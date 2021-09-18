@@ -1,0 +1,41 @@
+Package: cheem
+Title: Interactively explore data- and local explanation- spaces side-by-side. Further interrogate observation explanations with a radial tour.
+Version: 0.0.9000
+Authors@R: c(
+  person("Nicholas", "Spyrison", role = c("aut", "cre"),
+    email = "spyrison@gmail.com")
+  )
+Description: Given a model, extract the local explanation of every 
+  observation in a data set. View the data- and 
+  explanation-spaces side-by-side in an interactive shiny application. 
+  Further explored a selected point against a 
+  comparison by using its explanation as a 1D projection basis. 
+  The structure of explanation projection is then explored by a
+  radial tour.
+Depends:
+    R (>= 3.5.0),
+    spinifex,
+    DALEX,
+    treeshap,
+    randomForest
+License: CC BY-NC-SA 4.0
+URL: https://github.com/nspyrison/cheem/
+BugReports: https://github.com/nspyrison/cheem/issues
+Imports:
+    ggplot2,
+    plotly,
+    htmlwidgets,
+    shiny,
+    moments, 
+    Rdimtools,
+    magrittr,
+    dplyr,
+    tictoc,
+    beepr
+Suggests:
+VignetteBuilder: knitr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE, roclets=c('rd', 'collate', 'namespace'))
+RoxygenNote: 7.1.1
+Language: en-US
