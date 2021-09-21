@@ -6,10 +6,24 @@
 
 
 ## SHAP layers --------
-#### projection space df of
+#' Create the plot data.frame for the global linked plotly display.
+#' 
+#' Internal function, the plot data.frame of 1 layer, consumed in 
+#' local_attr_df_of() and format_nested_layers().
+#' 
+#' @param x The explanatory variables of the model.
+#' @param y The target variable of the model.
+#' @param basis_type The type of basis used to approximate the data and 
+#' attribution space from. Defaults to "pca".
+#' @param class The variable to group points by. Originally the _predicted_
+#'  class.
+#' @param layer_name Character layer name, typically the type of local 
+#' attribution used.
+#' @return A data.frame, for the global linked plotly display
 plot_df_of <- function(x, y, basis_type = c("pca", "olda"),
                        class = NULL, ## class req for olda, add to _df's
-                       d = 2, layer_name){
+                       layer_name){
+  d = 2 ## Fixed display dimensionality 
   ## maha_vect_of() -----
   #maha_vect_of <- function(x, do_normalize = TRUE){ ## distance from median(x), cov(x)
   if(is.null(class)) class <- as.factor(FALSE)
@@ -64,17 +78,38 @@ plot_df_of <- function(x, y, basis_type = c("pca", "olda"),
   return(rbind(.plot_df, .qq_df))
 }
 
-### One shap layer
-shap_layer_of <- function(
+#' Create the local attribution layer data.frame
+#' 
+#' Internal function, the local attribution layer data.frame of 1 layer, consumed in 
+#' nested_shap_layers().
+#' 
+#' @param x The explanatory variables of the model.
+#' @param y The target variable of the model
+#' @param xtext Optional, Out Of Sample data to find the local attribution of.
+#' @param ytext Optional, Out Of Sample response to measure xtext with 
+#' if provided.
+#' @param layer_name Character layer name, typically the type of local 
+#' attribution used.
+#' @param basis_type The type of basis used to approximate the data and 
+#' attribution space from. Defaults to "pca".
+#' @param class The variable to group points by. Originally the _predicted_
+#'  class.
+#' @param verbose Logical, Whether or not the function should print tictoc time
+#' info. Defaults to TRUE.
+#' @param noisy Logical, Whether of not the function should play a beeper tone
+#' upon completion. Defaults to TRUE.
+#' @return A data.frame, for the full local attribution matrix.
+local_attr_df_of <- function(
   x, y, xtest = NULL, ytest = NULL, layer_name = "UNAMED",
-  basis_type = c("pca", "olda"), class = NULL, d = 2, ## class req for olda
+  basis_type = c("pca", "olda"), class = NULL, ## class req for olda
   verbose = TRUE, noisy = TRUE
 ){
+  d = 2
   require("treeshap")
   if(noisy == TRUE) require("beepr")
   if(verbose == TRUE){
     require("tictoc")
-    tictoc::tic(paste0("shap_layer_of -- ", layer_name))
+    tictoc::tic(paste0("local_attr_df_of -- ", layer_name))
   }
   
   ## RF model
@@ -154,21 +189,21 @@ shap_layer_of <- function(
 }
 
 
-#' @examples
-#' X <- tourr::flea[, 2:6]
-#' Y <- tourr::flea[, 1]
-#' set.seed(303)
-#' .idx_test <- sample(1:nrow(X), size = round(.5 * nrow(X))) ### HOLD OUT TEST DATA.
-#' X_test  <- X[.idx_test,  ]
-#' X_train <- X[-.idx_test, ]
-#' Y_test  <- Y[ .idx_test]
-#' Y_train <- Y[-.idx_test]
-#' x <- X_train; y = Y_train; x_test = X_test; y_test = Y_test;
-#' formated_ls <- nested_shap_layers(X_train, Y_train,
-#'                                   X_test, Y_test)
-#' formated_ls$performance_df
-
-### Format many shap layers
+#' Format the nested local attribution layers
+#' 
+#' Internal function, formats all layers of all data.frames, consumed in 
+#' nested_shap_layers().
+#' 
+#' @parma shap_layer_ls
+#' @param x The explanatory variables of the model.
+#' @param y The target variable of the model
+#' @param basis_type The type of basis used to approximate the data and 
+#' attribution space from. Defaults to "pca".
+#' @param class The variable to group points by. Originally the _predicted_
+#'  class.
+#' @param verbose Logical, Whether or not the function should print tictoc time
+#' info.
+#' @return A list of formated data frames.
 format_nested_layers <- function(
   shap_layer_ls, x, y,
   basis_type = c("pca", "olda"),
@@ -279,16 +314,52 @@ format_nested_layers <- function(
 }
 
 
-## Final SHAP layer function
+#' Format the nested local attribution layers
+#' 
+#' Internal function, formats all layers of all data.frames, consumed in 
+#' nested_shap_layers().
+#' 
+#' @parma shap_layer_ls
+#' @param x The explanatory variables of the model.
+#' @param y The target variable of the model
+#' @param xtext Optional, Out Of Sample data to find the local attribution of.
+#' @param ytext Optional, Out Of Sample response to measure xtext with 
+#' if provided.
+#' @param n_shap_layers The number of local attribution deep. Defaults to 1, 
+#' just attribution of just the data. 
+#' @param basis_type The type of basis used to approximate the data and 
+#' attribution space from. Defaults to "pca".
+#' @param class The variable to group points by. Originally the _predicted_
+#'  class.
+#' @param verbose Logical, Whether or not the function should print tictoc time
+#' info. Defaults to TRUE.
+#' @param noisy Logical, Whether or not the function should play a beepr tone
+#' upon completion. Defaults to TRUE.
+#' @return A list of formated data frames.
+#' @export
+#' @examples
+#' X <- tourr::flea[, 2:6]
+#' Y <- tourr::flea[, 1]
+#' set.seed(303)
+#' .idx_test <- sample(1:nrow(X), size = round(.5 * nrow(X))) ### HOLD OUT TEST DATA.
+#' X_test  <- X[.idx_test,  ]
+#' X_train <- X[-.idx_test, ]
+#' Y_test  <- Y[ .idx_test]
+#' Y_train <- Y[-.idx_test]
+#' x <- X_train; y = Y_train; x_test = X_test; y_test = Y_test;
+#' formated_ls <- nested_shap_layers(X_train, Y_train,
+#'                                   X_test, Y_test)
+#' formated_ls$performance_df
 nested_shap_layers <- function(
   x, y, xtest = NULL, ytest = NULL, n_shap_layers = 1,
-  basis_type = c("pca", "olda"), class = NULL, d = 2,
+  basis_type = c("pca", "olda"), class = NULL,
   verbose = TRUE, noisy = TRUE
 ){
+  d = 2
   loc_attr_nm <- "SHAP"
   require("treeshap")
   if(noisy == TRUE) require("beepr")
-  if(verbose == TRUE) {
+  if(verbose == TRUE){
     writeLines(paste0("nested_shap_layers() started at ", Sys.time()))
     tictoc::tic("nested_shap_layers()")
   }
@@ -301,7 +372,7 @@ nested_shap_layers <- function(
     layer_nms <- loc_attr_nm
   }else layer_nms <- paste0(loc_attr_nm, "^", 1L:n_shap_layers)
   .m <- sapply(1L:n_shap_layers, function(i){
-    shap_layer_ls[[i]] <<- shap_layer_of(
+    shap_layer_ls[[i]] <<- local_attr_df_of(
       .next_layers_x, y,
       .next_layers_xtest, ytest, ## Could be NULL
       layer_nms[i], basis_type, class, d,
@@ -326,7 +397,15 @@ nested_shap_layers <- function(
 
 
 ## SHAP matrices/data frames -----
-
+#' Extract the full SHAP matrix of a randomForest model
+#' 
+#' Currently internal function, wants to be generalized. 
+#' Extracts a lighter version of the treeshap *.unify of a randomForest. 
+#' 
+#' @param randomForest_model The return of fitted randomForest::randomForest 
+#' model.
+#' @param data Data to extract the local attributions of.
+#' @return A dataframe of the local attributions.
 #' @examples
 #' dat <- DALEX::apartments[, 1:5]
 #' xdat <- dat[, 2:5] ## -c(m2.price, district))
@@ -356,11 +435,19 @@ print.treeshap_df <- function (x, ...){
 }
 
 
-
-## New for distribution -----
+## New for app tour -----
+#' Extract and format the 1D local attribution basis
+#' 
+#' Internal function, Extract and format the 1D local attribution basis from 
+#' the provided local_attribution_df.
+#' 
+#' @param local_attribution_df Return of a local attribution, such as 
+#' treeshap_df.
+#' @param target_rownum The rownumber of the selected observation
+#' @return A matrix of the 1D basis
 basis_local_attribution <- function(
   local_attribution_df,
-  selected_obs = nrow(local_attribution_df)
+  target_rownum = nrow(local_attribution_df)
 ){
   ## Remove last column if layer_name
   col_idx <- if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
