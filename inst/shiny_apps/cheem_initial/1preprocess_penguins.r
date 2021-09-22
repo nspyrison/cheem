@@ -28,7 +28,7 @@ assign_cobs_shap_layer_ls(
   class = clas,
   y = clas, ## Factor implies classification, numeric implies regression
   n_cobs = 0, ## REALLY 5 of first lvl labeled as second, atm.
-  sd_coeff = .1)
+  var_coeff = .1)
 
 names(shap_layer_ls)
 str(shap_layer_ls$plot_df)

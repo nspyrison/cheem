@@ -54,7 +54,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   #### linked_plotly ----
   h4("PC1:2 of the data and SHAP spaces"),
   textOutput("cobs_msg"),
-  uiOutput("input__shap.comp_obs"),
+  uiOutput("input__shap.comparison_obs"),
   selectInput("do_include_maha_qq", "Add Mahalanobis distance QQ plots?",
               choices = c(FALSE, TRUE), selected = FALSE),
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),

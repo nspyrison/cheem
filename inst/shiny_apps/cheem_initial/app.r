@@ -54,12 +54,12 @@ server <- function(input, output, session){
   bas <- reactive({
     req(layer_ls())
     shap_df <- layer_ls()$shap_df
-    bas <- basis_local_attribution(shap_df, shap_obs_d())
+    bas <- basis_local_attribution(shap_df, primary_obs_d())
     return(bas)
   })
   
   ## output: inputs in the ui -----
-  output$input__shap.comp_obs <- renderUI({
+  output$input__shap.comparison_obs <- renderUI({
     req(layer_ls())
     .n <- layer_ls()$decode_df %>% nrow()
     req(input$dat_char)
@@ -69,42 +69,42 @@ server <- function(input, output, session){
     
     ## Initialize to hard-coded hand picked examples.
     if(dat == "triangle simulation"){
-      shap_obs <- 18L
-      comp_obs <- 111L
+      primary_obs <- 18L
+      comparison_obs <- 111L
     }
     if(dat == "penguins"){
-      shap_obs <- 169L
-      comp_obs <- 99L
+      primary_obs <- 169L
+      comparison_obs <- 99L
     }
     if(dat == "fifa"){
-      shap_obs <- 1L ## L Messi
-      comp_obs <- 8L ## V. van Dijk
+      primary_obs <- 1L ## L Messi
+      comparison_obs <- 8L ## V. van Dijk
     }
     
     ## Return
     fluidRow(
       column(4L, numericInput(
-        "shap_obs", label = "SHAP values of row number, '*' shape:",
-        min = 1L, max = .n, step = 1L, value = shap_obs)),
+        "primary_obs", label = "SHAP values of row number, '*' shape:",
+        min = 1L, max = .n, step = 1L, value = primary_obs)),
       column(4L, numericInput(
-        "comp_obs", label = "Comparison row number, 'x' shape:",
-        min = 1L, max = .n, step = 1L, value = comp_obs)),
+        "comparison_obs", label = "Comparison row number, 'x' shape:",
+        min = 1L, max = .n, step = 1L, value = comparison_obs)),
       column(4L)
     )
   })
-  outputOptions(output, "input__shap.comp_obs", suspendWhenHidden = FALSE) ## Eager evaluation
-  ##"Debounce" shap/comp_obs; 
+  outputOptions(output, "input__shap.comparison_obs", suspendWhenHidden = FALSE) ## Eager evaluation
+  ##"Debounce" shap/comparison_obs; 
   #### ie, Reduces making multiple animations as someone types in a 3 digit number 
-  shap_obs <- reactive({
-    req(input$shap_obs)
-    input$shap_obs
+  primary_obs <- reactive({
+    req(input$primary_obs)
+    input$primary_obs
   })
-  shap_obs_d <- shap_obs %>% debounce(millis = 1000L)
-  comp_obs <- reactive({
-    req(input$comp_obs)
-    input$comp_obs
+  primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
+  comparison_obs <- reactive({
+    req(input$comparison_obs)
+    input$comparison_obs
   })
-  comp_obs_d <- comp_obs %>% debounce(millis = 1000L)
+  comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
   
   output$input__manip_var_nm <- renderUI({
     req(bas())
@@ -115,7 +115,7 @@ server <- function(input, output, session){
     clas <- layer_ls()$decode_df$class
     
     ## Median values of the actual class.
-    expect_bas <- apply(shap_df[clas == clas[shap_obs_d()], ], 2L, median) %>%
+    expect_bas <- apply(shap_df[clas == clas[primary_obs_d()], ], 2L, median) %>%
       matrix(ncol = 1L, dimnames = list(colnames(shap_df), "SHAP"))
     .diff <- abs(expect_bas - bas)
     sel <- opts[which(.diff == max(.diff))]
@@ -143,10 +143,10 @@ server <- function(input, output, session){
   
   output$linked_plotly <- plotly::renderPlotly({
     req(layer_ls())
-    req(shap_obs_d())
-    req(comp_obs_d())
+    req(primary_obs_d())
+    req(comparison_obs_d())
     linked_plotly_func(
-      layer_ls(), shap_obs_d(), comp_obs_d(),
+      layer_ls(), primary_obs_d(), comparison_obs_d(),
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
   outputOptions(output, "linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
@@ -166,7 +166,7 @@ server <- function(input, output, session){
     
     ggt <- manual_tour1d_func(
       layer_ls(), bas(), input$manip_var_nm,
-      shap_obs_d(), comp_obs_d(),
+      primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segements = as.logical(input$do_add_pcp_segments))
     animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
@@ -180,7 +180,7 @@ server <- function(input, output, session){
     ## Now make the animation
     ggt <- manual_tour1d_func(
       layer_ls(), bas(), input$manip_var_nm,
-      shap_obs_d(), comp_obs_d(),
+      primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segements = as.logical(input$do_add_pcp_segments))
     anim <- animate_gganimate(ggt)
     gganimate::anim_save("outfile.gif", anim)

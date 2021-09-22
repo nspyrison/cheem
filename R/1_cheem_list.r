@@ -9,7 +9,7 @@
 #' Create the plot data.frame for the global linked plotly display.
 #' 
 #' Internal function, the plot data.frame of 1 layer, consumed in 
-#' local_attr_df_of() and format_nested_layers().
+#' local_attr_layer() and format_nested_layers().
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
@@ -19,10 +19,20 @@
 #'  class.
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used.
-#' @return A data.frame, for the global linked plotly display
-plot_df_of <- function(x, y, basis_type = c("pca", "olda"),
-                       class = NULL, ## class req for olda, add to _df's
-                       layer_name){
+#' @return A data.frame, for the global linked plotly display.
+#' @examples
+#' sub <- DALEX::apartments[1:200, 1:6]
+#' x <- sub[, 2:5]
+#' y <- sub$m2.price
+#' clas <- sub$district
+#' 
+#' ret <- global_view_df(x, y, "pca", clas, "typically 'data'/'<attribution name>'")
+#' str(ret)
+global_view_df <- function(
+  x, y, basis_type = c("pca", "olda"),
+  class = NULL, ## class req for olda, add to _df's
+  layer_name
+){
   d = 2 ## Fixed display dimensionality 
   ## maha_vect_of() -----
   #maha_vect_of <- function(x, do_normalize = TRUE){ ## distance from median(x), cov(x)
@@ -81,7 +91,7 @@ plot_df_of <- function(x, y, basis_type = c("pca", "olda"),
 #' Create the local attribution layer data.frame
 #' 
 #' Internal function, the local attribution layer data.frame of 1 layer, consumed in 
-#' nested_shap_layers().
+#' nested_local_attr_layers().
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model
@@ -99,7 +109,17 @@ plot_df_of <- function(x, y, basis_type = c("pca", "olda"),
 #' @param noisy Logical, Whether of not the function should play a beeper tone
 #' upon completion. Defaults to TRUE.
 #' @return A data.frame, for the full local attribution matrix.
-local_attr_df_of <- function(
+#' @examples
+#' sub <- DALEX::apartments[1:200, 1:6]
+#' x <- sub[, 2:5]
+#' y <- sub$m2.price
+#' clas <- sub$district
+#' 
+#' ret <- local_attr_layer(
+#'   x, y, layer_name = "typically 'data'/'<attribution name>'",
+#'   basis_type = "pca", class = clas)
+#' names(ret)
+local_attr_layer <- function(
   x, y, xtest = NULL, ytest = NULL, layer_name = "UNAMED",
   basis_type = c("pca", "olda"), class = NULL, ## class req for olda
   verbose = TRUE, noisy = TRUE
@@ -109,7 +129,7 @@ local_attr_df_of <- function(
   if(noisy == TRUE) require("beepr")
   if(verbose == TRUE){
     require("tictoc")
-    tictoc::tic(paste0("local_attr_df_of -- ", layer_name))
+    tictoc::tic(paste0("local_attr_layer -- ", layer_name))
   }
   
   ## RF model
@@ -129,7 +149,7 @@ local_attr_df_of <- function(
   
   ## RF performance
   ### MANUALLY created, different than the performance created by the rf fit...
-  .pred <- predict(.rf, x)
+  .pred <- stats::predict(.rf, x)
   .resid <- y - .pred
   .rss <- sum(.resid^2L)
   .tss <- sum((y - mean(y))^2L)
@@ -156,7 +176,7 @@ local_attr_df_of <- function(
     if(is.null(xtest) == FALSE) .shap_xtest <- treeshap_df(.rf, xtest)
   })[3L]
   
-  ## plot_df_of() of .shap given .rf
+  ## global_view_df() of .shap given .rf
   #### On new shap matrix, data's plot df is initialized in format_nested_layers()
   sec_plot_df <- system.time({
     ## If classification, use .pred_clas over class, when passed to plot_df
@@ -167,8 +187,8 @@ local_attr_df_of <- function(
     }
     .plot_clas <- if(is_classification == TRUE) .pred_clas else class
     .m <- gc()
-    .plot_df <- plot_df_of(
-      .shap, y, basis_type, .plot_clas, d,
+    .plot_df <- global_view_df(
+      .shap, y, basis_type, .plot_clas,
       layer_name = layer_name) #paste0(layer_name, ", rmse = ", .rmse),
   })[3L]
   
@@ -192,7 +212,7 @@ local_attr_df_of <- function(
 #' Format the nested local attribution layers
 #' 
 #' Internal function, formats all layers of all data.frames, consumed in 
-#' nested_shap_layers().
+#' nested_local_attr_layers().
 #' 
 #' @parma shap_layer_ls
 #' @param x The explanatory variables of the model.
@@ -207,9 +227,10 @@ local_attr_df_of <- function(
 format_nested_layers <- function(
   shap_layer_ls, x, y,
   basis_type = c("pca", "olda"),
-  class = NULL, d = 2,
+  class = NULL,
   verbose = TRUE
 ){
+  d = 2
   if(verbose == TRUE) tictoc::tic("format_nested_layers()")
   ## Init with data layer,
   sec_data_plot_df <- system.time({ ## Init with data layer.
@@ -217,13 +238,13 @@ format_nested_layers <- function(
     if(is_classification == TRUE){
       .lvls <- levels(class)
       .rf_mod <- shap_layer_ls[[1L]]$rf_model
-      .pred_clas <<- as.factor(.lvls[round(predict(.rf_mod))])
+      .pred_clas <- as.factor(.lvls[round(predict(.rf_mod))])
     }
-    .plot_clas <- if(is_classification == TRUE) .pred_clas else class
-    .m <- capture.output(gc())
+    .plot_clas <- ifelse(is_classification == TRUE, .pred_clas, class)
+    .m <- utils::capture.output(gc())
     
-    data_plot_df <- plot_df_of(
-      x, y, basis_type, .plot_clas, d, layer_name = "data")
+    data_plot_df <- global_view_df(
+      x, y, basis_type, .plot_clas, layer_name = "data")
   })[3L]
    
   ### plot_df, bound longer
@@ -245,9 +266,9 @@ format_nested_layers <- function(
     decode_df <<- cbind(decode_df, .pred, y - .pred) ## Layer residual
     if(is_classification == TRUE){
       .lvls <- levels(class)
-      .pred_clas <<- as.factor(.lvls[round(.pred)])
-      .is_misclass <<- .pred_clas != class
-      decode_df <<- cbind(decode_df, .pred_clas, .is_misclass)
+      .pred_clas <- as.factor(.lvls[round(.pred)])
+      .is_misclass <- .pred_clas != class
+      decode_df <- cbind(decode_df, .pred_clas, .is_misclass)
     }
   })
   ## bind wider, adding x, and tooltip
@@ -317,7 +338,7 @@ format_nested_layers <- function(
 #' Format the nested local attribution layers
 #' 
 #' Internal function, formats all layers of all data.frames, consumed in 
-#' nested_shap_layers().
+#' nested_local_attr_layers().
 #' 
 #' @parma shap_layer_ls
 #' @param x The explanatory variables of the model.
@@ -325,8 +346,9 @@ format_nested_layers <- function(
 #' @param xtext Optional, Out Of Sample data to find the local attribution of.
 #' @param ytext Optional, Out Of Sample response to measure xtext with 
 #' if provided.
-#' @param n_shap_layers The number of local attribution deep. Defaults to 1, 
-#' just attribution of just the data. 
+#' @param n_layers The number of local attribution layers deep. Defaults to 1, 
+#' the local attribution of just the data. In bulk, I think going more layers is
+#' going to overfit the data, so be prepared to optimize OOS measures.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
@@ -335,23 +357,29 @@ format_nested_layers <- function(
 #' info. Defaults to TRUE.
 #' @param noisy Logical, Whether or not the function should play a beepr tone
 #' upon completion. Defaults to TRUE.
-#' @return A list of formated data frames.
+#' @return A list of formatted data frames.
 #' @export
 #' @examples
-#' X <- tourr::flea[, 2:6]
-#' Y <- tourr::flea[, 1]
+#' sub <- DALEX::apartments[1:200, 1:6]
 #' set.seed(303)
-#' .idx_test <- sample(1:nrow(X), size = round(.5 * nrow(X))) ### HOLD OUT TEST DATA.
-#' X_test  <- X[.idx_test,  ]
-#' X_train <- X[-.idx_test, ]
-#' Y_test  <- Y[ .idx_test]
-#' Y_train <- Y[-.idx_test]
-#' x <- X_train; y = Y_train; x_test = X_test; y_test = Y_test;
-#' formated_ls <- nested_shap_layers(X_train, Y_train,
-#'                                   X_test, Y_test)
-#' formated_ls$performance_df
-nested_shap_layers <- function(
-  x, y, xtest = NULL, ytest = NULL, n_shap_layers = 1,
+#' .idx_test <- sample(
+#'   1:nrow(sub), size = round(.5 * nrow(sub))) ## 20% index for testing
+#' X_train <- sub[-.idx_test, 2:5]
+#' Y_train <- sub$m2.price[-.idx_test]
+#' clas <- sub$district[-.idx_test]
+#' X_test  <- sub[.idx_test, ]
+#' Y_test  <- sub$m2.price[.idx_test]
+#' 
+#' layer_ls <- nested_local_attr_layers(
+#'   x=X_train, y=Y_train, xtest=X_test, ytest=Y_test,
+#'   n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' layer_ls$performance_df
+####
+# x=X_train;y=Y_train;xtest=X_test;ytest=Y_test;class=clas;
+# n_layers = 1;basis_type = "pca";verbose=TRUE;noisy = TRUE;
+##TODO: ERROR in maha_dist; solve.default(cov, ...) computationally singular
+nested_local_attr_layers <- function(
+  x, y, xtest = NULL, ytest = NULL, n_layers = 1,
   basis_type = c("pca", "olda"), class = NULL,
   verbose = TRUE, noisy = TRUE
 ){
@@ -360,22 +388,22 @@ nested_shap_layers <- function(
   require("treeshap")
   if(noisy == TRUE) require("beepr")
   if(verbose == TRUE){
-    writeLines(paste0("nested_shap_layers() started at ", Sys.time()))
-    tictoc::tic("nested_shap_layers()")
+    writeLines(paste0("nested_local_attr_layers() started at ", Sys.time()))
+    tictoc::tic("nested_local_attr_layers()")
   }
   
   ### Create shap layers in a list
   .next_layers_x <- x ## Init
   .next_layers_xtest <- xtest ## Init, could be NULL
   shap_layer_ls <- list()
-  if(n_shap_layers == 1L){
+  if(n_layers == 1L){
     layer_nms <- loc_attr_nm
-  }else layer_nms <- paste0(loc_attr_nm, "^", 1L:n_shap_layers)
-  .m <- sapply(1L:n_shap_layers, function(i){
-    shap_layer_ls[[i]] <<- local_attr_df_of(
+  }else layer_nms <- paste0(loc_attr_nm, "^", 1L:n_layers)
+  .m <- sapply(1L:n_layers, function(i){
+    shap_layer_ls[[i]] <<- local_attr_layer(
       .next_layers_x, y,
       .next_layers_xtest, ytest, ## Could be NULL
-      layer_nms[i], basis_type, class, d,
+      layer_nms[i], basis_type, class,
       verbose, noisy)
     .next_layers_x <<- shap_layer_ls[[i]]$shap_df
     .next_layers_xtest <<- shap_layer_ls[[i]]$shap_xtest_df ## Could be NULL
@@ -384,12 +412,12 @@ nested_shap_layers <- function(
   
   ## Format into one list of formatted df rather than many lists of formatted df
   formated <- format_nested_layers(
-    shap_layer_ls, x, y, basis_type, class, d, verbose)
+    shap_layer_ls, x, y, basis_type, class, verbose)
   .m <- gc()
   if(noisy == TRUE) beepr::beep(2L)
-  if(verbose == TRUE) {
+  if(verbose == TRUE){
     tictoc::toc()
-    writeLines(paste0("nested_shap_layers() finished at ", Sys.time()))
+    writeLines(paste0("nested_local_attr_layers() finished at ", Sys.time()))
   }
   return(formated)
 }
@@ -400,19 +428,21 @@ nested_shap_layers <- function(
 #' Extract the full SHAP matrix of a randomForest model
 #' 
 #' Currently internal function, wants to be generalized. 
-#' Extracts a lighter version of the treeshap *.unify of a randomForest. 
+#' Extracts a lighter version of the treeshap *.unify of a randomForest.
 #' 
 #' @param randomForest_model The return of fitted randomForest::randomForest 
 #' model.
 #' @param data Data to extract the local attributions of.
 #' @return A dataframe of the local attributions.
 #' @examples
-#' dat <- DALEX::apartments[, 1:5]
-#' xdat <- dat[, 2:5] ## -c(m2.price, district))
-#' y <- dat$m2.price
+#' sub <- DALEX::apartments[1:200, 1:5]
+#' x <- sub[, 2:5]
+#' y <- sub$m2.price
 #' 
-#' ## Fit a {randomForest} model, slower fit, but faster shap than ranger
-#' .rf <- randomForest::randomForest(y ~ ., data = data.frame(y, xdat))
+#' ## Fit a {randomForest} model, 
+#' # model fit slightly slower fit than {ranger},
+#' # but treeshap iis much faster than {ranger}
+#' .rf <- randomForest::randomForest(y ~ ., data = data.frame(y, x))
 #' system.time(
 #'  df_shap <- treeshap_df(.rf, data = xdat)
 #' )[3]
@@ -428,12 +458,6 @@ treeshap_df <- function(randomForest_model, data){
   attr(ret, "data") <- .tshap_ls[[2L]] ## Also a data.frame
   return(ret)
 }
-## Print basis_cheem_INSAMP as a numeric matrix without showing all the attributes.
-print.treeshap_df <- function (x, ...){
-  attr(x, "data") <- NULL
-  NextMethod()
-}
-
 
 ## New for app tour -----
 #' Extract and format the 1D local attribution basis
@@ -443,16 +467,19 @@ print.treeshap_df <- function (x, ...){
 #' 
 #' @param local_attribution_df Return of a local attribution, such as 
 #' treeshap_df.
-#' @param target_rownum The rownumber of the selected observation
+#' @param rownum The rownumber of the primary observation.
 #' @return A matrix of the 1D basis
+#' @examples
+#' la_df <- mtcars ## Pretend this is a local attribution data.frame
+#' basis_local_attribution(la_df, rownum = 10)
 basis_local_attribution <- function(
   local_attribution_df,
-  target_rownum = nrow(local_attribution_df)
+  rownum = nrow(local_attribution_df)
 ){
   ## Remove last column if layer_name
   col_idx <- if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
       1L:ncol(local_attribution_df) else -ncol(local_attribution_df)
-  LA_df <- local_attribution_df[selected_obs, col_idx]
+  LA_df <- local_attribution_df[rownum, col_idx]
   ## Extract formatted basis
   LA_bas <- LA_df %>%
     as.numeric %>%
@@ -460,12 +487,27 @@ basis_local_attribution <- function(
   return(tourr::orthonormalise(LA_bas))
 }
 
+
 #' Adds the distribution of the row local attributions to a ggtour
 #'
 #' Adds the distribution of orthonormalized row values of 
 #' the specified `local_attribution_df`. Does not at the basis itself, 
 #' use in conjunction with `proto_basis1d()`.
 #'
+#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param group_by Vector to group densities by. Originally _predicted_ class.
+#' @param position The position for the basis, one of: c("top1d", "floor1d",
+#' "off"). Defaults to "top1d"; basis above the density curves.
+#' @param shape Number specifying the shape of the basis distribution points. 
+#' Typically 142 or 124 indicating '|' for `plotly` and `gganimate` respectively.
+#' Defaults to 142, '|' for `plotly.`
+#' @param do_add_pcp_segments Logical, whether or not to add to add faint 
+#' parallel coordinate lines on the 1D basis. Defaults to TRUE.
+#' @param primary_obs The rownumber of the primary observation. Its local
+#' attribution becomes the 1d projection basis, and the point it highlighted 
+#' as a dashed line.
+#' @param comparison_obs The rownumber of the comparison observation. Point
+#' is highlighted as a dotted line.
 #' @rdname proto_basis
 #' @family ggtour proto
 #' @examples
@@ -493,15 +535,15 @@ proto_basis1d_distribution <- function(
   position = c("top1d", "floor1d", "off"), ## Needs to match that of `proto_basis1d()`
   shape = c(142, 124), ## '|' for plotly and ggplot respectively
   do_add_pcp_segements = TRUE,
-  shap_obs = NULL,
-  comp_obs = NULL
+  primary_obs = NULL,
+  comparison_obs = NULL
 ){
   requireNamespace("spinifex")
   ## Initialize
   eval(.init4proto)
   position <- match.arg(position)
   shape <- shape[1L] ## match.arg only for character values.
-  if(shape %in% c(142, 124) == FALSE) warning("Unexpected shape used in proto_basis1d_distribution.")
+  if(shape %in% c(142L, 124L) == FALSE) warning("Unexpected shape used in proto_basis1d_distribution.")
   if(position == "off") return()
   if(is.null(.facet_by) == FALSE) position = "floor1d"
   
@@ -574,28 +616,28 @@ proto_basis1d_distribution <- function(
       .df_basis_distr, .df_basis_distr2,
       by = c("var_num" = "var_num", "rownum" = "rownum"))
     ## Mapping .alpha for pcp lines to maha dist causing err: not of length 1 or data
-    faint_pcp <- suppressWarnings(ggplot2::geom_segment(
+    bkg_pcp <- suppressWarnings(ggplot2::geom_segment(
       ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                    color = group_by, tooltip = rownum),
       .df_basis_distr_pcp_segments,
       size = .5, alpha = .alpha / 6L))
-    shap_idx <- .df_basis_distr_pcp_segments$rownum == shap_obs
-    shap_pcp <- if(length(shap_obs) > 0L){
-      suppressWarnings(ggplot2::geom_segment(
+    prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
+    if(length(primary_obs) > 0L){
+      prim_pcp <- suppressWarnings(ggplot2::geom_segment(
         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                      color = group_by, tooltip = rownum),
-        .df_basis_distr_pcp_segments[shap_idx, ],
+        .df_basis_distr_pcp_segments[prim_idx, ],
         size = 1L, alpha = .8, linetype = 2L))
-    }else NULL
-    comp_idx <- .df_basis_distr_pcp_segments$rownum == comp_obs
-    comp_pcp <- if(length(comp_obs) > 0L){
-      suppressWarnings(ggplot2::geom_segment(
+    }else prim_pcp <- NULL
+    comp_idx <- .df_basis_distr_pcp_segments$rownum == comparison_obs
+    if(length(comparison_obs) > 0L){
+      comp_pcp <- suppressWarnings(ggplot2::geom_segment(
         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                      color = group_by, tooltip = rownum),
         .df_basis_distr_pcp_segments[comp_idx, ],
         size = .8, alpha = .6, linetype = 3L))
-    }else NULL
-    ret <- list(faint_pcp, comp_pcp, shap_pcp, ret)
+    }else comp_pcp <- NULL
+    ret <- list(bkg_pcp, comp_pcp, prim_pcp, ret)
   }
   
   ## Return proto

@@ -80,13 +80,12 @@ ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 
 ## Create shap layer_ls ---
 n_cobs <- 0L
-#debugonce(plot_df_of)
 assign_cobs_shap_layer_ls(
   data = dat,
   class = clas,
   y = clas, ## Factor implies classification, numeric implies regression
   n_cobs = n_cobs, ## Drawn from lvl 1, assigned to other levels
-  sd_coeff = .1)
+  var_coeff = .1)
 
 names(shap_layer_ls)
 str(shap_layer_ls$plot_df)
@@ -102,7 +101,7 @@ str(shap_layer_ls$decode_df)
 
 # ggt <- manual_tour1d_func(
 #   shap_layer_ls, basis = bas, mv_name = sel,
-#   shap_obs = tgt_obs, #comp_obs = NULL,
+#   primary_obs = tgt_obs, #comparison_obs = NULL,
 #   do_add_pcp_segements = TRUE, 
 #   pcp_shape = 124L ## ggplot '|'
 # )

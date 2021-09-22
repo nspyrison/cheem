@@ -31,7 +31,8 @@ Imports:
     magrittr,
     dplyr,
     tictoc,
-    beepr
+    beepr,
+    knitr
 Suggests:
 VignetteBuilder: knitr
 Encoding: UTF-8

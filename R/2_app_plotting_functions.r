@@ -7,78 +7,32 @@
 ## Other local functions for downstream consumption.
 #### Esp to prep for shiny apps.
 
-## create datasets with new, Corrupted OBServations,
-#### drawn from the obs each class level 1, then assigned to the other level.
-#### then get the shap_layer_ls of them 
-assign_cobs_shap_layer_ls <- function(
-  data = dat,
-  class = clas,
-  y = clas, ## Factor implies classification, numeric implies regression
-  n_cobs = 5, ## Drawn from level 1, assigned to all other levels.
-  sd_coeff = .1 ## Std dev co-efficient of the X/Y values for the cobs. Less is closer to the mean.
-){
-  ## Initialize
-  .clas_w_cobs <- as.factor(class)
-  .x_w_cobs    <- as.data.frame(data)
-  .n_cobs <- n_cobs[1L] ## Assume length 1.
-  ## Classification/regression
-  .prob_type   <- problem_type(y)
-  if(.prob_type == "classification") .y_w_cobs <- as.integer(y)
-  if(.prob_type == "regression")     .y_w_cobs <- y
-  
-  ## Append COBS if required ----
-  if(.n_cobs > 0L){
-    set.seed(404L)
-    .lvls <- levels(class)
-    
-    ## Sample cobs from level 1
-    #.m <- sapply(1L, function(k){
-    k <- 1L
-    .not_k <- (1L:length(.lvls))[-k]
-    .cobs_df_k <- rnorm_from(dat[class == .lvls[k], ],
-                             n_new_obs = .n_cobs,
-                             sd_coeff = sd_coeff)
-    
-    ## Replicate for every non-k level and assign a replicated set to each non-k level
-    .cobs_df <- data.frame(NULL)
-    .m <- sapply(1L:length(.not_k), function(i){
-      .cobs_df <<- rbind(.cobs_df, .cobs_df_k)
-    })
-    .clas_w_cobs <<- factor(c(
-      as.character(.clas_w_cobs), rep(.lvls[.not_k], times = .n_cobs)), levels = .lvls)
-    .x_w_cobs <<- rbind(.x_w_cobs, .cobs_df)
-    if(.prob_type == "classification") ## Classification problem if Y is a factor
-      ## treeshap wants integer classes :(.
-      .y_w_cobs <<- c(.y_w_cobs, rep(.not_k, times = .n_cobs))
-    if(.prob_type == "regression") ## Regression problem if Y is numeric
-      .y_w_cobs <<- c(.y_w_cobs, rnorm(
-        .n_cobs, mean(Y[class == .lvls[.not_k]]),
-        sd_coeff * sd(Y[class == .lvls[.not_k]])
-      ))
-  } ## End appending cobs.
-  
-  ### Create and global assign shap_layer_ls -----
-  .shap_layer_ls <- nested_shap_layers(
-    .x_w_cobs, .y_w_cobs, n_shap_layers = 1L, class = .clas_w_cobs)
-  attr(.shap_layer_ls, "problem_type") <- .prob_type
-  attr(.shap_layer_ls, "n_cobs") <- n_cobs
-  attr(.shap_layer_ls, "sd_coeff") <- sd_coeff
-  .n <- nrow(data)
-  attr(.shap_layer_ls, "cobs_msg") <- ifelse(.n_cobs > 0L, paste0(
-    "Level-courrupted observations in rows: ",
-    (nrow(data) + 1L), " to ", nrow(shap_layer_ls$decode_df), "."),
-    "") ## "" being no cobs added.
-  assign("shap_layer_ls", .shap_layer_ls, envir = globalenv())
-  writeLines(paste0(
-    "`shap_layer_ls` assigned to global env (contains ",
-    .n_cobs, " cobs drawn from the first level assigned to all other levels).",
-    "\nassign_cobs_shap_layer_ls() is complete."))
-  
-  ## Return NULL, By-product assigns 1 to many "shap_layer_ls_", .n_cobs, "cobs"
-  return(NULL)
-}
+#' Append corrupted observations and extract SHAP layer list.
+#' 
+#' Draws `n_cobs` from the `data` of the `target_level` for _each_ other level of 
+#' the `class`. This is appended to the `data` and finally applied to 
+#' `nested_local_attr_layers()`.
+#' 
+#' @param data A data.frame or matrix with data from all `class` levels, not just
+#' the level sampled from.
+#' @param class The variable to group points by. Originally the _predicted_
+#'  class.
+#' @param y The target variable of the model.
+#' @param target_level The number of the level of `class` (cast as.factor) to 
+#' sample from. 
+#' @param n_cobs The number of Corrupted OBServations (cobs) to draw for _each_ 
+#' other non-target level.
+#' @param var_coeff Variance coefficient, closer to 0 make points near the 
+#' median, above 1 makes more points further away from the median.
+#' Defaults to 1.
+#' @param verbose Logical, Whether or not the function should print tictoc time
+#' info. Defaults to TRUE.
+#' @param noisy Logical, Whether of not the function should play a beeper tone
+#' upon completion. Defaults to TRUE.
+#' @return A list of data.frames, the return of `nested_local_attr_layers()` of the 
+#' `data` after appending the new corrupted observations.
+#' @export
 #' @examples
-#' ## TESTING ------
 #' ## Data setup, palmerpenguins::penguins
 #' raw <- palmerpenguins::penguins ## Missing values, visdat::vis_miss(raw)
 #' raw_rmna <- raw[!is.na(raw$sex), ]
@@ -89,25 +43,113 @@ assign_cobs_shap_layer_ls <- function(
 #' clas <- factor(raw_rmna$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 #' 
 #' ## Apply the functions
-#' assign_cobs_shap_layer_ls(
+#' shap_layer_ls <- assign_cobs_shap_layer_ls(
 #'   data = dat,
 #'   class = clas,
-#'   Y = clas, ## Factor implies classification, numeric implies regression
-#'   n_cobs_per_class_vect = c(5),
-#'   sd_coeff = .25)
+#'   y = clas,
+#'   target_level = 1,
+#'   n_cobs = 2,
+#'   var_coeff = .1)
 #' 
-#' ## Structure of layer lists.
-#' #### 2 layers: data and SHAP of 1 data sets: *_5cobs, 5 cobs per class.
-#' names(shap_layer_ls_5cobs)
-#' str(shap_layer_ls_5cobs$plot_df)
-#' str(shap_layer_ls_5cobs$decode_df)
+#' ## Structure of the list.
+#' names(shap_layer_ls)
+#' str(shap_layer_ls$plot_df)
+#' str(shap_layer_ls$decode_df)
+assign_cobs_shap_layer_ls <- function(
+  data,
+  class,
+  y, ## Factor implies classification, numeric implies regression
+  target_level = 1,
+  n_cobs = 2,
+  var_coeff = .1,
+  verbose = TRUE,
+  noisy = TRUE
+){
+  ## Initialize
+  .clas_w_cobs <- as.factor(class)
+  .x_w_cobs    <- as.data.frame(data)
+  ## Classification/regression
+  .prob_type   <- problem_type(y)
+  if(.prob_type == "classification") .y_w_cobs <- as.integer(y)
+  if(.prob_type == "regression")     .y_w_cobs <- y
+  
+  ## Append COBS if required ----
+  if(n_cobs > 0L){
+    set.seed(404L)
+    .lvls <- levels(class)
+    
+    ## Sample cobs from level 1
+    #.m <- sapply(1L, function(k){
+    k <- target_level
+    .not_k <- (1L:length(.lvls))[-k]
+    .cobs_df_k <- rnorm_from(data[class == .lvls[k], ],
+                             n_obs = n_cobs,
+                             var_coeff = var_coeff)
+    
+    ## Replicate for every non-k level and assign a replicated set to each non-k level
+    .cobs_df <- data.frame(NULL)
+    .m <- sapply(1L:length(.not_k), function(i){
+      .cobs_df <<- rbind(.cobs_df, .cobs_df_k)
+    })
+    .clas_w_cobs <<- factor(c(
+      as.character(.clas_w_cobs), rep(.lvls[.not_k], times = n_cobs)), levels = .lvls)
+    .x_w_cobs <<- rbind(.x_w_cobs, .cobs_df)
+    if(.prob_type == "classification") ## Classification problem if Y is a factor
+      ## treeshap wants integer classes :(.
+      .y_w_cobs <<- c(.y_w_cobs, rep(.not_k, times = n_cobs))
+    if(.prob_type == "regression") ## Regression problem if Y is numeric
+      .y_w_cobs <<- c(.y_w_cobs, stats::rnorm(
+        n_cobs, mean(y[class == .lvls[.not_k]]),
+        sqrt(var_coeff) * stats::sd(y[class == .lvls[.not_k]])
+      ))
+  } ## End appending cobs.
+  
+  ### Create and global assign shap_layer_ls -----
+  .shap_layer_ls <- nested_local_attr_layers(
+    .x_w_cobs, .y_w_cobs, n_layers = 1L, basis_type = "pca",
+    class = .clas_w_cobs, verbose = verbose, noisy = noisy)
+  attr(.shap_layer_ls, "problem_type") <- .prob_type
+  attr(.shap_layer_ls, "n_cobs") <- n_cobs
+  attr(.shap_layer_ls, "var_coeff") <- var_coeff
+  .n <- nrow(data)
+  attr(.shap_layer_ls, "cobs_msg") <- ifelse(n_cobs > 0L, paste0(
+    "Level-courrupted observations in rows: ",
+    (nrow(data) + 1L), " to ", nrow(.shap_layer_ls$decode_df), "."),
+    "") ## ""; no cobs added.
+  
+  ## Return
+  return(.shap_layer_ls)
+}
 
 
 ## Shiny plot functions ------
+#' Linked `plotly` display, global view of data and attribution space.
+#' 
+#' Given an attribution layer list, create a linked `plotly`of the global data-
+#' and attribution- spaces. Typically consumed directly by shiny app.
+#' 
+#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param primary_obs The rownumber of the primary observation. Its local
+#' attribution becomes the 1d projection basis, and the point it highlighted 
+#' as a dashed line.
+#' @param comparison_obs The rownumber of the comparison observation. Point
+#' is highlighted as a dotted line.
+#' @param height_px The height in pixels of the returned `plotly` plot.
+#' @param width_px The width in pixels of the returned `plotly` plot.
+#' @param do_include_maha_qq Logical, whether or not to add the qq plots of the
+#' Mahalanobis distance for the data- and attribution- spaces
+#' @return `plotly` plot of the global view, first 2 components of the basis of
+#' the data- and attribution- spaces.
+#' @export
+#' @examples
+#' layer_ls <- NULL ##NEEDED
+#' tgt_obs <- nrow(layer_ls$decode_df)
+#' linked_plotly_func(layer_ls, tgt_obs)
+##TODO: Example needs layer_ls assignment
 linked_plotly_func <- function(
   layer_ls,
-  shap_obs = NULL,
-  comp_obs = NULL,
+  primary_obs = NULL,
+  comparison_obs = NULL,
   height_px = 640L,
   width_px = 640L,
   do_include_maha_qq = FALSE
@@ -148,8 +190,8 @@ linked_plotly_func <- function(
     }
   }
   ## Highlight comparison obs, if passed
-  if(is.null(comp_obs) == FALSE){
-    .idx_comp <- plot_df$rownum == comp_obs
+  if(is.null(comparison_obs) == FALSE){
+    .idx_comp <- plot_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L){
       .df <- plot_df[.idx_comp, ] %>% plotly::highlight_key(~rownum)
       gg <- gg +
@@ -159,8 +201,8 @@ linked_plotly_func <- function(
     }
   }
   ## Highlight shap obs, if passed
-  if(is.null(shap_obs) == FALSE){
-    .idx_shap <- plot_df$rownum == shap_obs
+  if(is.null(primary_obs) == FALSE){
+    .idx_shap <- plot_df$rownum == primary_obs
     if(sum(.idx_shap) > 0L){
       .df <- plot_df[.idx_shap, ] %>% plotly::highlight_key(~rownum)
       gg <- gg +
@@ -195,15 +237,29 @@ linked_plotly_func <- function(
     event_register("plotly_selected") %>% ## Reflect "selected", on release of the mouse button.
     highlight(on = "plotly_selected", off = "plotly_deselect")
 }
+
+
+#' Cheem tour; 1D manual tour on the selected attribution
+#' 
+#' Create a linked `plotly`of the global data-
+#' and attribution- spaces. Typically consumed directly by shiny app.
+#' 
+#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param primary_obs The rownumber of the primary observation. Its local
+#' attribution becomes the 1d projection basis, and the point it highlighted 
+#' as a dashed line.
+#' @param comparison_obs The rownumber of the comparison observation. Point
+#' is highlighted as a dotted line.
+#' @param height_px The height in pixels of the returned `plotly` plot.
+#' @param width_px The width in pixels of the returned `plotly` plot.
+#' @param do_include_maha_qq Logical, whether or not to add the qq plots of the
+#' Mahalanobis distance for the data- and attribution- spaces
+#' @return `plotly` plot of the global view, first 2 components of the basis of
+#' the data- and attribution- spaces.
+#' @export
 #' @examples
-#' layer_ls <- shap_layer_ls_5cobs
-#' shap_obs <- nrow(shap_layer_ls_5cobs$decode_df)
-#' linked_plotly_func(layer_ls, shap_obs)
-
-
-## radial tour 1d, from shap of obs. default1d + highlight.
 manual_tour1d_func <- function(
-  layer_ls, basis, mv_name, shap_obs, comp_obs = NULL,
+  layer_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
   do_add_pcp_segements = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .1
@@ -245,18 +301,18 @@ manual_tour1d_func <- function(
         position = "top1d",
         shape = pcp_shape, ## '|' for gganimate/ggplot
         do_add_pcp_segements = as.logical(do_add_pcp_segements),
-        shap_obs = shap_obs,
-        comp_obs = comp_obs)
+        primary_obs = primary_obs,
+        comparison_obs = comparison_obs)
       ## Highlight comparison obs, if passed
-    ggt <- ggt + 
+    ggt <- ggt +
       proto_highlight1d(
-        comp_obs,
+        comparison_obs,
         list(color = .pred_clas),
         list(linetype = 3L, alpha = 0.8),
         mark_initial = FALSE) +
       ## Highlight shap obs
       proto_highlight1d(
-        shap_obs,
+        primary_obs,
         list(color = .pred_clas),
         list(linetype = 2L, alpha = .6, size = .8),
         mark_initial = FALSE)
@@ -269,7 +325,7 @@ manual_tour1d_func <- function(
     .array <- array(NA, dim = .tgt_dim)
     .m <- sapply(1L:.tgt_dim[3L], function(i){
       .array[,, i] <<- matrix(c(.mt_path[,, i], rep(0L, .tgt_dim[1L]), 1L),
-                              nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]) %>% 
+                              nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]) %>%
         tourr::orthonormalise()
     })
     dn <- dimnames(.mt_path)
@@ -300,19 +356,19 @@ manual_tour1d_func <- function(
         position = "top1d",
         shape = 142L, ## '|' for gganimate/ggplot
         do_add_pcp_segements = as.logical(do_add_pcp_segements),
-        shap_obs = shap_obs,
-        comp_obs = comp_obs) +
-      labs(x="1D SHAP projection", y="Actual wages (2020 Euros)")
+        primary_obs = primary_obs,
+        comparison_obs = comparison_obs) +
+      labs(x = "1D SHAP projection", y = "Actual wages (2020 Euros)")
       ## Highlight comparison obs, if passed
     ggt <- ggt + 
       proto_highlight(
-        comp_obs,
+        comparison_obs,
         list(color = .pred_clas),
         list(size = 4L, shape = 4L, alpha = 0.5),
         mark_initial = FALSE) +
       ## Highlight shap obs
       proto_highlight(
-        shap_obs,
+        primary_obs,
         aes_args = list(color = .pred_clas),
         identity_args = list(size = 5L, shape = 8L, alpha = 1L),
         mark_initial = FALSE)
@@ -323,10 +379,10 @@ manual_tour1d_func <- function(
 }
 #' @examples
 #' layer_ls <- shap_layer_ls_5cobs
-#' shap_obs <- nrow(shap_layer_ls_5cobs$decode_df)
+#' primary_obs <- nrow(shap_layer_ls_5cobs$decode_df)
 #' shap_df <- shap_layer_ls_5cobs$shap_df
 #' bas <- basis_local_attribution(shap_df, nrow(shap_df))
 #' mv_name <- rownames(bas)[1L]
-#' layer_ls=layer_ls;basis=bas;mv_name=mv_name;shap_obs=shap_obs;comp_obs=NULL;
-#' manual_tour1d_func(layer_ls, bas, mv_name, shap_obs)
+#' layer_ls=layer_ls;basis=bas;mv_name=mv_name;primary_obs=primary_obs;comparison_obs=NULL;
+#' manual_tour1d_func(layer_ls, bas, mv_name, primary_obs)
 

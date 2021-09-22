@@ -4,9 +4,20 @@
 \alias{does_contain_nonnumeric}
 \title{Check if a vector contains non-numeric character}
 \usage{
-does_contain_nonnumeric(char)
+does_contain_nonnumeric(x)
+}
+\arguments{
+\item{x}{A vector to be tested for existence of non-numeric characters.}
+}
+\value{
+Character in c("classification", "regression")
 }
 \description{
 Returns a logical, whether or not a vector contains any non-numeric
 characters. Typically used to test if row names hold non-index information.
+}
+\examples{
+does_contain_nonnumeric(mtcars$mpg)
+does_contain_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
+does_contain_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in tooltip
 }

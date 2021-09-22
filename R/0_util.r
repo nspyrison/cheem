@@ -67,15 +67,23 @@ does_contain_nonnumeric <- function(x){
 #' @return Character in c("classification", "regression")
 #' @export
 #' @examples
+#' sub <- mtcars[mtcars$cyl == 6, ]
+#' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
+#' rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
 rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
   .mns <- apply(data, 2L, median)
   .cov <- cov(data, method = "pearson")
   diag(.cov) <- var_coeff * diag(.cov) ## Decrease univariate variance if needed.
   ## person numeric, not spearman ranked/ordinal
   
+  ## Check if this sigma is a positive definite matrix.
+  if(lqmm::is.positive.definite(.cov) == FALSE){
+    .cov <- lqmm::make.positive.definite(.cov)
+  }
+  
   ## Sample
   ret <- mvtnorm::rmvnorm(n = n_obs,
                           mean = .mns,
-                          sigma = .std_cov)
-  return(as.data.frame(data))
+                          sigma =  var_coeff * .cov)
+  return(as.data.frame(ret))
 }
