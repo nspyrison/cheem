@@ -14,9 +14,11 @@ format_nested_layers(
 )
 }
 \arguments{
+\item{shap_layer_ls}{A return from \code{nested_local_attr_layers()}.}
+
 \item{x}{The explanatory variables of the model.}
 
-\item{y}{The target variable of the model}
+\item{y}{The target variable of the model.}
 
 \item{basis_type}{The type of basis used to approximate the data and
 attribution space from. Defaults to "pca".}

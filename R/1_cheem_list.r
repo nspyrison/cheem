@@ -35,14 +35,15 @@ global_view_df <- function(
 ){
   d = 2 ## Fixed display dimensionality 
   ## maha_vect_of() -----
-  #maha_vect_of <- function(x, do_normalize = TRUE){ ## distance from median(x), cov(x)
+  #maha_vect_of <- function(x, do_normalize = TRUE){ ## distance from median(x), stats::cov(x)
   if(is.null(class)) class <- as.factor(FALSE)
   .lvls <- levels(class)
   maha <- NULL
   ## For each level of the class, find the in-class maha distances
   .m <- sapply(1L:length(.lvls), function(k){
     .sub <- x[class == .lvls[k], ]
-    .sub_maha <- mahalanobis(.sub, apply(.sub, 2L, median), cov(.sub)) %>%
+    .sub_maha <- stats::mahalanobis(
+      .sub, apply(.sub, 2L, stats::median), stats::cov(.sub)) %>%
       matrix(ncol = 1L)
     maha <<- c(maha, .sub_maha)
   })
@@ -51,10 +52,10 @@ global_view_df <- function(
   ## Maha quantiles
   ### Theoretical chi sq quantiles, x of a QQ plot
   .probs <- seq(.001, .999, length.out = nrow(x))
-  .qx <- qchisq(.probs, df = nrow(x) - 1L) %>%
+  .qx <- stats::qchisq(.probs, df = nrow(x) - 1L) %>%
     matrix() %>% spinifex::scale_01()
   ### Sample quantiles, y of a QQ plot
-  .qy <- quantile(maha, probs = .probs) %>%
+  .qy <- stats::quantile(maha, probs = .probs) %>%
     matrix() %>% spinifex::scale_01()
   .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy), "less")$p.value
   .maha_skew_text <- paste0(
@@ -95,8 +96,8 @@ global_view_df <- function(
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model
-#' @param xtext Optional, Out Of Sample data to find the local attribution of.
-#' @param ytext Optional, Out Of Sample response to measure xtext with 
+#' @param xtest Optional, Out Of Sample data to find the local attribution of.
+#' @param ytest Optional, Out Of Sample response to measure x with 
 #' if provided.
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used.
@@ -125,12 +126,8 @@ local_attr_layer <- function(
   verbose = TRUE, noisy = TRUE
 ){
   d = 2
-  require("treeshap")
-  if(noisy == TRUE) require("beepr")
-  if(verbose == TRUE){
-    require("tictoc")
+  if(verbose == TRUE)
     tictoc::tic(paste0("local_attr_layer -- ", layer_name))
-  }
   
   ## RF model
   .is_y_disc <- is_discrete(y)
@@ -158,7 +155,7 @@ local_attr_layer <- function(
   .rsq <- 1L - (.rss / .tss) %>% round(4L)
   .performance_df <- data.frame(mse = .mse, rmse = .rmse, rsq = .rsq)
   if(is.null(xtest) == FALSE & is.null(ytest) == FALSE){
-    .rss_t <- sum((ytest - predict(.rf, xtest))^2L)
+    .rss_t <- sum((ytest - stats::predict(.rf, xtest))^2L)
     .tss_t <- sum((ytest - mean(ytest))^2L)
     .mse_t <- 1L / nrow(x) * .rss_t %>% round(2L)
     .rmse_t <- sqrt(.mse_t) %>% round(2L)
@@ -214,9 +211,9 @@ local_attr_layer <- function(
 #' Internal function, formats all layers of all data.frames, consumed in 
 #' nested_local_attr_layers().
 #' 
-#' @parma shap_layer_ls
+#' @param shap_layer_ls A return from `nested_local_attr_layers()`.
 #' @param x The explanatory variables of the model.
-#' @param y The target variable of the model
+#' @param y The target variable of the model.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
@@ -238,10 +235,10 @@ format_nested_layers <- function(
     if(is_classification == TRUE){
       .lvls <- levels(class)
       .rf_mod <- shap_layer_ls[[1L]]$rf_model
-      .pred_clas <- as.factor(.lvls[round(predict(.rf_mod))])
+      .pred_clas <- as.factor(.lvls[round(stats::predict(.rf_mod))])
     }
     .plot_clas <- ifelse(is_classification == TRUE, .pred_clas, class)
-    .m <- utils::capture.output(gc())
+    .m <- gc()
     
     data_plot_df <- global_view_df(
       x, y, basis_type, .plot_clas, layer_name = "data")
@@ -260,9 +257,10 @@ format_nested_layers <- function(
   if(is.null(class)) class <- as.factor(FALSE)
   is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
   decode_df <- data.frame(rownum = 1L:nrow(x), class = class, y)
+  .is_misclass <- NULL
   .m <- sapply(1L:length(shap_layer_ls), function(i){
     .rf_mod <- shap_layer_ls[[i]]$rf_model
-    .pred <- predict(.rf_mod)
+    .pred <- stats::predict(.rf_mod)
     decode_df <<- cbind(decode_df, .pred, y - .pred) ## Layer residual
     if(is_classification == TRUE){
       .lvls <- levels(class)
@@ -340,11 +338,10 @@ format_nested_layers <- function(
 #' Internal function, formats all layers of all data.frames, consumed in 
 #' nested_local_attr_layers().
 #' 
-#' @parma shap_layer_ls
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model
-#' @param xtext Optional, Out Of Sample data to find the local attribution of.
-#' @param ytext Optional, Out Of Sample response to measure xtext with 
+#' @param xtest Optional, Out Of Sample data to find the local attribution of.
+#' @param ytest Optional, Out Of Sample response to measure xtext with 
 #' if provided.
 #' @param n_layers The number of local attribution layers deep. Defaults to 1, 
 #' the local attribution of just the data. In bulk, I think going more layers is
@@ -385,8 +382,6 @@ nested_local_attr_layers <- function(
 ){
   d = 2
   loc_attr_nm <- "SHAP"
-  require("treeshap")
-  if(noisy == TRUE) require("beepr")
   if(verbose == TRUE){
     writeLines(paste0("nested_local_attr_layers() started at ", Sys.time()))
     tictoc::tic("nested_local_attr_layers()")
@@ -500,7 +495,7 @@ basis_local_attribution <- function(
 #' "off"). Defaults to "top1d"; basis above the density curves.
 #' @param shape Number specifying the shape of the basis distribution points. 
 #' Typically 142 or 124 indicating '|' for `plotly` and `gganimate` respectively.
-#' Defaults to 142, '|' for `plotly.`
+#' Defaults to 142, '|' for `plotly`.
 #' @param do_add_pcp_segments Logical, whether or not to add to add faint 
 #' parallel coordinate lines on the 1D basis. Defaults to TRUE.
 #' @param primary_obs The rownumber of the primary observation. Its local
@@ -534,11 +529,13 @@ proto_basis1d_distribution <- function(
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "off"), ## Needs to match that of `proto_basis1d()`
   shape = c(142, 124), ## '|' for plotly and ggplot respectively
-  do_add_pcp_segements = TRUE,
+  do_add_pcp_segments = TRUE,
   primary_obs = NULL,
   comparison_obs = NULL
 ){
-  requireNamespace("spinifex")
+  ## Prevent global variable warnings:
+  .facet_by <- rownum <- maha_dist <- contribution <- var_name <- .map_to <-
+    .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
   eval(.init4proto)
   position <- match.arg(position)
@@ -594,7 +591,7 @@ proto_basis1d_distribution <- function(
   ## Add facet level if needed
   if(is.null(.facet_by) == FALSE){
     .basis_ls <- list(facet_by = rep_len("_basis_", nrow(.df_zero)))
-    .df_basis_distr <- .bind_elements2df(.basis_ls, .df_basis_distr)
+    .df_basis_distr <- spinifex:::.bind_elements2df(.basis_ls, .df_basis_distr)
   }
   
   if(length(unique(.df_basis_distr$rowname)) > 999L)
@@ -605,7 +602,7 @@ proto_basis1d_distribution <- function(
     shape = shape, alpha = .alpha, size = 1.5))
   
   ## Add PCP lines if needed.
-  if(do_add_pcp_segements == TRUE){
+  if(do_add_pcp_segments == TRUE){
     ## Make the right table to inner join to.
     .df_basis_distr2 <- .df_basis_distr %>% mutate(
       .keep = "none",

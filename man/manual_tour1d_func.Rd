@@ -10,13 +10,18 @@ manual_tour1d_func(
   mv_name,
   primary_obs,
   comparison_obs = NULL,
-  do_add_pcp_segements = TRUE,
+  do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
   angle = 0.1
 )
 }
 \arguments{
 \item{layer_ls}{A return from \code{nested_local_attr_layers()}, a list of data frames.}
+
+\item{basis}{A 1D projection basis, typically a return of
+\code{basis_local_attribution()}.}
+
+\item{mv_name}{The character string, \emph{name} of the Manipulation Variable.}
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
@@ -25,12 +30,14 @@ as a dashed line.}
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
 
-\item{height_px}{The height in pixels of the returned \code{plotly} plot.}
+\item{do_add_pcp_segments}{Logical, whether or not to add parallel coordinate
+line segments to the basis display.}
 
-\item{width_px}{The width in pixels of the returned \code{plotly} plot.}
+\item{pcp_shape}{The number of the shape character to add. Typically
+142 or 124, '|' for \code{plotly} and \code{gganimate} respectively. Defaults to 142,
+'|' for \code{plotly}.}
 
-\item{do_include_maha_qq}{Logical, whether or not to add the qq plots of the
-Mahalanobis distance for the data- and attribution- spaces}
+\item{angle}{The step size between interpolated frames, in radians.}
 }
 \value{
 \code{plotly} plot of the global view, first 2 components of the basis of

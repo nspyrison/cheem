@@ -21,6 +21,11 @@ local_attr_layer(
 
 \item{y}{The target variable of the model}
 
+\item{xtest}{Optional, Out Of Sample data to find the local attribution of.}
+
+\item{ytest}{Optional, Out Of Sample response to measure x with
+if provided.}
+
 \item{layer_name}{Character layer name, typically the type of local
 attribution used.}
 
@@ -35,11 +40,6 @@ info. Defaults to TRUE.}
 
 \item{noisy}{Logical, Whether of not the function should play a beeper tone
 upon completion. Defaults to TRUE.}
-
-\item{xtext}{Optional, Out Of Sample data to find the local attribution of.}
-
-\item{ytext}{Optional, Out Of Sample response to measure xtext with
-if provided.}
 }
 \value{
 A data.frame, for the full local attribution matrix.

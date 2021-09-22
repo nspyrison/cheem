@@ -9,7 +9,7 @@ proto_basis1d_distribution(
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "off"),
   shape = c(142, 124),
-  do_add_pcp_segements = TRUE,
+  do_add_pcp_segments = TRUE,
   primary_obs = NULL,
   comparison_obs = NULL
 )
@@ -24,7 +24,10 @@ proto_basis1d_distribution(
 
 \item{shape}{Number specifying the shape of the basis distribution points.
 Typically 142 or 124 indicating '|' for \code{plotly} and \code{gganimate} respectively.
-Defaults to 142, '|' for \code{plotly.}}
+Defaults to 142, '|' for \code{plotly}.}
+
+\item{do_add_pcp_segments}{Logical, whether or not to add to add faint
+parallel coordinate lines on the 1D basis. Defaults to TRUE.}
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
@@ -32,9 +35,6 @@ as a dashed line.}
 
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
-
-\item{do_add_pcp_segments}{Logical, whether or not to add to add faint
-parallel coordinate lines on the 1D basis. Defaults to TRUE.}
 }
 \description{
 Adds the distribution of orthonormalized row values of

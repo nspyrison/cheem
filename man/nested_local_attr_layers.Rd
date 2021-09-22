@@ -21,6 +21,11 @@ nested_local_attr_layers(
 
 \item{y}{The target variable of the model}
 
+\item{xtest}{Optional, Out Of Sample data to find the local attribution of.}
+
+\item{ytest}{Optional, Out Of Sample response to measure xtext with
+if provided.}
+
 \item{n_layers}{The number of local attribution layers deep. Defaults to 1,
 the local attribution of just the data. In bulk, I think going more layers is
 going to overfit the data, so be prepared to optimize OOS measures.}
@@ -36,11 +41,6 @@ info. Defaults to TRUE.}
 
 \item{noisy}{Logical, Whether or not the function should play a beepr tone
 upon completion. Defaults to TRUE.}
-
-\item{xtext}{Optional, Out Of Sample data to find the local attribution of.}
-
-\item{ytext}{Optional, Out Of Sample response to measure xtext with
-if provided.}
 }
 \value{
 A list of formatted data frames.

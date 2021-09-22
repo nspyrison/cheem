@@ -9,18 +9,14 @@ if(F){ ## Not run, open `trees_of_cheem.r`
 }
 
 ## Data preprocess ------
-## Data setup, palmerpenguins::penguins
-raw <- palmerpenguins::penguins
-if(F) ## Not run; Missing values,
-  visdat::vis_miss(raw)
-raw_rmna <- raw[!is.na(raw$sex), ]
-lvls <- levels(raw_rmna$species)
+## Data setup, spinifex::penguins
+raw <- spinifex::penguins
+lvls <- levels(raw$species)
 ## Filter to closest 2 classes
-raw_rmna <- raw_rmna[raw_rmna$species %in% lvls[1:2], ]
-dat <- raw_rmna[, 3:6] %>% ## X's not scaled.
-  as.data.frame()
+raw <- raw[raw$species %in% lvls[1:2], ]
+dat <- raw[, 3:6] %>% as.data.frame() ## X's not scaled.
 colnames(dat) <- c("b_l", "b_d", "f_l", "wgt")
-clas <- factor(raw_rmna$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
+clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 
 ## Create shap layer_ls ------
 assign_cobs_shap_layer_ls(

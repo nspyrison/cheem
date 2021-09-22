@@ -71,8 +71,8 @@ does_contain_nonnumeric <- function(x){
 #' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
 #' rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
 rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
-  .mns <- apply(data, 2L, median)
-  .cov <- cov(data, method = "pearson")
+  .mns <- apply(data, 2L, stats::median)
+  .cov <- stats::cov(data, method = "pearson")
   diag(.cov) <- var_coeff * diag(.cov) ## Decrease univariate variance if needed.
   ## person numeric, not spearman ranked/ordinal
   

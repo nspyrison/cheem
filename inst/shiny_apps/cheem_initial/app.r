@@ -167,7 +167,7 @@ server <- function(input, output, session){
     ggt <- manual_tour1d_func(
       layer_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
-      do_add_pcp_segements = as.logical(input$do_add_pcp_segments))
+      do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
     animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   output$manual_tour_gganimate <- renderImage({
@@ -181,7 +181,7 @@ server <- function(input, output, session){
     ggt <- manual_tour1d_func(
       layer_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
-      do_add_pcp_segements = as.logical(input$do_add_pcp_segments))
+      do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
     anim <- animate_gganimate(ggt)
     gganimate::anim_save("outfile.gif", anim)
     

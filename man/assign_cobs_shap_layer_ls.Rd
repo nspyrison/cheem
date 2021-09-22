@@ -51,13 +51,12 @@ the \code{class}. This is appended to the \code{data} and finally applied to
 }
 \examples{
 ## Data setup, palmerpenguins::penguins
-raw <- palmerpenguins::penguins ## Missing values, visdat::vis_miss(raw)
-raw_rmna <- raw[!is.na(raw$sex), ]
-lvls <- levels(raw_rmna$species)
+raw <- spinifex::penguins
+lvls <- levels(raw$species)
 ## Filter to closest 2 classes
-raw_rmna <- raw_rmna[raw_rmna$species \%in\% lvls[1:2], ]
-dat <- spinifex::scale_sd(raw_rmna[, 3:6]) \%>\% as.data.frame()
-clas <- factor(raw_rmna$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
+raw <- raw[raw$species \%in\% lvls[1:2], ]
+dat <- as.data.frame(spinifex::scale_sd(raw[, 1:4]))
+clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 
 ## Apply the functions
 shap_layer_ls <- assign_cobs_shap_layer_ls(

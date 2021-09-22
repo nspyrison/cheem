@@ -95,14 +95,14 @@ str(shap_layer_ls$decode_df)
 # tgt_obs <- nrow(df)
 # bas <- df[tgt_obs, -ncol(df)] %>%
 #   as.matrix(nrow = 1L) %>% t() %>%
-#   tourr::normalise()
+#   spinifex::scale_01()
 # opts <- rownames(bas)
 # sel <- opts[spinifex::manip_var_of(bas)]
 
 # ggt <- manual_tour1d_func(
 #   shap_layer_ls, basis = bas, mv_name = sel,
 #   primary_obs = tgt_obs, #comparison_obs = NULL,
-#   do_add_pcp_segements = TRUE, 
+#   do_add_pcp_segments = TRUE, 
 #   pcp_shape = 124L ## ggplot '|'
 # )
 # anim <- animate_gganimate(ggt)

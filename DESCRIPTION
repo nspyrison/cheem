@@ -1,5 +1,5 @@
 Package: cheem
-Title: Interactively explore data- and local explanation- spaces side-by-side. Further interrogate observation explanations with a radial tour.
+Title: Interactively itterogate local explanations of a model with radial tours
 Version: 0.0.9000
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
@@ -22,14 +22,18 @@ License: CC BY-NC-SA 4.0
 URL: https://github.com/nspyrison/cheem/
 BugReports: https://github.com/nspyrison/cheem/issues
 Imports:
+    tourr,
+    shiny,
     ggplot2,
     plotly,
     htmlwidgets,
-    shiny,
+    lqmm,
+    mvtnorm,
     moments,
     Rdimtools,
     magrittr,
     dplyr,
+    tidyr,
     tictoc,
     beepr,
     knitr

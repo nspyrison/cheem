@@ -34,13 +34,12 @@
 #' @export
 #' @examples
 #' ## Data setup, palmerpenguins::penguins
-#' raw <- palmerpenguins::penguins ## Missing values, visdat::vis_miss(raw)
-#' raw_rmna <- raw[!is.na(raw$sex), ]
-#' lvls <- levels(raw_rmna$species)
+#' raw <- spinifex::penguins
+#' lvls <- levels(raw$species)
 #' ## Filter to closest 2 classes
-#' raw_rmna <- raw_rmna[raw_rmna$species %in% lvls[1:2], ]
-#' dat <- spinifex::scale_sd(raw_rmna[, 3:6]) %>% as.data.frame()
-#' clas <- factor(raw_rmna$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
+#' raw <- raw[raw$species %in% lvls[1:2], ]
+#' dat <- as.data.frame(spinifex::scale_sd(raw[, 1:4]))
+#' clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 #' 
 #' ## Apply the functions
 #' shap_layer_ls <- assign_cobs_shap_layer_ls(
@@ -55,6 +54,7 @@
 #' names(shap_layer_ls)
 #' str(shap_layer_ls$plot_df)
 #' str(shap_layer_ls$decode_df)
+####TODO: EXAMPLE CAUSING ERROR.
 assign_cobs_shap_layer_ls <- function(
   data,
   class,
@@ -154,6 +154,8 @@ linked_plotly_func <- function(
   width_px = 640L,
   do_include_maha_qq = FALSE
 ){
+  ## Prevent global variable warnings:
+  V1 <- V2 <- ggtext <- projection_nm <- layer_nm <- tooltip <- NULL
   .alpha <- ifelse(nrow(layer_ls$decode_df) > 999L, .1, .6)
   .xlab <- ifelse(do_include_maha_qq == FALSE, "PC1",
                   "PC1 | Quantile, chi-squared")
@@ -175,63 +177,65 @@ linked_plotly_func <- function(
     as.factor()
   
   gg <- plot_df %>%
-    plotly::highlight_key(~rownum) %>%
-    ggplot(aes(V1, V2))
+    highlight_key(~rownum) %>%
+    ggplot(ggplot2::aes(V1, V2))
   ## Red misclassified points, if present
   if(is_classification == TRUE){
     .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
     .idx_misclas <- plot_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0L){
-      .df <- plot_df[.idx_misclas, ] %>% plotly::highlight_key(~rownum)
+      .df <- plot_df[.idx_misclas, ] %>% highlight_key(~rownum)
       gg <- gg +
-        geom_point(aes(V1, V2), .df,
-                   color = "red", fill = NA,
-                   shape = 21L, size = 3L, alpha = .alpha)
+        ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
+                            color = "red", fill = NA,
+                            shape = 21L, size = 3L, alpha = .alpha)
     }
   }
   ## Highlight comparison obs, if passed
   if(is.null(comparison_obs) == FALSE){
     .idx_comp <- plot_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L){
-      .df <- plot_df[.idx_comp, ] %>% plotly::highlight_key(~rownum)
+      .df <- plot_df[.idx_comp, ] %>% highlight_key(~rownum)
       gg <- gg +
         ## Highlight comparison obs
-        geom_point(aes(V1, V2, color = pred_clas[.idx_comp]),
-                   .df, size = 4L, shape = 4L)
+        ggplot2::geom_point(ggplot2::aes(V1, V2, color = pred_clas[.idx_comp]),
+                            .df, size = 4L, shape = 4L)
     }
   }
   ## Highlight shap obs, if passed
   if(is.null(primary_obs) == FALSE){
     .idx_shap <- plot_df$rownum == primary_obs
     if(sum(.idx_shap) > 0L){
-      .df <- plot_df[.idx_shap, ] %>% plotly::highlight_key(~rownum)
+      .df <- plot_df[.idx_shap, ] %>% highlight_key(~rownum)
       gg <- gg +
-        geom_point(aes(V1, V2, color = pred_clas[.idx_shap]),
-                   .df, size = 5L, shape = 8L)
+        ggplot2::geom_point(ggplot2::aes(V1, V2, color = pred_clas[.idx_shap]),
+                            .df, size = 5L, shape = 8L)
     }
   }
   ## Maha skew text,
   #### geom_text not working with plotly... & annotate() not working with facets...
   if(do_include_maha_qq == TRUE){
     gg <- gg +
-      geom_text(aes(x = -Inf, y = Inf, label = ggtext),
-                hjust = 0L, vjust = 1L, size = 4L)
+      ggplot2::geom_text(ggplot2::aes(x = -Inf, y = Inf, label = ggtext),
+                         hjust = 0L, vjust = 1L, size = 4L)
   }
   ## Normal points
   gg <- gg +
-    suppressWarnings(geom_point(
-      aes(V1, V2, color = pred_clas, shape = pred_clas, tooltip = tooltip),
+    suppressWarnings(ggplot2::geom_point(
+      ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas, tooltip = tooltip),
       alpha = .alpha)) +
-    facet_grid(rows = vars(projection_nm), cols = vars(layer_nm), scales = "free") +
-    theme_bw() +
-    labs(x = .xlab, y = .ylab) +
-    scale_color_brewer(palette = "Dark2") +
-    theme(axis.text  = element_blank(),
-          axis.ticks = element_blank(),
-          legend.position = "off")
+    ggplot2::facet_grid(rows = ggplot2::vars(projection_nm),
+                        cols = ggplot2::vars(layer_nm), scales = "free") +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = .xlab, y = .ylab) +
+    ggplot2::scale_color_brewer(palette = "Dark2") +
+    ggplot2::theme(axis.text  = ggplot2::element_blank(),
+                   axis.ticks = ggplot2::element_blank(),
+                   legend.position = "off")
   
   ## BOX SELECT
-  ggplotly(gg, tooltip = "tooltip", height = height_px, width = width_px) %>%
+  ggplotly(gg, tooltip = "tooltip", 
+                  height = height_px, width = width_px) %>%
     config(displayModeBar = FALSE) %>% ## Remove html buttons
     layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
     event_register("plotly_selected") %>% ## Reflect "selected", on release of the mouse button.
@@ -245,22 +249,27 @@ linked_plotly_func <- function(
 #' and attribution- spaces. Typically consumed directly by shiny app.
 #' 
 #' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param basis A 1D projection basis, typically a return of 
+#' `basis_local_attribution()`.
+#' @param mv_name The character string, _name_ of the Manipulation Variable.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
 #' as a dashed line.
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line.
-#' @param height_px The height in pixels of the returned `plotly` plot.
-#' @param width_px The width in pixels of the returned `plotly` plot.
-#' @param do_include_maha_qq Logical, whether or not to add the qq plots of the
-#' Mahalanobis distance for the data- and attribution- spaces
+#' @param do_add_pcp_segments Logical, whether or not to add parallel coordinate
+#' line segments to the basis display.
+#' @param pcp_shape The number of the shape character to add. Typically
+#' 142 or 124, '|' for `plotly` and `gganimate` respectively. Defaults to 142, 
+#' '|' for `plotly`.
+#' @param angle The step size between interpolated frames, in radians.
 #' @return `plotly` plot of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
-#' @examples
+## TODO: @examples needed
 manual_tour1d_func <- function(
   layer_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
-  do_add_pcp_segements = TRUE,
+  do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .1
 ){
@@ -287,31 +296,32 @@ manual_tour1d_func <- function(
   
   ## Manual (radial) tour 1d
   .mv <- which(colnames(layer_ls$shap_df) == mv_name)
-  .mt_path <- manual_tour(basis, manip_var = .mv)
+  .mt_path <- spinifex::manual_tour(basis, manip_var = .mv)
   
   ### Classification problem -----
   if(.prob_type == "classification"){
     .dat <- .x %>% scale_01
-    ggt <- ggtour(.mt_path, .dat, angle = angle) +
-      proto_density(aes_args = list(color = .pred_clas, fill = .pred_clas)) +
-      proto_origin1d() +
-      proto_basis1d(manip_col = "black") +
+    ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
+      spinifex::proto_density(
+        aes_args = list(color = .pred_clas, fill = .pred_clas)) +
+      spinifex::proto_origin1d() +
+      spinifex::proto_basis1d(manip_col = "black") +
       proto_basis1d_distribution(
         layer_ls, group_by = .pred_clas,
         position = "top1d",
         shape = pcp_shape, ## '|' for gganimate/ggplot
-        do_add_pcp_segements = as.logical(do_add_pcp_segements),
+        do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs)
-      ## Highlight comparison obs, if passed
+    ## Highlight comparison obs, if passed
     ggt <- ggt +
-      proto_highlight1d(
+      spinifex::proto_highlight1d(
         comparison_obs,
         list(color = .pred_clas),
         list(linetype = 3L, alpha = 0.8),
         mark_initial = FALSE) +
       ## Highlight shap obs
-      proto_highlight1d(
+      spinifex::proto_highlight1d(
         primary_obs,
         list(color = .pred_clas),
         list(linetype = 2L, alpha = .6, size = .8),
@@ -339,35 +349,35 @@ manual_tour1d_func <- function(
     attr(.array, "phi_max")   <- attr(.mt_path, "phi_max")
     
     ## Add y to .dat to project.
-    .dat <- data.frame(.x, .y) %>% scale_01
+    .dat <- spinifex::scale_01(data.frame(.x, .y))
     ## Plot
-    ggt <- ggtour(.array, .dat, angle = angle) +
+    ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
       ## _points would ideally be _hex or _hdr, but:
       #### _hex doesn't work with plotly
       #### _hdr not made atm.
       ##- Down sample?
-      proto_point(
+      spinifex::proto_point(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         identity_args = list(alpha = .alpha)) +
-      proto_origin() +
-      proto_basis1d(manip_col = "black") +
+      spinifex::proto_origin() +
+      spinifex::proto_basis1d(manip_col = "black") +
       proto_basis1d_distribution(
         layer_ls, group_by = .pred_clas,
         position = "top1d",
         shape = 142L, ## '|' for gganimate/ggplot
-        do_add_pcp_segements = as.logical(do_add_pcp_segements),
+        do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
       labs(x = "1D SHAP projection", y = "Actual wages (2020 Euros)")
-      ## Highlight comparison obs, if passed
-    ggt <- ggt + 
-      proto_highlight(
+    ## Highlight comparison obs, if passed
+    ggt <- ggt +
+      spinifex::proto_highlight(
         comparison_obs,
         list(color = .pred_clas),
         list(size = 4L, shape = 4L, alpha = 0.5),
         mark_initial = FALSE) +
       ## Highlight shap obs
-      proto_highlight(
+      spinifex::proto_highlight(
         primary_obs,
         aes_args = list(color = .pred_clas),
         identity_args = list(size = 5L, shape = 8L, alpha = 1L),
