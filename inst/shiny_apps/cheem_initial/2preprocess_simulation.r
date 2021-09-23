@@ -80,18 +80,18 @@ ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 
 ## Create shap layer_ls ---
 n_cobs <- 0L
-assign_cobs_shap_layer_ls(
+layer_ls <- assign_cobs_layer_ls(
   data = dat,
   class = clas,
   y = clas, ## Factor implies classification, numeric implies regression
   n_cobs = n_cobs, ## Drawn from lvl 1, assigned to other levels
   var_coeff = .1)
 
-names(shap_layer_ls)
-str(shap_layer_ls$plot_df)
-str(shap_layer_ls$decode_df)
+names(layer_ls)
+str(layer_ls$plot_df)
+str(layer_ls$decode_df)
 
-# df <- shap_layer_ls$shap_df
+# df <- layer_ls$shap_df
 # tgt_obs <- nrow(df)
 # bas <- df[tgt_obs, -ncol(df)] %>%
 #   as.matrix(nrow = 1L) %>% t() %>%
@@ -99,8 +99,8 @@ str(shap_layer_ls$decode_df)
 # opts <- rownames(bas)
 # sel <- opts[spinifex::manip_var_of(bas)]
 
-# ggt <- manual_tour1d_func(
-#   shap_layer_ls, basis = bas, mv_name = sel,
+# ggt <- radial_cheem_ggtour(
+#   layer_ls, basis = bas, mv_name = sel,
 #   primary_obs = tgt_obs, #comparison_obs = NULL,
 #   do_add_pcp_segments = TRUE, 
 #   pcp_shape = 124L ## ggplot '|'
@@ -113,7 +113,7 @@ str(shap_layer_ls$decode_df)
 if(interactive() == TRUE){
   save(dat,  ## Simulation pre-processed data
        clas, ## Simulation class
-       shap_layer_ls,
+       layer_ls,
        file = "2preprocess_simulation.RData")
   file.copy("./2preprocess_simulation.RData", to = "./apps/cheem_app/data/2preprocess_simulation.RData", overwrite = TRUE)
   file.remove("./2preprocess_simulation.RData")

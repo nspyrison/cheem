@@ -18,23 +18,23 @@ dat <- raw[, 3:6] %>% as.data.frame() ## X's not scaled.
 colnames(dat) <- c("b_l", "b_d", "f_l", "wgt")
 clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 
-## Create shap layer_ls ------
-assign_cobs_shap_layer_ls(
+## Create layer_ls ------
+layer_ls <- assign_cobs_layer_ls(
   data = dat,
   class = clas,
   y = clas, ## Factor implies classification, numeric implies regression
   n_cobs = 0, ## REALLY 5 of first lvl labeled as second, atm.
   var_coeff = .1)
 
-names(shap_layer_ls)
-str(shap_layer_ls$plot_df)
-str(shap_layer_ls$decode_df)
+names(layer_ls)
+str(layer_ls$plot_df)
+str(layer_ls$decode_df)
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
   save(dat,  ## penguins pre-processed data
        clas, ## penguins species
-       shap_layer_ls,
+       layer_ls,
        file = "1preprocess_penguins.RData")
   file.copy("./1preprocess_penguins.RData", to = "./apps/cheem_app/data/1preprocess_penguins.RData", overwrite = TRUE)
   file.remove("./1preprocess_penguins.RData")

@@ -43,9 +43,9 @@ use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-dat <- shap_layer_ls_3cobs$decode_df[, 4:7]
-clas <- shap_layer_ls_3cobs$decode_df$class
-shap_df <- shap_layer_ls_3cobs$shap_df[1:nrow(dat), -5]
+dat <- layer_ls$decode_df[, 4:7]
+clas <- layer_ls$decode_df$class
+shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
 bas <- basis_local_attribution(shap_df, nrow(dat))
 mv <- manip_var_of(bas) ## Warning is fine.
 

@@ -1,4 +1,4 @@
-# FIFA regression, save shap_layer_ls for app -----
+# FIFA regression, save layer_ls for app -----
 
 ## source and apply functions, apply the work to prep for shiny app
 if(F){ ## Not run, open `trees_of_cheem.r`
@@ -61,23 +61,23 @@ Y <- .raw$wage_eur ## unscaled wages in Euros, assumed 2020 valuation.
 
 ## COBS data and shap_layers -----
 #### Create Courpted OBServations datasets and their shap layers.
-assign_cobs_shap_layer_ls(
+layer_ls <- assign_cobs_layer_ls(
   data = X,
   class = clas,
   y = Y, ## Factor implies classification, numeric implies regression
   n_cobs = 0, ## Draw from first level, assigned to all other levels.
   var_coeff = .1)
 
-names(shap_layer_ls)
-str(shap_layer_ls$plot_df)
-str(shap_layer_ls$decode_df)
+names(layer_ls)
+str(layer_ls$plot_df)
+str(layer_ls$decode_df)
 
 ## EXPORT OBJECTS ----
 if(interactive()){
-  dat <- shap_layer_ls$decode_df[, 5L:13L]
+  dat <- layer_ls$decode_df[, 5L:13L]
   save(dat,   ## non-scaled 9X aggregates of 42 var Fifa20 data.
        #clas, ## fielder/goal-keeper
-       shap_layer_ls,
+       layer_ls,
        file = "3preprocess_fifa.RData")
   file.copy("./3preprocess_fifa.RData", to = "./apps/cheem_app/data/3preprocess_fifa.RData", overwrite = TRUE)
   file.remove("./3preprocess_fifa.RData")

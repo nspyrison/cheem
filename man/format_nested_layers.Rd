@@ -5,7 +5,7 @@
 \title{Format the nested local attribution layers}
 \usage{
 format_nested_layers(
-  shap_layer_ls,
+  layer_ls,
   x,
   y,
   basis_type = c("pca", "olda"),
@@ -14,7 +14,7 @@ format_nested_layers(
 )
 }
 \arguments{
-\item{shap_layer_ls}{A return from \code{nested_local_attr_layers()}.}
+\item{layer_ls}{A return from \code{nested_local_attr_layers()}.}
 
 \item{x}{The explanatory variables of the model.}
 

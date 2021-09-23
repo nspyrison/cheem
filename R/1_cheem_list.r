@@ -20,6 +20,7 @@
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used.
 #' @return A data.frame, for the global linked plotly display.
+#' @export
 #' @examples
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' x <- sub[, 2:5]
@@ -211,7 +212,7 @@ local_attr_layer <- function(
 #' Internal function, formats all layers of all data.frames, consumed in 
 #' nested_local_attr_layers().
 #' 
-#' @param shap_layer_ls A return from `nested_local_attr_layers()`.
+#' @param layer_ls A return from `nested_local_attr_layers()`.
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
 #' @param basis_type The type of basis used to approximate the data and 
@@ -222,7 +223,7 @@ local_attr_layer <- function(
 #' info.
 #' @return A list of formated data frames.
 format_nested_layers <- function(
-  shap_layer_ls, x, y,
+  layer_ls, x, y,
   basis_type = c("pca", "olda"),
   class = NULL,
   verbose = TRUE
@@ -234,7 +235,7 @@ format_nested_layers <- function(
     is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
     if(is_classification == TRUE){
       .lvls <- levels(class)
-      .rf_mod <- shap_layer_ls[[1L]]$rf_model
+      .rf_mod <- layer_ls[[1L]]$rf_model
       .pred_clas <- as.factor(.lvls[round(stats::predict(.rf_mod))])
     }
     .plot_clas <- ifelse(is_classification == TRUE, .pred_clas, class)
@@ -246,8 +247,8 @@ format_nested_layers <- function(
    
   ### plot_df, bound longer
   b_plot_df <- data.frame(data_plot_df) ## Init data layer plot_df
-  .m <- sapply(1L:length(shap_layer_ls), function(i){
-    this_plot_df <- shap_layer_ls[[i]]$plot_df
+  .m <- sapply(1L:length(layer_ls), function(i){
+    this_plot_df <- layer_ls[[i]]$plot_df
     b_plot_df <<- rbind(b_plot_df, this_plot_df)
   })
   
@@ -258,15 +259,15 @@ format_nested_layers <- function(
   is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
   decode_df <- data.frame(rownum = 1L:nrow(x), class = class, y)
   .is_misclass <- NULL
-  .m <- sapply(1L:length(shap_layer_ls), function(i){
-    .rf_mod <- shap_layer_ls[[i]]$rf_model
+  .m <- sapply(1L:length(layer_ls), function(i){
+    .rf_mod <- layer_ls[[i]]$rf_model
     .pred <- stats::predict(.rf_mod)
     decode_df <<- cbind(decode_df, .pred, y - .pred) ## Layer residual
     if(is_classification == TRUE){
       .lvls <- levels(class)
-      .pred_clas <- as.factor(.lvls[round(.pred)])
-      .is_misclass <- .pred_clas != class
-      decode_df <- cbind(decode_df, .pred_clas, .is_misclass)
+      .pred_clas <<- as.factor(.lvls[round(.pred)])
+      .is_misclass <<- .pred_clas != class
+      decode_df <<- cbind(decode_df, .pred_clas, .is_misclass)
     }
   })
   ## bind wider, adding x, and tooltip
@@ -287,8 +288,8 @@ format_nested_layers <- function(
   }
   decode_df <- cbind(decode_df, x, tooltip)
   .nms <- c("rownum", "class", "y", ## Init common names.
-            "prediction", #paste0("prediction_", names(shap_layer_ls)),
-            "residual")   #paste0("residual_",   names(shap_layer_ls)),
+            "prediction", #paste0("prediction_", names(layer_ls)),
+            "residual")   #paste0("residual_",   names(layer_ls)),
   if(is_classification == TRUE){
     .nms <- c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip")
   }else{ ## is regression
@@ -301,28 +302,28 @@ format_nested_layers <- function(
   
   ### performance of the layers
   ## manual performance, slightly different than that reported by the rf obj itself
-  .nms <- names(shap_layer_ls)
+  .nms <- names(layer_ls)
   performance_df <- data.frame(NULL)
-  .m <- sapply(1L:length(shap_layer_ls), function(i){
-    .row <- shap_layer_ls[[i]]$performance_df
-    .row$runtime_seconds <- sum(shap_layer_ls[[i]]$time_df$runtime_seconds)
+  .m <- sapply(1L:length(layer_ls), function(i){
+    .row <- layer_ls[[i]]$performance_df
+    .row$runtime_seconds <- sum(layer_ls[[i]]$time_df$runtime_seconds)
     performance_df <<- rbind(performance_df, .row)
   })
   row.names(performance_df) <- .nms
   
   ### Rbind shap_df
   b_shap_df <- data.frame()
-  .m <- sapply(1L:length(shap_layer_ls), function(i){
-    .shap_df <- cbind(shap_layer_ls[[i]]$shap_df, .nms[i])
+  .m <- sapply(1L:length(layer_ls), function(i){
+    .shap_df <- cbind(layer_ls[[i]]$shap_df, .nms[i])
     b_shap_df <<- rbind(b_shap_df, .shap_df)
   })
-  colnames(b_shap_df) <- c(colnames(shap_layer_ls[[1L]]$shap_df), "layer_name")
+  colnames(b_shap_df) <- c(colnames(layer_ls[[1L]]$shap_df), "layer_name")
   
   ### Rbind time_df
   b_time_df <- data.frame( ## Init with data layer.
     runtime_seconds = sec_data_plot_df, task = "plot_df (PCA/Maha)", layer = "data")
-  .m <- sapply(1L:length(shap_layer_ls), function(i){
-    b_time_df <<- rbind(b_time_df, shap_layer_ls[[i]]$time_df)
+  .m <- sapply(1L:length(layer_ls), function(i){
+    b_time_df <<- rbind(b_time_df, layer_ls[[i]]$time_df)
   })
   
   if(verbose == TRUE) tictoc::toc()
@@ -360,21 +361,17 @@ format_nested_layers <- function(
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' set.seed(303)
 #' .idx_test <- sample(
-#'   1:nrow(sub), size = round(.5 * nrow(sub))) ## 20% index for testing
+#'   1:nrow(sub), size = round(.2 * nrow(sub))) ## 20% index for testing
 #' X_train <- sub[-.idx_test, 2:5]
 #' Y_train <- sub$m2.price[-.idx_test]
 #' clas <- sub$district[-.idx_test]
-#' X_test  <- sub[.idx_test, ]
+#' X_test  <- sub[.idx_test, 2:5]
 #' Y_test  <- sub$m2.price[.idx_test]
 #' 
 #' layer_ls <- nested_local_attr_layers(
 #'   x=X_train, y=Y_train, xtest=X_test, ytest=Y_test,
 #'   n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
-#' layer_ls$performance_df
-####
-# x=X_train;y=Y_train;xtest=X_test;ytest=Y_test;class=clas;
-# n_layers = 1;basis_type = "pca";verbose=TRUE;noisy = TRUE;
-##TODO: ERROR in maha_dist; solve.default(cov, ...) computationally singular
+#' names(layer_ls)
 nested_local_attr_layers <- function(
   x, y, xtest = NULL, ytest = NULL, n_layers = 1,
   basis_type = c("pca", "olda"), class = NULL,
@@ -390,31 +387,33 @@ nested_local_attr_layers <- function(
   ### Create shap layers in a list
   .next_layers_x <- x ## Init
   .next_layers_xtest <- xtest ## Init, could be NULL
-  shap_layer_ls <- list()
+  layer_ls <- list()
   if(n_layers == 1L){
     layer_nms <- loc_attr_nm
   }else layer_nms <- paste0(loc_attr_nm, "^", 1L:n_layers)
   .m <- sapply(1L:n_layers, function(i){
-    shap_layer_ls[[i]] <<- local_attr_layer(
+    layer_ls[[i]] <<- local_attr_layer(
       .next_layers_x, y,
       .next_layers_xtest, ytest, ## Could be NULL
       layer_nms[i], basis_type, class,
       verbose, noisy)
-    .next_layers_x <<- shap_layer_ls[[i]]$shap_df
-    .next_layers_xtest <<- shap_layer_ls[[i]]$shap_xtest_df ## Could be NULL
+    .next_layers_x <<- layer_ls[[i]]$shap_df
+    .next_layers_xtest <<- layer_ls[[i]]$shap_xtest_df ## Could be NULL
   })
-  names(shap_layer_ls) <- layer_nms
+  names(layer_ls) <- layer_nms
   
   ## Format into one list of formatted df rather than many lists of formatted df
-  formated <- format_nested_layers(
-    shap_layer_ls, x, y, basis_type, class, verbose)
+  formated_ls <- format_nested_layers(
+    layer_ls, x, y, basis_type, class, verbose)
   .m <- gc()
   if(noisy == TRUE) beepr::beep(2L)
   if(verbose == TRUE){
     tictoc::toc()
     writeLines(paste0("nested_local_attr_layers() finished at ", Sys.time()))
   }
-  return(formated)
+  attr(formated_ls, "problem_type") <- problem_type(y)
+  attr(formated_ls, "cobs_msg") <- "" ## Just to be sure in app.
+  return(formated_ls)
 }
 
 
@@ -429,6 +428,7 @@ nested_local_attr_layers <- function(
 #' model.
 #' @param data Data to extract the local attributions of.
 #' @return A dataframe of the local attributions.
+#' @export
 #' @examples
 #' sub <- DALEX::apartments[1:200, 1:5]
 #' x <- sub[, 2:5]
@@ -464,6 +464,7 @@ treeshap_df <- function(randomForest_model, data){
 #' treeshap_df.
 #' @param rownum The rownumber of the primary observation.
 #' @return A matrix of the 1D basis
+#' @export
 #' @examples
 #' la_df <- mtcars ## Pretend this is a local attribution data.frame
 #' basis_local_attribution(la_df, rownum = 10)
@@ -472,8 +473,8 @@ basis_local_attribution <- function(
   rownum = nrow(local_attribution_df)
 ){
   ## Remove last column if layer_name
-  col_idx <- if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
-      1L:ncol(local_attribution_df) else -ncol(local_attribution_df)
+  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
+    col_idx <- 1L:ncol(local_attribution_df) else col_idx <- -ncol(local_attribution_df)
   LA_df <- local_attribution_df[rownum, col_idx]
   ## Extract formatted basis
   LA_bas <- LA_df %>%
@@ -505,11 +506,12 @@ basis_local_attribution <- function(
 #' is highlighted as a dotted line.
 #' @rdname proto_basis
 #' @family ggtour proto
+#' @export
 #' @examples
 #' load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-#' dat <- shap_layer_ls_3cobs$decode_df[, 4:7]
-#' clas <- shap_layer_ls_3cobs$decode_df$class
-#' shap_df <- shap_layer_ls_3cobs$shap_df[1:nrow(dat), -5]
+#' dat <- layer_ls$decode_df[, 4:7]
+#' clas <- layer_ls$decode_df$class
+#' shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
 #' bas <- basis_local_attribution(shap_df, nrow(dat))
 #' mv <- manip_var_of(bas) ## Warning is fine.
 #' 

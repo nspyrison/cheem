@@ -31,8 +31,9 @@ NULL
 }
 
 ## Exports ------
-#' @importFrom magrittr `%>%`
+#' @importFrom magrittr %>%
 #' @export
+magrittr::`%>%`
 #' @import spinifex
 #' @import DALEX
 #' @import treeshap

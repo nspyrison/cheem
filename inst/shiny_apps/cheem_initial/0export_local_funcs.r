@@ -5,7 +5,7 @@ source("./apps/cobs_n_plot_funcs.r") ## COBS func, and plotting functions for sh
 if(interactive()){
   save(proto_basis1d_distribution, ## from: file.edit("./apps/trees_of_cheem.r")
        basis_local_attribution,    ## from: file.edit("./apps/trees_of_cheem.r")
-       manual_tour1d_func,         ## from: file.edit("./apps/cobs_n_plot_funcs.r")
+       radial_cheem_ggtour,         ## from: file.edit("./apps/cobs_n_plot_funcs.r")
        linked_plotly_func,         ## from: file.edit("./apps/cobs_n_plot_funcs.r")
        file = "0local_funcs.RData")
   file.copy("./0local_funcs.RData", to = "./apps/cheem_app/data/0local_funcs.RData", overwrite = TRUE)

@@ -42,7 +42,7 @@
 #' clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 #' 
 #' ## Apply the functions
-#' shap_layer_ls <- assign_cobs_shap_layer_ls(
+#' layer_ls <- assign_cobs_layer_ls(
 #'   data = dat,
 #'   class = clas,
 #'   y = clas,
@@ -51,11 +51,11 @@
 #'   var_coeff = .1)
 #' 
 #' ## Structure of the list.
-#' names(shap_layer_ls)
-#' str(shap_layer_ls$plot_df)
-#' str(shap_layer_ls$decode_df)
+#' names(layer_ls)
+#' str(layer_ls$plot_df)
+#' str(layer_ls$decode_df)
 ####TODO: EXAMPLE CAUSING ERROR.
-assign_cobs_shap_layer_ls <- function(
+assign_cobs_layer_ls <- function(
   data,
   class,
   y, ## Factor implies classification, numeric implies regression
@@ -104,21 +104,20 @@ assign_cobs_shap_layer_ls <- function(
       ))
   } ## End appending cobs.
   
-  ### Create and global assign shap_layer_ls -----
-  .shap_layer_ls <- nested_local_attr_layers(
+  ### Create and global assign layer_ls -----
+  .layer_ls <- nested_local_attr_layers(
     .x_w_cobs, .y_w_cobs, n_layers = 1L, basis_type = "pca",
     class = .clas_w_cobs, verbose = verbose, noisy = noisy)
-  attr(.shap_layer_ls, "problem_type") <- .prob_type
-  attr(.shap_layer_ls, "n_cobs") <- n_cobs
-  attr(.shap_layer_ls, "var_coeff") <- var_coeff
+  attr(.layer_ls, "n_cobs") <- n_cobs
+  attr(.layer_ls, "var_coeff") <- var_coeff
   .n <- nrow(data)
-  attr(.shap_layer_ls, "cobs_msg") <- ifelse(n_cobs > 0L, paste0(
+  attr(.layer_ls, "cobs_msg") <- ifelse(n_cobs > 0L, paste0(
     "Level-courrupted observations in rows: ",
-    (nrow(data) + 1L), " to ", nrow(.shap_layer_ls$decode_df), "."),
+    (nrow(data) + 1L), " to ", nrow(.layer_ls$decode_df), "."),
     "") ## ""; no cobs added.
   
   ## Return
-  return(.shap_layer_ls)
+  return(.layer_ls)
 }
 
 
@@ -142,10 +141,16 @@ assign_cobs_shap_layer_ls <- function(
 #' the data- and attribution- spaces.
 #' @export
 #' @examples
-#' layer_ls <- NULL ##NEEDED
-#' tgt_obs <- nrow(layer_ls$decode_df)
-#' linked_plotly_func(layer_ls, tgt_obs)
-##TODO: Example needs layer_ls assignment
+#' sub <- DALEX::apartments[1:200, 1:6]
+#' X <- sub[, 2:5]
+#' Y <- sub$m2.price
+#' clas <- sub$district
+#' 
+#' layer_ls <- nested_local_attr_layers(
+#'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' 
+#' linked_plotly_func(layer_ls, primary_obs = 1, comparison_obs = 2)
+##TODO: example is missing comp obs; x and shap */x
 linked_plotly_func <- function(
   layer_ls,
   primary_obs = NULL,
@@ -168,6 +173,8 @@ linked_plotly_func <- function(
       layer_ls$plot_df$projection_nm != "QQ Mahalanobis distance", ]
     height_px <- height_px / 2L ## Half height display as qq maha is removed.
   }
+  ##TODO:!!! "problem_type" attr is only set in assign_cobs_layer_ls;
+  # wants to be set directly in nested_local_attr_layers
   is_classification <- attr(layer_ls, "problem_type") == "classification"
   # ifelse("is_misclassified" %in% colnames(layer_ls$decode_df), TRUE, FALSE)
   pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
@@ -266,8 +273,21 @@ linked_plotly_func <- function(
 #' @return `plotly` plot of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
-## TODO: @examples needed
-manual_tour1d_func <- function(
+#' @examples
+#' sub <- DALEX::apartments[1:200, 1:6]
+#' X <- sub[, 2:5]
+#' Y <- sub$m2.price
+#' clas <- sub$district
+#' 
+#' layer_ls <- nested_local_attr_layers(
+#'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' 
+#' tgt_obs <- 1
+#' bas <- basis_local_attribution(layer_ls$shap_df, tgt_obs)
+#' ggt <- radial_cheem_ggtour(layer_ls, basis=bas, mv_name=colnames(X)[1], 
+#'                            primary_obs=1, comparison_obs=2)
+#' spinifex::animate_plotly(ggt)
+radial_cheem_ggtour <- function(
   layer_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
@@ -368,7 +388,7 @@ manual_tour1d_func <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
-      labs(x = "1D SHAP projection", y = "Actual wages (2020 Euros)")
+      ggplot2::labs(x = "1D SHAP projection", y = "Actual wages (2020 Euros)")
     ## Highlight comparison obs, if passed
     ggt <- ggt +
       spinifex::proto_highlight(
@@ -387,12 +407,5 @@ manual_tour1d_func <- function(
   ## Return the static ggtour, animate in app
   return(ggt)
 }
-#' @examples
-#' layer_ls <- shap_layer_ls_5cobs
-#' primary_obs <- nrow(shap_layer_ls_5cobs$decode_df)
-#' shap_df <- shap_layer_ls_5cobs$shap_df
-#' bas <- basis_local_attribution(shap_df, nrow(shap_df))
-#' mv_name <- rownames(bas)[1L]
-#' layer_ls=layer_ls;basis=bas;mv_name=mv_name;primary_obs=primary_obs;comparison_obs=NULL;
-#' manual_tour1d_func(layer_ls, bas, mv_name, primary_obs)
+
 

@@ -20,7 +20,7 @@ server <- function(input, output, session){
       load("./data/1preprocess_penguins.RData", envir = globalenv())
     if(dat == "fifa")
       load("./data/3preprocess_fifa.RData", envir = globalenv())
-    return(shap_layer_ls)
+    return(layer_ls)
   })
   
   output$input__dat_desc <- renderUI({
@@ -164,7 +164,7 @@ server <- function(input, output, session){
     req(layer_ls())
     req(input$manip_var_nm)
     
-    ggt <- manual_tour1d_func(
+    ggt <- radial_cheem_ggtour(
       layer_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
@@ -178,7 +178,7 @@ server <- function(input, output, session){
     ## A temp file to save the output, will be removed later in renderImage
     outfile <- tempfile(fileext = ".gif")
     ## Now make the animation
-    ggt <- manual_tour1d_func(
+    ggt <- radial_cheem_ggtour(
       layer_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments))

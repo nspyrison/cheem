@@ -53,15 +53,15 @@ nested_local_attr_layers().
 sub <- DALEX::apartments[1:200, 1:6]
 set.seed(303)
 .idx_test <- sample(
-  1:nrow(sub), size = round(.5 * nrow(sub))) ## 20\% index for testing
+  1:nrow(sub), size = round(.2 * nrow(sub))) ## 20\% index for testing
 X_train <- sub[-.idx_test, 2:5]
 Y_train <- sub$m2.price[-.idx_test]
 clas <- sub$district[-.idx_test]
-X_test  <- sub[.idx_test, ]
+X_test  <- sub[.idx_test, 2:5]
 Y_test  <- sub$m2.price[.idx_test]
 
 layer_ls <- nested_local_attr_layers(
   x=X_train, y=Y_train, xtest=X_test, ytest=Y_test,
   n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
-layer_ls$performance_df
+names(layer_ls)
 }
