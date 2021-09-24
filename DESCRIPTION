@@ -1,6 +1,6 @@
 Package: cheem
 Title: Interactively itterogate local explanations of a model with radial tours
-Version: 0.0.9000
+Version: 0.1.0000
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
     email = "spyrison@gmail.com")

@@ -166,8 +166,6 @@ server <- function(input, output, session){
     req(primary_obs_d())
     req(comparison_obs_d())
     req(input$do_add_pcp_segments)
-    browser()
-    debugonce(proto_basis1d_distribution)
     ggt <- radial_cheem_ggtour(
       load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
