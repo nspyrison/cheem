@@ -4,19 +4,18 @@
 
 ## Dependencies -----
 #### Leg work
-require("ggplot2")
-require("plotly")
-require("spinifex")
-require("magrittr")
-require("gganimate")
+# require("ggplot2")
+# require("plotly")
+# require("spinifex")
+# require("magrittr")
+# require("gganimate")
 #### Shiny specific
 require("shiny")
 require("shinythemes") ## Themes for shiny, think preset css styling.
 require("shinycssloaders") ## Esp. for renderPlot() %>% withSpinner(type = 8L)
 require("DT") ## For html table and buttons
-
 ## Load a few app function
-load("./data/0local_funcs.RData", envir = globalenv())
+require("cheem") ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
 
 ## Sourcing more than needed may be more robust.
 #source("../trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()

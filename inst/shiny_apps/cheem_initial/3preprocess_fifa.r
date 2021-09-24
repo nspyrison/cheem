@@ -1,15 +1,6 @@
 # FIFA regression, save layer_ls for app -----
-
-## source and apply functions, apply the work to prep for shiny app
-if(F){ ## Not run, open `trees_of_cheem.r`
-  file.edit("./apps/trees_of_cheem.r")
-  file.edit("./apps/cobs_n_plot_funcs.r")
-}
-
 ## Dependencies ------
-## Local files
-source("./apps/trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-source("./apps/cobs_n_plot_funcs.r") ## COBS func, and plotting functions for shiny
+require("cheem")
 
 ## Setup ------
 .raw <- DALEX::fifa

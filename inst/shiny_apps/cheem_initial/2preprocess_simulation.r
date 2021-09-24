@@ -1,12 +1,6 @@
 ## Dependencies ------
 ## Local files
-source("./apps/trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-source("./apps/cobs_n_plot_funcs.r") ## COBS func, and plotting functions for shiny
-## source and apply functions, apply the work to prep for shiny app
-if(F){ ## Not run, open `trees_of_cheem.r`
-  file.edit("./apps/trees_of_cheem.r")
-  file.edit("./apps/cobs_n_plot_funcs.r")
-}
+require("cheem")
 
 ## Data simulation functions ------
 source("../spinifex_study/apps_supplementary/data_simulation/_sim_user_study.r")

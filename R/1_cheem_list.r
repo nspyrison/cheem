@@ -134,8 +134,8 @@ local_attr_layer <- function(
   .is_y_disc <- is_discrete(y)
   sec_rf <- system.time({
     .m <- gc()
-    .hp_mtry <- if(.is_y_disc == TRUE) sqrt(ncol(x)) else ncol(x) / 3L
-    .hp_node <- if(.is_y_disc == TRUE) 1L else 5L
+    .hp_mtry <- ifelse(.is_y_disc == TRUE, sqrt(ncol(x)), ncol(x) / 3L)
+    .hp_node <- ifelse(.is_y_disc == TRUE, 1L, 5L)
     .hp_node <- max(.hp_node, nrow(x) / 500L)
     .hp_ntree <- 500L / 4L ## A function of the data, atleast not as liberal as the default 500 trees
     suppressWarnings( 
@@ -183,7 +183,7 @@ local_attr_layer <- function(
       .lvls <- levels(class)
       .pred_clas <- as.factor(.lvls[round(.pred)])
     }
-    .plot_clas <- if(is_classification == TRUE) .pred_clas else class
+    .plot_clas <- ifelse(is_classification == TRUE, .pred_clas, class)
     .m <- gc()
     .plot_df <- global_view_df(
       .shap, y, basis_type, .plot_clas,
@@ -290,11 +290,9 @@ format_nested_layers <- function(
   .nms <- c("rownum", "class", "y", ## Init common names.
             "prediction", #paste0("prediction_", names(layer_ls)),
             "residual")   #paste0("residual_",   names(layer_ls)),
-  if(is_classification == TRUE){
-    .nms <- c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip")
-  }else{ ## is regression
-    .nms <- c(.nms, names(x), "tooltip")
-  }
+  .nms <-
+    ifelse(is_classification == FALSE, c(.nms, names(x), "tooltip"),
+           c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip"))
   names(decode_df) <- .nms
   ## Also add tooltip to plot_df, as it doesn't know of the RF, to check misclass
   b_plot_df$tooltip <- dplyr::left_join(
@@ -388,9 +386,8 @@ nested_local_attr_layers <- function(
   .next_layers_x <- x ## Init
   .next_layers_xtest <- xtest ## Init, could be NULL
   layer_ls <- list()
-  if(n_layers == 1L){
-    layer_nms <- loc_attr_nm
-  }else layer_nms <- paste0(loc_attr_nm, "^", 1L:n_layers)
+  layer_nms <- ifelse(n_layers == 1L, loc_attr_nm,
+                      paste0(loc_attr_nm, "^", 1L:n_layers))
   .m <- sapply(1L:n_layers, function(i){
     layer_ls[[i]] <<- local_attr_layer(
       .next_layers_x, y,
@@ -473,8 +470,9 @@ basis_local_attribution <- function(
   rownum = nrow(local_attribution_df)
 ){
   ## Remove last column if layer_name
-  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
-    col_idx <- 1L:ncol(local_attribution_df) else col_idx <- -ncol(local_attribution_df)
+  col_idx <- ifelse(
+    local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE,
+    1L:ncol(local_attribution_df), -ncol(local_attribution_df))
   LA_df <- local_attribution_df[rownum, col_idx]
   ## Extract formatted basis
   LA_bas <- LA_df %>%
@@ -549,9 +547,9 @@ proto_basis1d_distribution <- function(
   local_attribution_df <- layer_ls$shap_df
   ## Pivot longer:
   ### ensure last col dropped if layer_name
-  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE){
-    col_idx <- 1L:ncol(local_attribution_df)
-  } else {col_idx <- -ncol(local_attribution_df)}
+  col_idx <- ifelse(
+    local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric,
+    1L:ncol(local_attribution_df), -ncol(local_attribution_df))
   LA_df <- local_attribution_df[, col_idx]
   
   ## Force orthonormalize each row.
@@ -596,8 +594,7 @@ proto_basis1d_distribution <- function(
     .df_basis_distr <- spinifex:::.bind_elements2df(.basis_ls, .df_basis_distr)
   }
   
-  if(length(unique(.df_basis_distr$rowname)) > 999L)
-    .alpha <- .003 else .alpha <- .3
+  .alpha <- ifelse(length(unique(.df_basis_distr$rowname)) > 999L, .003, .3)
   ## Basis/attribution distribution of the rows of the LA_df
   ret <- suppressWarnings(ggplot2::geom_point(
     ggplot2::aes(x, y, color = group_by, tooltip = rownum), .df_basis_distr,
@@ -621,21 +618,21 @@ proto_basis1d_distribution <- function(
       .df_basis_distr_pcp_segments,
       size = .5, alpha = .alpha / 6L))
     prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
-    if(length(primary_obs) > 0L){
-      prim_pcp <- suppressWarnings(ggplot2::geom_segment(
-        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                     color = group_by, tooltip = rownum),
-        .df_basis_distr_pcp_segments[prim_idx, ],
-        size = 1L, alpha = .8, linetype = 2L))
-    }else prim_pcp <- NULL
+    prim_pcp <- ifelse(length(primary_obs) > 0L,
+                       suppressWarnings(ggplot2::geom_segment(
+                         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                                      color = group_by, tooltip = rownum),
+                         .df_basis_distr_pcp_segments[prim_idx, ],
+                         size = 1L, alpha = .8, linetype = 2L)
+             ), NULL)
     comp_idx <- .df_basis_distr_pcp_segments$rownum == comparison_obs
-    if(length(comparison_obs) > 0L){
-      comp_pcp <- suppressWarnings(ggplot2::geom_segment(
-        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                     color = group_by, tooltip = rownum),
-        .df_basis_distr_pcp_segments[comp_idx, ],
-        size = .8, alpha = .6, linetype = 3L))
-    }else comp_pcp <- NULL
+    comp_pcp <- ifelse(length(comparison_obs) > 0L,
+                       suppressWarnings(ggplot2::geom_segment(
+                         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                                      color = group_by, tooltip = rownum),
+                         .df_basis_distr_pcp_segments[comp_idx, ],
+                         size = .8, alpha = .6, linetype = 3L)
+                       ), NULL)
     ret <- list(bkg_pcp, comp_pcp, prim_pcp, ret)
   }
   

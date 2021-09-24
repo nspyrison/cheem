@@ -1,12 +1,5 @@
 ## Dependencies ------
-## Local files
-source("./apps/trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-source("./apps/cobs_n_plot_funcs.r") ## COBS func, and plotting functions for shiny
-## source and apply functions, apply the work to prep for shiny app
-if(F){ ## Not run, open `trees_of_cheem.r`
-  file.edit("./apps/trees_of_cheem.r")
-  file.edit("./apps/cobs_n_plot_funcs.r")
-}
+require("cheem")
 
 ## Data preprocess ------
 ## Data setup, spinifex::penguins
@@ -14,11 +7,12 @@ raw <- spinifex::penguins
 lvls <- levels(raw$species)
 ## Filter to closest 2 classes
 raw <- raw[raw$species %in% lvls[1:2], ]
-dat <- raw[, 3:6] %>% as.data.frame() ## X's not scaled.
+dat <- raw[, 1:4] %>% as.data.frame() ## X's not scaled.
 colnames(dat) <- c("b_l", "b_d", "f_l", "wgt")
 clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 
-## Create layer_ls ------
+## Create layer_ls -----
+debugonce(cheem:::format_nested_layers)
 layer_ls <- assign_cobs_layer_ls(
   data = dat,
   class = clas,
