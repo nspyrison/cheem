@@ -70,16 +70,10 @@ if(interactive()){
        #clas, ## fielder/goal-keeper
        layer_ls,
        file = "3preprocess_fifa.RData")
-  file.copy("./3preprocess_fifa.RData", to = "./apps/cheem_app/data/3preprocess_fifa.RData", overwrite = TRUE)
+  file.copy("./3preprocess_fifa.RData", overwrite = TRUE, to =
+  "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
   file.remove("./3preprocess_fifa.RData")
 }
-if(F)
-{ ## Don't run, import
-  load("./apps/cheem_app/data/3preprocess_fifa.RData")
-  source("./apps/trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-  source("./apps/cobs_n_plot_funcs.r") ## COBS func, and plotting functions for shiny
-}
-if(F){ ## Not run, open `trees_of_cheem.r`
-  file.edit("./apps/trees_of_cheem.r")
-  file.edit("./apps/cobs_n_plot_funcs.r")
+if(F){## Not run, load dat, layer_ls
+  load("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
 }

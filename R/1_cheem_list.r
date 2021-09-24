@@ -34,7 +34,7 @@ global_view_df <- function(
   class = NULL, ## class req for olda, add to _df's
   layer_name
 ){
-  d = 2 ## Fixed display dimensionality 
+  d = 2L ## Fixed display dimensionality 
   ## maha_vect_of() -----
   #maha_vect_of <- function(x, do_normalize = TRUE){ ## distance from median(x), stats::cov(x)
   if(is.null(class)) class <- as.factor(FALSE)
@@ -44,7 +44,7 @@ global_view_df <- function(
   .m <- sapply(1L:length(.lvls), function(k){
     .sub <- x[class == .lvls[k], ]
     .sub_maha <- stats::mahalanobis(
-      .sub, apply(.sub, 2L, stats::median), stats::cov(.sub)) %>%
+      .sub, apply(.sub, 2L, stats::median), stats::cov(.sub),) %>%
       matrix(ncol = 1L)
     maha <<- c(maha, .sub_maha)
   })
@@ -126,7 +126,7 @@ local_attr_layer <- function(
   basis_type = c("pca", "olda"), class = NULL, ## class req for olda
   verbose = TRUE, noisy = TRUE
 ){
-  d = 2
+  d = 2L
   if(verbose == TRUE)
     tictoc::tic(paste0("local_attr_layer -- ", layer_name))
   
@@ -178,12 +178,14 @@ local_attr_layer <- function(
   #### On new shap matrix, data's plot df is initialized in format_nested_layers()
   sec_plot_df <- system.time({
     ## If classification, use .pred_clas over class, when passed to plot_df
-    is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
+    is_classification <- problem_type(y) == "classification"
     if(is_classification == TRUE){
       .lvls <- levels(class)
       .pred_clas <- as.factor(.lvls[round(.pred)])
     }
-    .plot_clas <- ifelse(is_classification == TRUE, .pred_clas, class)
+    ## wants if() assignment over ifelse assignment for some reason
+    if(is_classification == TRUE)
+      .plot_clas <- .pred_clas else .plot_clas <- class
     .m <- gc()
     .plot_df <- global_view_df(
       .shap, y, basis_type, .plot_clas,
@@ -228,25 +230,26 @@ format_nested_layers <- function(
   class = NULL,
   verbose = TRUE
 ){
-  d = 2
+  d = 2L
   if(verbose == TRUE) tictoc::tic("format_nested_layers()")
   ## Init with data layer,
   sec_data_plot_df <- system.time({ ## Init with data layer.
-    is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
+    is_classification <- problem_type(y) == "classification"
     if(is_classification == TRUE){
       .lvls <- levels(class)
       .rf_mod <- layer_ls[[1L]]$rf_model
       .pred_clas <- as.factor(.lvls[round(stats::predict(.rf_mod))])
     }
-    .plot_clas <- ifelse(is_classification == TRUE, .pred_clas, class)
+    if(is_classification == TRUE)
+      .plot_clas <- .pred_clas else .plot_clas <- class
     .m <- gc()
     
-    data_plot_df <- global_view_df(
+    plot_df <- global_view_df(
       x, y, basis_type, .plot_clas, layer_name = "data")
   })[3L]
    
   ### plot_df, bound longer
-  b_plot_df <- data.frame(data_plot_df) ## Init data layer plot_df
+  b_plot_df <- data.frame(plot_df) ## Init data layer plot_df
   .m <- sapply(1L:length(layer_ls), function(i){
     this_plot_df <- layer_ls[[i]]$plot_df
     b_plot_df <<- rbind(b_plot_df, this_plot_df)
@@ -290,9 +293,9 @@ format_nested_layers <- function(
   .nms <- c("rownum", "class", "y", ## Init common names.
             "prediction", #paste0("prediction_", names(layer_ls)),
             "residual")   #paste0("residual_",   names(layer_ls)),
-  .nms <-
-    ifelse(is_classification == FALSE, c(.nms, names(x), "tooltip"),
-           c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip"))
+  if(is_classification == TRUE){
+    .nms <- c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip")
+  }else{.nms <- c(.nms, names(x), "tooltip")}
   names(decode_df) <- .nms
   ## Also add tooltip to plot_df, as it doesn't know of the RF, to check misclass
   b_plot_df$tooltip <- dplyr::left_join(
@@ -375,7 +378,7 @@ nested_local_attr_layers <- function(
   basis_type = c("pca", "olda"), class = NULL,
   verbose = TRUE, noisy = TRUE
 ){
-  d = 2
+  d = 2L
   loc_attr_nm <- "SHAP"
   if(verbose == TRUE){
     writeLines(paste0("nested_local_attr_layers() started at ", Sys.time()))

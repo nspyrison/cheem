@@ -12,7 +12,9 @@ colnames(dat) <- c("b_l", "b_d", "f_l", "wgt")
 clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
 
 ## Create layer_ls -----
-debugonce(cheem:::format_nested_layers)
+# debugonce(cheem:::local_attr_layer) ## .plot_class seems to get the corect value
+# debugonce(global_view_df) ## BUt, this recieves 1...; go to <<- ?? shouldnt matter.
+#debugonce(cheem:::format_nested_layers)
 layer_ls <- assign_cobs_layer_ls(
   data = dat,
   class = clas,
@@ -30,16 +32,12 @@ if(interactive() == TRUE){
        clas, ## penguins species
        layer_ls,
        file = "1preprocess_penguins.RData")
-  file.copy("./1preprocess_penguins.RData", to = "./apps/cheem_app/data/1preprocess_penguins.RData", overwrite = TRUE)
+  file.copy(
+    "./1preprocess_penguins.RData", overwrite = TRUE, to = 
+      "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
   file.remove("./1preprocess_penguins.RData")
 }
-if(F)
-{## Not run, load and review objects
-  load("./apps/cheem_app/data/1preprocess_penguins.RData")
-  source("./apps/trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-  source("./apps/cobs_n_plot_funcs.r") ## Shiny app plotting fucns
+if(F){## Not run, load dat, clas, layer_ls
+  load("./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
 }
-if(F){ ## Not run, open `trees_of_cheem.r`
-  file.edit("./apps/trees_of_cheem.r")
-  file.edit("./apps/cobs_n_plot_funcs.r")
-}
+

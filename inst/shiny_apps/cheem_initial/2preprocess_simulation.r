@@ -1,8 +1,8 @@
 ## Dependencies ------
 ## Local files
 require("cheem")
-
 ## Data simulation functions ------
+##TODO!! wants to be local in /R/
 source("../spinifex_study/apps_supplementary/data_simulation/_sim_user_study.r")
 #### esp for sim_mvtnorm_cl()
 
@@ -85,23 +85,6 @@ names(layer_ls)
 str(layer_ls$plot_df)
 str(layer_ls$decode_df)
 
-# df <- layer_ls$shap_df
-# tgt_obs <- nrow(df)
-# bas <- df[tgt_obs, -ncol(df)] %>%
-#   as.matrix(nrow = 1L) %>% t() %>%
-#   spinifex::scale_01()
-# opts <- rownames(bas)
-# sel <- opts[spinifex::manip_var_of(bas)]
-
-# ggt <- radial_cheem_ggtour(
-#   layer_ls, basis = bas, mv_name = sel,
-#   primary_obs = tgt_obs, #comparison_obs = NULL,
-#   do_add_pcp_segments = TRUE, 
-#   pcp_shape = 124L ## ggplot '|'
-# )
-# anim <- animate_gganimate(ggt)
-# gganimate::anim_save(
-#   "cheem_manualtour.gif", animation = anim, path = ".")
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
@@ -109,16 +92,11 @@ if(interactive() == TRUE){
        clas, ## Simulation class
        layer_ls,
        file = "2preprocess_simulation.RData")
-  file.copy("./2preprocess_simulation.RData", to = "./apps/cheem_app/data/2preprocess_simulation.RData", overwrite = TRUE)
+  file.copy(
+    "./2preprocess_simulation.RData", overwrite = TRUE, to =
+      "./inst/shiny_apps/cheem_initial/data/2preprocess_simulation.RData")
   file.remove("./2preprocess_simulation.RData")
 }
-if(F)
-{## Not run, load and review objects
-  load("./apps/cheem_app/data/2preprocess_simulation.RData")
-  source("./apps/trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-  source("./apps/cobs_n_plot_funcs.r") ## Shiny app plotting fucns
-}
-if(F){ ## Not run, open `trees_of_cheem.r`
-  file.edit("./apps/trees_of_cheem.r")
-  file.edit("./apps/cobs_n_plot_funcs.r")
+if(F){## Not run, load dat, clas, layer_ls
+  load("./inst/shiny_apps/cheem_initial/data/2preprocess_simulation.RData")
 }
