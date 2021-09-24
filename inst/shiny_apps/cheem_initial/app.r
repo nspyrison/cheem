@@ -9,7 +9,7 @@ source("ui.r", local = TRUE, encoding = "utf-8")
 server <- function(input, output, session){
   ## Reactives ----
   #### No eager evaluation of reactive functions, only outputs.
-  layer_ls <- reactive({
+  load_ls <- reactive({
     req(input$dat_char)
     dat <- input$dat_char
     if(!(dat %in% c("triangle simulation", "penguins", "fifa")))
@@ -52,16 +52,16 @@ server <- function(input, output, session){
   })
   
   bas <- reactive({
-    req(layer_ls())
-    shap_df <- layer_ls()$shap_df
+    req(load_ls())
+    shap_df <- load_ls()$shap_df
     bas <- basis_local_attribution(shap_df, primary_obs_d())
     return(bas)
   })
   
   ## output: inputs in the ui -----
   output$input__shap.comparison_obs <- renderUI({
-    req(layer_ls())
-    .n <- layer_ls()$decode_df %>% nrow()
+    req(load_ls())
+    .n <- load_ls()$decode_df %>% nrow()
     req(input$dat_char)
     dat <- input$dat_char
     if(!(dat %in% c("triangle simulation", "penguins", "fifa")))
@@ -111,8 +111,8 @@ server <- function(input, output, session){
     bas <- bas()
     
     opts <- rownames(bas)
-    shap_df <- layer_ls()$shap_df[, -ncol(layer_ls()$shap_df)]
-    clas <- layer_ls()$decode_df$class
+    shap_df <- load_ls()$shap_df[, -ncol(load_ls()$shap_df)]
+    clas <- load_ls()$decode_df$class
     
     ## Median values of the actual class.
     expect_bas <- apply(shap_df[clas == clas[primary_obs_d()], ], 2L, median) %>%
@@ -129,24 +129,24 @@ server <- function(input, output, session){
   
   ## Plot outputs -----
   output$kurtosis_print <- renderPrint({
-    req(layer_ls())
+    req(load_ls())
     req(input$do_include_maha_qq)
     if(as.logical(input$do_include_maha_qq) == FALSE){.lines <- ""
     }else{
       .lines <-
         c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
-          unique(layer_ls()$plot_df[, c("ggtext")])[-1L])
+          unique(load_ls()$plot_df[, c("ggtext")])[-1L])
     }
     writeLines(.lines)
   })
   outputOptions(output, "kurtosis_print", suspendWhenHidden = FALSE) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
-    req(layer_ls())
+    req(load_ls())
     req(primary_obs_d())
     req(comparison_obs_d())
     linked_plotly_func(
-      layer_ls(), primary_obs_d(), comparison_obs_d(),
+      load_ls(), primary_obs_d(), comparison_obs_d(),
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
   outputOptions(output, "linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
@@ -155,31 +155,38 @@ server <- function(input, output, session){
     ## This is dimension of spacer, figure dim's set in args of cobs_n_plot_func::linked_plotly_func
     height = 640L ## Init, height with qq maha.
     if(as.logical(input$do_include_maha_qq) == FALSE) height <- height / 2L
-    plotlyOutput("linked_plotly", width = "100%", height = paste0(height))
+    plotly::plotlyOutput("linked_plotly", width = "100%", height = paste0(height))
   })
   outputOptions(output, "input__linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
   
   output$manual_tour_plotly <- plotly::renderPlotly({
     req(bas())
-    req(layer_ls())
+    req(load_ls())
     req(input$manip_var_nm)
-    
+    req(primary_obs_d())
+    req(comparison_obs_d())
+    req(input$do_add_pcp_segments)
+    browser()
+    debugonce(proto_basis1d_distribution)
     ggt <- radial_cheem_ggtour(
-      layer_ls(), bas(), input$manip_var_nm,
+      load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
     animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   output$manual_tour_gganimate <- renderImage({
     req(bas())
-    req(layer_ls())
+    req(load_ls())
     req(input$manip_var_nm)
+    req(primary_obs_d())
+    req(comparison_obs_d())
+    req(input$do_add_pcp_segments)
     
     ## A temp file to save the output, will be removed later in renderImage
     outfile <- tempfile(fileext = ".gif")
     ## Now make the animation
     ggt <- radial_cheem_ggtour(
-      layer_ls(), bas(), input$manip_var_nm,
+      load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
     anim <- animate_gganimate(ggt)
@@ -194,15 +201,15 @@ server <- function(input, output, session){
   
   ## Data selected in pca_embed_plotly -----
   output$selected_df <- DT::renderDT({ ## Original data of selection
-    d <- event_data("plotly_selected") ## What plotly sees as selected
+    d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
     if (is.null(d)) return(NULL)
-    df <- layer_ls()$decode_df
+    df <- load_ls()$decode_df
     return(DT::datatable(df[df$rownum %in% d$key, ], rownames = FALSE))
   })
   outputOptions(output, "selected_df", suspendWhenHidden = FALSE) ## Eager evaluation
   
   ## Message of the cobs row numbers
-  output$cobs_msg <- renderText(attr(layer_ls(), "cobs_msg"))
+  output$cobs_msg <- renderText(attr(load_ls(), "cobs_msg"))
   outputOptions(output, "cobs_msg", suspendWhenHidden = FALSE) ## Eager evaluation
 } ## Close function, assigning server object.
 

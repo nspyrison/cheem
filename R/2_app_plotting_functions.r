@@ -183,15 +183,17 @@ linked_plotly_func <- function(
     rep_len(nrow(plot_df)) %>%
     as.factor()
   
-  gg <- plot_df %>%
-    highlight_key(~rownum) %>%
-    ggplot(ggplot2::aes(V1, V2))
+  gg <- ggplot2::ggplot(
+    plotly::highlight_key(plot_df, ~rownum),
+    ggplot2::aes(V1, V2)
+  )
+    
   ## Red misclassified points, if present
   if(is_classification == TRUE){
     .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
     .idx_misclas <- plot_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0L){
-      .df <- plot_df[.idx_misclas, ] %>% highlight_key(~rownum)
+      .df <- plot_df[.idx_misclas, ] # %>% highlight_key(~rownum)
       gg <- gg +
         ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
                             color = "red", fill = NA,
@@ -202,7 +204,7 @@ linked_plotly_func <- function(
   if(is.null(comparison_obs) == FALSE){
     .idx_comp <- plot_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L){
-      .df <- plot_df[.idx_comp, ] %>% highlight_key(~rownum)
+      .df <- plot_df[.idx_comp, ] # %>% highlight_key(~rownum)
       gg <- gg +
         ## Highlight comparison obs
         ggplot2::geom_point(ggplot2::aes(V1, V2, color = pred_clas[.idx_comp]),
@@ -213,7 +215,7 @@ linked_plotly_func <- function(
   if(is.null(primary_obs) == FALSE){
     .idx_shap <- plot_df$rownum == primary_obs
     if(sum(.idx_shap) > 0L){
-      .df <- plot_df[.idx_shap, ] %>% highlight_key(~rownum)
+      .df <- plot_df[.idx_shap, ] # %>% highlight_key(~rownum)
       gg <- gg +
         ggplot2::geom_point(ggplot2::aes(V1, V2, color = pred_clas[.idx_shap]),
                             .df, size = 5L, shape = 8L)
@@ -241,12 +243,13 @@ linked_plotly_func <- function(
                    legend.position = "off")
   
   ## BOX SELECT
-  ggplotly(gg, tooltip = "tooltip", 
-                  height = height_px, width = width_px) %>%
-    config(displayModeBar = FALSE) %>% ## Remove html buttons
-    layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
-    event_register("plotly_selected") %>% ## Reflect "selected", on release of the mouse button.
-    highlight(on = "plotly_selected", off = "plotly_deselect")
+  ggp <- plotly::ggplotly(gg, tooltip = "tooltip",
+           height = height_px, width = width_px)
+  ggp <- plotly::config(ggp, displayModeBar = FALSE)                  ## Remove html buttons
+  ggp <- plotly::layout(ggp, dragmode = "select", showlegend = FALSE) ## Set drag left mouse
+  ggp <- plotly::event_register(ggp, "plotly_selected")               ## Reflect "selected", on release of the mouse button.
+  ggp <- plotly::highlight(ggp, on = "plotly_selected", off = "plotly_deselect")
+  return(ggp)
 }
 
 
@@ -320,7 +323,7 @@ radial_cheem_ggtour <- function(
   
   ### Classification problem -----
   if(.prob_type == "classification"){
-    .dat <- .x %>% scale_01
+    .dat <- spinifex::scale_01(.x)
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas)) +
@@ -354,9 +357,9 @@ radial_cheem_ggtour <- function(
     .tgt_dim <- c(dim(.mt_path) + c(1L, 1L, 0L))
     .array <- array(NA, dim = .tgt_dim)
     .m <- sapply(1L:.tgt_dim[3L], function(i){
-      .array[,, i] <<- matrix(c(.mt_path[,, i], rep(0L, .tgt_dim[1L]), 1L),
-                              nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]) %>%
-        tourr::orthonormalise()
+      .array[,, i] <<- tourr::orthonormalise(
+        matrix(c(.mt_path[,, i], rep(0L, .tgt_dim[1L]), 1L),
+               nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]))
     })
     dn <- dimnames(.mt_path)
     dn[[1L]] <- c(rownames(.mt_path), "wage_euro")

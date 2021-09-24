@@ -19,7 +19,7 @@ layer_ls <- assign_cobs_layer_ls(
   data = dat,
   class = clas,
   y = clas, ## Factor implies classification, numeric implies regression
-  n_cobs = 0, ## REALLY 5 of first lvl labeled as second, atm.
+  n_cobs = 0, ## Draw from first level, assigned to all other levels.
   var_coeff = .1)
 
 names(layer_ls)

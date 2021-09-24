@@ -43,14 +43,14 @@ use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-dat <- layer_ls$decode_df[, 4:7]
+dat <- layer_ls$decode_df[, 8:11]
 clas <- layer_ls$decode_df$class
 shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
 bas <- basis_local_attribution(shap_df, nrow(dat))
 mv <- manip_var_of(bas) ## Warning is fine.
 
 ## 1D case:
-mt_path <- manual_tour(bas, mv, angle = .3)
+mt_path <- manual_tour(bas, mv)
 
 debugonce(proto_basis1d)
 ggt <- ggtour(mt_path, dat) +

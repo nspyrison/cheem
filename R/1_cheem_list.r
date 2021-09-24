@@ -44,20 +44,18 @@ global_view_df <- function(
   .m <- sapply(1L:length(.lvls), function(k){
     .sub <- x[class == .lvls[k], ]
     .sub_maha <- stats::mahalanobis(
-      .sub, apply(.sub, 2L, stats::median), stats::cov(.sub),) %>%
+      .sub, apply(.sub, 2L, stats::median), stats::cov(.sub)) %>%
       matrix(ncol = 1L)
     maha <<- c(maha, .sub_maha)
   })
   ## 01 normalize (outside class levels)
-  maha <- maha %>% as.matrix(ncol = 1L) %>% spinifex::scale_01()
+  maha <- spinifex::scale_01(as.matrix(maha, ncol = 1L))
   ## Maha quantiles
   ### Theoretical chi sq quantiles, x of a QQ plot
   .probs <- seq(.001, .999, length.out = nrow(x))
-  .qx <- stats::qchisq(.probs, df = nrow(x) - 1L) %>%
-    matrix() %>% spinifex::scale_01()
+  .qx <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
   ### Sample quantiles, y of a QQ plot
-  .qy <- stats::quantile(maha, probs = .probs) %>%
-    matrix() %>% spinifex::scale_01()
+  .qy <- spinifex::scale_01(matrix(stats::quantile(maha, probs = .probs)))
   .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy), "less")$p.value
   .maha_skew_text <- paste0(
     "  Anscombe-Glynn p-value: ",
@@ -473,9 +471,9 @@ basis_local_attribution <- function(
   rownum = nrow(local_attribution_df)
 ){
   ## Remove last column if layer_name
-  col_idx <- ifelse(
-    local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE,
-    1L:ncol(local_attribution_df), -ncol(local_attribution_df))
+  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE){
+    col_idx <- 1L:ncol(local_attribution_df)
+  }else{col_idx <- -ncol(local_attribution_df)}
   LA_df <- local_attribution_df[rownum, col_idx]
   ## Extract formatted basis
   LA_bas <- LA_df %>%
@@ -510,14 +508,14 @@ basis_local_attribution <- function(
 #' @export
 #' @examples
 #' load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-#' dat <- layer_ls$decode_df[, 4:7]
+#' dat <- layer_ls$decode_df[, 8:11]
 #' clas <- layer_ls$decode_df$class
 #' shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
 #' bas <- basis_local_attribution(shap_df, nrow(dat))
 #' mv <- manip_var_of(bas) ## Warning is fine.
 #' 
 #' ## 1D case:
-#' mt_path <- manual_tour(bas, mv, angle = .3)
+#' mt_path <- manual_tour(bas, mv)
 #' 
 #' debugonce(proto_basis1d)
 #' ggt <- ggtour(mt_path, dat) +
@@ -540,7 +538,7 @@ proto_basis1d_distribution <- function(
   .facet_by <- rownum <- maha_dist <- contribution <- var_name <- .map_to <-
     .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
-  eval(.init4proto)
+  eval(spinifex::.init4proto)
   position <- match.arg(position)
   shape <- shape[1L] ## match.arg only for character values.
   if(shape %in% c(142L, 124L) == FALSE) warning("Unexpected shape used in proto_basis1d_distribution.")
@@ -571,26 +569,26 @@ proto_basis1d_distribution <- function(
     .p_df[.p_df$layer_nm == "data" &
             .p_df$projection_nm == "QQ Mahalanobis distance", c(1L, 4L)]
   colnames(.maha_dist_df) <- c("rownum", "maha_dist")
-  .df_basis_distr <- LA_df %>%
-    dplyr::left_join(.maha_dist_df, by = "rownum") %>%
-    tidyr::pivot_longer(
-      cols = !c(rownum, group_by, maha_dist),
-      names_to = "var_name",
-      values_to = "contribution") %>%
-    dplyr::mutate(
-      .keep = "none",
-      x = contribution,
-      ## Must be reverse order; var 1 on top, highest value.
-      y = rep_len(.p:1L, .n * .p) + .05 * (as.integer(group_by) - 2L),
-      var_name = var_name,
-      var_num = rep_len(.p:1L, .n * .p),
-      rownum = rownum,
-      group_by = group_by,
-      maha_dist = maha_dist) %>%
+  .LA_df_lj <- dplyr::left_join(LA_df, .maha_dist_df, by = "rownum")
+  .LA_df_longer <- tidyr::pivot_longer(.LA_df_lj, 
+                                       cols = !c(rownum, group_by, maha_dist),
+                                       names_to = "var_name",
+                                       values_to = "contribution")
+  .df_basis_distr <- dplyr::mutate(
+    .LA_df_longer,
+    .keep = "none",
+    x = contribution,
+    ## Must be reverse order; var 1 on top, highest value.
+    y = rep_len(.p:1L, .n * .p) + .05 * (as.integer(group_by) - 2L),
+    var_name = var_name,
+    var_num = rep_len(.p:1L, .n * .p),
+    rownum = rownum,
+    group_by = group_by,
+    maha_dist = maha_dist) %>%
     as.data.frame()
   
   ## Position them
-  .df_basis_distr <- map_relative(.df_basis_distr, position, .map_to)
+  .df_basis_distr <- spinifex::map_relative(.df_basis_distr, position, .map_to)
   ## Add facet level if needed
   if(is.null(.facet_by) == FALSE){
     .basis_ls <- list(facet_by = rep_len("_basis_", nrow(.df_zero)))
@@ -606,10 +604,9 @@ proto_basis1d_distribution <- function(
   ## Add PCP lines if needed.
   if(do_add_pcp_segments == TRUE){
     ## Make the right table to inner join to.
-    .df_basis_distr2 <- .df_basis_distr %>% mutate(
-      .keep = "none",
-      xend = x, yend = y,
-      var_num = var_num - 1L, rownum = rownum)
+    .df_basis_distr2 <- dplyr::mutate(.df_basis_distr, .keep = "none",
+                                      xend = x, yend = y,
+                                      var_num = var_num - 1L, rownum = rownum)
     ## Inner join to by var_name & rownum(lead1)
     .df_basis_distr_pcp_segments <- dplyr::inner_join(
       .df_basis_distr, .df_basis_distr2,
@@ -621,21 +618,21 @@ proto_basis1d_distribution <- function(
       .df_basis_distr_pcp_segments,
       size = .5, alpha = .alpha / 6L))
     prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
-    prim_pcp <- ifelse(length(primary_obs) > 0L,
-                       suppressWarnings(ggplot2::geom_segment(
-                         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                                      color = group_by, tooltip = rownum),
-                         .df_basis_distr_pcp_segments[prim_idx, ],
-                         size = 1L, alpha = .8, linetype = 2L)
-             ), NULL)
+    if(length(primary_obs) > 0L){
+      prim_pcp <- suppressWarnings(ggplot2::geom_segment(
+        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                     color = group_by, tooltip = rownum),
+        .df_basis_distr_pcp_segments[prim_idx, ],
+        size = 1L, alpha = .8, linetype = 2L))
+    }else{prim_pcp <- NULL}
     comp_idx <- .df_basis_distr_pcp_segments$rownum == comparison_obs
-    comp_pcp <- ifelse(length(comparison_obs) > 0L,
-                       suppressWarnings(ggplot2::geom_segment(
-                         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                                      color = group_by, tooltip = rownum),
-                         .df_basis_distr_pcp_segments[comp_idx, ],
-                         size = .8, alpha = .6, linetype = 3L)
-                       ), NULL)
+    if(length(primary_obs) > 0L){
+      comp_pcp <- suppressWarnings(ggplot2::geom_segment(
+        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                     color = group_by, tooltip = rownum),
+        .df_basis_distr_pcp_segments[comp_idx, ],
+        size = .8, alpha = .6, linetype = 3L))
+    }else{comp_pcp <- NULL}
     ret <- list(bkg_pcp, comp_pcp, prim_pcp, ret)
   }
   

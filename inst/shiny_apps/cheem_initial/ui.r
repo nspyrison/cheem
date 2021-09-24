@@ -16,19 +16,9 @@ require("shinycssloaders") ## Esp. for renderPlot() %>% withSpinner(type = 8L)
 require("DT") ## For html table and buttons
 ## Load a few app function
 require("cheem") ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
-
-## Sourcing more than needed may be more robust.
-#source("../trees_of_cheem.r") ## Local functions, esp. for basis_cheem() and view_cheem()
-#source("../cobs_n_plot_funcs.r")
-
-if(F){ ## Not run, manual source function or open export file.
-  load("./apps/cheem_app/data/0local_funcs.RData")
-  file.edit("./apps/cheem_app/0export_local_funcs.r")
-}
-
-## Load prepared objs -----
-#load("./data/1preprocess.RData")
-## Load preprocessed objects, see the file.edit() above for details
+require("plotly")
+## Load prepared objs
+# preared objects now loaded in app.r; layer_ls reactive function.
 
 
 ## UI content ----

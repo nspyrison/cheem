@@ -24,7 +24,7 @@ NULL
 #### prints upon first attaching the package
 .onAttach <- function(...){
   packageStartupMessage("--------------------------------------------------------")
-  packageStartupMessage("Cheem --- version ", utils::packageVersion("cheem"))
+  packageStartupMessage("cheem --- version ", utils::packageVersion("cheem"))
   packageStartupMessage("Please share bugs, suggestions, and feature requests at:")
   packageStartupMessage("https://github.com/nspyrison/cheem/issues/")
   packageStartupMessage("--------------------------------------------------------")
@@ -34,11 +34,4 @@ NULL
 #' @importFrom magrittr %>%
 #' @export
 magrittr::`%>%`
-#' @import spinifex
-#' @import DALEX
-#' @import treeshap
-#' @import randomForest
-#' @import ggplot2
-#' @import plotly
-#' 
-NULL ## Required but roxygen, do not delete
+NULL ## Required for roxygen2 to work, do not delete

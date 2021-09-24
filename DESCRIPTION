@@ -13,20 +13,24 @@ Description: Given a model, extract the local explanation of every
   The structure of explanation projection is then explored by a
   radial tour.
 Depends:
-    R (>= 3.5.0),
-    spinifex,
-    DALEX,
-    treeshap,
-    randomForest
+    R (>= 3.5.0)
 License: CC BY-NC-SA 4.0
 URL: https://github.com/nspyrison/cheem/
 BugReports: https://github.com/nspyrison/cheem/issues
 Imports:
-    tourr,
-    shiny,
+    spinifex,
+    DALEX,
+    treeshap,
+    randomForest,
     ggplot2,
     plotly,
-    htmlwidgets,
+    tourr
+Suggests:
+    shiny,
+    shinythemes,
+    shinycssloaders,
+    DT,
+    gganimate,
     lqmm,
     mvtnorm,
     moments,
@@ -37,7 +41,6 @@ Imports:
     tictoc,
     beepr,
     knitr
-Suggests:
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
