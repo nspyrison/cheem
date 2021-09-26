@@ -166,11 +166,12 @@ server <- function(input, output, session){
     req(primary_obs_d())
     req(comparison_obs_d())
     req(input$do_add_pcp_segments)
+    
     ggt <- radial_cheem_ggtour(
       load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
-    animate_plotly(ggt)
+    spinifex::animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   output$manual_tour_gganimate <- renderImage({
     req(bas())

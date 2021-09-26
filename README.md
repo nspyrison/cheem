@@ -11,7 +11,7 @@ _Local explanations_ are an approximation of instance(observation) level variabl
 ## Getting started
 
 ```
-## Install development version from GitHub
+## Install development version from GitHub & its dependancies.
 remotes::install_github("nspyrison/cheem", dependencies = TRUE)
 ## Run the {cheem} app including 3 preprocessed datasets
 cheem::run_app()
