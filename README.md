@@ -11,14 +11,18 @@ _Local explanations_ are an approximation of instance(observation) level variabl
 ## Getting started
 
 ```
-## Install development version from GitHub & its dependancies.
+## Github dependancies:
+remotes::install_github('ModelOriented/treeshap')
+remotes::install_github("nspyrison/spinifex", dependencies = TRUE) ## Dev version required at the moment.
+
+## Install cheem development version & its CRAN dependancies.
 remotes::install_github("nspyrison/cheem", dependencies = TRUE)
 ## Run the {cheem} app including 3 preprocessed datasets
 cheem::run_app()
 ```
 ### Original application
 
-We started by looking at the model-agnostic local explantion _SHAP_ as applied to random forests. We made this choice our of concern for runtime (`{treeshap}` uses an an alternative algorithm with reduced computational complexity and thus achieves much faster run time in the _preprocessing_ step). The namesake, Cheem, stemmed from this tree-based approach. The [Cheem](https://tardis.fandom.com/wiki/Tree_of_Cheem) are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.
+We started by looking at the model-agnostic local explantion _SHAP_ as applied to random forests. We made this choice our of concern for runtime (`{treeshap}` uses an an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The [Cheem](https://tardis.fandom.com/wiki/Tree_of_Cheem) are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.
 
 ### Extensions
 
