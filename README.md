@@ -1,4 +1,4 @@
-# cheem
+# {cheem}, R package
 
 Interactively explore data- and local explanation- spaces side-by-side. Further interrogate observation explanations with a radial tour.
 
@@ -21,7 +21,7 @@ remotes::install_github("nspyrison/cheem", dependencies = TRUE)
 cheem::run_app()
 ```
 
-or see a hosted version at [ebsmonash.shinyapps.io/cheem_initial](https://ebsmonash.shinyapps.io/cheem_initial/).
+Alternatively, try out hosted shiny app at [ebsmonash.shinyapps.io/cheem_initial](https://ebsmonash.shinyapps.io/cheem_initial/).
 
 ### Original application
 
