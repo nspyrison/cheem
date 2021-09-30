@@ -3,20 +3,18 @@
 #' Aug 2021
 
 ## Dependencies -----
-#### Leg work
-# require("ggplot2")
-# require("plotly")
-# require("spinifex")
-# require("magrittr")
-# require("gganimate")
+# Application only, preprocessing already done.
 #### Shiny specific
-require("shiny")
-require("shinythemes") ## Themes for shiny, think preset css styling.
-require("shinycssloaders") ## Esp. for renderPlot() %>% withSpinner(type = 8L)
-require("DT") ## For html table and buttons
+require(shiny)
+require(shinythemes) ## Themes for shiny, think preset css styling.
+require(shinycssloaders) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
+require(DT) ## For html table and buttons
 ## Load a few app function
-require("cheem") ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
-require("plotly")
+require(cheem) ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
+require(spinifex)
+require(plotly)
+require(gganimate) ## Not in use atm
+require(magrittr)
 ## Load prepared objs
 # preared objects now loaded in app.r; layer_ls reactive function.
 

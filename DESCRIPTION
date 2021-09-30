@@ -1,10 +1,9 @@
 Package: cheem
-Title: Interactively itterogate local explanations of a model with radial tours
+Title: Interactively interrogate local explanations of a model with radial tours
 Version: 0.1.0000
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
-    email = "spyrison@gmail.com")
-  )
+    email = "spyrison@gmail.com"))
 Description: Given a model, extract the local explanation of every 
   observation in a data set. View the data- and 
   explanation-spaces side-by-side in an interactive shiny application. 
@@ -19,18 +18,17 @@ URL: https://github.com/nspyrison/cheem/
 BugReports: https://github.com/nspyrison/cheem/issues
 Imports:
     spinifex,
-    DALEX,
-    treeshap,
-    randomForest,
-    ggplot2,
     plotly,
-    tourr
-Suggests:
+    gganimate,
+    magrittr,
     shiny,
     shinythemes,
     shinycssloaders,
-    DT,
-    gganimate,
+    DT
+Suggests:
+    DALEX,
+    treeshap,
+    randomForest,
     lqmm,
     mvtnorm,
     moments,
