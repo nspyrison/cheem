@@ -20,6 +20,9 @@ remotes::install_github("nspyrison/cheem", dependencies = TRUE)
 ## Run the {cheem} app including 3 preprocessed datasets
 cheem::run_app()
 ```
+
+or see a hosted version at [ebsmonash.shinyapps.io/cheem_initial](https://ebsmonash.shinyapps.io/cheem_initial/).
+
 ### Original application
 
 We started by looking at the model-agnostic local explantion _SHAP_ as applied to random forests. We made this choice our of concern for runtime (`{treeshap}` uses an an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The [Cheem](https://tardis.fandom.com/wiki/Tree_of_Cheem) are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.
