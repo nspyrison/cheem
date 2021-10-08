@@ -67,7 +67,10 @@ str(layer_ls$decode_df)
 ## Filter out lowest 80% maha distances.
 ## V2 is observed maha
 .raw_layer_ls <- layer_ls
+<<<<<<< HEAD
 object.size(layer_ls)
+=======
+>>>>>>> 5b229089113dd5a27b8d6311f116a6cfb4f2f52e
 if(F)
   layer_ls <- .raw_layer_ls
 .ridx_maha <- layer_ls$plot_df[, "projection_nm"] == "QQ Mahalanobis distance"
@@ -79,9 +82,14 @@ layer_ls$plot_df <-
 layer_ls$decode_df <-
   layer_ls$decode_df[layer_ls$decode_df$rownum %in% .rownums_to_keep,]
 layer_ls$shap_df <- layer_ls$shap_df[.rownums_to_keep,]
+<<<<<<< HEAD
 object.size(layer_ls)
 length(unique(.rownums_to_keep)) ## of original 5000 row nums
 table(.ridx_keep_maha)
+=======
+length(unique(.rownums_to_keep)) ## of original 5000 row nums
+length(unique(.ridx_maha))
+>>>>>>> 5b229089113dd5a27b8d6311f116a6cfb4f2f52e
 
 ## EXPORT OBJECTS ----
 if(interactive()){
