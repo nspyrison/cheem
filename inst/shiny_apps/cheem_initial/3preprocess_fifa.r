@@ -39,7 +39,7 @@ dat <- .dat_less_ys %>%
     gk = (goalkeeping_diving+goalkeeping_positioning+goalkeeping_reflexes+
             goalkeeping_handling+goalkeeping_kicking)/5L
   )
-## Class for the position of the player, eiter "fielder" or "goalkeeper"
+## Class for the position of the player, either a "fielder" or "goalkeeper"
 position <- clas <- dplyr::case_when(
   dat$gk <= 40L ~ "fielder",
   dat$gk >  40L ~ "goalkeeper") %>%
@@ -48,7 +48,8 @@ position <- clas <- dplyr::case_when(
 ## Starting with 42 variables, we remove `nationality`, and some potential Y vars,
 #### and aggregate into 9 aggregate 'aspect' dimensions based on var correlation 
 X <- dat ## 9 aspects of the X's
-Y <- .raw$wage_eur ## unscaled wages in Euros, assumed 2020 valuation.
+Y <- log(.raw$wage_eur) ## _LOG_ wages in Euros, assumed 2020 valuation.
+hist(Y)
 
 ## COBS data and shap_layers -----
 #### Create Courpted OBServations datasets and their shap layers.
@@ -62,6 +63,25 @@ layer_ls <- assign_cobs_layer_ls(
 names(layer_ls)
 str(layer_ls$plot_df)
 str(layer_ls$decode_df)
+
+## Filter out lowest 80% maha distances.
+## V2 is observed maha
+.raw_layer_ls <- layer_ls
+object.size(layer_ls)
+if(F)
+  layer_ls <- .raw_layer_ls
+.ridx_maha <- layer_ls$plot_df[, "projection_nm"] == "QQ Mahalanobis distance"
+.ridx_keep_maha <- layer_ls$plot_df[.ridx_maha, "V2"] >
+  quantile(layer_ls$plot_df[.ridx_maha, "V2"], .9, na.rm = TRUE)
+.rownums_to_keep <- layer_ls$plot_df[.ridx_keep_maha,1]
+layer_ls$plot_df <-
+  layer_ls$plot_df[layer_ls$plot_df$rownum %in% .rownums_to_keep,]
+layer_ls$decode_df <-
+  layer_ls$decode_df[layer_ls$decode_df$rownum %in% .rownums_to_keep,]
+layer_ls$shap_df <- layer_ls$shap_df[.rownums_to_keep,]
+object.size(layer_ls)
+length(unique(.rownums_to_keep)) ## of original 5000 row nums
+table(.ridx_keep_maha)
 
 ## EXPORT OBJECTS ----
 if(interactive()){
