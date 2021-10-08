@@ -3,10 +3,10 @@
 require("cheem")
 ## Data simulation functions ------
 ##TODO!! wants to be local in /R/
-source("../spinifex_study/apps_supplementary/data_simulation/_sim_user_study.r")
+source("../spinifex_study/apps_supplementary/data_toy_classificiation/_sim_user_study.r")
 #### esp for sim_mvtnorm_cl()
 
-#### A simplified version 
+#### A simplified version
 this_sim_mvtnorm_cl <- function(
   means,  ## Required
   sigmas, ## Required
@@ -91,12 +91,12 @@ if(interactive() == TRUE){
   save(dat,  ## Simulation pre-processed data
        clas, ## Simulation class
        layer_ls,
-       file = "2preprocess_simulation.RData")
+       file = "2preprocess_toy_classificiation.RData")
   file.copy(
-    "./2preprocess_simulation.RData", overwrite = TRUE, to =
-      "./inst/shiny_apps/cheem_initial/data/2preprocess_simulation.RData")
-  file.remove("./2preprocess_simulation.RData")
+    "./2preprocess_toy_classificiation.RData", overwrite = TRUE, to =
+      "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
+  file.remove("./2preprocess_toy_classificiation.RData")
 }
 if(F){## Not run, load dat, clas, layer_ls
-  load("./inst/shiny_apps/cheem_initial/data/2preprocess_simulation.RData")
+  load("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
 }

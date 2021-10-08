@@ -12,9 +12,9 @@ server <- function(input, output, session){
   load_ls <- reactive({
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartments")))
+    if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
-    if(dat == "triangle simulation")
+    if(dat == "toy classification")
       load("./data/2preprocess_simulation.RData", envir = globalenv())
     if(dat == "penguins")
       load("./data/1preprocess_penguins.RData", envir = globalenv())
@@ -28,10 +28,10 @@ server <- function(input, output, session){
   output$input__dat_desc <- renderUI({
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartments")))
+    if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
     ## Load data:
-    if(dat == "triangle simulation")
+    if(dat == "toy classification")
       desc_rows <- list(
         h4("Simulated triangle vertices"),
         p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)"),
@@ -72,11 +72,11 @@ server <- function(input, output, session){
     .n <- load_ls()$decode_df %>% nrow()
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartments")))
+    if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
     
     ## Initialize to hard-coded hand picked examples.
-    if(dat == "triangle simulation"){
+    if(dat == "toy classification"){
       primary_obs <- 18L
       comparison_obs <- 111L
     }

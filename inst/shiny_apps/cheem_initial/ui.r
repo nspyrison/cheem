@@ -26,8 +26,8 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   fluidRow(
     ## Choose data:
     selectInput("dat_char", "Data:",
-                c("triangle simulation", "penguins", "fifa", "appartments"),
-                "triangle simulation"),
+                c("toy classification", "penguins", "fifa", "appartments"),
+                "toy classification"),
     h3("Preprocessing and data description"),
     uiOutput("input__dat_desc"),
     p("3) Extract the SHAP matrix, that is SHAP values of EACH observation, via {treeshap}"),
