@@ -26,7 +26,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   fluidRow(
     ## Choose data:
     selectInput("dat_char", "Data:",
-                c("triangle simulation", "penguins", "fifa", "appartment simulation"),
+                c("triangle simulation", "penguins", "fifa", "appartments"),
                 "triangle simulation"),
     h3("Preprocessing and data description"),
     uiOutput("input__dat_desc"),

@@ -12,7 +12,7 @@ server <- function(input, output, session){
   load_ls <- reactive({
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartment simulation")))
+    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
     if(dat == "triangle simulation")
       load("./data/2preprocess_simulation.RData", envir = globalenv())
@@ -20,7 +20,7 @@ server <- function(input, output, session){
       load("./data/1preprocess_penguins.RData", envir = globalenv())
     if(dat == "fifa")
       load("./data/3preprocess_fifa.RData", envir = globalenv())
-    if(dat == "appartment simulation")
+    if(dat == "appartments")
       load("./data/4preprocess_appt.RData", envir = globalenv())
     return(layer_ls)
   })
@@ -28,7 +28,7 @@ server <- function(input, output, session){
   output$input__dat_desc <- renderUI({
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartment simulation")))
+    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
     ## Load data:
     if(dat == "triangle simulation")
@@ -50,7 +50,7 @@ server <- function(input, output, session){
         p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)"),
         p("2) Create a RF model regressing continuous wages from the skill aggregates.")
       )
-    if(dat == "appartment simulation")
+    if(dat == "appartments")
       desc_rows <- list(
         h4("DALEX::appartments, sinthetic data of appartment prices"),
         p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter."),
@@ -72,7 +72,7 @@ server <- function(input, output, session){
     .n <- load_ls()$decode_df %>% nrow()
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa")))
+    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
     
     ## Initialize to hard-coded hand picked examples.
@@ -84,9 +84,13 @@ server <- function(input, output, session){
       primary_obs <- 169L
       comparison_obs <- 99L
     }
-    if(dat == "fifa"){
+    if(dat == "fifa"){ ##TODO: WILL BE WRONG OBS AFTER THINNING:
       primary_obs <- 1L ## L Messi
       comparison_obs <- 8L ## V. van Dijk
+    }
+    if(dat == "appartments"){
+      primary_obs <- 1L
+      comparison_obs <- 2L
     }
     
     ## Return
