@@ -12,7 +12,7 @@ server <- function(input, output, session){
   load_ls <- reactive({
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa")))
+    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartment simulation")))
       stop("data string not matched.")
     if(dat == "triangle simulation")
       load("./data/2preprocess_simulation.RData", envir = globalenv())
@@ -20,13 +20,15 @@ server <- function(input, output, session){
       load("./data/1preprocess_penguins.RData", envir = globalenv())
     if(dat == "fifa")
       load("./data/3preprocess_fifa.RData", envir = globalenv())
+    if(dat == "appartment simulation")
+      load("./data/4preprocess_appt.RData", envir = globalenv())
     return(layer_ls)
   })
   
   output$input__dat_desc <- renderUI({
     req(input$dat_char)
     dat <- input$dat_char
-    if(!(dat %in% c("triangle simulation", "penguins", "fifa")))
+    if(!(dat %in% c("triangle simulation", "penguins", "fifa", "appartment simulation")))
       stop("data string not matched.")
     ## Load data:
     if(dat == "triangle simulation")
@@ -47,6 +49,12 @@ server <- function(input, output, session){
         h4("FIFA soccer players, 2020 season"),
         p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)"),
         p("2) Create a RF model regressing continuous wages from the skill aggregates.")
+      )
+    if(dat == "appartment simulation")
+      desc_rows <- list(
+        h4("DALEX::appartments, sinthetic data of appartment prices"),
+        p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter."),
+        p("2) Create a RF model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
       )
     return(desc_rows)
   })
