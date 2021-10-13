@@ -117,7 +117,7 @@ proto_basis1d_distribution <- function(
             .p_df$projection_nm == "QQ Mahalanobis distance", c(1L, 4L)]
   colnames(.maha_dist_df) <- c("rownum", "maha_dist")
   .LA_df_lj <- dplyr::left_join(LA_df, .maha_dist_df, by = "rownum")
-  .LA_df_longer <- tidyr::pivot_longer(.LA_df_lj, 
+  .LA_df_longer <- tidyr::pivot_longer(.LA_df_lj,
                                        cols = !c(rownum, group_by, maha_dist),
                                        names_to = "var_name",
                                        values_to = "contribution")
@@ -424,8 +424,8 @@ linked_plotly_func <- function(
   ## Normal points
   gg <- gg +
     suppressWarnings(ggplot2::geom_point(
-      ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas, tooltip = tooltip),
-      alpha = .alpha)) +
+      ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas,
+                   tooltip = tooltip), alpha = .alpha)) +
     ggplot2::facet_grid(rows = ggplot2::vars(projection_nm),
                         cols = ggplot2::vars(layer_nm), scales = "free") +
     ggplot2::theme_bw() +
@@ -530,8 +530,8 @@ radial_cheem_ggtour <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs)
-    ## Highlight comparison obs, if passed
     ggt <- ggt +
+      ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
         comparison_obs,
         list(color = .pred_clas),
@@ -589,8 +589,13 @@ radial_cheem_ggtour <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
-      ggplot2::labs(x = "SHAP projection, 1D", y = "Observed y")
-    ggt <- ggt +
+      ## Manual axes titles
+      ggplot2::annotate(
+        geom = "text", x=0L, y=-1L, angle = 0L,
+        label = "Attribution projection, 1D") +
+      ggplot2::annotate(
+        geom = "text", x=-2L, y=0L, angle = 90L,
+        label = "Observed y") +
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,

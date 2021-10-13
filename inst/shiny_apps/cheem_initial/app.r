@@ -126,7 +126,7 @@ server <- function(input, output, session){
     shap_df <- load_ls()$shap_df[, -ncol(load_ls()$shap_df)]
     clas <- load_ls()$decode_df$class
     
-    ## Median values of the actual class.
+    ## Median values of the observed class.
     expect_bas <- apply(shap_df[clas == clas[primary_obs_d()], ], 2L, median) %>%
       matrix(ncol = 1L, dimnames = list(colnames(shap_df), "SHAP"))
     .diff <- abs(expect_bas - bas)
@@ -181,8 +181,10 @@ server <- function(input, output, session){
     
     if(input$dat_char == "fifa"){ ## If fifa data
       ## Want to browse 2D tour of fifa data
+      browser()
       debugonce(radial_cheem_ggtour)
     }
+    
     ggt <- radial_cheem_ggtour(
       load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),

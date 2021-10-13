@@ -283,7 +283,7 @@ format_nested_layers <- function(
     tooltip[.is_misclass] <- paste0(
       tooltip[.is_misclass],
       "\nMisclassified! predicted: ", .pred_clas[.is_misclass],
-      ", actual: ", class[.is_misclass])
+      ", observed: ", class[.is_misclass])
     tooltip[!.is_misclass] <- paste0(
       tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])
   }
