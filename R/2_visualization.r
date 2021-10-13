@@ -1,11 +1,203 @@
-##TODO: !! This whole file wants to be renamed and recoded as generalized variants
+## spinifex extensions ----
+
+#' Extract and format the 1D local attribution basis
+#' 
+#' Internal function, Extract and format the 1D local attribution basis from 
+#' the provided local_attribution_df.
+#' 
+#' @param local_attribution_df Return of a local attribution, such as 
+#' treeshap_df.
+#' @param rownum The rownumber of the primary observation.
+#' @return A matrix of the 1D basis
+#' @export
+#' @examples
+#' la_df <- mtcars ## Pretend this is a local attribution data.frame
+#' basis_local_attribution(la_df, rownum = 10)
+basis_local_attribution <- function(
+  local_attribution_df,
+  rownum = nrow(local_attribution_df)
+){
+  ## Remove last column if layer_name
+  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE){
+    col_idx <- 1L:ncol(local_attribution_df)
+  }else{col_idx <- -ncol(local_attribution_df)}
+  LA_df <- local_attribution_df[rownum, col_idx]
+  ## Extract formatted basis
+  LA_bas <- LA_df %>%
+    as.numeric %>%
+    matrix(ncol = 1L, dimnames = list(colnames(LA_df), "SHAP"))
+  return(tourr::orthonormalise(LA_bas))
+}
+
+
+#' Adds the distribution of the row local attributions to a ggtour
+#'
+#' Adds the distribution of orthonormalized row values of 
+#' the specified `local_attribution_df`. Does not at the basis itself, 
+#' use in conjunction with `proto_basis1d()`.
+#'
+#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param group_by Vector to group densities by. Originally _predicted_ class.
+#' @param position The position for the basis, one of: c("top1d", "floor1d",
+#' "off"). Defaults to "top1d"; basis above the density curves.
+#' @param shape Number specifying the shape of the basis distribution points. 
+#' Typically 142 or 124 indicating '|' for `plotly` and `gganimate` respectively.
+#' Defaults to 142, '|' for `plotly`.
+#' @param do_add_pcp_segments Logical, whether or not to add to add faint 
+#' parallel coordinate lines on the 1D basis. Defaults to TRUE.
+#' @param primary_obs The rownumber of the primary observation. Its local
+#' attribution becomes the 1d projection basis, and the point it highlighted 
+#' as a dashed line.
+#' @param comparison_obs The rownumber of the comparison observation. Point
+#' is highlighted as a dotted line.
+#' @rdname proto_basis
+#' @family ggtour proto
+#' @export
+#' @examples
+#' load("./apps/cheem_penguins_classification/data/1preprocess.RData")
+#' dat <- layer_ls$decode_df[, 8:11]
+#' clas <- layer_ls$decode_df$class
+#' shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
+#' bas <- basis_local_attribution(shap_df, nrow(dat))
+#' mv <- manip_var_of(bas) ## Warning is fine.
+#' 
+#' ## 1D case:
+#' mt_path <- manual_tour(bas, mv)
+#' 
+#' debugonce(proto_basis1d)
+#' ggt <- ggtour(mt_path, dat) +
+#'   proto_density(aes_args = list(color = clas, fill = clas)) +
+#'   proto_basis1d() +
+#'   proto_basis1d_distribution(shap_df, group_by = clas)
+#' \dontrun{
+#' animate_plotly(ggt)
+#' }
+proto_basis1d_distribution <- function(
+  layer_ls, ## Only for distribution of bases.
+  group_by = as.factor(FALSE),
+  position = c("top1d", "floor1d", "off"), ## Needs to match that of `proto_basis1d()`
+  shape = c(142, 124), ## '|' for plotly and ggplot respectively
+  do_add_pcp_segments = TRUE,
+  primary_obs = NULL,
+  comparison_obs = NULL
+){
+  ## Prevent global variable warnings:
+  .facet_by <- rownum <- maha_dist <- contribution <- var_name <- .map_to <-
+    .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
+  ## Initialize
+  eval(spinifex::.init4proto)
+  position <- match.arg(position)
+  shape <- shape[1L] ## match.arg only for character values.
+  if(shape %in% c(142L, 124L) == FALSE) warning("Unexpected shape used in proto_basis1d_distribution.")
+  if(position == "off") return()
+  if(is.null(.facet_by) == FALSE) position = "floor1d"
+  
+  local_attribution_df <- layer_ls$shap_df
+  ## Pivot longer:
+  ### ensure last col dropped if layer_name
+  col_idx <- ifelse(
+    local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric,
+    1L:ncol(local_attribution_df), -ncol(local_attribution_df))
+  LA_df <- local_attribution_df[, col_idx]
+  
+  ## Force orthonormalize each row.
+  .m <- sapply(1L:nrow(LA_df), function(i){
+    row_bas <- basis_local_attribution(LA_df, i)
+    LA_df[i, ] <<- tourr::orthonormalise(row_bas)
+  })
+  ## Pivot the SHAP values (columns) longer to rows.
+  .n <- nrow(LA_df)
+  .p <- ncol(LA_df)
+  LA_df$rownum <- 1L:.n
+  LA_df$group_by <- as.factor(group_by)
+  
+  .p_df <- layer_ls$plot_df
+  .maha_dist_df <-
+    .p_df[.p_df$layer_nm == "data" &
+            .p_df$projection_nm == "QQ Mahalanobis distance", c(1L, 4L)]
+  colnames(.maha_dist_df) <- c("rownum", "maha_dist")
+  .LA_df_lj <- dplyr::left_join(LA_df, .maha_dist_df, by = "rownum")
+  .LA_df_longer <- tidyr::pivot_longer(.LA_df_lj, 
+                                       cols = !c(rownum, group_by, maha_dist),
+                                       names_to = "var_name",
+                                       values_to = "contribution")
+  .df_basis_distr <- dplyr::mutate(
+    .LA_df_longer,
+    .keep = "none",
+    x = contribution,
+    ## Must be reverse order; var 1 on top, highest value.
+    y = rep_len(.p:1L, .n * .p) + .05 * (as.integer(group_by) - 2L),
+    var_name = var_name,
+    var_num = rep_len(.p:1L, .n * .p),
+    rownum = rownum,
+    group_by = group_by,
+    maha_dist = maha_dist) %>%
+    as.data.frame()
+  
+  ## Position them
+  .df_basis_distr <- spinifex::map_relative(.df_basis_distr, position, .map_to)
+  ## Add facet level if needed
+  if(is.null(.facet_by) == FALSE){
+    .basis_ls <- list(facet_by = rep_len("_basis_", nrow(.df_zero)))
+    .df_basis_distr <- spinifex:::.bind_elements2df(.basis_ls, .df_basis_distr)
+  }
+  
+  .alpha <- ifelse(length(unique(.df_basis_distr$rowname)) > 999L, .003, .3)
+  ## Basis/attribution distribution of the rows of the LA_df
+  ret <- suppressWarnings(ggplot2::geom_point(
+    ggplot2::aes(x, y, color = group_by, tooltip = rownum), .df_basis_distr,
+    shape = shape, alpha = .alpha, size = 1.5))
+  
+  ## Add PCP lines if needed.
+  if(do_add_pcp_segments == TRUE){
+    ## Make the right table to inner join to.
+    .df_basis_distr2 <- dplyr::mutate(.df_basis_distr, .keep = "none",
+                                      xend = x, yend = y,
+                                      var_num = var_num - 1L, rownum = rownum)
+    ## Inner join to by var_name & rownum(lead1)
+    .df_basis_distr_pcp_segments <- dplyr::inner_join(
+      .df_basis_distr, .df_basis_distr2,
+      by = c("var_num" = "var_num", "rownum" = "rownum"))
+    ## Mapping .alpha for pcp lines to maha dist causing err: not of length 1 or data
+    bkg_pcp <- suppressWarnings(ggplot2::geom_segment(
+      ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                   color = group_by, tooltip = rownum),
+      .df_basis_distr_pcp_segments,
+      size = .5, alpha = .alpha / 6L))
+    prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
+    if(length(primary_obs) > 0L){
+      prim_pcp <- suppressWarnings(ggplot2::geom_segment(
+        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                     color = group_by, tooltip = rownum),
+        .df_basis_distr_pcp_segments[prim_idx, ],
+        size = 1L, alpha = .8, linetype = 2L))
+    }else{prim_pcp <- NULL}
+    comp_idx <- .df_basis_distr_pcp_segments$rownum == comparison_obs
+    if(length(primary_obs) > 0L){
+      comp_pcp <- suppressWarnings(ggplot2::geom_segment(
+        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
+                     color = group_by, tooltip = rownum),
+        .df_basis_distr_pcp_segments[comp_idx, ],
+        size = .8, alpha = .6, linetype = 3L))
+    }else{comp_pcp <- NULL}
+    ret <- list(bkg_pcp, comp_pcp, prim_pcp, ret)
+  }
+  
+  ## Return proto
+  return(ret)
+}
+
+
+##NOTES -----
+
+##TODO: !! This whole file wants to rebased with generalized models and attributiosn
 #  Keep in mind extension of RF models. then model and explanation types by DALEX.
 
-##TODO: !! Whole file wants Roxygen descriptions if not examples.
+##TODO: !! Whole file wants Roxygen descriptions and ideally examples.
 
 
-## Other local functions for downstream consumption.
-#### Esp to prep for shiny apps.
+## shiny preprocess functions -----
+## NOTE: this is outdated and should be removed.
 
 #' Append corrupted observations and extract SHAP layer list.
 #' 
@@ -122,6 +314,7 @@ assign_cobs_layer_ls <- function(
 
 
 ## Shiny plot functions ------
+
 #' Linked `plotly` display, global view of data and attribution space.
 #' 
 #' Given an attribution layer list, create a linked `plotly`of the global data-
@@ -307,9 +500,9 @@ radial_cheem_ggtour <- function(
   
   ## Problem type: classification or regression?
   problem_type <- function(y){
-    if(length(unique(y)) < 5L) return("classification")
+    if(length(unique(y)) < 16L) return("classification")
     if(is.numeric(y) == TRUE) return("regression")
-    stop("y was expected as a with less than 5 unique values, or numeric indicating a classification or regression problem respectivly.")
+    stop("y was expected as a with less than 16 unique values, or numeric indicating a classification or regression problem respectivly.")
   }
   .prob_type <- problem_type(.y) ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
@@ -321,7 +514,8 @@ radial_cheem_ggtour <- function(
   .mv <- which(colnames(layer_ls$shap_df) == mv_name)
   .mt_path <- spinifex::manual_tour(basis, manip_var = .mv)
   
-  ### Classification problem -----
+  ### Classification case -----
+  # Classification goes right into vis
   if(.prob_type == "classification"){
     .dat <- spinifex::scale_01(.x)
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
@@ -351,19 +545,23 @@ radial_cheem_ggtour <- function(
         mark_initial = FALSE)
   }
   
-  ### Regression problem -----
+  ### Regression case -----
+  # Regression does some work to append y or y_hat to the basis
   if(.prob_type == "regression"){
-    ## Add a 2nd 'd' dimension, full contribution of the y var.
+    ## y axis; full contribution of the y, regression var.
     .tgt_dim <- c(dim(.mt_path) + c(1L, 1L, 0L))
     .array <- array(NA, dim = .tgt_dim)
     .m <- sapply(1L:.tgt_dim[3L], function(i){
       .array[,, i] <<- tourr::orthonormalise(
-        matrix(c(.mt_path[,, i], rep(0L, .tgt_dim[1L]), 1L),
-               nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]))
+        matrix(
+          c(0L, .mt_path[,, i], c(1L, rep(0L, .tgt_dim[1L] - 1L))),
+          nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]
+        )
+      )
     })
     dn <- dimnames(.mt_path)
-    dn[[1L]] <- c(rownames(.mt_path), "wage_euro")
-    dn[[2L]] <- c("proj", "wage_euro")
+    dn[[1L]] <- c("Observed y", rownames(.mt_path))
+    dn[[2L]] <- c("Local explanation", "Observed y")
     dimnames(.array) <- dn
     attr(.array, "manip_var") <- attr(.mt_path, "manip_var")
     attr(.array, "theta")     <- attr(.mt_path, "theta")
@@ -371,14 +569,14 @@ radial_cheem_ggtour <- function(
     attr(.array, "phi_min")   <- attr(.mt_path, "phi_min")
     attr(.array, "phi_max")   <- attr(.mt_path, "phi_max")
     
-    ## Add y to .dat to project.
+    ## Add y to .dat to project
     .dat <- spinifex::scale_01(data.frame(.x, .y))
     ## Plot
     ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
       ## _points would ideally be _hex or _hdr, but:
       #### _hex doesn't work with plotly
-      #### _hdr not made atm.
-      ##- Down sample?
+      #### _hdr not implented atm.
+      ##- thin the data...
       spinifex::proto_point(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         identity_args = list(alpha = .alpha)) +
@@ -387,19 +585,19 @@ radial_cheem_ggtour <- function(
       proto_basis1d_distribution(
         layer_ls, group_by = .pred_clas,
         position = "top1d",
-        shape = 142L, ## '|' for gganimate/ggplot
+        shape = c(142L, 124L), ## '|' for plotly/gganimate.
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
-      ggplot2::labs(x = "1D SHAP projection", y = "Actual wages (2020 Euros)")
-    ## Highlight comparison obs, if passed
+      ggplot2::labs(x = "SHAP projection, 1D", y = "Observed y")
     ggt <- ggt +
+      ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,
         list(color = .pred_clas),
         list(size = 4L, shape = 4L, alpha = 0.5),
         mark_initial = FALSE) +
-      ## Highlight shap obs
+      ## Highlight primary obs
       spinifex::proto_highlight(
         primary_obs,
         aes_args = list(color = .pred_clas),
