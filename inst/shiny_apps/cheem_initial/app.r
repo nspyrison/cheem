@@ -179,6 +179,10 @@ server <- function(input, output, session){
     req(comparison_obs_d())
     req(input$do_add_pcp_segments)
     
+    if(input$dat_char == "fifa"){ ## If fifa data
+      ## Want to browse 2D tour of fifa data
+      debugonce(radial_cheem_ggtour)
+    }
     ggt <- radial_cheem_ggtour(
       load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),

@@ -74,8 +74,11 @@ if(F)
   layer_ls <- .raw_layer_ls
 .maha_plot_df <- layer_ls$plot_df[
   layer_ls$plot_df[, "projection_nm"] == "QQ Mahalanobis distance",]
-.rownums_to_keep <- .maha_plot_df[.maha_plot_df["V2"] >
-  quantile(.maha_plot_df["V2"], .9, na.rm = TRUE), 1]
+## THIN: just first 500 (as messi and van Dijk are 1 & 8)
+.rownums_to_keep <- 1:500
+## Order of maha numbers is not correct atm
+# .rownums_to_keep <- .maha_plot_df[.maha_plot_df["V2"] >
+#   quantile(.maha_plot_df["V2"], .9, na.rm = TRUE), 1]
 layer_ls$plot_df <-
   layer_ls$plot_df[layer_ls$plot_df$rownum %in% .rownums_to_keep,]
 layer_ls$decode_df <-

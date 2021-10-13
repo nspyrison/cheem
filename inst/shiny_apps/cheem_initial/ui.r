@@ -26,8 +26,8 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   fluidRow(
     ## Choose data:
     selectInput("dat_char", "Data:",
-                c("toy classification", "penguins", "fifa", "appartments"),
-                "toy classification"),
+                choices = c("toy classification", "penguins", "fifa", "appartments"),
+                selected = "fifa"), #"toy classification"),
     h3("Preprocessing and data description"),
     uiOutput("input__dat_desc"),
     p("3) Extract the SHAP matrix, that is SHAP values of EACH observation, via {treeshap}"),
@@ -82,7 +82,7 @@ tab_about <- tabPanel("About", fluidPage(
     Doing so allows them to be more accurate, but makes them unrealistically complex to parse and interpret the reasoning and weights used. 
     We want to impove the interprebility of black box models."),
   img(src = "lime_nonlinear.png"),
-  p('Ribeiro, M. et. al. (2017). Why Should I Trust You?. ', a(href = 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', .noWS = "outside"), '!', .noWS = c("after-begin", "before-end")),
+  p('Ribeiro, M. et. al. (2017). Why Should I Trust You?', a(href = 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', .noWS = "outside"), '!', .noWS = c("after-begin", "before-end")),
   p("Recently, there have been advances in interegating or explaining agnostic models within the local vacinity of a new observation. 
     Some of the original methods of such local explainations of models (Lundberg, 2017) include: LIME, DeepLIFT, and SHAP.
     Here, we build a random foest model (in light of speed), extract SHAP local attributions -- 
