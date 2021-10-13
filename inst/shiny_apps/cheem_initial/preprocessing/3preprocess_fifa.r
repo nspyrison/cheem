@@ -5,8 +5,10 @@ require("cheem")
 ## Setup ------
 .raw <- DALEX::fifa
 .dat_less_ys <- .raw %>%
-  dplyr::select(-c(`nationality`, ## useless class
-                   `overall`, `potential`, `value_eur`, `wage_eur`)) %>% ## potential target vars.
+  dplyr::select(
+    -c(`nationality`, ## useless class
+       ## potential target vars:
+       `overall`, `potential`, `value_eur`, `wage_eur`)) %>%
   as.data.frame()
 
 if(F) ## Don't run, View corrplot
