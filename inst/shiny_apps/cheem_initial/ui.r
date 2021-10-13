@@ -71,9 +71,6 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   plotly::plotlyOutput(
     "manual_tour_plotly",
     height = "640px", width = "100%") %>%
-  ## gganimate, .gif temp file, animated radial tour:
-  # shiny::imageOutput("manual_tour_gganimate",
-  #                    width = "100%", height = "900px") %>%
     shinycssloaders::withSpinner(type = 8L)
 ) ## Assign tab1_cheem
 
@@ -84,7 +81,7 @@ tab_about <- tabPanel("About", fluidPage(
     Black-box models use increasingly more and complex interaction terms between features. 
     Doing so allows them to be more accurate, but makes them unrealistically complex to parse and interpret the reasoning and weights used. 
     We want to impove the interprebility of black box models."),
-  img(src = "lime_nonlinear.PNG"),
+  img(src = "lime_nonlinear.png"),
   p('Ribeiro, M. et. al. (2017). Why Should I Trust You?. ', a(href = 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', .noWS = "outside"), '!', .noWS = c("after-begin", "before-end")),
   p("Recently, there have been advances in interegating or explaining agnostic models within the local vacinity of a new observation. 
     Some of the original methods of such local explainations of models (Lundberg, 2017) include: LIME, DeepLIFT, and SHAP.

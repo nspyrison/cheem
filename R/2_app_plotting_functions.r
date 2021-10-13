@@ -296,7 +296,7 @@ radial_cheem_ggtour <- function(
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .1
 ){
-  ## Initialization
+  ## Initialization Y on basis
   .y <- layer_ls$decode_df$y %>% matrix(ncol = 1L)
   .col_idx <- which(!(
     colnames(layer_ls$decode_df) %in%

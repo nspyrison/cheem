@@ -185,30 +185,6 @@ server <- function(input, output, session){
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
     spinifex::animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
-  output$manual_tour_gganimate <- renderImage({
-    req(bas())
-    req(load_ls())
-    req(input$manip_var_nm)
-    req(primary_obs_d())
-    req(comparison_obs_d())
-    req(input$do_add_pcp_segments)
-    
-    ## A temp file to save the output, will be removed later in renderImage
-    outfile <- tempfile(fileext = ".gif")
-    ## Now make the animation
-    ggt <- radial_cheem_ggtour(
-      load_ls(), bas(), input$manip_var_nm,
-      primary_obs_d(), comparison_obs_d(),
-      do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
-    anim <- animate_gganimate(ggt)
-    gganimate::anim_save("outfile.gif", anim)
-    
-    ## Return a list containing the filename
-    list(src = "outfile.gif", contentType = "image/gif"
-         ## ,alt = "Hover tooltip text here" ## h/w dim set in preprocess func.
-    )},
-    deleteFile = TRUE
-  ) ## Lazy eval, too heavy
   
   ## Data selected in pca_embed_plotly -----
   output$selected_df <- DT::renderDT({ ## Original data of selection
