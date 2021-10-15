@@ -77,19 +77,19 @@ server <- function(input, output, session){
     
     ## Initialize to hard-coded hand picked examples.
     if(dat == "toy classification"){
-      primary_obs <- 18L
+      primary_obs    <- 18L
       comparison_obs <- 111L
     }
     if(dat == "penguins"){
-      primary_obs <- 169L
+      primary_obs    <- 169L
       comparison_obs <- 99L
     }
     if(dat == "fifa"){ ##TODO: WILL BE WRONG OBS AFTER THINNING:
-      primary_obs <- 1L ## L Messi
+      primary_obs    <- 1L ## L Messi
       comparison_obs <- 8L ## V. van Dijk
     }
     if(dat == "appartments"){
-      primary_obs <- 1L
+      primary_obs    <- 1L
       comparison_obs <- 2L
     }
     
@@ -179,11 +179,11 @@ server <- function(input, output, session){
     req(comparison_obs_d())
     req(input$do_add_pcp_segments)
     
-    if(input$dat_char == "fifa"){ ## If fifa data
-      ## Want to browse 2D tour of fifa data
-      browser()
-      debugonce(radial_cheem_ggtour)
-    }
+    # if(input$dat_char == "fifa"){ ## If fifa data
+    #   ## Want to browse 2D tour of fifa data
+    #   browser()
+    #   debugonce(radial_cheem_ggtour)
+    # }
     
     ggt <- radial_cheem_ggtour(
       load_ls(), bas(), input$manip_var_nm,

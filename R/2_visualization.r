@@ -39,7 +39,8 @@ basis_local_attribution <- function(
 #' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
 #' @param group_by Vector to group densities by. Originally _predicted_ class.
 #' @param position The position for the basis, one of: c("top1d", "floor1d",
-#' "off"). Defaults to "top1d"; basis above the density curves.
+#' "top2d", "floor2d", "off"). 
+#' Defaults to "top1d"; basis above the density curves.
 #' @param shape Number specifying the shape of the basis distribution points. 
 #' Typically 142 or 124 indicating '|' for `plotly` and `gganimate` respectively.
 #' Defaults to 142, '|' for `plotly`.
@@ -75,14 +76,15 @@ basis_local_attribution <- function(
 proto_basis1d_distribution <- function(
   layer_ls, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
-  position = c("top1d", "floor1d", "off"), ## Needs to match that of `proto_basis1d()`
+  position = c("top1d", "floor1d", "top2d", "floor2d", "off"), ## Needs to match that of `proto_basis1d()`
   shape = c(142, 124), ## '|' for plotly and ggplot respectively
   do_add_pcp_segments = TRUE,
   primary_obs = NULL,
   comparison_obs = NULL
 ){
   ## Prevent global variable warnings:
-  .facet_by <- rownum <- maha_dist <- contribution <- var_name <- .map_to <-
+  .facet_by <- rownum <- maha_dist <- contribution <- var_name <-
+    .map_to_unitbox <- .map_to_data <- .map_to_density <-
     .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
   eval(spinifex::.init4proto)
@@ -134,8 +136,12 @@ proto_basis1d_distribution <- function(
     maha_dist = maha_dist) %>%
     as.data.frame()
   
-  ## Position them
-  .df_basis_distr <- spinifex::map_relative(.df_basis_distr, position, .map_to)
+  ## Map them to position
+  if(.d == 1L){
+    .map_to_tgt <- .map_to_density
+  } else .map_to_tgt <- .map_to_data
+  .df_basis_distr <- spinifex::map_relative(
+    .df_basis_distr, position, .map_to_tgt)
   ## Add facet level if needed
   if(is.null(.facet_by) == FALSE){
     .basis_ls <- list(facet_by = rep_len("_basis_", nrow(.df_zero)))
@@ -151,9 +157,9 @@ proto_basis1d_distribution <- function(
   ## Add PCP lines if needed.
   if(do_add_pcp_segments == TRUE){
     ## Make the right table to inner join to.
-    .df_basis_distr2 <- dplyr::mutate(.df_basis_distr, .keep = "none",
-                                      xend = x, yend = y,
-                                      var_num = var_num - 1L, rownum = rownum)
+    .df_basis_distr2 <- dplyr::mutate(
+      .df_basis_distr, .keep = "none",
+      xend = x, yend = y, var_num = var_num - 1L, rownum = rownum)
     ## Inner join to by var_name & rownum(lead1)
     .df_basis_distr_pcp_segments <- dplyr::inner_join(
       .df_basis_distr, .df_basis_distr2,
@@ -162,8 +168,7 @@ proto_basis1d_distribution <- function(
     bkg_pcp <- suppressWarnings(ggplot2::geom_segment(
       ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                    color = group_by, tooltip = rownum),
-      .df_basis_distr_pcp_segments,
-      size = .5, alpha = .alpha / 6L))
+      .df_basis_distr_pcp_segments, size = .5, alpha = .alpha / 6L))
     prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
     if(length(primary_obs) > 0L){
       prim_pcp <- suppressWarnings(ggplot2::geom_segment(
@@ -508,7 +513,14 @@ radial_cheem_ggtour <- function(
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- layer_ls$decode_df$predicted_class
-  .alpha <- ifelse(nrow(layer_ls$decode_df) > 999L, .1, 1L)
+  
+  logistic_rownum_tform = function(x, mid_pt = 1000, k_attenuation = 2/mid_pt, max = 1, floor=.1) {
+    k_attenuation
+    log <- max / (1 + exp(k_attenuation * (x - mid_pt)))
+    floor + (1 - floor)*log}
+  #' @examples 
+  #' x <- 1:5000; plot(x, logistic_rownum_tform(x), col='blue');
+  .alpha <- logistic_rownum_tform(nrow(layer_ls$decode_df))
   
   ## Manual (radial) tour 1d
   .mv <- which(colnames(layer_ls$shap_df) == mv_name)
@@ -521,16 +533,15 @@ radial_cheem_ggtour <- function(
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas)) +
-      spinifex::proto_origin1d() +
-      spinifex::proto_basis1d(manip_col = "black") +
       proto_basis1d_distribution(
         layer_ls, group_by = .pred_clas,
         position = "top1d",
         shape = pcp_shape, ## '|' for gganimate/ggplot
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
-        comparison_obs = comparison_obs)
-    ggt <- ggt +
+        comparison_obs = comparison_obs) +
+      spinifex::proto_basis1d(manip_col = "black") +
+      spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
         comparison_obs,
@@ -556,8 +567,7 @@ radial_cheem_ggtour <- function(
         matrix(
           c(0L, .mt_path[,, i], c(1L, rep(0L, .tgt_dim[1L] - 1L))),
           nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]
-        )
-      )
+        ))
     })
     dn <- dimnames(.mt_path)
     dn[[1L]] <- c("Observed y", rownames(.mt_path))
@@ -580,22 +590,21 @@ radial_cheem_ggtour <- function(
       spinifex::proto_point(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         identity_args = list(alpha = .alpha)) +
-      spinifex::proto_origin() +
-      spinifex::proto_basis1d(manip_col = "black") +
       proto_basis1d_distribution(
         layer_ls, group_by = .pred_clas,
-        position = "top1d",
+        position = "top2d",
         shape = c(142L, 124L), ## '|' for plotly/gganimate.
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
+      spinifex::proto_basis1d(
+        position = "top2d", manip_col = "black") +
+      spinifex::proto_origin() +
       ## Manual axes titles
-      ggplot2::annotate(
-        geom = "text", x=0L, y=-1L, angle = 0L,
-        label = "Attribution projection, 1D") +
-      ggplot2::annotate(
-        geom = "text", x=-2L, y=0L, angle = 90L,
-        label = "Observed y") +
+      # Plotly can't handle text rotation of geom_text/annotate.
+      ggplot2::labs(x = "Attribution projection, 1D",
+                    y = "Observed y") +
+      ggplot2::theme(axis.title.y = ggplot2::element_text(vjust = .25)) +
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,

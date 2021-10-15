@@ -70,7 +70,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   ## Plotly, .html widget, animated radial tour:
   plotly::plotlyOutput(
     "manual_tour_plotly",
-    height = "640px", width = "100%") %>%
+    height = "720px", width = "540px") %>%
     shinycssloaders::withSpinner(type = 8L)
 ) ## Assign tab1_cheem
 

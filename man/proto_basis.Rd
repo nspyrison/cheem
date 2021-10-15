@@ -7,7 +7,7 @@
 proto_basis1d_distribution(
   layer_ls,
   group_by = as.factor(FALSE),
-  position = c("top1d", "floor1d", "off"),
+  position = c("top1d", "floor1d", "top2d", "floor2d", "off"),
   shape = c(142, 124),
   do_add_pcp_segments = TRUE,
   primary_obs = NULL,
@@ -20,7 +20,8 @@ proto_basis1d_distribution(
 \item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
 \item{position}{The position for the basis, one of: c("top1d", "floor1d",
-"off"). Defaults to "top1d"; basis above the density curves.}
+"top2d", "floor2d", "off").
+Defaults to "top1d"; basis above the density curves.}
 
 \item{shape}{Number specifying the shape of the basis distribution points.
 Typically 142 or 124 indicating '|' for \code{plotly} and \code{gganimate} respectively.
