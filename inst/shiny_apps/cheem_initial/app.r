@@ -140,7 +140,7 @@ server <- function(input, output, session){
   outputOptions(output, "input__manip_var_nm", suspendWhenHidden = FALSE) ## Eager evaluation
   
   ## Plot outputs -----
-  output$kurtosis_print <- renderPrint({
+  output$kurtosis_text <- renderPrint({
     req(load_ls())
     req(input$do_include_maha_qq)
     if(as.logical(input$do_include_maha_qq) == FALSE){.lines <- ""
@@ -151,7 +151,7 @@ server <- function(input, output, session){
     }
     writeLines(.lines)
   })
-  outputOptions(output, "kurtosis_print", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "kurtosis_text", suspendWhenHidden = FALSE) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
     req(load_ls())
@@ -171,13 +171,22 @@ server <- function(input, output, session){
   })
   outputOptions(output, "input__linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
   
-  output$manual_tour_plotly <- plotly::renderPlotly({
+  output$cheem_tour <- plotly::renderPlotly({
     req(bas())
     req(load_ls())
     req(input$manip_var_nm)
     req(primary_obs_d())
     req(comparison_obs_d())
     req(input$do_add_pcp_segments)
+    
+    ## Filter to only selected data:
+    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+    if(is.null(.d)){
+      .idx_rownums <- TRUE
+    }else{
+      .df <- load_ls()$decode_df
+      .idx_rownums <- .df$rownum %in% .d$key
+    }
     
     # if(input$dat_char == "fifa"){ ## If fifa data
     #   ## Want to browse 2D tour of fifa data
@@ -188,16 +197,17 @@ server <- function(input, output, session){
     ggt <- radial_cheem_ggtour(
       load_ls(), bas(), input$manip_var_nm,
       primary_obs_d(), comparison_obs_d(),
-      do_add_pcp_segments = as.logical(input$do_add_pcp_segments))
+      do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
+      rownum_idx = .idx_rownums)
     spinifex::animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   
   ## Data selected in pca_embed_plotly -----
   output$selected_df <- DT::renderDT({ ## Original data of selection
-    d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    if (is.null(d)) return(NULL)
-    df <- load_ls()$decode_df
-    return(DT::datatable(df[df$rownum %in% d$key, ], rownames = FALSE))
+    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+    if(is.null(.d)) return(NULL)
+    .df <- load_ls()$decode_df
+    return(DT::datatable(.df[.df$rownum %in% .d$key, ], rownames = FALSE))
   })
   outputOptions(output, "selected_df", suspendWhenHidden = FALSE) ## Eager evaluation
   

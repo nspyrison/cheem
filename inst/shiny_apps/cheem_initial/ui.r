@@ -53,7 +53,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
     shinycssloaders::withSpinner(type = 8L),
   h4("Selected data:"),
   DT::DTOutput("selected_df")),
-  verbatimTextOutput("kurtosis_print"),
+  verbatimTextOutput("kurtosis_text"),
   tags$hr(style = "border-color: grey;"),
   br(),
   
@@ -67,11 +67,19 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Dashed line: current location of SHAP observation ('*' above)."),
   p("Dotted line: current location of comparison observation ('x' above)."),
-  ## Plotly, .html widget, animated radial tour:
-  plotly::plotlyOutput(
-    "manual_tour_plotly",
-    height = "720px", width = "540px") %>%
-    shinycssloaders::withSpinner(type = 8L)
+  fluidRow(
+    ## Plotly, .html widget, animated radial tour:
+    column(width = 6L,
+           plotly::plotlyOutput(
+             "cheem_tour",
+             height = "720px", width = "500px") %>%
+             shinycssloaders::withSpinner(type = 8L)
+    ),
+    column(width = 6L,
+           p("residual_plot here")
+          # plotOutput("residual_plot", width = "100%")
+    )
+  ) ## close fluidRow
 ) ## Assign tab1_cheem
 
 ### tab_about -----

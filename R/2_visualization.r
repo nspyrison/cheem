@@ -492,16 +492,17 @@ radial_cheem_ggtour <- function(
   layer_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
-  angle = .1
+  angle = .1,
+  rownum_idx = TRUE
 ){
   ## Initialization Y on basis
-  .y <- layer_ls$decode_df$y %>% matrix(ncol = 1L)
+  .y <- layer_ls$decode_df[rownum_idx, "y"] %>% matrix(ncol = 1L)
   .col_idx <- which(!(
     colnames(layer_ls$decode_df) %in%
       c("rownum", "class", "y", "prediction", "residual",
         "predicted_class", "is_misclassified", "tooltip")
   ))
-  .x <- layer_ls$decode_df[, .col_idx] ## Numeric X variables
+  .x <- layer_ls$decode_df[rownum_idx, .col_idx] ## Numeric X variables
   
   ## Problem type: classification or regression?
   problem_type <- function(y){
@@ -509,7 +510,7 @@ radial_cheem_ggtour <- function(
     if(is.numeric(y) == TRUE) return("regression")
     stop("y was expected as a with less than 16 unique values, or numeric indicating a classification or regression problem respectivly.")
   }
-  .prob_type <- problem_type(.y) ## Either "classification" or "regression"
+  .prob_type <- problem_type(layer_ls$decode_df$y) ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- layer_ls$decode_df$predicted_class

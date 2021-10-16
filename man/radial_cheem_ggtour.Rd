@@ -12,7 +12,8 @@ radial_cheem_ggtour(
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
-  angle = 0.1
+  angle = 0.1,
+  rownum_idx = TRUE
 )
 }
 \arguments{
