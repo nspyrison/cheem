@@ -553,7 +553,8 @@ radial_cheem_ggtour <- function(
         primary_obs,
         list(color = .pred_clas),
         list(linetype = 2L, alpha = .6, size = .8),
-        mark_initial = FALSE)
+        mark_initial = FALSE) +
+      spinifex::proto_frame_cor()
   }
   
   ### Regression case -----
@@ -616,7 +617,8 @@ radial_cheem_ggtour <- function(
         primary_obs,
         aes_args = list(color = .pred_clas),
         identity_args = list(size = 5L, shape = 8L, alpha = 1L),
-        mark_initial = FALSE)
+        mark_initial = FALSE) +
+      spinifex::proto_frame_cor()
   }
   
   ## Return the static ggtour, animate in app

@@ -84,7 +84,7 @@ server <- function(input, output, session){
       primary_obs    <- 169L
       comparison_obs <- 99L
     }
-    if(dat == "fifa"){ ##TODO: WILL BE WRONG OBS AFTER THINNING:
+    if(dat == "fifa"){ ## TODO: WILL BE WRONG OBS AFTER THINNING:
       primary_obs    <- 1L ## L Messi
       comparison_obs <- 8L ## V. van Dijk
     }
