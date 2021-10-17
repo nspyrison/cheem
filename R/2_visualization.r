@@ -402,11 +402,11 @@ linked_plotly_func <- function(
   if(is.null(comparison_obs) == FALSE){
     .idx_comp <- plot_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L){
-      .df <- plot_df[.idx_comp, ] # %>% highlight_key(~rownum)
+      .df <- plot_df[.idx_comp, ]
       gg <- gg +
         ## Highlight comparison obs
-        ggplot2::geom_point(ggplot2::aes(V1, V2, color = pred_clas[.idx_comp]),
-                            .df, size = 4L, shape = 4L)
+        ggplot2::geom_point(ggplot2::aes(V1, V2), #, color = pred_clas[.idx_comp]),
+                            .df, size = 4L, shape = 4L, color = "black")
     }
   }
   ## Highlight shap obs, if passed
@@ -415,8 +415,8 @@ linked_plotly_func <- function(
     if(sum(.idx_shap) > 0L){
       .df <- plot_df[.idx_shap, ] # %>% highlight_key(~rownum)
       gg <- gg +
-        ggplot2::geom_point(ggplot2::aes(V1, V2, color = pred_clas[.idx_shap]),
-                            .df, size = 5L, shape = 8L)
+        ggplot2::geom_point(ggplot2::aes(V1, V2),#, color = pred_clas[.idx_shap]),
+                            .df, size = 5L, shape = 8L, color = "black")
     }
   }
   ## Maha skew text,
@@ -505,11 +505,6 @@ radial_cheem_ggtour <- function(
   .x <- layer_ls$decode_df[rownum_idx, .col_idx] ## Numeric X variables
   
   ## Problem type: classification or regression?
-  problem_type <- function(y){
-    if(length(unique(y)) < 16L) return("classification")
-    if(is.numeric(y) == TRUE) return("regression")
-    stop("y was expected as a with less than 16 unique values, or numeric indicating a classification or regression problem respectivly.")
-  }
   .prob_type <- problem_type(layer_ls$decode_df$y) ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
@@ -546,14 +541,14 @@ radial_cheem_ggtour <- function(
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
         comparison_obs,
-        list(color = .pred_clas),
-        list(linetype = 3L, alpha = 0.8),
+        #list(color = .pred_clas),
+        list(linetype = 3L, alpha = 0.8, color = "black"),
         mark_initial = FALSE) +
       ## Highlight shap obs
       spinifex::proto_highlight1d(
         primary_obs,
-        list(color = .pred_clas),
-        list(linetype = 2L, alpha = .6, size = .8),
+        #list(color = .pred_clas),
+        list(linetype = 2L, alpha = .6, size = .8, color = "black"),
         mark_initial = FALSE) +
       spinifex::proto_frame_cor()
   }
@@ -610,14 +605,14 @@ radial_cheem_ggtour <- function(
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,
-        list(color = .pred_clas),
-        list(size = 4L, shape = 4L, alpha = 0.5),
+        #list(color = .pred_clas),
+        list(size = 4L, shape = 4L, alpha = 0.5, color = "black"),
         mark_initial = FALSE) +
       ## Highlight primary obs
       spinifex::proto_highlight(
         primary_obs,
-        aes_args = list(color = .pred_clas),
-        identity_args = list(size = 5L, shape = 8L, alpha = 1L),
+        #aes_args = list(color = .pred_clas),
+        identity_args = list(size = 5L, shape = 8L, alpha = 1L, color = "black"),
         mark_initial = FALSE) +
       spinifex::proto_frame_cor()
   }

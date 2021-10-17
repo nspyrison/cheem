@@ -20,6 +20,6 @@ for strange classes.
 }
 \examples{
 problem_type(mtcars$mpg)
-problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 9 unique values
+problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 problem_type(letters)
 }

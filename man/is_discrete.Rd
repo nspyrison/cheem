@@ -18,6 +18,6 @@ Typically used on the Y variable of a model.
 }
 \examples{
 is_discrete(mtcars$mpg)
-is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 9 unique values
+is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 is_discrete(letters)
 }

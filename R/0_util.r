@@ -10,11 +10,11 @@
 #' @export
 #' @examples
 #' is_discrete(mtcars$mpg)
-#' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 9 unique values
+#' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' is_discrete(letters)
 is_discrete <- function(x){
   is.factor(x) || is.character(x) || is.logical(x) ||
-    (length(unique(x)) < 9L & is.numeric(x))
+    (length(unique(x)) < 25L & is.numeric(x))
 }
 
 #' The type of model for a given Y variable.
@@ -28,13 +28,13 @@ is_discrete <- function(x){
 #' @export
 #' @examples
 #' problem_type(mtcars$mpg)
-#' problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 9 unique values
+#' problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' problem_type(letters)
 #TODO May want be deprecated in favor of is.discrete, this may be slightly safer if outside of the checks of is_discrete
 problem_type <- function(y){
   if(is_discrete(y) == TRUE) return("classification")
   if(is.numeric(y) == TRUE)  return("regression")
-  stop("y was expected as a with less than 9 unique values, or continuous numeric; indicating a classification or regression problem respectivly.")
+  stop("y was expected as a with less than 25 unique values, or continuous numeric; indicating a classification or regression problem respectivly.")
 }
 
 

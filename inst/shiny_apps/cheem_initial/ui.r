@@ -76,8 +76,9 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
              shinycssloaders::withSpinner(type = 8L)
     ),
     column(width = 6L,
-           p("residual_plot here")
-          # plotOutput("residual_plot", width = "100%")
+           plotly::plotlyOutput("residual_plot",
+                                height = "400px", width = "400px") %>%
+             shinycssloaders::withSpinner(type = 8L)
     )
   ) ## close fluidRow
 ) ## Assign tab1_cheem

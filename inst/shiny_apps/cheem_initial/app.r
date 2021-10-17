@@ -171,6 +171,81 @@ server <- function(input, output, session){
   })
   outputOptions(output, "input__linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
   
+  output$residual_plot <- plotly::renderPlotly({
+    req(load_ls())
+    req(primary_obs_d())
+    req(comparison_obs_d())
+    decode_df <- load_ls()$decode_df
+    
+    ## Index of selected data:
+    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+    if(is.null(.d)){
+      .idx_rownums <- TRUE
+    }else{
+      .idx_rownums <- decode_df$rownum %in% .d$key
+    }
+    
+    ## Filter to rownum and select columns
+    df <- decode_df[
+      .idx_rownums, c("y", "residual", "class", "tooltip")]
+    
+    ## Red misclassified points, if applicable
+    .is_classification <- problem_type(df$y) == "classifcation"
+    pts_misclas <- NULL
+    .pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
+    if(.is_classification == TRUE){
+      .pred_clas <- layer_ls$decode_df$predicted_class
+      .idx_misclas <- which(decode_df$is_misclassified == TRUE)
+      if(sum(.idx_misclas) > 0L){
+        .df_misclas <- df[.idx_misclas, ] # %>% highlight_key(~rownum)
+        pts_misclas <-
+          ggplot2::geom_point(ggplot2::aes(y, residual), .df_misclas,
+                              color = "red", fill = NA,
+                              shape = 21L, size = 3L, alpha = .alpha)
+      }
+    }
+    
+    ## Highlight points
+    pts_selected <- list()
+    prim_obs <- primary_obs_d()
+    if(is.null(prim_obs) == FALSE)
+      pts_selected <- c(
+        pts_selected,
+        geom_point(#aes(color = .pred_clas[prim_obs]), 
+                   data = decode_df[prim_obs, ],
+                   color = "black",
+                   size = 4L, shape = 4L, alpha = 0.5))
+    comp_obs <- comparison_obs_d()
+    if(is.null(prim_obs) == FALSE)
+      pts_selected <- c(
+        pts_selected,
+        geom_point(#aes(color = .pred_clas[comp_obs]), 
+                   data = decode_df[comp_obs, ],
+                   color = "black",
+                   size = 5L, shape = 8L, alpha = 1L))
+    
+    ## Plot
+    gg <- ggplot(df, aes(y, residual, label = tooltip,
+                         color = .pred_clas, shape = .pred_clas)) +
+      geom_point() +
+      pts_misclas +
+      pts_selected +
+      theme_bw() +
+      scale_color_brewer(palette = "Dark2") +
+      labs(x = "Y, response variable", y = "Residual, Y - predition")
+    
+    ## Return
+    plotly::ggplotly(p = gg, tooltip = "label") %>%
+      ## Remove button bar and zoom box
+      plotly::config(displayModeBar = FALSE,
+                     modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d")) %>%
+      ## Remove legends and axis lines
+      plotly::layout(showlegend = FALSE,
+                     xaxis = list(scaleanchor = "y", scalaratio = 1L))
+  })
+  outputOptions(output, "residual_plot", suspendWhenHidden = FALSE) ## Eager evaluation
+  
+  
   output$cheem_tour <- plotly::renderPlotly({
     req(bas())
     req(load_ls())

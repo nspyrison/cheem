@@ -28,13 +28,13 @@ str(layer_ls$decode_df)
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
+  setwd("~/R/cheem")
   save(dat,  ## penguins pre-processed data
        clas, ## penguins species
        layer_ls,
        file = "1preprocess_penguins.RData")
-  file.copy(
-    "./1preprocess_penguins.RData", overwrite = TRUE, to = 
-      "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
+  file.copy("./1preprocess_penguins.RData", overwrite = TRUE, to = 
+              "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
   file.remove("./1preprocess_penguins.RData")
 }
 if(F){## Not run, load dat, clas, layer_ls
