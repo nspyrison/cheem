@@ -381,32 +381,20 @@ linked_plotly_func <- function(
     rep_len(nrow(plot_df)) %>%
     as.factor()
   
-  gg <- ggplot2::ggplot(
-    plotly::highlight_key(plot_df, ~rownum),
-    ggplot2::aes(V1, V2)
-  )
-    
-  ## Red misclassified points, if present
-  if(is_classification == TRUE){
-    .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
-    .idx_misclas <- plot_df$rownum %in% .rn_misclass
-    if(sum(.idx_misclas) > 0L){
-      .df <- plot_df[.idx_misclas, ] # %>% highlight_key(~rownum)
-      gg <- gg +
-        ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
-                            color = "red", fill = NA,
-                            shape = 21L, size = 3L, alpha = .alpha)
-    }
-  }
+  gg <- 
+  
+  pts_highlight <- list()
   ## Highlight comparison obs, if passed
   if(is.null(comparison_obs) == FALSE){
     .idx_comp <- plot_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L){
       .df <- plot_df[.idx_comp, ]
-      gg <- gg +
+      pts_highlight <- c(
+        pts_highlight,
         ## Highlight comparison obs
         ggplot2::geom_point(ggplot2::aes(V1, V2), #, color = pred_clas[.idx_comp]),
-                            .df, size = 4L, shape = 4L, color = "black")
+                            .df, size = 3L, shape = 4L, color = "black")
+      )
     }
   }
   ## Highlight shap obs, if passed
@@ -414,20 +402,42 @@ linked_plotly_func <- function(
     .idx_shap <- plot_df$rownum == primary_obs
     if(sum(.idx_shap) > 0L){
       .df <- plot_df[.idx_shap, ] # %>% highlight_key(~rownum)
-      gg <- gg +
+      pts_highlight <- c(
+        pts_highlight,
         ggplot2::geom_point(ggplot2::aes(V1, V2),#, color = pred_clas[.idx_shap]),
                             .df, size = 5L, shape = 8L, color = "black")
+      )
+    }
+  }
+  ## Red misclassified points, if present
+  if(is_classification == TRUE){
+    .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
+    .idx_misclas <- plot_df$rownum %in% .rn_misclass
+    if(sum(.idx_misclas) > 0L){
+      .df <- plot_df[.idx_misclas, ] # %>% highlight_key(~rownum)
+      pts_highlight <- c(
+        pts_highlight,
+        ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
+                            color = "red", fill = NA,
+                            shape = 21L, size = 3L, alpha = .alpha)
+      )
     }
   }
   ## Maha skew text,
   #### geom_text not working with plotly... & annotate() not working with facets...
   if(do_include_maha_qq == TRUE){
-    gg <- gg +
+    pts_highlight <- c(
+      pts_highlight,
       ggplot2::geom_text(ggplot2::aes(x = -Inf, y = Inf, label = ggtext),
-                         hjust = 0L, vjust = 1L, size = 4L)
+                         hjust = 0L, vjust = 1L, size = 3L)
+    )
   }
+ 
   ## Normal points
-  gg <- gg +
+  gg <- ggplot2::ggplot(
+    plotly::highlight_key(plot_df, ~rownum),
+    ggplot2::aes(V1, V2)) + 
+    pts_highlight +
     suppressWarnings(ggplot2::geom_point(
       ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas,
                    tooltip = tooltip), alpha = .alpha)) +
@@ -541,16 +551,16 @@ radial_cheem_ggtour <- function(
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
         comparison_obs,
-        #list(color = .pred_clas),
-        list(linetype = 3L, alpha = 0.8, color = "black"),
+        #aes_args = list(color = .pred_clas),
+        identity_args = list(linetype = 3L, alpha = 0.8, color = "black"),
         mark_initial = FALSE) +
       ## Highlight shap obs
       spinifex::proto_highlight1d(
         primary_obs,
-        #list(color = .pred_clas),
-        list(linetype = 2L, alpha = .6, size = .8, color = "black"),
-        mark_initial = FALSE) +
-      spinifex::proto_frame_cor()
+        #aes_args = list(color = .pred_clas),
+        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"),
+        mark_initial = FALSE)
+    ## No frame correlation for a 1D projection
   }
   
   ### Regression case -----
@@ -567,7 +577,7 @@ radial_cheem_ggtour <- function(
         ))
     })
     dn <- dimnames(.mt_path)
-    dn[[1L]] <- c("Observed y", rownames(.mt_path))
+    dn[[1L]] <- c("Obs y", rownames(.mt_path))
     dn[[2L]] <- c("Local explanation", "Observed y")
     dimnames(.array) <- dn
     attr(.array, "manip_var") <- attr(.mt_path, "manip_var")
@@ -578,11 +588,13 @@ radial_cheem_ggtour <- function(
     
     ## Add y to .dat to project
     .dat <- spinifex::scale_01(data.frame(.x, .y))
+    
+    browser()
     ## Plot
     ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
       ## _points would ideally be _hex or _hdr, but:
       #### _hex doesn't work with plotly
-      #### _hdr not implented atm.
+      #### _hdr not implemented atm.
       ##- thin the data...
       spinifex::proto_point(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
@@ -605,8 +617,8 @@ radial_cheem_ggtour <- function(
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,
-        #list(color = .pred_clas),
-        list(size = 4L, shape = 4L, alpha = 0.5, color = "black"),
+        #aes_args = list(color = .pred_clas),
+        identity_args = list(size = 3L, shape = 4L, alpha = 0.5, color = "black"),
         mark_initial = FALSE) +
       ## Highlight primary obs
       spinifex::proto_highlight(
