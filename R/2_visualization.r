@@ -18,10 +18,10 @@ basis_local_attribution <- function(
   rownum = nrow(local_attribution_df)
 ){
   ## Remove last column if layer_name
-  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE){
-    col_idx <- 1L:ncol(local_attribution_df)
-  }else{col_idx <- -ncol(local_attribution_df)}
-  LA_df <- local_attribution_df[rownum, col_idx]
+  .col_idx <- -ncol(local_attribution_df)
+  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
+    .col_idx <- 1L:ncol(local_attribution_df)
+  LA_df <- local_attribution_df[rownum, .col_idx]
   ## Extract formatted basis
   LA_bas <- LA_df %>%
     as.numeric %>%
@@ -97,10 +97,10 @@ proto_basis1d_distribution <- function(
   local_attribution_df <- layer_ls$shap_df
   ## Pivot longer:
   ### ensure last col dropped if layer_name
-  col_idx <- ifelse(
-    local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric,
-    1L:ncol(local_attribution_df), -ncol(local_attribution_df))
-  LA_df <- local_attribution_df[, col_idx]
+  .col_idx <- -ncol(local_attribution_df)
+  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric)
+    .col_idx <- 1L:ncol(local_attribution_df)
+  LA_df <- local_attribution_df[, .col_idx]
   
   ## Force orthonormalize each row.
   .m <- sapply(1L:nrow(LA_df), function(i){
@@ -170,21 +170,21 @@ proto_basis1d_distribution <- function(
                    color = group_by, tooltip = rownum),
       .df_basis_distr_pcp_segments, size = .5, alpha = .alpha / 6L))
     prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
-    if(length(primary_obs) > 0L){
+    prim_pcp <- NULL
+    if(length(primary_obs) > 0L)
       prim_pcp <- suppressWarnings(ggplot2::geom_segment(
         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                      color = group_by, tooltip = rownum),
         .df_basis_distr_pcp_segments[prim_idx, ],
         size = 1L, alpha = .8, linetype = 2L))
-    }else{prim_pcp <- NULL}
     comp_idx <- .df_basis_distr_pcp_segments$rownum == comparison_obs
-    if(length(primary_obs) > 0L){
+    comp_pcp <- NULL
+    if(length(primary_obs) > 0L)
       comp_pcp <- suppressWarnings(ggplot2::geom_segment(
         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                      color = group_by, tooltip = rownum),
         .df_basis_distr_pcp_segments[comp_idx, ],
         size = .8, alpha = .6, linetype = 3L))
-    }else{comp_pcp <- NULL}
     ret <- list(bkg_pcp, comp_pcp, prim_pcp, ret)
   }
   
@@ -381,9 +381,21 @@ linked_plotly_func <- function(
     rep_len(nrow(plot_df)) %>%
     as.factor()
   
-  gg <- 
-  
   pts_highlight <- list()
+  ## Red misclassified points, if present
+  if(is_classification == TRUE){
+    .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
+    .idx_misclas <- plot_df$rownum %in% .rn_misclass
+    if(sum(.idx_misclas) > 0L){
+      .df <- plot_df[.idx_misclas, ] # %>% highlight_key(~rownum)
+      pts_highlight <- c(
+        pts_highlight,
+        ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
+                            color = "red", fill = NA,
+                            shape = 21L, size = 3L, alpha = .alpha)
+      )
+    }
+  }
   ## Highlight comparison obs, if passed
   if(is.null(comparison_obs) == FALSE){
     .idx_comp <- plot_df$rownum == comparison_obs
@@ -409,22 +421,9 @@ linked_plotly_func <- function(
       )
     }
   }
-  ## Red misclassified points, if present
-  if(is_classification == TRUE){
-    .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
-    .idx_misclas <- plot_df$rownum %in% .rn_misclass
-    if(sum(.idx_misclas) > 0L){
-      .df <- plot_df[.idx_misclas, ] # %>% highlight_key(~rownum)
-      pts_highlight <- c(
-        pts_highlight,
-        ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
-                            color = "red", fill = NA,
-                            shape = 21L, size = 3L, alpha = .alpha)
-      )
-    }
-  }
   ## Maha skew text,
-  #### geom_text not working with plotly... & annotate() not working with facets...
+  #### geom_text not working with plotly... &
+  #### annotate() doesn't wor4d accross with facets...
   if(do_include_maha_qq == TRUE){
     pts_highlight <- c(
       pts_highlight,
@@ -432,15 +431,15 @@ linked_plotly_func <- function(
                          hjust = 0L, vjust = 1L, size = 3L)
     )
   }
- 
-  ## Normal points
+  
+  ## ggplot
   gg <- ggplot2::ggplot(
-    plotly::highlight_key(plot_df, ~rownum),
-    ggplot2::aes(V1, V2)) + 
-    pts_highlight +
+    data = plotly::highlight_key(plot_df, ~rownum),
+    mapping = ggplot2::aes(V1, V2)) +
     suppressWarnings(ggplot2::geom_point(
       ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas,
                    tooltip = tooltip), alpha = .alpha)) +
+    pts_highlight +
     ggplot2::facet_grid(rows = ggplot2::vars(projection_nm),
                         cols = ggplot2::vars(layer_nm), scales = "free") +
     ggplot2::theme_bw() +
@@ -450,9 +449,9 @@ linked_plotly_func <- function(
                    axis.ticks = ggplot2::element_blank(),
                    legend.position = "off")
   
-  ## BOX SELECT
-  ggp <- plotly::ggplotly(gg, tooltip = "tooltip",
-           height = height_px, width = width_px)
+  ## Plotly options & box selection
+  ggp <- plotly::ggplotly(gg, tooltip = "tooltip", 
+                          height = height_px, width = width_px)
   ggp <- plotly::config(ggp, displayModeBar = FALSE)                  ## Remove html buttons
   ggp <- plotly::layout(ggp, dragmode = "select", showlegend = FALSE) ## Set drag left mouse
   ggp <- plotly::event_register(ggp, "plotly_selected")               ## Reflect "selected", on release of the mouse button.
@@ -505,6 +504,7 @@ radial_cheem_ggtour <- function(
   angle = .1,
   rownum_idx = TRUE
 ){
+  if(sum(rownum_idx) == 0L) stop("radial_cheem_ggtour: sum of rownum_idx was 0.")
   ## Initialization Y on basis
   .y <- layer_ls$decode_df[rownum_idx, "y"] %>% matrix(ncol = 1L)
   .col_idx <- which(!(
@@ -520,10 +520,12 @@ radial_cheem_ggtour <- function(
   if(.prob_type == "classification")
     .pred_clas <- layer_ls$decode_df$predicted_class
   
-  logistic_rownum_tform = function(x, mid_pt = 1000, k_attenuation = 2/mid_pt, max = 1, floor=.1) {
+  logistic_rownum_tform = function(
+    x, mid_pt = 700L, k_attenuation = 2L / mid_pt, max = 1L, floor = .1){
     k_attenuation
-    log <- max / (1 + exp(k_attenuation * (x - mid_pt)))
-    floor + (1 - floor)*log}
+    log <- max / (1L + exp(k_attenuation * (x - mid_pt)))
+    floor + (1L - floor)*log
+  }
   #' @examples 
   #' x <- 1:5000; plot(x, logistic_rownum_tform(x), col='blue');
   .alpha <- logistic_rownum_tform(nrow(layer_ls$decode_df))
@@ -589,7 +591,8 @@ radial_cheem_ggtour <- function(
     ## Add y to .dat to project
     .dat <- spinifex::scale_01(data.frame(.x, .y))
     
-    browser()
+    #browser() #TODO: want to explore how to remove/fix order of basis.
+    
     ## Plot
     ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
       ## _points would ideally be _hex or _hdr, but:

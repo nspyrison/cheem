@@ -72,14 +72,10 @@ str(sim_EEE_p4)
 require("ggplot2")
 ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 
-## Create shap layer_ls ---
+## SHAP layer_ls -----
 n_cobs <- 0L
-layer_ls <- assign_cobs_layer_ls(
-  data = dat,
-  class = clas,
-  y = clas, ## Factor implies classification, numeric implies regression
-  n_cobs = n_cobs, ## Drawn from lvl 1, assigned to other levels
-  var_coeff = .1)
+layer_ls <- nested_local_attr_layers(
+  x = dat, y = clas, basis_type = "pca", class = clas)
 
 names(layer_ls)
 str(layer_ls$plot_df)
@@ -91,11 +87,7 @@ if(interactive() == TRUE){
   save(dat,  ## Simulation pre-processed data
        clas, ## Simulation class
        layer_ls,
-       file = "2preprocess_toy_classificiation.RData")
-  file.copy(
-    "./2preprocess_toy_classificiation.RData", overwrite = TRUE, to =
-      "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
-  file.remove("./2preprocess_toy_classificiation.RData")
+       file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
 }
 if(F){## Not run, load dat, clas, layer_ls
   load("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")

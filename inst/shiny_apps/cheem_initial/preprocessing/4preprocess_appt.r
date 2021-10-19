@@ -27,14 +27,9 @@ if(F)
 lj <- left_join(.raw, .agg, by = "district")
 X <- lj[,c(2:5, 10)]
 
-## COBS data and shap_layers -----
-#### Create Courpted OBServations datasets and their shap layers.
-layer_ls <- assign_cobs_layer_ls(
-  data = X,
-  class = clas,
-  y = Y, ## Factor implies classification, numeric implies regression
-  n_cobs = 0, ## Draw from first level, assigned to all other levels.
-  var_coeff = .1)
+## SHAP layer_ls -----
+layer_ls <- nested_local_attr_layers(
+  x = X, y = Y, basis_type = "pca", class = clas)
 
 names(layer_ls)
 str(layer_ls$plot_df)
@@ -47,10 +42,7 @@ if(interactive()){
        clas, ## district; it's sd rank is in X, but not the Y of the rf model.
        Y,    ## m2.price, price_per_sq_meter?
        layer_ls,
-       file = "4preprocess_appt.RData")
-  file.copy("./4preprocess_appt.RData", overwrite = TRUE, to =
-  "./inst/shiny_apps/cheem_initial/data/4preprocess_appt.RData")
-  file.remove("./4preprocess_appt.RData")
+       file = "./inst/shiny_apps/cheem_initial/data/4preprocess_appt.RData")
 }
 if(F){## Not run, load dat, layer_ls
   load("./inst/shiny_apps/cheem_initial/data/4preprocess_appt.RData")

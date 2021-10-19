@@ -10,7 +10,7 @@ server <- function(input, output, session){
   ## Reactives ----
   #### No eager evaluation of reactive functions, only outputs.
   load_ls <- reactive({
-    req(input$dat_char)
+    req(input$dat_char, cancelOutput = TRUE)
     dat <- input$dat_char
     if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
@@ -26,7 +26,7 @@ server <- function(input, output, session){
   })
   
   output$input__dat_desc <- renderUI({
-    req(input$dat_char)
+    req(input$dat_char, cancelOutput = TRUE)
     dat <- input$dat_char
     if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
@@ -60,7 +60,7 @@ server <- function(input, output, session){
   })
   
   bas <- reactive({
-    req(load_ls())
+    req(load_ls(), cancelOutput = TRUE)
     shap_df <- load_ls()$shap_df
     bas <- basis_local_attribution(shap_df, primary_obs_d())
     return(bas)
@@ -68,9 +68,9 @@ server <- function(input, output, session){
   
   ## output: inputs in the ui -----
   output$input__shap.comparison_obs <- renderUI({
-    req(load_ls())
+    req(load_ls(), cancelOutput = TRUE)
     .n <- load_ls()$decode_df %>% nrow()
-    req(input$dat_char)
+    req(input$dat_char, cancelOutput = TRUE)
     dat <- input$dat_char
     if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
       stop("data string not matched.")
@@ -81,8 +81,8 @@ server <- function(input, output, session){
       comparison_obs <- 111L
     }
     if(dat == "penguins"){
-      primary_obs    <- 169L
-      comparison_obs <- 99L
+      primary_obs    <- 177L
+      comparison_obs <- 131L
     }
     if(dat == "fifa"){ ## TODO: WILL BE WRONG OBS AFTER THINNING:
       primary_obs    <- 1L ## L Messi
@@ -108,18 +108,18 @@ server <- function(input, output, session){
   ##"Debounce" shap/comparison_obs; 
   #### ie, Reduces making multiple animations as someone types in a 3 digit number 
   primary_obs <- reactive({
-    req(input$primary_obs)
+    req(input$primary_obs, cancelOutput = TRUE)
     input$primary_obs
   })
   primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
   comparison_obs <- reactive({
-    req(input$comparison_obs)
+    req(input$comparison_obs, cancelOutput = TRUE)
     input$comparison_obs
   })
   comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
   
   output$input__manip_var_nm <- renderUI({
-    req(bas())
+    req(bas(), cancelOutput = TRUE)
     bas <- bas()
     
     opts <- rownames(bas)
@@ -141,22 +141,21 @@ server <- function(input, output, session){
   
   ## Plot outputs -----
   output$kurtosis_text <- renderPrint({
-    req(load_ls())
-    req(input$do_include_maha_qq)
-    if(as.logical(input$do_include_maha_qq) == FALSE){.lines <- ""
-    }else{
-      .lines <-
-        c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
-          unique(load_ls()$plot_df[, c("ggtext")])[-1L])
-    }
+    req(load_ls(), cancelOutput = TRUE)
+    req(input$do_include_maha_qq, cancelOutput = TRUE)
+    .lines <- ""
+    if(as.logical(input$do_include_maha_qq) == TRUE)
+      .lines <- c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
+        unique(load_ls()$plot_df[, c("ggtext")])[-1L])
     writeLines(.lines)
   })
   outputOptions(output, "kurtosis_text", suspendWhenHidden = FALSE) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
-    req(load_ls())
-    req(primary_obs_d())
-    req(comparison_obs_d())
+    req(load_ls(), cancelOutput = TRUE)
+    req(primary_obs_d(), cancelOutput = TRUE)
+    req(comparison_obs_d(), cancelOutput = TRUE)
+    
     linked_plotly_func(
       load_ls(), primary_obs_d(), comparison_obs_d(),
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
@@ -172,20 +171,19 @@ server <- function(input, output, session){
   outputOptions(output, "input__linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
   
   output$residual_plot <- plotly::renderPlotly({
-    req(load_ls())
-    req(primary_obs_d())
-    req(comparison_obs_d())
+    req(load_ls(), cancelOutput = TRUE)
+    req(primary_obs_d(), cancelOutput = TRUE)
+    req(comparison_obs_d(), cancelOutput = TRUE)
     decode_df <- load_ls()$decode_df
     
     ## Index of selected data:
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    if(is.null(.d)){
-      .idx_rownums <- TRUE
-    }else{
+    .idx_rownums <- TRUE
+    if(is.null(.d) == FALSE)
       .idx_rownums <- decode_df$rownum %in% .d$key
-    }
     
     ## Filter to rownum and select columns
+    decode_df <- decode_df[.idx_rownums, ]
     df <- decode_df[
       .idx_rownums, c("y", "residual", "class", "tooltip")]
     .pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
@@ -196,33 +194,30 @@ server <- function(input, output, session){
     if(.is_classification == TRUE){
       .pred_clas <- layer_ls$decode_df$predicted_class
       .idx_misclas <- which(decode_df$is_misclassified == TRUE)
-      if(sum(.idx_misclas) > 0L){
-        .df_misclas <- df[.idx_misclas, ]
+      if(sum(.idx_misclas) > 0L)
         pts_highlight <- c(
           pts_highlight,
-          ggplot2::geom_point(ggplot2::aes(y, residual), .df_misclas,
-                              color = "red", fill = NA,
-                              shape = 21L, size = 3L, alpha = .alpha)
+          ggplot2::geom_point(
+            ggplot2::aes(y, residual), df[.idx_misclas, ],
+            color = "red", fill = NA, shape = 21L, size = 3L, alpha = .alpha)
         )
-      }
     }
-    ## Highlight points
+    ## Primary point
     prim_obs <- primary_obs_d()
     if(is.null(prim_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
-        geom_point(#aes(color = .pred_clas[prim_obs]), 
-                   data = decode_df[prim_obs, ],
-                   color = "black",
-                   size = 3L, shape = 4L, alpha = 0.5))
+        geom_point(#aes(color = .pred_clas[decode_df$rownum == prim_obs]),
+                   data = decode_df[decode_df$rownum == prim_obs, ],
+                   color = "black", size = 5L, shape = 4L, alpha = 0.5))
+    ## Comp point
     comp_obs <- comparison_obs_d()
     if(is.null(prim_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
-        geom_point(#aes(color = .pred_clas[comp_obs]), 
-                   data = decode_df[comp_obs, ],
-                   color = "black",
-                   size = 3L, shape = 8L, alpha = 1L))
+        geom_point(#aes(color = .pred_clas[.idx_comp]),
+                   data = decode_df[decode_df$rownum == comp_obs, ],
+                   color = "black", size = 3L, shape = 8L, alpha = 1L))
     
     ## Plot
     gg <- ggplot(df, aes(y, residual, label = tooltip,
@@ -246,21 +241,18 @@ server <- function(input, output, session){
   
   
   output$cheem_tour <- plotly::renderPlotly({
-    req(bas())
-    req(load_ls())
-    req(input$manip_var_nm)
-    req(primary_obs_d())
-    req(comparison_obs_d())
-    req(input$do_add_pcp_segments)
+    req(bas(), cancelOutput = TRUE)
+    req(load_ls(), cancelOutput = TRUE)
+    req(input$manip_var_nm, cancelOutput = TRUE)
+    req(primary_obs_d(), cancelOutput = TRUE)
+    req(comparison_obs_d(), cancelOutput = TRUE)
+    req(input$do_add_pcp_segments, cancelOutput = TRUE)
     
     ## Filter to only selected data:
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    if(is.null(.d)){
-      .idx_rownums <- TRUE
-    }else{
-      .df <- load_ls()$decode_df
-      .idx_rownums <- .df$rownum %in% .d$key
-    }
+    .idx_rownums <- TRUE
+    if(is.null(.d) == FALSE)
+      .idx_rownums <- load_ls()$decode_df$rownum %in% .d$key
     
     # if(input$dat_char == "fifa"){ ## If fifa data
     #   ## Want to browse 2D tour of fifa data

@@ -17,11 +17,11 @@ Y <- diamonds_sub$log_price
 X <- diamonds_sub[,2:7]
 clas <- diamonds_sub$cut
 
-## Create shap layer_ls ---
+## SHAP layer_ls -----
 ### TODO: ERROR HERE: object 'y.1' not found. Rstudio won't let me select anything....
 debugonce(nested_local_attr_layers)
-layer_ls <- nested_local_attr_layers(X, Y, class = clas)
-
+layer_ls <- nested_local_attr_layers(
+  x = X, y = Y, basis_type = "pca", class = clas)
 
 names(layer_ls)
 str(layer_ls$plot_df)
@@ -34,11 +34,7 @@ if(interactive() == TRUE){
   save(dat,  ## Simulation pre-processed data
        clas, ## Simulation class
        layer_ls,
-       file = "2preprocess_toy_classificiation.RData")
-  file.copy(
-    "./2preprocess_toy_classificiation.RData", overwrite = TRUE, to =
-      "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
-  file.remove("./2preprocess_toy_classificiation.RData")
+       file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
 }
 if(F){## Not run, load dat, clas, layer_ls
   load("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")

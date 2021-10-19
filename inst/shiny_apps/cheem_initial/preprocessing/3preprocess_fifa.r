@@ -53,14 +53,9 @@ X <- dat ## 9 aspects of the X's
 Y <- log(.raw$wage_eur) ## _LOG_ wages in Euros, assumed 2020 valuation.
 hist(Y)
 
-## COBS data and shap_layers -----
-#### Create Courpted OBServations datasets and their shap layers.
-layer_ls <- assign_cobs_layer_ls(
-  data = X,
-  class = clas,
-  y = Y, ## Factor implies classification, numeric implies regression
-  n_cobs = 0, ## Draw from first level, assigned to all other levels.
-  var_coeff = .1)
+## SHAP layer_ls -----
+layer_ls <- nested_local_attr_layers(
+  x = X, y = Y, basis_type = "pca", class = clas)
 
 names(layer_ls)
 str(layer_ls$plot_df)
@@ -68,41 +63,37 @@ str(layer_ls$decode_df)
 
 ## Filter out lowest 80% maha distances.
 ## V2 is observed maha
-.raw_layer_ls <- layer_ls
-object.size(layer_ls)
-if(F)
-  layer_ls <- .raw_layer_ls
-.maha_plot_df <- layer_ls$plot_df[
-  layer_ls$plot_df[, "projection_nm"] == "QQ Mahalanobis distance",]
-## THIN: just first 500 (as messi and van Dijk are 1 & 8)
-.rownums_to_keep <- 1:500
-## Order of maha numbers is not correct atm
-# .rownums_to_keep <- .maha_plot_df[.maha_plot_df["V2"] >
-#   quantile(.maha_plot_df["V2"], .9, na.rm = TRUE), 1]
-layer_ls$plot_df <-
-  layer_ls$plot_df[layer_ls$plot_df$rownum %in% .rownums_to_keep,]
-layer_ls$decode_df <-
-  layer_ls$decode_df[layer_ls$decode_df$rownum %in% .rownums_to_keep,]
-layer_ls$shap_df <- layer_ls$shap_df[.rownums_to_keep,]
-object.size(layer_ls)
+.raw_layer_ls <- layer_ls ## backup
+if(F){
+  .maha_plot_df <- layer_ls$plot_df[
+    layer_ls$plot_df$projection_nm == "QQ Mahalanobis distance",]
+  ## Want to thin out lowest 90% of maha, but I don't trust the orderign of maha atm, so manual top 10%
+  # hist(.maha_plot_df$V2)
+  # idx_top_maha <- order(.maha_plot_df$V2, decreasing = T)
+  # head(.maha_plot_df[idx_top_maha,])
+  # .rownums_to_keep <- .maha_plot_df[.maha_plot_df$V2 >
+  #   quantile(.maha_plot_df$V2, .9, na.rm = TRUE), 1]
+  
+  ## THIN: just first 500 (top skill overall/potential) (as messi and van Dijk are 1 & 8)
+  .rownums_to_keep <- 1:500
+  ## Order of maha numbers is not correct atm
+  layer_ls$plot_df <-
+    layer_ls$plot_df[layer_ls$plot_df$rownum %in% .rownums_to_keep,]
+  layer_ls$decode_df <-
+    layer_ls$decode_df[layer_ls$decode_df$rownum %in% .rownums_to_keep,]
+  layer_ls$shap_df <- layer_ls$shap_df[.rownums_to_keep,]
+}
 length(.rownums_to_keep)
 length(unique(.rownums_to_keep)) ## of original 5000 row nums
-
-layer_ls$decode_df <- layer_ls$decode_df[order(layer_ls$decode_df$rownum),]
-if(F) ##TODO: i think the order maha dist is mukign everthing up..... will need to go back through...
-  View(layer_ls$decode_df)
 
 
 ## EXPORT OBJECTS ----
 if(interactive()){
   dat <- layer_ls$decode_df[, 5L:13L]
-  save(dat,   ## non-scaled 9X aggregates of 42 var Fifa20 data.
-       #clas, ## fielder/goal-keeper
+  save(dat,  ## non-scaled 9X aggregates of 42 var Fifa20 data.
+       clas, ## fielder/goal-keeper
        layer_ls,
-       file = "3preprocess_fifa.RData")
-  file.copy("./3preprocess_fifa.RData", overwrite = TRUE, to =
-  "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
-  file.remove("./3preprocess_fifa.RData")
+       file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
 }
 if(F){## Not run, load dat, layer_ls
   load("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")

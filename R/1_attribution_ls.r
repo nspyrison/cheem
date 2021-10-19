@@ -35,8 +35,8 @@ global_view_df <- function(
   layer_name
 ){
   d = 2L ## Fixed display dimensionality 
+  
   ## maha_vect_of() -----
-  #maha_vect_of <- function(x, do_normalize = TRUE){ ## distance from median(x), stats::cov(x)
   if(is.null(class)) class <- as.factor(FALSE)
   .lvls <- levels(class)
   maha <- NULL
@@ -54,7 +54,7 @@ global_view_df <- function(
   ### Theoretical chi sq quantiles, x of a QQ plot
   .probs <- seq(.001, .999, length.out = nrow(x))
   .qx <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
-  ### Sample quantiles, y of a QQ plot
+  ### Sample/obs quantiles, y of a QQ plot
   .qy <- spinifex::scale_01(matrix(stats::quantile(maha, probs = .probs)))
   .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy), "less")$p.value
   .maha_skew_text <- paste0(
@@ -64,7 +64,7 @@ global_view_df <- function(
     "  Kurtosis - 3: ", round(moments::kurtosis(.qy) - 3L, 2L), "\n",
     "  Skew: ", round(moments::skewness(.qy), 2L), "\n")
   
-  ## projection df -----
+  ## Projection df -----
   basis_type <- match.arg(basis_type)
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x, d),
@@ -73,15 +73,15 @@ global_view_df <- function(
   proj <- spinifex::scale_01(proj) %>% as.data.frame()
   
   ## Column bind wider, order by rownum
-  tooltip <- 1L:nrow(x) ## Init, 
+  tooltip <- 1L:nrow(x)
   #### !!OVERWROTE in format_nested_layers, once we have the model to check misclassification
   .plot_df <- cbind(
     1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
   ## Row bind longer, adding QQ maha, and kurtosis info.
-  .q_idx <- order(maha, decreasing = FALSE) ## Order by maha
   .qq_df <- data.frame(1L:nrow(x), class, .qx, .qy, y, layer_name,
     "QQ Mahalanobis distance", tooltip, .maha_skew_text)
-  .qq_df <- .qq_df[.q_idx, ] ## Order by maha distances
+  # .q_idx <- order(maha, decreasing = FALSE) ## Order by maha
+  # .qq_df <- .qq_df[.q_idx, ] ## Order by maha distances
   colnames(.qq_df) <- colnames(.plot_df) <-
     c("rownum", "class", paste0("V", 1L:d), "y",
       "layer_nm", "projection_nm", "tooltip", "ggtext")
