@@ -519,16 +519,7 @@ radial_cheem_ggtour <- function(
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- layer_ls$decode_df$predicted_class
-  
-  logistic_rownum_tform = function(
-    x, mid_pt = 700L, k_attenuation = 2L / mid_pt, max = 1L, floor = .1){
-    k_attenuation
-    log <- max / (1L + exp(k_attenuation * (x - mid_pt)))
-    floor + (1L - floor)*log
-  }
-  #' @examples 
-  #' x <- 1:5000; plot(x, logistic_rownum_tform(x), col='blue');
-  .alpha <- logistic_rownum_tform(nrow(layer_ls$decode_df))
+  .alpha <- logistic_tform(nrow(layer_ls$decode_df))
   
   ## Manual (radial) tour 1d
   .mv <- which(colnames(layer_ls$shap_df) == mv_name)

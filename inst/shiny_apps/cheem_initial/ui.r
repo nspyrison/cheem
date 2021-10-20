@@ -25,9 +25,11 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   #### Top text description -----
   fluidRow(
     ## Choose data:
-    selectInput("dat_char", "Data:",
-                choices = c("toy classification", "penguins", "fifa", "appartments"),
-                selected = "fifa"), #"toy classification"),
+    selectInput(
+      "dat_char", "Data:",
+      choices = c("toy classification", "penguins", "fifa", "apartments",
+                  "diabetes (wide)", "diabetes (long)"),
+      selected = "fifa"), #"toy classification"),
     h3("Preprocessing and data description"),
     uiOutput("input__dat_desc"),
     p("3) Extract the SHAP matrix, that is SHAP values of EACH observation, via {treeshap}"),
@@ -41,7 +43,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   #### linked_plotly ----
   h4("PC1:2 of the data and SHAP spaces"),
   textOutput("cobs_msg"),
-  uiOutput("input__shap.comparison_obs"),
+  uiOutput("input__prim.comp_obs"),
   selectInput("do_include_maha_qq", "Add Mahalanobis distance QQ plots?",
               choices = c(FALSE, TRUE), selected = FALSE),
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),

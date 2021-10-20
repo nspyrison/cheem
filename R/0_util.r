@@ -87,3 +87,56 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
                           sigma =  var_coeff * .cov)
   return(as.data.frame(ret))
 }
+
+#' Linear function to help set alpha opacity
+#' 
+#' Suggests a alpha opacity to plot with as a function of the number of 
+#' observation.
+#' 
+#' @param n Number of observations to plot.
+#' @param appox_max_n The number of observation to reach floor opacity.
+#' @param ceiling The highest number returned. Defaults to 1.
+#' @param floor The lowest number returned. Defaults to 0.2.
+#' @return A scalar numeric, suggested value to set alpha opacity.
+#' @export
+#' @examples
+#' ## Suggest an opacity to use in plotting:
+#' (my_alpha <- linear_tfrom(nrow(spinifex::penguins)))
+#'
+#' ## Visualize
+#' x <- 1:2000
+#' plot(x, linear_tfrom(x), col='blue')
+linear_tfrom = function(
+  n, appox_max_n = 5000L, ceiling = 1, floor = .2
+){
+  vec <- 1L - min(n / appox_max_n, 1L)
+  ceiling * (floor + (1L - floor) * vec)
+}
+
+#' Logistic function to help set alpha opacity
+#' 
+#' Suggests a alpha opacity to plot with as a function of the number of 
+#' observation.
+#' 
+#' @param n Number of observations to plot.
+#' @param mid_pt Inflection point that the logistic curve. Defaults to 1000.
+#' @param k_attenuation The steepness of the transition, larger is more 
+#' discrete transition. Quite sensitive and defaults to 0.01.
+#' @param ceiling The highest number returned. Defaults to 1.
+#' @param floor The lowest number returned. Defaults to 0.2.
+#' @return A scalar numeric, suggested value to set alpha opacity.
+#' @export
+#' @examples
+#' ## Suggest an opacity to use in plotting:
+#' (my_alpha <- logistic_tfrom(nrow(spinifex::penguins)))
+#'
+#' ## Visualize
+#' x <- 1:2000
+#' plot(x, logistic_tfrom(x), col='blue')
+logistic_tfrom = function(
+  n, mid_pt = 1000L, k_attenuation = .01, ceiling = 1L, floor = .2
+){
+  vec <- 1 / (1L + exp(k_attenuation * (n - mid_pt)))
+  ceiling * (floor + (1L - floor) * vec)
+}
+

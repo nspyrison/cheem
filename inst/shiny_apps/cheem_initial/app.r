@@ -12,7 +12,8 @@ server <- function(input, output, session){
   load_ls <- reactive({
     req(input$dat_char, cancelOutput = TRUE)
     dat <- input$dat_char
-    if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
+    if(!(dat %in% c("toy classification", "penguins", "fifa",
+                    "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
     if(dat == "toy classification")
       load("./data/2preprocess_simulation.RData", envir = globalenv())
@@ -20,15 +21,20 @@ server <- function(input, output, session){
       load("./data/1preprocess_penguins.RData", envir = globalenv())
     if(dat == "fifa")
       load("./data/3preprocess_fifa.RData", envir = globalenv())
-    if(dat == "appartments")
-      load("./data/4preprocess_appt.RData", envir = globalenv())
+    if(dat == "apartments")
+      load("./data/4preprocess_apartments.RData", envir = globalenv())
+    if(dat == "diabetes (wide)")
+      load("./data/6preprocess_diabetes_wide.RData", envir = globalenv())
+    if(dat == "diabetes (long)")
+      load("./data/6preprocess_diabetes_long.RData", envir = globalenv())
     return(layer_ls)
   })
   
   output$input__dat_desc <- renderUI({
     req(input$dat_char, cancelOutput = TRUE)
     dat <- input$dat_char
-    if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
+    if(!(dat %in% c("toy classification", "penguins", "fifa",
+                    "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
     ## Load data:
     if(dat == "toy classification")
@@ -36,28 +42,43 @@ server <- function(input, output, session){
         h4("Simulated triangle vertices"),
         p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)"),
         p("   - Each cluster is spherical and has 140 observations"),
-        p("2) Create a RF model classifying cluster level, given the continuous variables.")
+        p("2) Create a random forest model classifying cluster level, given the continuous variables.")
       )
     if(dat == "penguins")
       desc_rows <- list(
         h4("Palmer penguins"),
         p("1) 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y)."),
-        p("2) Create a RF model classifying species from the physical measurements.")
+        p("2) Create a random forest model classifying species from the physical measurements.")
       )
     if(dat == "fifa")
       desc_rows <- list(
         h4("FIFA soccer players, 2020 season"),
         p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)"),
-        p("2) Create a RF model regressing continuous wages from the skill aggregates.")
+        p("2) Create a random forest model regressing continuous wages from the skill aggregates.")
       )
-    if(dat == "appartments")
+    if(dat == "apartments")
       desc_rows <- list(
-        h4("DALEX::appartments, sinthetic data of appartment prices"),
+        h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices"),
         p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter."),
-        p("2) Create a RF model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
+        p("2) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
+      )
+    if(dat == "diabetes (wide)")
+      desc_rows <- list(
+        h4("Pima Indians Diabetes (wide)"),
+        p("1) 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes."),
+        p("2) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
+      )
+    if(dat == "diabetes (long)")
+      desc_rows <- list(
+        h4("Pima Indians Diabetes (long)"),
+        p("1) *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes."),
+        p("2) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
       )
     return(desc_rows)
   })
+  outputOptions(output, "input__dat_desc",
+                suspendWhenHidden = FALSE, priority = 0L) ## Eager evaluation
+  
   
   bas <- reactive({
     req(load_ls(), cancelOutput = TRUE)
@@ -67,12 +88,13 @@ server <- function(input, output, session){
   })
   
   ## output: inputs in the ui -----
-  output$input__shap.comparison_obs <- renderUI({
+  output$input__prim.comp_obs <- renderUI({
     req(load_ls(), cancelOutput = TRUE)
     .n <- load_ls()$decode_df %>% nrow()
     req(input$dat_char, cancelOutput = TRUE)
     dat <- input$dat_char
-    if(!(dat %in% c("toy classification", "penguins", "fifa", "appartments")))
+    if(!(dat %in% c("toy classification", "penguins", "fifa",
+                    "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
     
     ## Initialize to hard-coded hand picked examples.
@@ -88,10 +110,19 @@ server <- function(input, output, session){
       primary_obs    <- 1L ## L Messi
       comparison_obs <- 8L ## V. van Dijk
     }
-    if(dat == "appartments"){
-      primary_obs    <- 1L
-      comparison_obs <- 2L
+    if(dat == "apartments"){
+      primary_obs    <- 485L
+      comparison_obs <- 487L
     }
+    if(dat == "diabetes (wide)"){
+      primary_obs    <- 120L
+      comparison_obs <- 201L
+    }
+    if(dat == "diabetes (long)"){
+      primary_obs    <- 616L
+      comparison_obs <- 215L
+    }
+    
     
     ## Return
     fluidRow(
@@ -104,8 +135,10 @@ server <- function(input, output, session){
       column(4L)
     )
   })
-  outputOptions(output, "input__shap.comparison_obs", suspendWhenHidden = FALSE) ## Eager evaluation
-  ##"Debounce" shap/comparison_obs; 
+  outputOptions(output, "input__prim.comp_obs",
+                suspendWhenHidden = FALSE, priority = -10L) ## Eager evaluation
+ 
+   ##"Debounce" shap/comparison_obs; 
   #### ie, Reduces making multiple animations as someone types in a 3 digit number 
   primary_obs <- reactive({
     req(input$primary_obs, cancelOutput = TRUE)
@@ -137,7 +170,8 @@ server <- function(input, output, session){
                 choices  = opts,
                 selected = sel)
   })
-  outputOptions(output, "input__manip_var_nm", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "input__manip_var_nm",
+                suspendWhenHidden = FALSE, priority = -20L) ## Eager evaluation
   
   ## Plot outputs -----
   output$kurtosis_text <- renderPrint({
@@ -149,7 +183,8 @@ server <- function(input, output, session){
         unique(load_ls()$plot_df[, c("ggtext")])[-1L])
     writeLines(.lines)
   })
-  outputOptions(output, "kurtosis_text", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "kurtosis_text",
+                suspendWhenHidden = FALSE, priority = -40L) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
     req(load_ls(), cancelOutput = TRUE)
@@ -160,7 +195,8 @@ server <- function(input, output, session){
       load_ls(), primary_obs_d(), comparison_obs_d(),
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
-  outputOptions(output, "linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "linked_plotly",
+                suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   output$input__linked_plotly = renderUI({
     ## This is dimension of spacer, figure dim's set in args of cobs_n_plot_func::linked_plotly_func
@@ -168,7 +204,8 @@ server <- function(input, output, session){
     if(as.logical(input$do_include_maha_qq) == FALSE) height <- height / 2L
     plotly::plotlyOutput("linked_plotly", width = "100%", height = paste0(height))
   })
-  outputOptions(output, "input__linked_plotly", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "input__linked_plotly",
+                suspendWhenHidden = FALSE, priority = -201L) ## Eager evaluation
   
   output$residual_plot <- plotly::renderPlotly({
     req(load_ls(), cancelOutput = TRUE)
@@ -237,13 +274,14 @@ server <- function(input, output, session){
       plotly::layout(showlegend = FALSE, dragmode = FALSE,
                      xaxis = list(scaleanchor = "y", scalaratio = 1L))
   })
-  outputOptions(output, "residual_plot", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "residual_plot",
+                suspendWhenHidden = FALSE, priority = -100L) ## Eager evaluation
   
   
   output$cheem_tour <- plotly::renderPlotly({
     req(bas(), cancelOutput = TRUE)
     req(load_ls(), cancelOutput = TRUE)
-    req(input$manip_var_nm, cancelOutput = TRUE)
+    req(input$manip_var_nm, cancelOutput = FALSE)
     req(primary_obs_d(), cancelOutput = TRUE)
     req(comparison_obs_d(), cancelOutput = TRUE)
     req(input$do_add_pcp_segments, cancelOutput = TRUE)
@@ -259,14 +297,25 @@ server <- function(input, output, session){
     #   browser()
     #   debugonce(radial_cheem_ggtour)
     # }
+    bas <- bas()
+    mv_nm <- input$manip_var_nm
+    if(mv_nm %in% rownames(bas) == FALSE){
+      message(paste0(
+        "output$cheem_tour: input$manip_var_nm = '", mv_nm,
+        "' wasn't in the basis bas(). Shiny tried to update cheem_tour before valid manip_var_nm was passed..."))
+      return(NULL)
+    }
     
     ggt <- radial_cheem_ggtour(
-      load_ls(), bas(), input$manip_var_nm,
+      load_ls(), bas, mv_nm,
       primary_obs_d(), comparison_obs_d(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
       rownum_idx = .idx_rownums)
     spinifex::animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
+  outputOptions(output, "cheem_tour", ## LAZY eval, do last
+                suspendWhenHidden = TRUE, priority = -9999999L)
+  
   
   ## Data selected in pca_embed_plotly -----
   output$selected_df <- DT::renderDT({ ## Original data of selection
@@ -275,11 +324,8 @@ server <- function(input, output, session){
     .df <- load_ls()$decode_df
     return(DT::datatable(.df[.df$rownum %in% .d$key, ], rownames = FALSE))
   })
-  outputOptions(output, "selected_df", suspendWhenHidden = FALSE) ## Eager evaluation
-  
-  ## Message of the cobs row numbers
-  output$cobs_msg <- renderText(attr(load_ls(), "cobs_msg"))
-  outputOptions(output, "cobs_msg", suspendWhenHidden = FALSE) ## Eager evaluation
+  outputOptions(output, "selected_df",
+                suspendWhenHidden = FALSE, priority = -30L) ## Eager evaluation
 } ## Close function, assigning server object.
 
 shinyApp(ui = ui, server = server)
