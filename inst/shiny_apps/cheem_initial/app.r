@@ -77,7 +77,7 @@ server <- function(input, output, session){
     return(desc_rows)
   })
   outputOptions(output, "input__dat_desc",
-                suspendWhenHidden = FALSE, priority = 0L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -0L) ## Eager evaluation
   
   
   bas <- reactive({
@@ -115,7 +115,7 @@ server <- function(input, output, session){
       comparison_obs <- 487L
     }
     if(dat == "diabetes (wide)"){
-      primary_obs    <- 120L
+      primary_obs    <- 121L
       comparison_obs <- 201L
     }
     if(dat == "diabetes (long)"){
@@ -136,7 +136,7 @@ server <- function(input, output, session){
     )
   })
   outputOptions(output, "input__prim.comp_obs",
-                suspendWhenHidden = FALSE, priority = -10L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -10L) ## Eager evaluation
  
    ##"Debounce" shap/comparison_obs; 
   #### ie, Reduces making multiple animations as someone types in a 3 digit number 
@@ -171,7 +171,7 @@ server <- function(input, output, session){
                 selected = sel)
   })
   outputOptions(output, "input__manip_var_nm",
-                suspendWhenHidden = FALSE, priority = -20L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -20L) ## Eager evaluation
   
   ## Plot outputs -----
   output$kurtosis_text <- renderPrint({
@@ -184,7 +184,7 @@ server <- function(input, output, session){
     writeLines(.lines)
   })
   outputOptions(output, "kurtosis_text",
-                suspendWhenHidden = FALSE, priority = -40L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -40L) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
     req(load_ls(), cancelOutput = TRUE)
@@ -196,7 +196,7 @@ server <- function(input, output, session){
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
   outputOptions(output, "linked_plotly",
-                suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -200L) ## Eager evaluation
   
   output$input__linked_plotly = renderUI({
     ## This is dimension of spacer, figure dim's set in args of cobs_n_plot_func::linked_plotly_func
@@ -205,7 +205,7 @@ server <- function(input, output, session){
     plotly::plotlyOutput("linked_plotly", width = "100%", height = paste0(height))
   })
   outputOptions(output, "input__linked_plotly",
-                suspendWhenHidden = FALSE, priority = -201L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -201L) ## Eager evaluation
   
   output$residual_plot <- plotly::renderPlotly({
     req(load_ls(), cancelOutput = TRUE)
@@ -225,6 +225,7 @@ server <- function(input, output, session){
       .idx_rownums, c("y", "residual", "class", "tooltip")]
     .pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
     .is_classification <- problem_type(df$y) == "classification"
+    .alpha <- logistic_tform(nrow(df))
     
     ## Red misclassified points, if applicable
     pts_highlight <- list()
@@ -236,7 +237,7 @@ server <- function(input, output, session){
           pts_highlight,
           ggplot2::geom_point(
             ggplot2::aes(y, residual), df[.idx_misclas, ],
-            color = "red", fill = NA, shape = 21L, size = 3L, alpha = .alpha)
+            color = "red", fill = NA, shape = 21L, size = 3L)
         )
     }
     ## Primary point
@@ -258,7 +259,7 @@ server <- function(input, output, session){
     
     ## Plot
     gg <- ggplot(df, aes(y, residual, label = tooltip,
-                         color = .pred_clas, shape = .pred_clas)) +
+                         color = .pred_clas, shape = .pred_clas, alpha = .alpha)) +
       geom_point() +
       pts_highlight +
       theme_bw() +
@@ -275,7 +276,7 @@ server <- function(input, output, session){
                      xaxis = list(scaleanchor = "y", scalaratio = 1L))
   })
   outputOptions(output, "residual_plot",
-                suspendWhenHidden = FALSE, priority = -100L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -100L) ## Eager evaluation
   
   
   output$cheem_tour <- plotly::renderPlotly({
@@ -314,7 +315,7 @@ server <- function(input, output, session){
     spinifex::animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour", ## LAZY eval, do last
-                suspendWhenHidden = TRUE, priority = -9999999L)
+                suspendWhenHidden = TRUE) #, priority = -9999L)
   
   
   ## Data selected in pca_embed_plotly -----
@@ -325,7 +326,7 @@ server <- function(input, output, session){
     return(DT::datatable(.df[.df$rownum %in% .d$key, ], rownames = FALSE))
   })
   outputOptions(output, "selected_df",
-                suspendWhenHidden = FALSE, priority = -30L) ## Eager evaluation
+                suspendWhenHidden = FALSE) #, priority = -30L) ## Eager evaluation
 } ## Close function, assigning server object.
 
 shinyApp(ui = ui, server = server)

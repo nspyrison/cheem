@@ -62,5 +62,4 @@ bas <- basis_local_attribution(layer_ls$shap_df, tgt_obs)
 ggt <- radial_cheem_ggtour(layer_ls, basis=bas, mv_name=colnames(X)[1], 
                            primary_obs=1, comparison_obs=2)
 spinifex::animate_plotly(ggt)
-x <- 1:5000; plot(x, logistic_rownum_tform(x), col='blue');
 }

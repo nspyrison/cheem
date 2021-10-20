@@ -101,12 +101,12 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #' @export
 #' @examples
 #' ## Suggest an opacity to use in plotting:
-#' (my_alpha <- linear_tfrom(nrow(spinifex::penguins)))
+#' (my_alpha <- linear_tform(nrow(spinifex::penguins)))
 #'
 #' ## Visualize
 #' x <- 1:2000
-#' plot(x, linear_tfrom(x), col='blue')
-linear_tfrom = function(
+#' plot(x, linear_tform(x), col='blue')
+linear_tform = function(
   n, appox_max_n = 5000L, ceiling = 1, floor = .2
 ){
   vec <- 1L - min(n / appox_max_n, 1L)
@@ -128,12 +128,12 @@ linear_tfrom = function(
 #' @export
 #' @examples
 #' ## Suggest an opacity to use in plotting:
-#' (my_alpha <- logistic_tfrom(nrow(spinifex::penguins)))
+#' (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
 #'
 #' ## Visualize
 #' x <- 1:2000
-#' plot(x, logistic_tfrom(x), col='blue')
-logistic_tfrom = function(
+#' plot(x, logistic_tform(x), col='blue')
+logistic_tform = function(
   n, mid_pt = 1000L, k_attenuation = .01, ceiling = 1L, floor = .2
 ){
   vec <- 1 / (1L + exp(k_attenuation * (n - mid_pt)))
