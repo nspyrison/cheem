@@ -10,7 +10,7 @@ server <- function(input, output, session){
   ## Reactives ----
   #### No eager evaluation of reactive functions, only outputs.
   load_ls <- reactive({
-    req(input$dat_char, cancelOutput = TRUE)
+    req(input$dat_char)
     dat <- input$dat_char
     if(!(dat %in% c("toy classification", "penguins", "fifa",
                     "apartments", "diabetes (wide)", "diabetes (long)")))
@@ -30,68 +30,59 @@ server <- function(input, output, session){
     return(layer_ls)
   })
   
-  output$input__dat_desc <- renderUI({
-    req(input$dat_char, cancelOutput = TRUE)
+  output$desc_rows <- renderText({
+    req(input$dat_char)
     dat <- input$dat_char
     if(!(dat %in% c("toy classification", "penguins", "fifa",
                     "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
     ## Load data:
-    if(dat == "toy classification")
-      desc_rows <- list(
-        h4("Simulated triangle vertices"),
-        p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)"),
-        p("   - Each cluster is spherical and has 140 observations"),
-        p("2) Create a random forest model classifying cluster level, given the continuous variables.")
-      )
-    if(dat == "penguins")
-      desc_rows <- list(
-        h4("Palmer penguins"),
-        p("1) 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y)."),
-        p("2) Create a random forest model classifying species from the physical measurements.")
-      )
-    if(dat == "fifa")
-      desc_rows <- list(
-        h4("FIFA soccer players, 2020 season"),
-        p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)"),
-        p("2) Create a random forest model regressing continuous wages from the skill aggregates.")
-      )
-    if(dat == "apartments")
-      desc_rows <- list(
-        h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices"),
-        p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter."),
-        p("2) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
-      )
-    if(dat == "diabetes (wide)")
-      desc_rows <- list(
-        h4("Pima Indians Diabetes (wide)"),
-        p("1) 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes."),
-        p("2) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
-      )
-    if(dat == "diabetes (long)")
-      desc_rows <- list(
-        h4("Pima Indians Diabetes (long)"),
-        p("1) *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes."),
-        p("2) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
-      )
-    return(desc_rows)
+    if(dat == "toy classification"){
+      he <- h4("Simulated triangle vertices")
+      l1 <- p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
+      l2 <- p("2) Create a random forest model classifying cluster level, given the continuous variables.")
+    }
+    if(dat == "penguins"){
+      he <- h4("Palmer penguins")
+      l1 <- p("1) 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
+      l2 <- p("2) Create a random forest model classifying species from the physical measurements.")
+    }
+    if(dat == "fifa"){
+      he <- h4("FIFA soccer players, 2020 season")
+      l1 <- p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
+      l2 <- p("2) Create a random forest model regressing continuous wages from the skill aggregates.")
+    }
+    if(dat == "apartments"){
+      he <- h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
+      l1 <- p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
+      l2 <- p("2) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
+    }
+    if(dat == "diabetes (wide)"){
+      he <- h4("Pima Indians Diabetes (wide)")
+      l1 <- p("1) 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
+    }
+    if(dat == "diabetes (long)"){
+      he <- h4("Pima Indians Diabetes (long)")
+      l1 <- p("1) *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
+    }
+    ## Return
+    HTML(paste(he, l1, l2))
   })
-  outputOptions(output, "input__dat_desc",
-                suspendWhenHidden = FALSE) #, priority = -0L) ## Eager evaluation
-  
   
   bas <- reactive({
-    req(load_ls(), cancelOutput = TRUE)
+    req(load_ls())
     shap_df <- load_ls()$shap_df
     bas <- basis_local_attribution(shap_df, primary_obs_d())
     return(bas)
   })
   
   ## output: inputs in the ui -----
-  output$input__prim.comp_obs <- renderUI({
-    req(load_ls(), cancelOutput = TRUE)
+  observe({
+    req(load_ls())
     .n <- load_ls()$decode_df %>% nrow()
-    req(input$dat_char, cancelOutput = TRUE)
+    req(input$dat_char)
     dat <- input$dat_char
     if(!(dat %in% c("toy classification", "penguins", "fifa",
                     "apartments", "diabetes (wide)", "diabetes (long)")))
@@ -123,41 +114,40 @@ server <- function(input, output, session){
       comparison_obs <- 215L
     }
     
-    
     ## Return
-    fluidRow(
-      column(4L, numericInput(
-        "primary_obs", label = "SHAP values of row number, '*' shape:",
-        min = 1L, max = .n, step = 1L, value = primary_obs)),
-      column(4L, numericInput(
-        "comparison_obs", label = "Comparison row number, 'x' shape:",
-        min = 1L, max = .n, step = 1L, value = comparison_obs)),
-      column(4L)
-    )
+    updateNumericInput(
+      session, "primary_obs",
+      label = "Primary observation rownum, ('*' point):",
+      min = 1L, max = .n, step = 1L, value = primary_obs)
+    updateNumericInput(
+      session, "comparison_obs",
+      label = "Comparison observation rownum, ('x' ponit):",
+      min = 1L, max = .n, step = 1L, value = comparison_obs)
   })
-  outputOptions(output, "input__prim.comp_obs",
-                suspendWhenHidden = FALSE) #, priority = -10L) ## Eager evaluation
- 
-   ##"Debounce" shap/comparison_obs; 
-  #### ie, Reduces making multiple animations as someone types in a 3 digit number 
+  
+  ##"Debounce" shap/comparison_obs; 
+  #### that is, try to reduce multiple renders as someone types in a 3 digit number 
   primary_obs <- reactive({
-    req(input$primary_obs, cancelOutput = TRUE)
+    req(input$primary_obs)
     input$primary_obs
   })
   primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
   comparison_obs <- reactive({
-    req(input$comparison_obs, cancelOutput = TRUE)
+    req(input$comparison_obs)
     input$comparison_obs
   })
   comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
   
-  output$input__manip_var_nm <- renderUI({
-    req(bas(), cancelOutput = TRUE)
-    bas <- bas()
+  observe({
+    req(bas())
+    req(load_ls())
+    req(primary_obs_d())
     
+    bas <- bas()
     opts <- rownames(bas)
-    shap_df <- load_ls()$shap_df[, -ncol(load_ls()$shap_df)]
-    clas <- load_ls()$decode_df$class
+    layer_ls <- load_ls()
+    shap_df <- layer_ls$shap_df[, -ncol(layer_ls$shap_df)]
+    clas <- layer_ls$decode_df$class
     
     ## Median values of the observed class.
     expect_bas <- apply(shap_df[clas == clas[primary_obs_d()], ], 2L, median) %>%
@@ -165,18 +155,16 @@ server <- function(input, output, session){
     .diff <- abs(expect_bas - bas)
     sel <- opts[which(.diff == max(.diff))]
     
-    selectInput("manip_var_nm",
-                label = "Manipulation variable:",
-                choices  = opts,
-                selected = sel)
+    updateSelectInput(session, "manip_var_nm",
+                      label = "Manipulation variable:",
+                      choices  = opts,
+                      selected = sel)
   })
-  outputOptions(output, "input__manip_var_nm",
-                suspendWhenHidden = FALSE) #, priority = -20L) ## Eager evaluation
   
   ## Plot outputs -----
   output$kurtosis_text <- renderPrint({
-    req(load_ls(), cancelOutput = TRUE)
-    req(input$do_include_maha_qq, cancelOutput = TRUE)
+    req(load_ls())
+    req(input$do_include_maha_qq)
     .lines <- ""
     if(as.logical(input$do_include_maha_qq) == TRUE)
       .lines <- c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
@@ -187,9 +175,9 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE) #, priority = -40L) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
-    req(load_ls(), cancelOutput = TRUE)
-    req(primary_obs_d(), cancelOutput = TRUE)
-    req(comparison_obs_d(), cancelOutput = TRUE)
+    req(load_ls())
+    req(primary_obs_d())
+    req(comparison_obs_d())
     
     linked_plotly_func(
       load_ls(), primary_obs_d(), comparison_obs_d(),
@@ -198,19 +186,11 @@ server <- function(input, output, session){
   outputOptions(output, "linked_plotly",
                 suspendWhenHidden = FALSE) #, priority = -200L) ## Eager evaluation
   
-  output$input__linked_plotly = renderUI({
-    ## This is dimension of spacer, figure dim's set in args of cobs_n_plot_func::linked_plotly_func
-    height = 640L ## Init, height with qq maha.
-    if(as.logical(input$do_include_maha_qq) == FALSE) height <- height / 2L
-    plotly::plotlyOutput("linked_plotly", width = "100%", height = paste0(height))
-  })
-  outputOptions(output, "input__linked_plotly",
-                suspendWhenHidden = FALSE) #, priority = -201L) ## Eager evaluation
   
   output$residual_plot <- plotly::renderPlotly({
-    req(load_ls(), cancelOutput = TRUE)
-    req(primary_obs_d(), cancelOutput = TRUE)
-    req(comparison_obs_d(), cancelOutput = TRUE)
+    req(load_ls())
+    req(primary_obs_d())
+    req(comparison_obs_d())
     decode_df <- load_ls()$decode_df
     
     ## Index of selected data:
@@ -280,12 +260,12 @@ server <- function(input, output, session){
   
   
   output$cheem_tour <- plotly::renderPlotly({
-    req(bas(), cancelOutput = TRUE)
-    req(load_ls(), cancelOutput = TRUE)
-    req(input$manip_var_nm, cancelOutput = FALSE)
-    req(primary_obs_d(), cancelOutput = TRUE)
-    req(comparison_obs_d(), cancelOutput = TRUE)
-    req(input$do_add_pcp_segments, cancelOutput = TRUE)
+    req(bas())
+    req(load_ls())
+    req(input$manip_var_nm)
+    req(primary_obs_d())
+    req(comparison_obs_d())
+    req(input$do_add_pcp_segments)
     
     ## Filter to only selected data:
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected

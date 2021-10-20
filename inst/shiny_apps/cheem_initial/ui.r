@@ -31,19 +31,26 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
                   "diabetes (wide)", "diabetes (long)"),
       selected = "fifa"), #"toy classification"),
     h3("Preprocessing and data description"),
-    uiOutput("input__dat_desc"),
+    htmlOutput("desc_rows"),
     p("3) Extract the SHAP matrix, that is SHAP values of EACH observation, via {treeshap}"),
-    p("- Load above objects into shiny app & perform EDA with ggplot2/plotly."),
-    p("Top) View PC1:2 of the data and SHAP spaces."),
-    p("Bottom) 1d radial tour, the X's projected through the selected SHAP obs ('*').")
+    h4("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly."),
+    p("Global view, top) The first 2 PC of data- and SHAP-spaces. Explore the spaces and enter a primary and comparison points (shown as '*'/'x') to further explore the differnce of their shaply values."),
+    p("Comparison tour, bottom) 1d radial tour, starting at the SHAP values of the primary comparison point is shown as a reference (shown as dashed line and dotted line).")
   ),
   tags$hr(style = "border-color: grey;"),
   br(),
   
   #### linked_plotly ----
-  h4("PC1:2 of the data and SHAP spaces"),
-  textOutput("cobs_msg"),
-  uiOutput("input__prim.comp_obs"),
+  h4("PC1:2 of the data- and SHAP-spaces"),
+  fluidRow(
+    column(4L, numericInput( ## Updated by updateNumericInput
+      "primary_obs", label = "Primary observation rownum, ('*' point):",
+      min = 1L, max = 1L, step = 1L, value = 1L)),
+    column(4L, numericInput( ## Updated by updateNumericInput
+      "comparison_obs", label = "Comparison observation rownum, ('x' ponit):",
+      min = 1L, max = 1L, step = 1L, value = 1L)),
+    column(4L)
+  ),
   selectInput("do_include_maha_qq", "Add Mahalanobis distance QQ plots?",
               choices = c(FALSE, TRUE), selected = FALSE),
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
@@ -51,24 +58,31 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   p("Selection: click & drag to select points, double click to remove the selection."),
   p("-- Selecting points will highight them in all facets and display detiled information to the right."),
   ## Set w/h with: ggplotly(p) %>% layout(height = 800, width = 800)
-  uiOutput("input__linked_plotly") %>%
-    shinycssloaders::withSpinner(type = 8L),
+  fluidRow(
+    column(width = 6L,
+           plotly::plotlyOutput("linked_plotly") %>%
+             shinycssloaders::withSpinner(type = 8L)
+    ), column(width = 6L,
+              verbatimTextOutput("kurtosis_text"),
+    )),
   h4("Selected data:"),
   DT::DTOutput("selected_df")),
-  verbatimTextOutput("kurtosis_text"),
   tags$hr(style = "border-color: grey;"),
   br(),
   
   #### Manual tour ----
-  h4("Manual tour, data-space projected through the 1d shap values of the specified obs."),
+  h4("Manual tour, data-space projected through the 1d SHAP values of the Primary observation."),
   fluidRow(
-    column(6L, uiOutput("input__manip_var_nm")),
+    column(width = 6L,
+           selectInput("manip_var_nm",
+                       label = "Manipulation variable:",
+                       choices  = NULL)), #"<Set in updateInput()>")),
     column(6L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
                            c("Yes" = TRUE, "No" = FALSE)))
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
-  p("Dashed line: current location of SHAP observation ('*' above)."),
-  p("Dotted line: current location of comparison observation ('x' above)."),
+  p("Dashed line: location of primary observation (previously '*')."),
+  p("Dotted line: location of comparison observation (previously 'x')."),
   fluidRow(
     ## Plotly, .html widget, animated radial tour:
     column(width = 6L,
