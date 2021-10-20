@@ -209,7 +209,7 @@ server <- function(input, output, session){
         pts_highlight,
         geom_point(#aes(color = .pred_clas[decode_df$rownum == prim_obs]),
                    data = decode_df[decode_df$rownum == prim_obs, ],
-                   color = "black", size = 5L, shape = 4L, alpha = 0.5))
+                   color = "black", size = 5L, shape = 8L, alpha = 0.5))
     ## Comp point
     comp_obs <- comparison_obs_d()
     if(is.null(prim_obs) == FALSE)
@@ -217,7 +217,7 @@ server <- function(input, output, session){
         pts_highlight,
         geom_point(#aes(color = .pred_clas[.idx_comp]),
                    data = decode_df[decode_df$rownum == comp_obs, ],
-                   color = "black", size = 3L, shape = 8L, alpha = 1L))
+                   color = "black", size = 3L, shape = 4L, alpha = 1L))
     
     ## Plot
     gg <- ggplot(df, aes(y, residual, label = tooltip,

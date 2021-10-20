@@ -3,7 +3,7 @@
 require("cheem")
 ## Data simulation functions ------
 ##TODO!! wants to be local in /R/
-source("../spinifex_study/apps_supplementary/data_toy_classificiation/_sim_user_study.r")
+source("../spinifex_study/apps_supplementary/data_simulation/_sim_user_study.r")
 #### esp for sim_mvtnorm_cl()
 
 #### A simplified version
@@ -69,6 +69,7 @@ clas <- factor(.lvls[.clas_ints], levels = .lvls)
 str(sim_EEE_p4)
 
 ## Visualize
+
 require("ggplot2")
 ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 
@@ -76,19 +77,13 @@ ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 n_cobs <- 0L
 layer_ls <- nested_local_attr_layers(
   x = dat, y = clas, basis_type = "pca", class = clas)
-
 names(layer_ls)
-str(layer_ls$plot_df)
-str(layer_ls$decode_df)
 
 
 ## EXPORT OBJECTS ----
-if(interactive() == TRUE){
-  save(dat,  ## Simulation pre-processed data
-       clas, ## Simulation class
-       layer_ls,
+if(interactive() == TRUE)
+  save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
-}
-if(F){## Not run, load dat, clas, layer_ls
+if(F) ## Not run, load layer_ls
   load("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
-}
+

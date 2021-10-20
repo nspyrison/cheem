@@ -29,13 +29,9 @@ str(layer_ls$decode_df)
 
 
 ## EXPORT OBJECTS ----
-if(interactive() == TRUE){
-  dat <- X
-  save(dat,  ## Simulation pre-processed data
-       clas, ## Simulation class
-       layer_ls,
-       file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
-}
-if(F){## Not run, load dat, clas, layer_ls
-  load("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classificiation.RData")
-}
+if(interactive() == TRUE)
+  save(layer_ls,
+       file = "./inst/shiny_apps/cheem_initial/data/5preprocess_diamond_subset.RData")
+if(F) ## Not run, load layer_ls
+  load("./inst/shiny_apps/cheem_initial/data/5preprocess_diamond_subset.RData")
+

@@ -88,13 +88,9 @@ length(unique(.rownums_to_keep)) ## of original 5000 row nums
 
 
 ## EXPORT OBJECTS ----
-if(interactive()){
-  dat <- layer_ls$decode_df[, 5L:13L]
-  save(dat,  ## non-scaled 9X aggregates of 42 var Fifa20 data.
-       clas, ## fielder/goal-keeper
-       layer_ls,
+if(interactive())
+  save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
-}
-if(F){## Not run, load dat, layer_ls
+if(F) ## Not run, load layer_ls
   load("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
-}
+

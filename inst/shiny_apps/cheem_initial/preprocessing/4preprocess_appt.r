@@ -36,14 +36,9 @@ str(layer_ls$plot_df)
 str(layer_ls$decode_df)
 
 ## EXPORT OBJECTS ----
-if(interactive()){
-  dat <- X
-  save(dat,  ## non-scaled 9X aggregates of 42 var Fifa20 data.
-       clas, ## district; it's sd rank is in X, but not the Y of the rf model.
-       Y,    ## m2.price, price_per_sq_meter?
-       layer_ls,
+if(interactive())
+  save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/4preprocess_appt.RData")
-}
-if(F){## Not run, load dat, layer_ls
+if(F) ## Not run, load layer_ls
   load("./inst/shiny_apps/cheem_initial/data/4preprocess_appt.RData")
-}
+
