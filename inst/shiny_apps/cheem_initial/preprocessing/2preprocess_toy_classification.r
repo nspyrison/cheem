@@ -64,19 +64,18 @@ this_sim_mvtnorm_cl <- function(
 #cr_simulation() ## see obj `sim_EEE_p4`
 dat <- sim_EEE_p4
 .lvls <- LETTERS[1:3]
-.clas_ints <- attr(sim_EEE_p4, "cluster") %>% as.integer()
-clas <- factor(.lvls[.clas_ints], levels = .lvls)
+y <- attr(sim_EEE_p4, "cluster") %>% as.integer()
+clas <- factor(.lvls[y], levels = .lvls)
 str(sim_EEE_p4)
 
 ## Visualize
-
 require("ggplot2")
 ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 
 ## SHAP layer_ls -----
 n_cobs <- 0L
 layer_ls <- nested_local_attr_layers(
-  x = dat, y = clas, basis_type = "pca", class = clas)
+  x = dat, y = y, basis_type = "pca", class = clas)
 names(layer_ls)
 
 

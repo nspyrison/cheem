@@ -21,7 +21,7 @@ require(magrittr)
 
 ## UI content ----
 ### tab1_cheem -----
-tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
+tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #### Top text description -----
   fluidRow(
     ## Choose data:
@@ -56,7 +56,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
   p("Red circle around the point indicates a misclassified point."),
   p("Selection: click & drag to select points, double click to remove the selection."),
-  p("-- Selecting points will highight them in all facets and display detiled information to the right."),
+  p("-- Selecting points will highight them in all facets and display detiled information below."),
   ## Set w/h with: ggplotly(p) %>% layout(height = 800, width = 800)
   fluidRow(
     column(width = 6L,
@@ -71,7 +71,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
   br(),
   
   #### Manual tour ----
-  h4("Manual tour, data-space projected through the 1d SHAP values of the Primary observation."),
+  h4("Manual tour, data-space projected through the 1d SHAP values of the primary observation."),
   fluidRow(
     column(width = 6L,
            selectInput("manip_var_nm",

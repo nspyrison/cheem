@@ -204,7 +204,7 @@ server <- function(input, output, session){
     
     ## Filter to rownum and select columns
     decode_df <- decode_df[.idx_rownums, ]
-    .alpha <- logistic_tform(nrow(decode_df))
+    .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
     .is_classification <- problem_type(decode_df$y) == "classification"
     .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
     
@@ -294,13 +294,14 @@ server <- function(input, output, session){
   outputOptions(output, "cheem_tour", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)
   
-  
   ## Data selected in pca_embed_plotly -----
   output$selected_df <- DT::renderDT({ ## Original data of selection
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
     if(is.null(.d)) return(NULL)
     .df <- load_ls()$decode_df
-    return(DT::datatable(.df[.df$rownum %in% .d$key, ], rownames = FALSE))
+    .df_r <- data.frame(lapply(
+      .df, function(c) if(is.numeric(c)) round(c, 2L) else c))
+    return(DT::datatable(.df_r[.df_r$rownum %in% .d$key, ], rownames = FALSE))
   })
   outputOptions(output, "selected_df",
                 suspendWhenHidden = FALSE, priority = 100L) ## Eager evaluation

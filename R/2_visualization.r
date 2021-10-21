@@ -198,10 +198,8 @@ proto_basis1d_distribution <- function(
 
 ##NOTES -----
 
-##TODO: !! This whole file wants to rebased with generalized models and attributiosn
-#  Keep in mind extension of RF models. then model and explanation types by DALEX.
-
-##TODO: !! Whole file wants Roxygen descriptions and ideally examples.
+##TODO: !! This whole file wants to rebased with generalized models and local 
+# explanations
 
 
 ## shiny preprocess functions -----
@@ -362,7 +360,7 @@ linked_plotly_func <- function(
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_nm <- tooltip <- NULL
-  .alpha <- ifelse(nrow(layer_ls$decode_df) > 999L, .1, .6)
+  .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
   .xlab <- ifelse(do_include_maha_qq == FALSE, "PC1",
                   "PC1 | Quantile, chi-squared")
   .ylab <- ifelse(do_include_maha_qq == FALSE, "PC2",
@@ -522,7 +520,7 @@ radial_cheem_ggtour <- function(
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- layer_ls$decode_df$predicted_class
-  .alpha <- logistic_tform(nrow(layer_ls$decode_df))
+  .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
   
   ## Manual (radial) tour 1d
   .mv <- which(colnames(layer_ls$shap_df) == mv_name)
@@ -615,13 +613,13 @@ radial_cheem_ggtour <- function(
       spinifex::proto_highlight(
         comparison_obs,
         #aes_args = list(color = .pred_clas),
-        identity_args = list(size = 3L, shape = 4L, alpha = 0.5, color = "black"),
+        identity_args = list(size = 3L, shape = 4L, alpha = 0.6, color = "black"),
         mark_initial = FALSE) +
       ## Highlight primary obs
       spinifex::proto_highlight(
         primary_obs,
         #aes_args = list(color = .pred_clas),
-        identity_args = list(size = 5L, shape = 8L, alpha = 1L, color = "black"),
+        identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"),
         mark_initial = FALSE) +
       spinifex::proto_frame_cor()
   }

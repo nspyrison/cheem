@@ -1,8 +1,5 @@
-##TODO: !! This whole file wants to be renamed and recoded as generalized variants
-#  Keep in mind extension of RF models. then model and explanation types by DALEX.
-
-##TODO: !! Whole file wants Roxygen descriptions if not examples.
-
+##TODO: !! This whole file wants to be rebased for 1) gerneralized models and 
+# 2) local explanations (language is already generalized)
 
 
 ## SHAP layers --------
@@ -53,16 +50,16 @@ global_view_df <- function(
   ## Maha quantiles
   ### Theoretical chi sq quantiles, x of a QQ plot
   .probs <- seq(.001, .999, length.out = nrow(x))
-  .qx <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
+  .qx_chisq <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
   ### Sample/obs quantiles, y of a QQ plot
-  .qy <- spinifex::scale_01(matrix(stats::quantile(maha, probs = .probs)))
-  .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy), "less")$p.value
+  .qy_obs <- spinifex::scale_01(matrix(stats::quantile(maha, probs = .probs)))
+  .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy_obs), "less")$p.value
   .maha_skew_text <- paste0(
     "  Anscombe-Glynn p-value: ",
     format(signif(.AG_kurt_tst_p, 3L), scientific = TRUE), "\n",
     "    (testing 1-tailed kurtosis)\n",
-    "  Kurtosis - 3: ", round(moments::kurtosis(.qy) - 3L, 2L), "\n",
-    "  Skew: ", round(moments::skewness(.qy), 2L), "\n")
+    "  Kurtosis - 3: ", round(moments::kurtosis(.qy_obs) - 3L, 2L), "\n",
+    "  Skew: ", round(moments::skewness(.qy_obs), 2L), "\n")
   
   ## Projection df -----
   basis_type <- match.arg(basis_type)
@@ -78,8 +75,9 @@ global_view_df <- function(
   .plot_df <- cbind(
     1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
   ## Row bind longer, adding QQ maha, and kurtosis info.
-  .qq_df <- data.frame(1L:nrow(x), class, .qx, .qy, y, layer_name,
+  .qq_df <- data.frame(1L:nrow(x), class, .qx_chisq, .qy_obs, y, layer_name,
     "QQ Mahalanobis distance", tooltip, .maha_skew_text)
+  ##TODO: I don't trust this reorder; needs to be applied ONLY to .qx or .qy?
   # .q_idx <- order(maha, decreasing = FALSE) ## Order by maha
   # .qq_df <- .qq_df[.q_idx, ] ## Order by maha distances
   colnames(.qq_df) <- colnames(.plot_df) <-
@@ -298,6 +296,8 @@ format_nested_layers <- function(
   ## Also add tooltip to plot_df, as it doesn't know of the RF, to check misclass
   b_plot_df$tooltip <- dplyr::left_join(
     b_plot_df, decode_df, c("rownum" = "rownum"))$tooltip.y
+  .maha_df <- b_plot_df %>% dplyr::filter(projection_nm == "QQ Mahalanobis distance")
+  decode_df$maha <- dplyr::left_join(decode_df, .maha_df, c("rownum" = "rownum"))$V2
   
   ### performance of the layers
   ## manual performance, slightly different than that reported by the rf obj itself
