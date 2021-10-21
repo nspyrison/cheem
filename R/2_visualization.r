@@ -148,11 +148,11 @@ proto_basis1d_distribution <- function(
     .df_basis_distr <- spinifex:::.bind_elements2df(.basis_ls, .df_basis_distr)
   }
   
-  .alpha <- ifelse(length(unique(.df_basis_distr$rowname)) > 999L, .003, .3)
+  .alpha <- logistic_tform(nrow(local_attribution_df)) / 15L
   ## Basis/attribution distribution of the rows of the LA_df
-  ret <- suppressWarnings(ggplot2::geom_point(
+  rug_distr <- list(suppressWarnings(ggplot2::geom_point(
     ggplot2::aes(x, y, color = group_by, tooltip = rownum), .df_basis_distr,
-    shape = shape, alpha = .alpha, size = 1.5))
+    shape = shape, alpha = .alpha, size = 1.5)))
   
   ## Add PCP lines if needed.
   if(do_add_pcp_segments == TRUE){
@@ -161,31 +161,34 @@ proto_basis1d_distribution <- function(
       .df_basis_distr, .keep = "none",
       xend = x, yend = y, var_num = var_num - 1L, rownum = rownum)
     ## Inner join to by var_name & rownum(lead1)
-    .df_basis_distr_pcp_segments <- dplyr::inner_join(
+    .df_pcp <- dplyr::inner_join(
       .df_basis_distr, .df_basis_distr2,
       by = c("var_num" = "var_num", "rownum" = "rownum"))
-    ## Mapping .alpha for pcp lines to maha dist causing err: not of length 1 or data
-    bkg_pcp <- suppressWarnings(ggplot2::geom_segment(
-      ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                   color = group_by, tooltip = rownum),
-      .df_basis_distr_pcp_segments, size = .5, alpha = .alpha / 6L))
-    prim_idx <- .df_basis_distr_pcp_segments$rownum == primary_obs
-    prim_pcp <- NULL
-    if(length(primary_obs) > 0L)
-      prim_pcp <- suppressWarnings(ggplot2::geom_segment(
+    
+    ## Background pcp lines
+    pcp_lines <- list(
+      suppressWarnings(ggplot2::geom_segment(
         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                     color = group_by, tooltip = rownum),
-        .df_basis_distr_pcp_segments[prim_idx, ],
-        size = 1L, alpha = .8, linetype = 2L))
-    comp_idx <- .df_basis_distr_pcp_segments$rownum == comparison_obs
-    comp_pcp <- NULL
+                     tooltip = rownum, color = group_by),
+        .df_pcp, size = .5, alpha = .alpha / 2L)))
+    ## Add comp_obs highlight
+    if(length(comparison_obs) > 0L)
+      pcp_lines <- c(
+        pcp_lines,
+        suppressWarnings(ggplot2::geom_segment(
+          ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
+          .df_pcp[.df_pcp$rownum == comparison_obs, ],
+          color = "black", size = .8, alpha = .6, linetype = 3L)))
+    ## Add primary_obs highlight
     if(length(primary_obs) > 0L)
-      comp_pcp <- suppressWarnings(ggplot2::geom_segment(
-        ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
-                     color = group_by, tooltip = rownum),
-        .df_basis_distr_pcp_segments[comp_idx, ],
-        size = .8, alpha = .6, linetype = 3L))
-    ret <- list(bkg_pcp, comp_pcp, prim_pcp, ret)
+      pcp_lines <- c(
+        pcp_lines,
+        suppressWarnings(ggplot2::geom_segment(
+          ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
+          .df_pcp[.df_pcp$rownum == primary_obs, ],
+          color = "black", size = 1L, alpha = .8, linetype = 2L)))
+    ## Return
+    return(c(rug_distr, pcp_lines))
   }
   
   ## Return proto

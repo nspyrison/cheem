@@ -16,7 +16,7 @@ server <- function(input, output, session){
                     "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
     if(dat == "toy classification")
-      load("./data/2preprocess_simulation.RData", envir = globalenv())
+      load("./data/2preprocess_toy_classification.RData", envir = globalenv())
     if(dat == "penguins")
       load("./data/1preprocess_penguins.RData", envir = globalenv())
     if(dat == "fifa")
@@ -29,6 +29,7 @@ server <- function(input, output, session){
       load("./data/6preprocess_diabetes_long.RData", envir = globalenv())
     return(layer_ls)
   })
+  load_ls_d <- load_ls %>%  debounce(millis = 100L)
   
   output$desc_rows <- renderText({
     req(input$dat_char)
@@ -74,7 +75,7 @@ server <- function(input, output, session){
   bas <- reactive({
     req(load_ls())
     shap_df <- load_ls()$shap_df
-    bas <- basis_local_attribution(shap_df, primary_obs_d())
+    bas <- basis_local_attribution(shap_df, primary_obs())
     return(bas)
   })
   
@@ -141,7 +142,7 @@ server <- function(input, output, session){
   observe({
     req(bas())
     req(load_ls())
-    req(primary_obs_d())
+    req(primary_obs())
     
     bas <- bas()
     opts <- rownames(bas)
@@ -150,7 +151,7 @@ server <- function(input, output, session){
     clas <- layer_ls$decode_df$class
     
     ## Median values of the observed class.
-    expect_bas <- apply(shap_df[clas == clas[primary_obs_d()], ], 2L, median) %>%
+    expect_bas <- apply(shap_df[clas == clas[primary_obs()], ], 2L, median) %>%
       matrix(ncol = 1L, dimnames = list(colnames(shap_df), "SHAP"))
     .diff <- abs(expect_bas - bas)
     sel <- opts[which(.diff == max(.diff))]
@@ -172,40 +173,40 @@ server <- function(input, output, session){
     writeLines(.lines)
   })
   outputOptions(output, "kurtosis_text",
-                suspendWhenHidden = FALSE) #, priority = -40L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = -199L) ## Eager evaluation
   
   output$linked_plotly <- plotly::renderPlotly({
     req(load_ls())
-    req(primary_obs_d())
-    req(comparison_obs_d())
+    req(primary_obs())
+    req(comparison_obs())
     
     linked_plotly_func(
-      load_ls(), primary_obs_d(), comparison_obs_d(),
+      load_ls(), primary_obs(), comparison_obs(),
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
   outputOptions(output, "linked_plotly",
-                suspendWhenHidden = FALSE) #, priority = -200L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   
   output$residual_plot <- plotly::renderPlotly({
     req(load_ls())
-    req(primary_obs_d())
-    req(comparison_obs_d())
+    req(primary_obs())
+    req(comparison_obs())
     decode_df <- load_ls()$decode_df
+    prim_obs <- primary_obs()
+    comp_obs <- comparison_obs()
     
     ## Index of selected data:
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
     .idx_rownums <- TRUE
     if(is.null(.d) == FALSE)
-      .idx_rownums <- decode_df$rownum %in% .d$key
+      .idx_rownums <- decode_df$rownum %in% c(.d$key, prim_obs, comp_obs)
     
     ## Filter to rownum and select columns
     decode_df <- decode_df[.idx_rownums, ]
-    df <- decode_df[
-      .idx_rownums, c("y", "residual", "class", "tooltip")]
-    .pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
-    .is_classification <- problem_type(df$y) == "classification"
-    .alpha <- logistic_tform(nrow(df))
+    .alpha <- logistic_tform(nrow(decode_df))
+    .is_classification <- problem_type(decode_df$y) == "classification"
+    .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
     
     ## Red misclassified points, if applicable
     pts_highlight <- list()
@@ -216,30 +217,28 @@ server <- function(input, output, session){
         pts_highlight <- c(
           pts_highlight,
           ggplot2::geom_point(
-            ggplot2::aes(y, residual), df[.idx_misclas, ],
+            ggplot2::aes(y, residual), decode_df[.idx_misclas, ],
             color = "red", fill = NA, shape = 21L, size = 3L)
         )
     }
-    ## Primary point
-    prim_obs <- primary_obs_d()
-    if(is.null(prim_obs) == FALSE)
-      pts_highlight <- c(
-        pts_highlight,
-        geom_point(#aes(color = .pred_clas[decode_df$rownum == prim_obs]),
-                   data = decode_df[decode_df$rownum == prim_obs, ],
-                   color = "black", size = 5L, shape = 8L, alpha = 0.5))
     ## Comp point
-    comp_obs <- comparison_obs_d()
     if(is.null(prim_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
         geom_point(#aes(color = .pred_clas[.idx_comp]),
-                   data = decode_df[decode_df$rownum == comp_obs, ],
-                   color = "black", size = 3L, shape = 4L, alpha = 1L))
+          data = decode_df[decode_df$rownum == comp_obs, ],
+          color = "black", size = 3L, shape = 4L, alpha = 0.6))
+    ## Primary point
+    if(is.null(prim_obs) == FALSE)
+      pts_highlight <- c(
+        pts_highlight,
+        geom_point(#aes(color = .pred_clas[decode_df$rownum == prim_obs]),
+          data = decode_df[decode_df$rownum == prim_obs, ],
+          color = "black", size = 5L, shape = 8L, alpha = 0.8))
     
     ## Plot
-    gg <- ggplot(df, aes(y, residual, label = tooltip,
-                         color = .pred_clas, shape = .pred_clas, alpha = .alpha)) +
+    gg <- ggplot(decode_df, aes(y, residual, label = tooltip,
+                                color = .pred_clas, shape = .pred_clas, alpha = .alpha)) +
       geom_point() +
       pts_highlight +
       theme_bw() +
@@ -256,15 +255,14 @@ server <- function(input, output, session){
                      xaxis = list(scaleanchor = "y", scalaratio = 1L))
   })
   outputOptions(output, "residual_plot",
-                suspendWhenHidden = FALSE) #, priority = -100L) ## Eager evaluation
-  
+                suspendWhenHidden = FALSE, priority = -300L) ## Eager evaluation
   
   output$cheem_tour <- plotly::renderPlotly({
     req(bas())
     req(load_ls())
     req(input$manip_var_nm)
-    req(primary_obs_d())
-    req(comparison_obs_d())
+    req(primary_obs())
+    req(comparison_obs())
     req(input$do_add_pcp_segments)
     
     ## Filter to only selected data:
@@ -273,11 +271,6 @@ server <- function(input, output, session){
     if(is.null(.d) == FALSE)
       .idx_rownums <- load_ls()$decode_df$rownum %in% .d$key
     
-    # if(input$dat_char == "fifa"){ ## If fifa data
-    #   ## Want to browse 2D tour of fifa data
-    #   browser()
-    #   debugonce(radial_cheem_ggtour)
-    # }
     bas <- bas()
     mv_nm <- input$manip_var_nm
     if(mv_nm %in% rownames(bas) == FALSE){
@@ -287,15 +280,19 @@ server <- function(input, output, session){
       return(NULL)
     }
     
+    # if(input$dat_char == "apartments")
+    #   browser() ## prep issue in apts?
+    # ## Error: missing value where TRUE/FALSE needed| something in proto_frame_cor
     ggt <- radial_cheem_ggtour(
       load_ls(), bas, mv_nm,
-      primary_obs_d(), comparison_obs_d(),
+      primary_obs(), comparison_obs(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
       rownum_idx = .idx_rownums)
     spinifex::animate_plotly(ggt)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
+  
   outputOptions(output, "cheem_tour", ## LAZY eval, do last
-                suspendWhenHidden = TRUE) #, priority = -9999L)
+                suspendWhenHidden = TRUE, priority = -9999L)
   
   
   ## Data selected in pca_embed_plotly -----
@@ -306,7 +303,7 @@ server <- function(input, output, session){
     return(DT::datatable(.df[.df$rownum %in% .d$key, ], rownames = FALSE))
   })
   outputOptions(output, "selected_df",
-                suspendWhenHidden = FALSE) #, priority = -30L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = 100L) ## Eager evaluation
 } ## Close function, assigning server object.
 
 shinyApp(ui = ui, server = server)

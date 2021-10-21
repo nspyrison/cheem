@@ -48,7 +48,7 @@ tab1_cheem <- tabPanel(title = "EDA of SHAP- and data- spaces", fluidPage(
       min = 1L, max = 1L, step = 1L, value = 1L)),
     column(4L, numericInput( ## Updated by updateNumericInput
       "comparison_obs", label = "Comparison observation rownum, ('x' ponit):",
-      min = 1L, max = 1L, step = 1L, value = 1L)),
+      min = 1L, max = 8L, step = 1L, value = 8L)),
     column(4L)
   ),
   selectInput("do_include_maha_qq", "Add Mahalanobis distance QQ plots?",
