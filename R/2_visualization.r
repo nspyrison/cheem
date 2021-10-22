@@ -510,8 +510,8 @@ radial_cheem_ggtour <- function(
   .y <- layer_ls$decode_df[rownum_idx, "y"] %>% matrix(ncol = 1L)
   .col_idx <- which(!(
     colnames(layer_ls$decode_df) %in%
-      c("rownum", "class", "y", "prediction", "residual",
-        "predicted_class", "is_misclassified", "tooltip")
+      c("rownum", "class", "y", "prediction", "residual", "predicted_class",
+        "is_misclassified", "tooltip", "maha_data", "maha_SHAP")
   ))
   .x <- layer_ls$decode_df[rownum_idx, .col_idx] ## Numeric X variables
   
@@ -582,15 +582,10 @@ radial_cheem_ggtour <- function(
     
     ## Add y to .dat to project
     .dat <- spinifex::scale_01(data.frame(.x, .y))
-    
     #browser() #TODO: want to explore how to remove/fix order of basis.
     
     ## Plot
     ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
-      ## _points would ideally be _hex or _hdr, but:
-      #### _hex doesn't work with plotly
-      #### _hdr not implemented atm.
-      ##- thin the data...
       spinifex::proto_point(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         identity_args = list(alpha = .alpha)) +
