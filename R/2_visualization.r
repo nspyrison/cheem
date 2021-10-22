@@ -507,13 +507,13 @@ radial_cheem_ggtour <- function(
 ){
   if(sum(rownum_idx) == 0L) stop("radial_cheem_ggtour: sum of rownum_idx was 0.")
   ## Initialization Y on basis
-  .y <- layer_ls$decode_df[rownum_idx, "y"] %>% matrix(ncol = 1L)
+  .y <- layer_ls$decode_df$y %>% matrix(ncol = 1L)
   .col_idx <- which(!(
     colnames(layer_ls$decode_df) %in%
       c("rownum", "class", "y", "prediction", "residual", "predicted_class",
         "is_misclassified", "tooltip", "maha_data", "maha_SHAP")
   ))
-  .x <- layer_ls$decode_df[rownum_idx, .col_idx] ## Numeric X variables
+  .df <- layer_ls$decode_df[, .col_idx] ## Numeric X variables
   
   ## Problem type: classification or regression?
   .prob_type <- problem_type(layer_ls$decode_df$y) ## Either "classification" or "regression"
@@ -529,7 +529,9 @@ radial_cheem_ggtour <- function(
   ### Classification case -----
   # Classification goes right into vis
   if(.prob_type == "classification"){
-    .dat <- spinifex::scale_01(.x)
+    ## !!For classification densities only shown for selected data!!!
+    .dat <- spinifex::scale_01(.df)[rownum_idx, ]
+    
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas)) +
@@ -581,14 +583,28 @@ radial_cheem_ggtour <- function(
     attr(.array, "phi_max")   <- attr(.mt_path, "phi_max")
     
     ## Add y to .dat to project
-    .dat <- spinifex::scale_01(data.frame(.x, .y))
-    #browser() #TODO: want to explore how to remove/fix order of basis.
+    .dat <- spinifex::scale_01(data.frame(.df, .y))
     
+    ## Change rownum_idx from logical to numeric, replicate if needed
+    if(identical(rownum_idx, TRUE) == TRUE) rownum_idx <- rep_len(TRUE, nrow(.df))
+    active_idx <- which(rownum_idx == TRUE)
+    bkg_idx <- which(rownum_idx == FALSE)
+    .pred_clas <- rep_len(.pred_clas, nrow(.df))
+    
+    #TODO: want to explore how to remove/fix order of basis.
     ## Plot
-    ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
-      spinifex::proto_point(
-        aes_args = list(color = .pred_clas, fill = .pred_clas),
-        identity_args = list(alpha = .alpha)) +
+    ggt <- spinifex::ggtour(.array, .dat, angle = angle)
+    ## Background, not selected points
+    if(length(bkg_idx) > 0L)
+      ggt <- ggt + spinifex::proto_highlight(
+        bkg_idx,
+        aes_args = list(shape = .pred_clas),
+        identity_args = list(alpha = .alpha, color = "grey80"))
+    ## Selected points
+    ggt <- ggt + spinifex::proto_highlight(
+      active_idx,
+      aes_args = list(color = .pred_clas, shape = .pred_clas),
+      identity_args = list(alpha = .alpha)) +
       proto_basis1d_distribution(
         layer_ls, group_by = .pred_clas,
         position = "top2d",
@@ -596,8 +612,7 @@ radial_cheem_ggtour <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
-      spinifex::proto_basis1d(
-        position = "top2d", manip_col = "black") +
+      spinifex::proto_basis1d(position = "top2d", manip_col = "black") +
       spinifex::proto_origin() +
       ## Manual axes titles
       # Plotly can't handle text rotation of geom_text/annotate.
@@ -607,13 +622,11 @@ radial_cheem_ggtour <- function(
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,
-        #aes_args = list(color = .pred_clas),
         identity_args = list(size = 3L, shape = 4L, alpha = 0.6, color = "black"),
         mark_initial = FALSE) +
       ## Highlight primary obs
       spinifex::proto_highlight(
         primary_obs,
-        #aes_args = list(color = .pred_clas),
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"),
         mark_initial = FALSE) +
       spinifex::proto_frame_cor()

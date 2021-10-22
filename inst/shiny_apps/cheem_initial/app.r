@@ -233,7 +233,7 @@ server <- function(input, output, session){
     if(is.null(prim_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
-        geom_point(aes(y, residual),
+        geom_point(aes(prediction, residual),
           data = active_df[active_df$rownum == prim_obs, ],
           color = "black", size = 5L, shape = 8L, alpha = 0.8))
     bkg_pts <- NULL
@@ -252,7 +252,7 @@ server <- function(input, output, session){
       pts_highlight +
       theme_bw() +
       scale_color_brewer(palette = "Dark2") +
-      labs(x = "Y, response variable", y = "Residual, Y - predition")
+      labs(x = "Prediction", y = "Residual")
     
     ## Return
     plotly::ggplotly(p = gg, tooltip = "label") %>%
@@ -297,7 +297,7 @@ server <- function(input, output, session){
       primary_obs(), comparison_obs(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
       rownum_idx = .idx_rownums)
-    spinifex::animate_plotly(ggt)
+    spinifex::animate_plotly(ggt) %>% plotly::toWebGL()
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   
   outputOptions(output, "cheem_tour", ## LAZY eval, do last
