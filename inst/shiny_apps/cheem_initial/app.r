@@ -203,7 +203,8 @@ server <- function(input, output, session){
       .idx_rownums <- decode_df$rownum %in% c(.d$key, prim_obs, comp_obs)
     
     ## Filter to rownum and select columns
-    decode_df <- decode_df[.idx_rownums, ]
+    active_df <- decode_df[.idx_rownums, ]
+    bkg_df <- decode_df[!.idx_rownums, ]
     .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
     .is_classification <- problem_type(decode_df$y) == "classification"
     .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
@@ -211,13 +212,13 @@ server <- function(input, output, session){
     ## Red misclassified points, if applicable
     pts_highlight <- list()
     if(.is_classification == TRUE){
-      .pred_clas <- layer_ls$decode_df$predicted_class
-      .idx_misclas <- which(decode_df$is_misclassified == TRUE)
+      .pred_clas <- active_df$predicted_class
+      .idx_misclas <- which(active_df$is_misclassified == TRUE)
       if(sum(.idx_misclas) > 0L)
         pts_highlight <- c(
           pts_highlight,
           ggplot2::geom_point(
-            ggplot2::aes(y, residual), decode_df[.idx_misclas, ],
+            ggplot2::aes(y, residual), active_df[.idx_misclas, ],
             color = "red", fill = NA, shape = 21L, size = 3L)
         )
     }
@@ -225,21 +226,29 @@ server <- function(input, output, session){
     if(is.null(prim_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
-        geom_point(#aes(color = .pred_clas[.idx_comp]),
-          data = decode_df[decode_df$rownum == comp_obs, ],
+        geom_point(aes(y, residual),
+          data = active_df[active_df$rownum == comp_obs, ],
           color = "black", size = 3L, shape = 4L, alpha = 0.6))
     ## Primary point
     if(is.null(prim_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
-        geom_point(#aes(color = .pred_clas[decode_df$rownum == prim_obs]),
-          data = decode_df[decode_df$rownum == prim_obs, ],
+        geom_point(aes(y, residual),
+          data = active_df[active_df$rownum == prim_obs, ],
           color = "black", size = 5L, shape = 8L, alpha = 0.8))
+    bkg_pts <- NULL
+    if(nrow(bkg_df) > 0L)
+      bkg_pts <- geom_point(aes(y, residual, shape = .pred_clas),
+                            bkg_df, color = "grey80", alpha = .alpha)
     
     ## Plot
-    gg <- ggplot(decode_df, aes(y, residual, label = tooltip,
-                                color = .pred_clas, shape = .pred_clas, alpha = .alpha)) +
-      geom_point() +
+    gg <- ggplot() +
+      ## Not selected background
+      bkg_pts +
+      ## Selected_df
+      geom_point(aes(y, residual, label = tooltip,
+                     color = .pred_clas, shape = .pred_clas),
+                 active_df, alpha = .alpha) +
       pts_highlight +
       theme_bw() +
       scale_color_brewer(palette = "Dark2") +

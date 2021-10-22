@@ -60,10 +60,10 @@ layer_ls <- nested_local_attr_layers(
 names(layer_ls)
 
 
-## Thin data, after model/shaps
+## Thin data, after model/layer_ls ----
 ## V2 is observed maha
-.raw_layer_ls <- layer_ls ## backup
-if(F){
+{
+  .raw_layer_ls <- layer_ls ## backup
   .maha_plot_df <- layer_ls$plot_df[
     layer_ls$plot_df$projection_nm == "QQ Mahalanobis distance",]
   ## Want to thin out lowest 90% of maha, but I don't trust the orderign of maha atm, so manual top 10%
