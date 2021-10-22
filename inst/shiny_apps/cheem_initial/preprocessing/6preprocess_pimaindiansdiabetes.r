@@ -1,7 +1,6 @@
 ## Dependencies ------
 ## Local files
 require("cheem")
-
 {
   dat_wide <- spinifex::PimaIndiansDiabetes_wide
   X_wide <- dat_wide[, -9]
@@ -20,9 +19,11 @@ layer_ls <- nested_local_attr_layers(
 names(layer_ls)
 
 ### EXPORT OBJECTS -----
-if(interactive() == TRUE)
+if(interactive() == TRUE){
+  setwd("~/R/cheem")
   save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.RData")
+}
 if(F) ## Not run, load dat, clas, layer_ls
   load("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.RData")
 
@@ -34,8 +35,10 @@ layer_ls <- nested_local_attr_layers(
 names(layer_ls)
 
 ### EXPORT OBJECTS -----
-if(interactive() == TRUE)
+if(interactive() == TRUE){
+  setwd("~/R/cheem")
   save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.RData")
+}
 if(F) ## Not run, load layer_ls
   load("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.RData")

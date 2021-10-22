@@ -107,6 +107,7 @@ global_view_df <- function(
 #' @param noisy Logical, Whether of not the function should play a beeper tone
 #' upon completion. Defaults to TRUE.
 #' @return A data.frame, for the full local attribution matrix.
+#' @export
 #' @examples
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' x <- sub[, 2:5]
@@ -187,15 +188,14 @@ local_attr_layer <- function(
       .shap, y, basis_type, .plot_clas,
       layer_name = layer_name) #paste0(layer_name, ", rmse = ", .rmse),
   })[3L]
-  
   ## Execution time
   time_df <- data.frame(
     runtime_seconds = c(sec_rf, sec_shap, sec_plot_df),
     task = c("rf model", "rf SHAP {treeshap}", "plot_df (PCA/Maha)"),
     layer = layer_name)
-  
   if(verbose == TRUE) tictoc::toc()
   if(noisy == TRUE & sum(time_df$runtime_seconds) > 30L) beepr::beep(1L)
+  
   return(list(plot_df = .plot_df,
               rf_model = .rf,
               performance_df = .performance_df,
@@ -220,6 +220,7 @@ local_attr_layer <- function(
 #' @param verbose Logical, Whether or not the function should print tictoc time
 #' info.
 #' @return A list of formated data frames.
+#' @export
 format_nested_layers <- function(
   layer_ls, x, y,
   basis_type = c("pca", "olda"),
@@ -296,8 +297,14 @@ format_nested_layers <- function(
   ## Also add tooltip to plot_df, as it doesn't know of the RF, to check misclass
   b_plot_df$tooltip <- dplyr::left_join(
     b_plot_df, decode_df, c("rownum" = "rownum"))$tooltip.y
-  .maha_df <- b_plot_df %>% dplyr::filter(projection_nm == "QQ Mahalanobis distance")
-  decode_df$maha <- dplyr::left_join(decode_df, .maha_df, c("rownum" = "rownum"))$V2
+  
+  .maha_df <- b_plot_df %>%
+    dplyr::filter(projection_nm == "QQ Mahalanobis distance") %>%
+    dplyr::select(rownum, V2, layer_nm) %>% 
+    tidyr::pivot_wider(names_from  = layer_nm, values_from = V2)
+  .lj <-  dplyr::left_join(decode_df, .maha_df, c("rownum" = "rownum"))
+  decode_df$maha_data <- .lj$data
+  decode_df$maha_SHAP <- .lj$SHAP
   
   ### performance of the layers
   ## manual performance, slightly different than that reported by the rf obj itself

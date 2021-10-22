@@ -25,20 +25,24 @@ if(F)
   arrange(sd_price) %>%
   mutate(district_sd_rank = 1:n())
 lj <- left_join(.raw, .agg, by = "district")
-X <- lj[,c(2:5, 10)]
+X <- lj[, c(2:5, 10)]
 
 ## SHAP layer_ls -----
+debugonce(nested_local_attr_layers)
+#debugonce(format_nested_layers)
+#debugonce(global_view_df)
 layer_ls <- nested_local_attr_layers(
   x = X, y = Y, basis_type = "pca", class = clas)
 
 names(layer_ls)
-str(layer_ls$plot_df)
-str(layer_ls$decode_df)
+
 
 ## EXPORT OBJECTS ----
-if(interactive())
+if(interactive()){
+  setwd("~/R/cheem")
   save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/4preprocess_apartments.RData")
+}
 if(F) ## Not run, load layer_ls
   load("./inst/shiny_apps/cheem_initial/data/4preprocess_apartments.RData")
 

@@ -58,10 +58,9 @@ layer_ls <- nested_local_attr_layers(
   x = X, y = Y, basis_type = "pca", class = clas)
 
 names(layer_ls)
-str(layer_ls$plot_df)
-str(layer_ls$decode_df)
 
-## Filter out lowest 80% maha distances.
+
+## Thin data, after model/shaps
 ## V2 is observed maha
 .raw_layer_ls <- layer_ls ## backup
 if(F){
@@ -88,9 +87,11 @@ length(unique(.rownums_to_keep)) ## of original 5000 row nums
 
 
 ## EXPORT OBJECTS ----
-if(interactive())
+if(interactive()){
+  setwd("~/R/cheem")
   save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
+}
 if(F) ## Not run, load layer_ls
   load("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
 

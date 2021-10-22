@@ -27,7 +27,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     ## Choose data:
     selectInput(
       "dat_char", "Data:",
-      choices = c("toy classification", "penguins", "fifa", "apartments",
+      choices = c("toy classification", "penguins", "fifa", #"apartments",
                   "diabetes (wide)", "diabetes (long)"),
       selected = "fifa"), #"toy classification"),
     h3("Preprocessing and data description"),

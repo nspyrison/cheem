@@ -23,9 +23,11 @@ str(layer_ls$plot_df)
 str(layer_ls$decode_df)
 
 ## EXPORT OBJECTS ----
-if(interactive() == TRUE)
+if(interactive() == TRUE){
+  setwd("~/R/cheem")
   save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
+}
 if(F) ## Not run, load dat, clas, layer_ls
   load("./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
 
