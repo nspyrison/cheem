@@ -8,7 +8,8 @@ source("ui.r", local = TRUE, encoding = "utf-8")
 
 server <- function(input, output, session){
   ## Reactives ----
-  #### No eager evaluation of reactive functions, only outputs.
+  
+  ## LOAD_LS, pass the layer_ls from the selected data
   load_ls <- reactive({
     req(input$dat_char)
     dat <- input$dat_char
@@ -30,48 +31,21 @@ server <- function(input, output, session){
     return(layer_ls)
   })
   load_ls_d <- load_ls %>%  debounce(millis = 100L)
-  
-  output$desc_rows <- renderText({
-    req(input$dat_char)
-    dat <- input$dat_char
-    if(!(dat %in% c("toy classification", "penguins", "fifa",
-                    "apartments", "diabetes (wide)", "diabetes (long)")))
-      stop("data string not matched.")
-    ## Load data:
-    if(dat == "toy classification"){
-      he <- h4("Simulated triangle vertices")
-      l1 <- p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
-      l2 <- p("2) Create a random forest model classifying cluster level, given the continuous variables.")
-    }
-    if(dat == "penguins"){
-      he <- h4("Palmer penguins")
-      l1 <- p("1) 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
-      l2 <- p("2) Create a random forest model classifying species from the physical measurements.")
-    }
-    if(dat == "fifa"){
-      he <- h4("FIFA soccer players, 2020 season")
-      l1 <- p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
-      l2 <- p("2) Create a random forest model regressing continuous wages from the skill aggregates.")
-    }
-    if(dat == "apartments"){
-      he <- h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
-      l1 <- p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
-      l2 <- p("2) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
-    }
-    if(dat == "diabetes (wide)"){
-      he <- h4("Pima Indians Diabetes (wide)")
-      l1 <- p("1) 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
-    }
-    if(dat == "diabetes (long)"){
-      he <- h4("Pima Indians Diabetes (long)")
-      l1 <- p("1) *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
-    }
-    ## Return
-    HTML(paste(he, l1, l2))
+ 
+  ## PIMARY & COMPARISON OBS, & thier debounced versions
+  #### debounce; try to reduce multiple renders as a 3 digit number is typed
+  primary_obs <- reactive({
+    req(input$primary_obs)
+    input$primary_obs
   })
+  primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
+  comparison_obs <- reactive({
+    req(input$comparison_obs)
+    input$comparison_obs
+  })
+  comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
   
+  ## BASIS FROM local explanation of promary obs
   bas <- reactive({
     req(load_ls())
     shap_df <- load_ls()$shap_df
@@ -79,7 +53,10 @@ server <- function(input, output, session){
     return(bas)
   })
   
-  ## output: inputs in the ui -----
+  
+  ## Observers: updating inputs in the ui -----
+  
+  ## UPDATE PRIMARY/COMPARISON OBSERVATIONS
   observe({
     req(load_ls())
     .n <- load_ls()$decode_df %>% nrow()
@@ -126,26 +103,22 @@ server <- function(input, output, session){
       min = 1L, max = .n, step = 1L, value = comparison_obs)
   })
   
-  ##"Debounce" shap/comparison_obs; 
-  #### that is, try to reduce multiple renders as someone types in a 3 digit number 
-  primary_obs <- reactive({
-    req(input$primary_obs)
-    input$primary_obs
-  })
-  primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
-  comparison_obs <- reactive({
-    req(input$comparison_obs)
-    input$comparison_obs
-  })
-  comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
-  
+  ## UPDATE INCLUSION VARIABLES
   observe({
     req(bas())
+    bas <- bas()
+    opts <- rownames(bas)
+    updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
+                             choices = opts, selected = opts, inline = TRUE)
+  })
+  
+  ## UPDATE MANIPULATION VARIABLE INPUT
+  observe({
+    req(input$inc_vars)
     req(load_ls())
     req(primary_obs())
     
-    bas <- bas()
-    opts <- rownames(bas)
+    opts <- input$inc_vars
     layer_ls <- load_ls()
     shap_df <- layer_ls$shap_df[, -ncol(layer_ls$shap_df)]
     clas <- layer_ls$decode_df$class
@@ -162,7 +135,9 @@ server <- function(input, output, session){
                       selected = sel)
   })
   
-  ## Plot outputs -----
+  ## Outputs -----
+  
+  ### MAHA KURTOSIS TEXT, may be off at the moment.
   output$kurtosis_text <- renderPrint({
     req(load_ls())
     req(input$do_include_maha_qq)
@@ -175,6 +150,7 @@ server <- function(input, output, session){
   outputOptions(output, "kurtosis_text",
                 suspendWhenHidden = FALSE, priority = -199L) ## Eager evaluation
   
+  ### GLOBAL VIEW PLOTLY
   output$linked_plotly <- plotly::renderPlotly({
     req(load_ls())
     req(primary_obs())
@@ -188,6 +164,7 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   
+  ### RESIDUAL PLOT, wants to go to residual tour
   output$residual_plot <- plotly::renderPlotly({
     req(load_ls())
     req(primary_obs())
@@ -197,7 +174,7 @@ server <- function(input, output, session){
     comp_obs <- comparison_obs()
     
     ## Index of selected data:
-    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+    .d <- plotly::event_data("plotly_selected") ## selected in global view
     .idx_rownums <- TRUE
     if(is.null(.d) == FALSE)
       .idx_rownums <- decode_df$rownum %in% c(.d$key, prim_obs, comp_obs)
@@ -266,6 +243,8 @@ server <- function(input, output, session){
   outputOptions(output, "residual_plot",
                 suspendWhenHidden = FALSE, priority = -300L) ## Eager evaluation
   
+  
+  ## FIANL TOUR
   output$cheem_tour <- plotly::renderPlotly({
     req(bas())
     req(load_ls())
@@ -289,21 +268,17 @@ server <- function(input, output, session){
       return(NULL)
     }
     
-    # if(input$dat_char == "apartments")
-    #   browser() ## prep issue in apts?
-    # ## Error: missing value where TRUE/FALSE needed| something in proto_frame_cor
     ggt <- radial_cheem_ggtour(
       load_ls(), bas, mv_nm,
       primary_obs(), comparison_obs(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
       rownum_idx = .idx_rownums)
-    spinifex::animate_plotly(ggt) %>% plotly::toWebGL()
+    spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
-  
   outputOptions(output, "cheem_tour", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)
   
-  ## Data selected in pca_embed_plotly -----
+  ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
     if(is.null(.d)) return(NULL)

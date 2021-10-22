@@ -72,13 +72,19 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   
   #### Manual tour ----
   h4("Manual tour, data-space projected through the 1d SHAP values of the primary observation."),
+  checkboxGroupInput(
+    "inc_vars", label = "Inclusion variables",
+    choices = c("bdy", "age", "rct", "atk", "def", "acc", "mvm", "pwr", "gk"),
+    selected = c("atk", "def", "acc", "mvm", "pwr"),
+    inline = TRUE),
   fluidRow(
-    column(width = 6L,
+    column(width = 4L,
            selectInput("manip_var_nm",
                        label = "Manipulation variable:",
                        choices  = NULL)), #"<Set in updateInput()>")),
-    column(6L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
-                           c("Yes" = TRUE, "No" = FALSE)))
+    column(width = 4L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
+                           c("Yes" = TRUE, "No" = FALSE))),
+    column(width = 4L)
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Dashed line: location of primary observation (previously '*')."),
