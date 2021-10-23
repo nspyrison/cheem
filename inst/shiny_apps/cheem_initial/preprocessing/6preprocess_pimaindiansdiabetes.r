@@ -13,32 +13,32 @@ require("cheem")
 }
 
 ## diabetes wide: -----
-### SHAP layer_ls -----
-layer_ls <- nested_local_attr_layers(
+### cheem_ls -----
+cheem_ls <- nested_local_attr_layers(
   x = X_wide, y = Y_wide, basis_type = "pca", class = clas_wide)
-names(layer_ls)
+names(cheem_ls)
 
 ### EXPORT OBJECTS -----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  save(layer_ls,
+  save(cheem_ls,
        file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.RData")
 }
-if(F) ## Not run, load dat, clas, layer_ls
+if(F) ## Not run, load cheem_ls
   load("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.RData")
 
 
 ## diabetes long: -----
-### SHAP layer_ls -----
-layer_ls <- nested_local_attr_layers(
+### cheem_ls -----
+cheem_ls <- cheem_ls(
   x = X_long, y = Y_long, basis_type = "pca", class = clas_long)
-names(layer_ls)
+names(cheem_ls)
 
 ### EXPORT OBJECTS -----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  save(layer_ls,
+  save(cheem_ls,
        file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.RData")
 }
-if(F) ## Not run, load layer_ls
+if(F) ## Not run, load cheem_ls
   load("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.RData")

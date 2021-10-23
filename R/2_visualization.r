@@ -1,4 +1,4 @@
-## spinifex extensions ----
+## spinifex proto_* extensions ----
 
 #' Extract and format the 1D local attribution basis
 #' 
@@ -84,7 +84,7 @@ proto_basis1d_distribution <- function(
 ){
   ## Prevent global variable warnings:
   .facet_by <- rownum <- maha_dist <- contribution <- var_name <-
-    .map_to_unitbox <- .map_to_data <- .map_to_density <-
+    .map_to_unitbox <- .map_to_data <- .map_to_density <- .d <-
     .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
   eval(spinifex::.init4proto)
@@ -192,131 +192,123 @@ proto_basis1d_distribution <- function(
   }
   
   ## Return proto
-  return(ret)
+  return(rug_distr)
 }
 
 
-##NOTES -----
-
-##TODO: !! This whole file wants to rebased with generalized models and local 
-# explanations
-
-
-## shiny preprocess functions -----
-## NOTE: this is outdated and should be removed.
-
-#' Append corrupted observations and extract SHAP layer list.
-#' 
-#' Draws `n_cobs` from the `data` of the `target_level` for _each_ other level of 
-#' the `class`. This is appended to the `data` and finally applied to 
-#' `nested_local_attr_layers()`.
-#' 
-#' @param data A data.frame or matrix with data from all `class` levels, not just
-#' the level sampled from.
-#' @param class The variable to group points by. Originally the _predicted_
-#'  class.
-#' @param y The target variable of the model.
-#' @param target_level The number of the level of `class` (cast as.factor) to 
-#' sample from. 
-#' @param n_cobs The number of Corrupted OBServations (cobs) to draw for _each_ 
-#' other non-target level.
-#' @param var_coeff Variance coefficient, closer to 0 make points near the 
-#' median, above 1 makes more points further away from the median.
-#' Defaults to 1.
-#' @param verbose Logical, Whether or not the function should print tictoc time
-#' info. Defaults to TRUE.
-#' @param noisy Logical, Whether of not the function should play a beeper tone
-#' upon completion. Defaults to TRUE.
-#' @return A list of data.frames, the return of `nested_local_attr_layers()` of the 
-#' `data` after appending the new corrupted observations.
-#' @export
-#' @examples
-#' ## Data setup, palmerpenguins::penguins
-#' raw <- spinifex::penguins
-#' lvls <- levels(raw$species)
-#' ## Filter to closest 2 classes
-#' raw <- raw[raw$species %in% lvls[1:2], ]
-#' dat <- as.data.frame(spinifex::scale_sd(raw[, 1:4]))
-#' clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
-#' 
-#' ## Apply the functions
-#' layer_ls <- assign_cobs_layer_ls(
-#'   data = dat,
-#'   class = clas,
-#'   y = clas,
-#'   target_level = 1,
-#'   n_cobs = 2,
-#'   var_coeff = .1)
-#' 
-#' ## Structure of the list.
-#' names(layer_ls)
-#' str(layer_ls$plot_df)
-#' str(layer_ls$decode_df)
-####TODO: EXAMPLE CAUSING ERROR.
-assign_cobs_layer_ls <- function(
-  data,
-  class,
-  y, ## Factor implies classification, numeric implies regression
-  target_level = 1,
-  n_cobs = 2,
-  var_coeff = .1,
-  verbose = TRUE,
-  noisy = TRUE
-){
-  ## Initialize
-  .clas_w_cobs <- as.factor(class)
-  .x_w_cobs    <- as.data.frame(data)
-  ## Classification/regression
-  .prob_type   <- problem_type(y)
-  if(.prob_type == "classification") .y_w_cobs <- as.integer(y)
-  if(.prob_type == "regression")     .y_w_cobs <- y
-  
-  ## Append COBS if required ----
-  if(n_cobs > 0L){
-    set.seed(404L)
-    .lvls <- levels(class)
-    
-    ## Sample cobs from level 1
-    #.m <- sapply(1L, function(k){
-    k <- target_level
-    .not_k <- (1L:length(.lvls))[-k]
-    .cobs_df_k <- rnorm_from(data[class == .lvls[k], ],
-                             n_obs = n_cobs,
-                             var_coeff = var_coeff)
-    
-    ## Replicate for every non-k level and assign a replicated set to each non-k level
-    .cobs_df <- data.frame(NULL)
-    .m <- sapply(1L:length(.not_k), function(i){
-      .cobs_df <<- rbind(.cobs_df, .cobs_df_k)
-    })
-    .clas_w_cobs <<- factor(c(
-      as.character(.clas_w_cobs), rep(.lvls[.not_k], times = n_cobs)), levels = .lvls)
-    .x_w_cobs <<- rbind(.x_w_cobs, .cobs_df)
-    if(.prob_type == "classification") ## Classification problem if Y is a factor
-      ## treeshap wants integer classes :(.
-      .y_w_cobs <<- c(.y_w_cobs, rep(.not_k, times = n_cobs))
-    if(.prob_type == "regression") ## Regression problem if Y is numeric
-      .y_w_cobs <<- c(.y_w_cobs, stats::rnorm(
-        n_cobs, mean(y[class == .lvls[.not_k]]),
-        sqrt(var_coeff) * stats::sd(y[class == .lvls[.not_k]])
-      ))
-  } ## End appending cobs.
-  
-  ### Create and global assign layer_ls -----
-  .layer_ls <- nested_local_attr_layers(
-    .x_w_cobs, .y_w_cobs, n_layers = 1L, basis_type = "pca",
-    class = .clas_w_cobs, verbose = verbose, noisy = noisy)
-  attr(.layer_ls, "n_cobs") <- n_cobs
-  attr(.layer_ls, "var_coeff") <- var_coeff
-  .n <- nrow(data)
-  attr(.layer_ls, "cobs_msg") <- ifelse(n_cobs > 0L, paste0(
-    "Level-courrupted observations in rows: ",
-    (nrow(data) + 1L), " to ", nrow(.layer_ls$decode_df), "."),
-    "") ## ""; no cobs added.
-  
-  ## Return
-  return(.layer_ls)
-}
+## shiny preprocess functions ---
+## NOTE: !!DEPRICATING!!!
+# #' Append corrupted observations and extract SHAP layer list.
+# #' 
+# #' Draws `n_cobs` from the `data` of the `target_level` for _each_ other level of 
+# #' the `class`. This is appended to the `data` and finally applied to 
+# #' `nested_local_attr_layers()`.
+# #' 
+# #' @param data A data.frame or matrix with data from all `class` levels, not just
+# #' the level sampled from.
+# #' @param class The variable to group points by. Originally the _predicted_
+# #'  class.
+# #' @param y The target variable of the model.
+# #' @param target_level The number of the level of `class` (cast as.factor) to 
+# #' sample from. 
+# #' @param n_cobs The number of Corrupted OBServations (cobs) to draw for _each_ 
+# #' other non-target level.
+# #' @param var_coeff Variance coefficient, closer to 0 make points near the 
+# #' median, above 1 makes more points further away from the median.
+# #' Defaults to 1.
+# #' @param verbose Logical, Whether or not the function should print tictoc time
+# #' info. Defaults to TRUE.
+# #' @param noisy Logical, Whether of not the function should play a beeper tone
+# #' upon completion. Defaults to TRUE.
+# #' @return A list of data.frames, the return of `nested_local_attr_layers()` of the 
+# #' `data` after appending the new corrupted observations.
+# # ## @export ## !!!DEPRECATING!!!
+# #' @examples
+# #' ## Data setup, palmerpenguins::penguins
+# #' raw <- spinifex::penguins
+# #' lvls <- levels(raw$species)
+# #' ## Filter to closest 2 classes
+# #' raw <- raw[raw$species %in% lvls[1:2], ]
+# #' dat <- as.data.frame(spinifex::scale_sd(raw[, 1:4]))
+# #' clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
+# #' 
+# #' ## Apply the functions
+# #' layer_ls <- assign_cobs_layer_ls(
+# #'   data = dat,
+# #'   class = clas,
+# #'   y = clas,
+# #'   target_level = 1,
+# #'   n_cobs = 2,
+# #'   var_coeff = .1)
+# #' 
+# #' ## Structure of the list.
+# #' names(layer_ls)
+# #' str(layer_ls$plot_df)
+# #' str(layer_ls$decode_df)
+# assign_cobs_layer_ls <- function(
+#   data,
+#   class,
+#   y, ## Factor implies classification, numeric implies regression
+#   target_level = 1,
+#   n_cobs = 2,
+#   var_coeff = .1,
+#   verbose = TRUE,
+#   noisy = TRUE
+# ){
+#   ## Initialize
+#   .clas_w_cobs <- as.factor(class)
+#   .x_w_cobs    <- as.data.frame(data)
+#   ## Classification/regression
+#   .prob_type   <- problem_type(y)
+#   if(.prob_type == "classification") .y_w_cobs <- as.integer(y)
+#   if(.prob_type == "regression")     .y_w_cobs <- y
+#   
+#   ## Append COBS if required ---
+#   if(n_cobs > 0L){
+#     set.seed(404L)
+#     .lvls <- levels(class)
+#     
+#     ## Sample cobs from level 1
+#     #.m <- sapply(1L, function(k){
+#     k <- target_level
+#     .not_k <- (1L:length(.lvls))[-k]
+#     .cobs_df_k <- rnorm_from(data[class == .lvls[k], ],
+#                              n_obs = n_cobs,
+#                              var_coeff = var_coeff)
+#     
+#     ## Replicate for every non-k level and assign a replicated set to each non-k level
+#     .cobs_df <- data.frame(NULL)
+#     .m <- sapply(1L:length(.not_k), function(i){
+#       .cobs_df <<- rbind(.cobs_df, .cobs_df_k)
+#     })
+#     .clas_w_cobs <<- factor(c(
+#       as.character(.clas_w_cobs), rep(.lvls[.not_k], times = n_cobs)), levels = .lvls)
+#     .x_w_cobs <<- rbind(.x_w_cobs, .cobs_df)
+#     if(.prob_type == "classification") ## Classification problem if Y is a factor
+#       ## treeshap wants integer classes :(.
+#       .y_w_cobs <<- c(.y_w_cobs, rep(.not_k, times = n_cobs))
+#     if(.prob_type == "regression") ## Regression problem if Y is numeric
+#       .y_w_cobs <<- c(.y_w_cobs, stats::rnorm(
+#         n_cobs, mean(y[class == .lvls[.not_k]]),
+#         sqrt(var_coeff) * stats::sd(y[class == .lvls[.not_k]])
+#       ))
+#   } ## End appending cobs.
+#   
+#   ### Create and global assign layer_ls ---
+#   .layer_ls <- nested_local_attr_layers(
+#     .x_w_cobs, .y_w_cobs, n_layers = 1L, basis_type = "pca",
+#     class = .clas_w_cobs, verbose = verbose, noisy = noisy)
+#   attr(.layer_ls, "n_cobs") <- n_cobs
+#   attr(.layer_ls, "var_coeff") <- var_coeff
+#   .n <- nrow(data)
+#   attr(.layer_ls, "cobs_msg") <- ifelse(n_cobs > 0L, paste0(
+#     "Level-courrupted observations in rows: ",
+#     (nrow(data) + 1L), " to ", nrow(.layer_ls$decode_df), "."),
+#     "") ## ""; no cobs added.
+#   
+#   ## Return
+#   return(.layer_ls)
+# }
 
 
 ## Shiny plot functions ------
@@ -481,6 +473,9 @@ linked_plotly_func <- function(
 #' 142 or 124, '|' for `plotly` and `gganimate` respectively. Defaults to 142, 
 #' '|' for `plotly`.
 #' @param angle The step size between interpolated frames, in radians.
+#' @param rownum_idx Numeric index of selected observations. Logial
+#' Defaults to TRUE; 1:n.
+#' @param inc_vars A vector of the names of the variables to include in the projection.
 #' @return `plotly` plot of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
@@ -503,17 +498,15 @@ radial_cheem_ggtour <- function(
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .1,
-  rownum_idx = TRUE
+  rownum_idx = TRUE,
+  inc_vars = TRUE
 ){
   if(sum(rownum_idx) == 0L) stop("radial_cheem_ggtour: sum of rownum_idx was 0.")
   ## Initialization Y on basis
   .y <- layer_ls$decode_df$y %>% matrix(ncol = 1L)
-  .col_idx <- which(!(
-    colnames(layer_ls$decode_df) %in%
-      c("rownum", "class", "y", "prediction", "residual", "predicted_class",
-        "is_misclassified", "tooltip", "maha_data", "maha_SHAP")
-  ))
+  .col_idx <- which(colnames(layer_ls$decode_df) %in% inc_vars)
   .df <- layer_ls$decode_df[, .col_idx] ## Numeric X variables
+  ## .df differs from .dat with the inclusion of a y var for regression.
   
   ## Problem type: classification or regression?
   .prob_type <- problem_type(layer_ls$decode_df$y) ## Either "classification" or "regression"
@@ -591,9 +584,13 @@ radial_cheem_ggtour <- function(
     bkg_idx <- which(rownum_idx == FALSE)
     .pred_clas <- rep_len(.pred_clas, nrow(.df))
     
-    #TODO: want to explore how to remove/fix order of basis.
     ## Plot
-    ggt <- spinifex::ggtour(.array, .dat, angle = angle)
+    ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
+      ## Manual axes titles
+      # Plotly can't handle text rotation in geom_text/annotate.
+      ggplot2::labs(x = "Attribution projection, 1D",
+                    y = "Observed y") +
+      ggplot2::theme(axis.title.y = ggplot2::element_text(vjust = .25))
     ## Background, not selected points
     if(length(bkg_idx) > 0L)
       ggt <- ggt + spinifex::proto_highlight(
@@ -614,11 +611,6 @@ radial_cheem_ggtour <- function(
         comparison_obs = comparison_obs) +
       spinifex::proto_basis1d(position = "top2d", manip_col = "black") +
       spinifex::proto_origin() +
-      ## Manual axes titles
-      # Plotly can't handle text rotation of geom_text/annotate.
-      ggplot2::labs(x = "Attribution projection, 1D",
-                    y = "Observed y") +
-      ggplot2::theme(axis.title.y = ggplot2::element_text(vjust = .25)) +
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,

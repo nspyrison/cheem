@@ -13,7 +13,8 @@ radial_cheem_ggtour(
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
   angle = 0.1,
-  rownum_idx = TRUE
+  rownum_idx = TRUE,
+  inc_vars = TRUE
 )
 }
 \arguments{
@@ -39,6 +40,11 @@ line segments to the basis display.}
 '|' for \code{plotly}.}
 
 \item{angle}{The step size between interpolated frames, in radians.}
+
+\item{rownum_idx}{Numeric index of selected observations. Logial
+Defaults to TRUE; 1:n.}
+
+\item{inc_vars}{A vector of the names of the variables to include in the projection.}
 }
 \value{
 \code{plotly} plot of the global view, first 2 components of the basis of

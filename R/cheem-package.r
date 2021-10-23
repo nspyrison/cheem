@@ -17,7 +17,7 @@
 #' 
 #' @name cheem
 #' @docType package
-#' @seealso [nested_local_attr_layers()] [run_app()]
+#' @seealso [cheem_ls()] [run_app()]
 NULL
 
 ## Print message -----

@@ -27,22 +27,20 @@ if(F)
 lj <- left_join(.raw, .agg, by = "district")
 X <- lj[, c(2:5, 10)]
 
-## SHAP layer_ls -----
-debugonce(nested_local_attr_layers)
-#debugonce(format_nested_layers)
-#debugonce(global_view_df)
-layer_ls <- nested_local_attr_layers(
+## cheem_ls -----
+## Error in solve.default(cov, ...) :
+# not singular for pca or something?
+cheem_ls <- cheem_ls(
   x = X, y = Y, basis_type = "pca", class = clas)
-
 names(layer_ls)
 
 
 ## EXPORT OBJECTS ----
 if(interactive()){
   setwd("~/R/cheem")
-  save(layer_ls,
+  save(cheem_ls,
        file = "./inst/shiny_apps/cheem_initial/data/4preprocess_apartments.RData")
 }
-if(F) ## Not run, load layer_ls
+if(F) ## Not run, load cheem_ls
   load("./inst/shiny_apps/cheem_initial/data/4preprocess_apartments.RData")
 

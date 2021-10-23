@@ -34,7 +34,7 @@ this_sim_mvtnorm_cl <- function(
   
   ## COVARIANCES ---
   sd <- 1
-  ### DEFINE COMMON COVARIANCES
+  ## DEFINE COMMON COVARIANCES
   #### FOR p = 4
   cov_circ_p4 <- matrix(c(sd, 0,  0,  0,
                           0,  sd, 0,  0,
@@ -72,19 +72,18 @@ str(sim_EEE_p4)
 require("ggplot2")
 ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
 
-## SHAP layer_ls -----
-n_cobs <- 0L
-layer_ls <- nested_local_attr_layers(
+## cheem_ls -----
+cheem_ls <- cheem_ls(
   x = dat, y = y, basis_type = "pca", class = clas)
-names(layer_ls)
+names(cheem_ls)
 
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  save(layer_ls,
+  save(cheem_ls,
        file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.RData")
 }
-if(F) ## Not run, load layer_ls
+if(F) ## Not run, load cheem_ls
   load("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.RData")
 

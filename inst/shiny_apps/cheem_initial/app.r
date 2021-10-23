@@ -9,7 +9,7 @@ source("ui.r", local = TRUE, encoding = "utf-8")
 server <- function(input, output, session){
   ## Reactives ----
   
-  ## LOAD_LS, pass the layer_ls from the selected data
+  ## LOAD_LS, pass the cheem_ls from the selected data
   load_ls <- reactive({
     req(input$dat_char)
     dat <- input$dat_char
@@ -28,9 +28,9 @@ server <- function(input, output, session){
       load("./data/6preprocess_diabetes_wide.RData", envir = globalenv())
     if(dat == "diabetes (long)")
       load("./data/6preprocess_diabetes_long.RData", envir = globalenv())
-    return(layer_ls)
+    return(cheem_ls)
   })
-  load_ls_d <- load_ls %>%  debounce(millis = 100L)
+  #load_ls_d <- load_ls %>%  debounce(millis = 100L)
  
   ## PIMARY & COMPARISON OBS, & thier debounced versions
   #### debounce; try to reduce multiple renders as a 3 digit number is typed
@@ -48,8 +48,21 @@ server <- function(input, output, session){
   ## BASIS FROM local explanation of promary obs
   bas <- reactive({
     req(load_ls())
+    req(input$inc_vars)
+    req(primary_obs())
     shap_df <- load_ls()$shap_df
-    bas <- basis_local_attribution(shap_df, primary_obs())
+    var_nms <- colnames(shap_df)
+    
+    ## By product: update inc_vars
+    updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
+                             choices = var_nms, selected = var_nms, inline = TRUE)
+    
+    if(all(input$inc_vars %in% var_nms) == FALSE){
+      message("bas(): bas tried to react before inc_vars updated...")
+      return()
+    }
+    
+    bas <- basis_local_attribution(shap_df[, input$inc_vars], primary_obs())
     return(bas)
   })
   
@@ -101,31 +114,34 @@ server <- function(input, output, session){
       session, "comparison_obs",
       label = "Comparison observation rownum, ('x' ponit):",
       min = 1L, max = .n, step = 1L, value = comparison_obs)
-  })
+  }, priority = 90L)
   
   ## UPDATE INCLUSION VARIABLES
-  observe({
-    req(bas())
-    bas <- bas()
-    opts <- rownames(bas)
-    updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
-                             choices = opts, selected = opts, inline = TRUE)
-  })
+  # observe({
+  #   req(bas())
+  #   bas <- bas()
+  #   opts <- rownames(bas)
+  #   updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
+  #                            choices = opts, selected = opts, inline = TRUE)
+  # }, priority = 91L)
   
   ## UPDATE MANIPULATION VARIABLE INPUT
   observe({
+    req(bas())
     req(input$inc_vars)
     req(load_ls())
     req(primary_obs())
     
+    bas <- bas()
     opts <- input$inc_vars
-    layer_ls <- load_ls()
-    shap_df <- layer_ls$shap_df[, -ncol(layer_ls$shap_df)]
-    clas <- layer_ls$decode_df$class
+    cheem_ls <- load_ls()
+    shap_df <- cheem_ls$shap_df[, -ncol(cheem_ls$shap_df)]
+    clas <- cheem_ls$decode_df$class
     
-    ## Median values of the observed class.
-    expect_bas <- apply(shap_df[clas == clas[primary_obs()], ], 2L, median) %>%
-      matrix(ncol = 1L, dimnames = list(colnames(shap_df), "SHAP"))
+    browser()
+    ## Select var with largest diff of median values between classes.
+    expect_bas <- apply(shap_df[clas == clas[primary_obs()], opts], 2L, median) %>%
+      matrix(ncol = 1L, dimnames = list(opts, "SHAP"))
     .diff <- abs(expect_bas - bas)
     sel <- opts[which(.diff == max(.diff))]
     
@@ -133,7 +149,7 @@ server <- function(input, output, session){
                       label = "Manipulation variable:",
                       choices  = opts,
                       selected = sel)
-  })
+  }, priority = 50L)
   
   ## Outputs -----
   
@@ -182,7 +198,7 @@ server <- function(input, output, session){
     ## Filter to rownum and select columns
     active_df <- decode_df[.idx_rownums, ]
     bkg_df <- decode_df[!.idx_rownums, ]
-    .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
+    .alpha <- logistic_tform(nrow(cheem_ls$decode_df), mid_pt = 500L)
     .is_classification <- problem_type(decode_df$y) == "classification"
     .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
     
@@ -244,7 +260,7 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = -300L) ## Eager evaluation
   
   
-  ## FIANL TOUR
+  ## FINAL TOUR
   output$cheem_tour <- plotly::renderPlotly({
     req(bas())
     req(load_ls())
@@ -252,6 +268,7 @@ server <- function(input, output, session){
     req(primary_obs())
     req(comparison_obs())
     req(input$do_add_pcp_segments)
+    req(input$inc_vars)
     
     ## Filter to only selected data:
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
@@ -272,7 +289,8 @@ server <- function(input, output, session){
       load_ls(), bas, mv_nm,
       primary_obs(), comparison_obs(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
-      rownum_idx = .idx_rownums)
+      rownum_idx = .idx_rownums, inc_vars = input$inc_vars
+      )
     spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour", ## LAZY eval, do last

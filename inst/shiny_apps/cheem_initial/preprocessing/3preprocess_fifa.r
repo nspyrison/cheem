@@ -53,19 +53,17 @@ X <- dat ## 9 aspects of the X's
 Y <- log(.raw$wage_eur) ## _LOG_ wages in Euros, assumed 2020 valuation.
 hist(Y)
 
-## SHAP layer_ls -----
-layer_ls <- nested_local_attr_layers(
+## cheem_ls -----
+cheem_ls <- cheem_ls(
   x = X, y = Y, basis_type = "pca", class = clas)
-
-names(layer_ls)
-
+names(cheem_ls)
 
 ## Thin data, after model/layer_ls ----
 ## V2 is observed maha
 {
-  .raw_layer_ls <- layer_ls ## backup
-  .maha_plot_df <- layer_ls$plot_df[
-    layer_ls$plot_df$projection_nm == "QQ Mahalanobis distance",]
+  .raw_layer_ls <- cheem_ls ## backup
+  .maha_plot_df <- cheem_ls$plot_df[
+    cheem_ls$plot_df$projection_nm == "QQ Mahalanobis distance",]
   ## Want to thin out lowest 90% of maha, but I don't trust the orderign of maha atm, so manual top 10%
   # hist(.maha_plot_df$V2)
   # idx_top_maha <- order(.maha_plot_df$V2, decreasing = T)
@@ -76,11 +74,11 @@ names(layer_ls)
   ## THIN: just first 500 (top skill overall/potential) (as messi and van Dijk are 1 & 8)
   .rownums_to_keep <- 1:500
   ## Order of maha numbers is not correct atm
-  layer_ls$plot_df <-
-    layer_ls$plot_df[layer_ls$plot_df$rownum %in% .rownums_to_keep,]
-  layer_ls$decode_df <-
-    layer_ls$decode_df[layer_ls$decode_df$rownum %in% .rownums_to_keep,]
-  layer_ls$shap_df <- layer_ls$shap_df[.rownums_to_keep,]
+  cheem_ls$plot_df <-
+    cheem_ls$plot_df[cheem_ls$plot_df$rownum %in% .rownums_to_keep,]
+  cheem_ls$decode_df <-
+    cheem_ls$decode_df[cheem_ls$decode_df$rownum %in% .rownums_to_keep,]
+  cheem_ls$shap_df <- cheem_ls$shap_df[.rownums_to_keep,]
 }
 length(.rownums_to_keep)
 length(unique(.rownums_to_keep)) ## of original 5000 row nums
@@ -92,6 +90,6 @@ if(interactive()){
   save(layer_ls,
        file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
 }
-if(F) ## Not run, load layer_ls
+if(F) ## Not run, load cheem_ls
   load("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
 

@@ -1,12 +1,12 @@
-##TODO: !! This whole file wants to be rebased for 1) gerneralized models and 
+##TODO: !! This whole file wants to be rebased for 1) generalized models and 
 # 2) local explanations (language is already generalized)
+##TODO: Some functions lacking examples.
 
 
-## SHAP layers --------
 #' Create the plot data.frame for the global linked plotly display.
 #' 
 #' Internal function, the plot data.frame of 1 layer, consumed in 
-#' local_attr_layer() and format_nested_layers().
+#' local_attr_ls() and format_ls().
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
@@ -24,14 +24,15 @@
 #' y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' ret <- global_view_df(x, y, "pca", clas, "typically 'data'/'<attribution name>'")
+#' ret <- global_view_1sp(x, y, basis_type = "pca",
+#'                        class = clas, layer_name ="SHAP")
 #' str(ret)
-global_view_df <- function(
+global_view_1sp <- function(
   x, y, basis_type = c("pca", "olda"),
   class = NULL, ## class req for olda, add to _df's
   layer_name
 ){
-  d = 2L ## Fixed display dimensionality 
+  d = 2L ## Fixed display dimensionality
   
   ## maha_vect_of() -----
   if(is.null(class)) class <- as.factor(FALSE)
@@ -45,7 +46,7 @@ global_view_df <- function(
       matrix(ncol = 1L)
     maha <<- c(maha, .sub_maha)
   })
-  ## 01 normalize (outside class levels)
+  ## [01] normalize (outside class levels)
   maha <- spinifex::scale_01(as.matrix(maha, ncol = 1L))
   ## Maha quantiles
   ### Theoretical chi sq quantiles, x of a QQ plot
@@ -61,7 +62,7 @@ global_view_df <- function(
     "  Kurtosis - 3: ", round(moments::kurtosis(.qy_obs) - 3L, 2L), "\n",
     "  Skew: ", round(moments::skewness(.qy_obs), 2L), "\n")
   
-  ## Projection df -----
+  ## $global_view_df -----
   basis_type <- match.arg(basis_type)
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x, d),
@@ -71,8 +72,7 @@ global_view_df <- function(
   
   ## Column bind wider, order by rownum
   tooltip <- 1L:nrow(x)
-  #### !!OVERWROTE in format_nested_layers, once we have the model to check misclassification
-  .plot_df <- cbind(
+  .global_view_df <- cbind(
     1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
   ## Row bind longer, adding QQ maha, and kurtosis info.
   .qq_df <- data.frame(1L:nrow(x), class, .qx_chisq, .qy_obs, y, layer_name,
@@ -80,16 +80,16 @@ global_view_df <- function(
   ##TODO: I don't trust this reorder; needs to be applied ONLY to .qx or .qy?
   # .q_idx <- order(maha, decreasing = FALSE) ## Order by maha
   # .qq_df <- .qq_df[.q_idx, ] ## Order by maha distances
-  colnames(.qq_df) <- colnames(.plot_df) <-
+  colnames(.qq_df) <- colnames(.global_view_df) <-
     c("rownum", "class", paste0("V", 1L:d), "y",
       "layer_nm", "projection_nm", "tooltip", "ggtext")
-  return(rbind(.plot_df, .qq_df))
+  return(rbind(.global_view_df, .qq_df))
 }
 
 #' Create the local attribution layer data.frame
 #' 
 #' Internal function, the local attribution layer data.frame of 1 layer, consumed in 
-#' nested_local_attr_layers().
+#' local_attr_ls().
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model
@@ -114,67 +114,71 @@ global_view_df <- function(
 #' y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' ret <- local_attr_layer(
+#' ret <- local_attr_ls(
 #'   x, y, layer_name = "typically 'data'/'<attribution name>'",
 #'   basis_type = "pca", class = clas)
 #' names(ret)
-local_attr_layer <- function(
+local_attr_ls <- function(
   x, y, xtest = NULL, ytest = NULL, layer_name = "UNAMED",
   basis_type = c("pca", "olda"), class = NULL, ## class req for olda
   verbose = TRUE, noisy = TRUE
 ){
   d = 2L
   if(verbose == TRUE)
-    tictoc::tic(paste0("local_attr_layer -- ", layer_name))
+    tictoc::tic(paste0("local_attr_ls -- ", layer_name))
   
-  ## RF model
+  ## RF model -----
   .is_y_disc <- is_discrete(y)
-  sec_rf <- system.time({
+  sec_mod <- system.time({
     .m <- gc()
+    ## Default hyperparameters, (hp)
     .hp_mtry <- ifelse(.is_y_disc == TRUE, sqrt(ncol(x)), ncol(x) / 3L)
     .hp_node <- ifelse(.is_y_disc == TRUE, 1L, 5L)
     .hp_node <- max(.hp_node, nrow(x) / 500L)
     .hp_ntree <- 500L / 4L ## A function of the data, atleast not as liberal as the default 500 trees
-    suppressWarnings( 
-      ## suppresses The response has five or fewer unique values.  Are you sure?
-      .rf <- randomForest::randomForest(
+    suppressWarnings(
+      ## suppresses: The response has five or fewer unique values.  Are you sure?
+      .mod <- randomForest::randomForest(
         y~., data = data.frame(y, x),
-        mtry = .hp_mtry, nodesize = .hp_node, ntree = .hp_ntree))
+        mtry = .hp_mtry, nodesize = .hp_node, ntree = .hp_ntree)
+    )
   })[3L]
   
-  ## RF performance
-  ### MANUALLY created, different than the performance created by the rf fit...
-  .pred <- stats::predict(.rf, x)
+  ## $model_performance_df -----
+  #### MANUALLY created, different than the performance created by the rf fit...
+  .pred <- stats::predict(.mod, x)
   .resid <- y - .pred
   .rss <- sum(.resid^2L)
   .tss <- sum((y - mean(y))^2L)
   .mse <- 1L / nrow(x) * .rss %>% round(2L)
   .rmse <- sqrt(.mse) %>% round(2L)
   .rsq <- 1L - (.rss / .tss) %>% round(4L)
-  .performance_df <- data.frame(mse = .mse, rmse = .rmse, rsq = .rsq)
+  .model_performance_df <- data.frame(
+    model_type = "randomForest",
+    hp_mtry = .hp_mtry, hp_node = .hp_node, hp_ntree = .hp_ntree,
+    mse = .mse, rmse = .rmse, rsq = .rsq, model_runtime_sec = sec_mod)
   if(is.null(xtest) == FALSE & is.null(ytest) == FALSE){
-    .rss_t <- sum((ytest - stats::predict(.rf, xtest))^2L)
+    .rss_t <- sum((ytest - stats::predict(.mod, xtest))^2L)
     .tss_t <- sum((ytest - mean(ytest))^2L)
     .mse_t <- 1L / nrow(x) * .rss_t %>% round(2L)
     .rmse_t <- sqrt(.mse_t) %>% round(2L)
     .rsq_t <- 1L - (.rss_t/.tss_t) %>% round(4L)
-    .performance_df$test_mse <- .mse_t
-    .performance_df$test_rmse <- .rmse_t
-    .performance_df$test_rsq <- .rsq_t
+    .model_performance_df$test_mse <- .mse_t
+    .model_performance_df$test_rmse <- .rmse_t
+    .model_performance_df$test_rsq <- .rsq_t
   }
   
-  ## treeshap
-  sec_shap <- system.time({
+  ## treeshap, attribution matrix
+  sec_attr_mat <- system.time({
     .m <- gc()
-    .shap <- treeshap_df(.rf, x)
+    .shap <- treeshap_df(.mod, x)
     .shap_xtest <- NULL ## Init
-    if(is.null(xtest) == FALSE) .shap_xtest <- treeshap_df(.rf, xtest)
+    if(is.null(xtest) == FALSE) .shap_xtest <- treeshap_df(.mod, xtest)
   })[3L]
   
-  ## global_view_df() of .shap given .rf
-  #### On new shap matrix, data's plot df is initialized in format_nested_layers()
-  sec_plot_df <- system.time({
-    ## If classification, use .pred_clas over class, when passed to plot_df
+  ## global_view of Attribution space ----
+  sec_global_view_attr_sp <- system.time({
+    ## If classification, use .pred_clas over class
     is_classification <- problem_type(y) == "classification"
     if(is_classification == TRUE){
       .lvls <- levels(class)
@@ -184,92 +188,89 @@ local_attr_layer <- function(
     if(is_classification == TRUE)
       .plot_clas <- .pred_clas else .plot_clas <- class
     .m <- gc()
-    .plot_df <- global_view_df(
+    .global_view_df <- global_view_1sp(
       .shap, y, basis_type, .plot_clas,
-      layer_name = layer_name) #paste0(layer_name, ", rmse = ", .rmse),
+      layer_name = layer_name)
   })[3L]
-  ## Execution time
-  time_df <- data.frame(
-    runtime_seconds = c(sec_rf, sec_shap, sec_plot_df),
-    task = c("rf model", "rf SHAP {treeshap}", "plot_df (PCA/Maha)"),
+  
+  ## $time_df, Execution time -----
+  runtime_df <- data.frame(
+    runtime_seconds = c(sec_mod, sec_attr_mat, sec_global_view_attr_sp),
+    task = c("rf model", "rf SHAP {treeshap}", "global_view_df (PCA/Maha)"),
     layer = layer_name)
   if(verbose == TRUE) tictoc::toc()
-  if(noisy == TRUE & sum(time_df$runtime_seconds) > 30L) beepr::beep(1L)
+  if(noisy == TRUE & sum(runtime_df$runtime_seconds) > 30L) beepr::beep(1L)
   
-  return(list(plot_df = .plot_df,
-              rf_model = .rf,
-              performance_df = .performance_df,
+  return(list(global_view_df = .global_view_df,
+              model = .mod, ## Heavy object
+              model_performance_df = .model_performance_df,
               shap_df = .shap,
-              shap_xtest_df = .shap_xtest,
-              time_df = time_df))
+              shap_xtest_df = .shap_xtest, ## Typically NULL
+              runtime_df = runtime_df))
 }
 
 
 #' Format the nested local attribution layers
 #' 
 #' Internal function, formats all layers of all data.frames, consumed in 
-#' nested_local_attr_layers().
+#' local_attr_ls().
 #' 
-#' @param layer_ls A return from `nested_local_attr_layers()`.
+#' @param local_attr_ls A return from `local_attr_ls()`.
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
 #'  class.
+#' @param keep_model Whether or not to keep the (sizable) model object. 
+#' Defaults to FALSE.
 #' @param verbose Logical, Whether or not the function should print tictoc time
 #' info.
 #' @return A list of formated data frames.
 #' @export
-format_nested_layers <- function(
-  layer_ls, x, y,
+format_ls <- function(
+  local_attr_ls, x, y,
   basis_type = c("pca", "olda"),
   class = NULL,
+  keep_model = FALSE,
   verbose = TRUE
 ){
+  layer_nm <- "SHAP"
   d = 2L
-  if(verbose == TRUE) tictoc::tic("format_nested_layers()")
+  rownum <- V2 <- layer_ls <- projection_nm <- NULL
+  if(verbose == TRUE) tictoc::tic("format_ls()")
   ## Init with data layer,
-  sec_data_plot_df <- system.time({ ## Init with data layer.
+  sec_global_view_data_sp <- system.time({ ## Init with data layer.
+    .mod  <- local_attr_ls$model
+    .pred <- stats::predict(.mod)
+    .plot_clas <- class # Init regression plot class
     is_classification <- problem_type(y) == "classification"
     if(is_classification == TRUE){
       .lvls <- levels(class)
-      .rf_mod <- layer_ls[[1L]]$rf_model
-      .pred_clas <- as.factor(.lvls[round(stats::predict(.rf_mod))])
+      .pred_clas <- as.factor(.lvls[round(.pred)])
+      .plot_clas <- .pred_clas
     }
-    if(is_classification == TRUE)
-      .plot_clas <- .pred_clas else .plot_clas <- class
-    .m <- gc()
-    
-    plot_df <- global_view_df(
+    b_global_view_df <- global_view_1sp( ## Only data, but will be bound in next chunck
       x, y, basis_type, .plot_clas, layer_name = "data")
+    .m <- gc()
   })[3L]
-   
-  ### plot_df, bound longer
-  b_plot_df <- data.frame(plot_df) ## Init data layer plot_df
-  .m <- sapply(1L:length(layer_ls), function(i){
-    this_plot_df <- layer_ls[[i]]$plot_df
-    b_plot_df <<- rbind(b_plot_df, this_plot_df)
-  })
+  ### global_view_df, bound longer
+  b_global_view_df <- rbind(b_global_view_df, local_attr_ls$global_view_df)
   
   ## decode_df_of -----
-  #### Information decode(/display) table
-  ## bound wider: add prediction, residuals of every layer
+  #### A decode display table at the observation/instance grain
   if(is.null(class)) class <- as.factor(FALSE)
   is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
   decode_df <- data.frame(rownum = 1L:nrow(x), class = class, y)
   .is_misclass <- NULL
-  .m <- sapply(1L:length(layer_ls), function(i){
-    .rf_mod <- layer_ls[[i]]$rf_model
-    .pred <- stats::predict(.rf_mod)
-    decode_df <<- cbind(decode_df, .pred, y - .pred) ## Layer residual
-    if(is_classification == TRUE){
-      .lvls <- levels(class)
-      .pred_clas <<- as.factor(.lvls[round(.pred)])
-      .is_misclass <<- .pred_clas != class
-      decode_df <<- cbind(decode_df, .pred_clas, .is_misclass)
-    }
-  })
+  decode_df <- cbind(decode_df, .pred, y - .pred) ## Layer residual
+  if(is_classification == TRUE){
+    .lvls <- levels(class)
+    .pred_clas <- as.factor(.lvls[round(.pred)])
+    .is_misclass <- .pred_clas != class
+    decode_df <- cbind(decode_df, .pred_clas, .is_misclass)
+  }
+  
   ## bind wider, adding x, and tooltip
   tooltip <- 1L:nrow(x) ## Init, if rownames null, just row numbers
   ### Add rownames to tooltip if meaningful
@@ -287,76 +288,58 @@ format_nested_layers <- function(
       tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])
   }
   decode_df <- cbind(decode_df, x, tooltip)
-  .nms <- c("rownum", "class", "y", ## Init common names.
-            "prediction", #paste0("prediction_", names(layer_ls)),
-            "residual")   #paste0("residual_",   names(layer_ls)),
+  .nms <- c("rownum", "class", "y", "prediction", "residual")
   if(is_classification == TRUE){
     .nms <- c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip")
   }else{.nms <- c(.nms, names(x), "tooltip")}
   names(decode_df) <- .nms
-  ## Also add tooltip to plot_df, as it doesn't know of the RF, to check misclass
-  b_plot_df$tooltip <- dplyr::left_join(
-    b_plot_df, decode_df, c("rownum" = "rownum"))$tooltip.y
+  ## Also add tooltip to global_view
+  #### (it doesn't know of the model, to check misclassification)
+  b_global_view_df$tooltip <- dplyr::left_join(
+    b_global_view_df, decode_df, c("rownum" = "rownum"))$tooltip.y
   
-  .maha_df <- b_plot_df %>%
+  .maha_df <- b_global_view_df %>%
     dplyr::filter(projection_nm == "QQ Mahalanobis distance") %>%
-    dplyr::select(rownum, V2, layer_nm) %>% 
+    dplyr::select(rownum, V2, layer_nm) %>%
     tidyr::pivot_wider(names_from  = layer_nm, values_from = V2)
   .lj <-  dplyr::left_join(decode_df, .maha_df, c("rownum" = "rownum"))
   decode_df$maha_data <- .lj$data
   decode_df$maha_SHAP <- .lj$SHAP
   
-  ### performance of the layers
-  ## manual performance, slightly different than that reported by the rf obj itself
-  .nms <- names(layer_ls)
-  performance_df <- data.frame(NULL)
-  .m <- sapply(1L:length(layer_ls), function(i){
-    .row <- layer_ls[[i]]$performance_df
-    .row$runtime_seconds <- sum(layer_ls[[i]]$time_df$runtime_seconds)
-    performance_df <<- rbind(performance_df, .row)
-  })
-  row.names(performance_df) <- .nms
-  
-  ### Rbind shap_df
-  b_shap_df <- data.frame()
-  .m <- sapply(1L:length(layer_ls), function(i){
-    .shap_df <- cbind(layer_ls[[i]]$shap_df, .nms[i])
-    b_shap_df <<- rbind(b_shap_df, .shap_df)
-  })
-  colnames(b_shap_df) <- c(colnames(layer_ls[[1L]]$shap_df), "layer_name")
-  
-  ### Rbind time_df
-  b_time_df <- data.frame( ## Init with data layer.
-    runtime_seconds = sec_data_plot_df, task = "plot_df (PCA/Maha)", layer = "data")
-  .m <- sapply(1L:length(layer_ls), function(i){
-    b_time_df <<- rbind(b_time_df, layer_ls[[i]]$time_df)
-  })
+  ### Rbind runtime_df
+  b_runtime_df <- rbind(
+    data.frame(runtime_seconds = sec_global_view_data_sp,
+               task = "global_view (PCA/Maha)", layer = "data"),
+    layer_ls$runtime_df)
   
   if(verbose == TRUE) tictoc::toc()
-  return(list(
-    plot_df = b_plot_df, decode_df = decode_df,
-    performance_df = performance_df, shap_df = b_shap_df, time_df = b_time_df
-  )) ## Model obj is most of the weight, not kept, limiting reuse, but much lighter output.
+  ret <- list(
+    global_view_df = b_global_view_df, decode_df = decode_df,
+    model_performance_df = layer_ls$model_performance_df,
+    attr_mat_df = layer_ls$attr_mat_df, runtime_df = b_runtime_df
+  )
+  ## Keep heavy model object? 
+  if(keep_model == TRUE) ret <- c(ret, model = layer_ls$model)
+  return(ret)
 }
-
 
 #' Format the nested local attribution layers
 #' 
 #' Internal function, formats all layers of all data.frames, consumed in 
-#' nested_local_attr_layers().
+#' local_attr_ls().
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model
 #' @param xtest Optional, Out Of Sample data to find the local attribution of.
 #' @param ytest Optional, Out Of Sample response to measure xtext with 
 #' if provided.
-#' @param n_layers The number of local attribution layers deep. Defaults to 1, 
-#' the local attribution of just the data. In bulk, I think going more layers is
-#' going to overfit the data, so be prepared to optimize OOS measures.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
 #'  class.
+#' @param loc_attr_nm Name of the layer/attribution. Defaults to "SHAP".
+#' @param keep_model Whether or not to keep the (sizable) model object. 
+#' Defaults to FALSE.
 #' @param verbose Logical, Whether or not the function should print tictoc time
 #' info. Defaults to TRUE.
 #' @param noisy Logical, Whether or not the function should play a beepr tone
@@ -374,56 +357,42 @@ format_nested_layers <- function(
 #' X_test  <- sub[.idx_test, 2:5]
 #' Y_test  <- sub$m2.price[.idx_test]
 #' 
-#' layer_ls <- nested_local_attr_layers(
-#'   x=X_train, y=Y_train, xtest=X_test, ytest=Y_test,
-#'   n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
-#' names(layer_ls)
-nested_local_attr_layers <- function(
-  x, y, xtest = NULL, ytest = NULL, n_layers = 1,
-  basis_type = c("pca", "olda"), class = NULL,
+#' cheem_ls <- cheem_ls(
+#'   x = X_train, y = Y_train, xtest = X_test, ytest = Y_test,
+#'   basis_type = "pca", class = clas)
+#' names(cheem_ls)
+cheem_ls <- function(
+  x, y, xtest = NULL, ytest = NULL, basis_type = c("pca", "olda"),
+  class = NULL, loc_attr_nm = "SHAP", keep_model = FALSE,
   verbose = TRUE, noisy = TRUE
 ){
   d = 2L
-  loc_attr_nm <- "SHAP"
   if(verbose == TRUE){
-    writeLines(paste0("nested_local_attr_layers() started at ", Sys.time()))
-    tictoc::tic("nested_local_attr_layers()")
+    writeLines(paste0("cheem_ls() started at ", Sys.time()))
+    tictoc::tic("cheem_ls()")
   }
   
   ### Create shap layers in a list
-  .next_layers_x <- x ## Init
-  .next_layers_xtest <- xtest ## Init, could be NULL
-  layer_ls <- list()
-  layer_nms <- ifelse(n_layers == 1L, loc_attr_nm,
-                      paste0(loc_attr_nm, "^", 1L:n_layers))
-  .m <- sapply(1L:n_layers, function(i){
-    layer_ls[[i]] <<- local_attr_layer(
-      .next_layers_x, y,
-      .next_layers_xtest, ytest, ## Could be NULL
-      layer_nms[i], basis_type, class,
-      verbose, noisy)
-    .next_layers_x <<- layer_ls[[i]]$shap_df
-    .next_layers_xtest <<- layer_ls[[i]]$shap_xtest_df ## Could be NULL
-  })
-  names(layer_ls) <- layer_nms
+  la_layer <- local_attr_ls(
+    x, y, xtest, ytest, ## Could be NULL
+    loc_attr_nm, basis_type, class, verbose, noisy)
   
   ## Format into one list of formatted df rather than many lists of formatted df
-  formated_ls <- format_nested_layers(
-    layer_ls, x, y, basis_type, class, verbose)
+  formated_ls <- format_ls(
+    la_layer, x, y, basis_type, class, keep_model, verbose)
   .m <- gc()
   if(noisy == TRUE) beepr::beep(2L)
   if(verbose == TRUE){
     tictoc::toc()
-    writeLines(paste0("nested_local_attr_layers() finished at ", Sys.time()))
+    writeLines(paste0("cheem_ls() finished at ", Sys.time()))
   }
   attr(formated_ls, "problem_type") <- problem_type(y)
-  attr(formated_ls, "cobs_msg") <- "" ## Just to be sure in app.
   return(formated_ls)
 }
 
 
 
-## SHAP matrices/data frames -----
+
 #' Extract the full SHAP matrix of a randomForest model
 #' 
 #' Currently internal function, wants to be generalized. 

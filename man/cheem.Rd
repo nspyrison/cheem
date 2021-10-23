@@ -21,5 +21,5 @@ compared with a correctly classified neighbor.
 GitHub: \url{https://github.com/nspyrison/cheem}
 }
 \seealso{
-\code{\link[=nested_local_attr_layers]{nested_local_attr_layers()}} \code{\link[=run_app]{run_app()}}
+\code{\link[=cheem_ls]{cheem_ls()}} \code{\link[=run_app]{run_app()}}
 }
