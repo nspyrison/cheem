@@ -16,19 +16,63 @@ server <- function(input, output, session){
     if(!(dat %in% c("toy classification", "penguins", "fifa",
                     "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
+    
+    ### BY PRODUCT: UPDATE PRIM/COMP OBS
+    if(dat == "toy classification"){
+      primary_obs    <- 18L
+      comparison_obs <- 111L
+    }
+    if(dat == "penguins"){
+      primary_obs    <- 177L
+      comparison_obs <- 131L
+    }
+    if(dat == "fifa"){
+      primary_obs    <- 1L
+      comparison_obs <- 8L
+    }
+    if(dat == "apartments"){
+      primary_obs    <- 485L
+      comparison_obs <- 487L
+    }
+    if(dat == "diabetes (wide)"){
+      primary_obs    <- 121L
+      comparison_obs <- 201L
+    }
+    if(dat == "diabetes (long)"){
+      primary_obs    <- 616L
+      comparison_obs <- 215L
+    }
+    .n_max <- 5000L
+    updateNumericInput(
+      session, "primary_obs",
+      label = "Primary observation rownum, ('*' point):",
+      min = 1L, max = .n_max, step = 1L, value = primary_obs)
+    updateNumericInput(
+      session, "comparison_obs",
+      label = "Comparison observation rownum, ('x' ponit):",
+      min = 1L, max = .n_max, step = 1L, value = comparison_obs)
+    
+    ### LOAD THE DATA
     if(dat == "toy classification")
-      load("./data/2preprocess_toy_classification.RData", envir = globalenv())
+      out_ls <- readRDS("./data/2preprocess_toy_classification.rds")
     if(dat == "penguins")
-      load("./data/1preprocess_penguins.RData", envir = globalenv())
+      out_ls <- readRDS("./data/1preprocess_penguins.rds")
     if(dat == "fifa")
-      load("./data/3preprocess_fifa.RData", envir = globalenv())
+      out_ls <- readRDS("./data/3preprocess_fifa.rds")
     if(dat == "apartments")
-      load("./data/4preprocess_apartments.RData", envir = globalenv())
+      out_ls <- readRDS("./data/4preprocess_apartments.rds")
     if(dat == "diabetes (wide)")
-      load("./data/6preprocess_diabetes_wide.RData", envir = globalenv())
+      out_ls <- readRDS("./data/6preprocess_diabetes_wide.rds")
     if(dat == "diabetes (long)")
-      load("./data/6preprocess_diabetes_long.RData", envir = globalenv())
-    return(cheem_ls)
+      out_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
+    
+    ## BY PRODUCT: UPDATE INCLUSION VARIABLES
+    var_nms <- colnames(out_ls$attr_df)
+    updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
+                             choices = var_nms, selected = var_nms, inline = TRUE)
+    
+    ## Return loaded cheem_ls
+    return(out_ls)
   })
   #load_ls_d <- load_ls %>%  debounce(millis = 100L)
  
@@ -50,97 +94,40 @@ server <- function(input, output, session){
     req(load_ls())
     req(input$inc_vars)
     req(primary_obs())
-    shap_df <- load_ls()$shap_df
-    var_nms <- colnames(shap_df)
-    
-    ## By product: update inc_vars
-    updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
-                             choices = var_nms, selected = var_nms, inline = TRUE)
-    
-    if(all(input$inc_vars %in% var_nms) == FALSE){
+    attr_df <- load_ls()$attr_df
+    if(all(input$inc_vars %in% colnames(attr_df)) == FALSE){
       message("bas(): bas tried to react before inc_vars updated...")
       return()
     }
     
-    bas <- basis_local_attribution(shap_df[, input$inc_vars], primary_obs())
+    bas <- basis_local_attribution(
+      attr_df[, input$inc_vars], primary_obs())
     return(bas)
   })
   
   
+  
   ## Observers: updating inputs in the ui -----
   
-  ## UPDATE PRIMARY/COMPARISON OBSERVATIONS
-  observe({
-    req(load_ls())
-    .n <- load_ls()$decode_df %>% nrow()
-    req(input$dat_char)
-    dat <- input$dat_char
-    if(!(dat %in% c("toy classification", "penguins", "fifa",
-                    "apartments", "diabetes (wide)", "diabetes (long)")))
-      stop("data string not matched.")
-    
-    ## Initialize to hard-coded hand picked examples.
-    if(dat == "toy classification"){
-      primary_obs    <- 18L
-      comparison_obs <- 111L
-    }
-    if(dat == "penguins"){
-      primary_obs    <- 177L
-      comparison_obs <- 131L
-    }
-    if(dat == "fifa"){ ## TODO: WILL BE WRONG OBS AFTER THINNING:
-      primary_obs    <- 1L ## L Messi
-      comparison_obs <- 8L ## V. van Dijk
-    }
-    if(dat == "apartments"){
-      primary_obs    <- 485L
-      comparison_obs <- 487L
-    }
-    if(dat == "diabetes (wide)"){
-      primary_obs    <- 121L
-      comparison_obs <- 201L
-    }
-    if(dat == "diabetes (long)"){
-      primary_obs    <- 616L
-      comparison_obs <- 215L
-    }
-    
-    ## Return
-    updateNumericInput(
-      session, "primary_obs",
-      label = "Primary observation rownum, ('*' point):",
-      min = 1L, max = .n, step = 1L, value = primary_obs)
-    updateNumericInput(
-      session, "comparison_obs",
-      label = "Comparison observation rownum, ('x' ponit):",
-      min = 1L, max = .n, step = 1L, value = comparison_obs)
-  }, priority = 90L)
-  
-  ## UPDATE INCLUSION VARIABLES
-  # observe({
-  #   req(bas())
-  #   bas <- bas()
-  #   opts <- rownames(bas)
-  #   updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
-  #                            choices = opts, selected = opts, inline = TRUE)
-  # }, priority = 91L)
-  
   ## UPDATE MANIPULATION VARIABLE INPUT
-  observe({
+  observeEvent({
+    bas()
+    primary_obs()
+  },{
     req(bas())
     req(input$inc_vars)
     req(load_ls())
     req(primary_obs())
     
-    bas <- bas()
-    opts <- input$inc_vars
     cheem_ls <- load_ls()
-    shap_df <- cheem_ls$shap_df[, -ncol(cheem_ls$shap_df)]
+    attr_df <- cheem_ls$attr_df
+    opts <- input$inc_vars
     clas <- cheem_ls$decode_df$class
+    bas <- bas()
     
-    browser()
     ## Select var with largest diff of median values between classes.
-    expect_bas <- apply(shap_df[clas == clas[primary_obs()], opts], 2L, median) %>%
+    expect_bas <- apply(
+      attr_df[clas == clas[primary_obs()], opts], 2L, median) %>%
       matrix(ncol = 1L, dimnames = list(opts, "SHAP"))
     .diff <- abs(expect_bas - bas)
     sel <- opts[which(.diff == max(.diff))]
@@ -152,6 +139,48 @@ server <- function(input, output, session){
   }, priority = 50L)
   
   ## Outputs -----
+  output$desc_rows <- renderText({
+    req(input$dat_char)
+    dat <- input$dat_char
+    if(!(dat %in% c("toy classification", "penguins", "fifa",
+                    "apartments", "diabetes (wide)", "diabetes (long)")))
+      stop("data string not matched.")
+    ## Load data:
+    if(dat == "toy classification"){
+      he <- h4("Simulated triangle vertices")
+      l1 <- p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
+      l2 <- p("2) Create a random forest model classifying cluster level, given the continuous variables.")
+    }
+    if(dat == "penguins"){
+      he <- h4("Palmer penguins")
+      l1 <- p("1) 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
+      l2 <- p("2) Create a random forest model classifying species from the physical measurements.")
+    }
+    if(dat == "fifa"){
+      he <- h4("FIFA soccer players, 2020 season")
+      l1 <- p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
+      l2 <- p("2) Create a random forest model regressing continuous wages from the skill aggregates.")
+    }
+    if(dat == "apartments"){
+      he <- h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
+      l1 <- p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
+      l2 <- p("2) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
+    }
+    if(dat == "diabetes (wide)"){
+      he <- h4("Pima Indians Diabetes (wide)")
+      l1 <- p("1) 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
+    }
+    if(dat == "diabetes (long)"){
+      he <- h4("Pima Indians Diabetes (long)")
+      l1 <- p("1) *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
+    }
+    ## Return
+    HTML(paste(he, l1, l2))
+  })
+  outputOptions(output, "desc_rows",
+                suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
   
   ### MAHA KURTOSIS TEXT, may be off at the moment.
   output$kurtosis_text <- renderPrint({
@@ -160,7 +189,7 @@ server <- function(input, output, session){
     .lines <- ""
     if(as.logical(input$do_include_maha_qq) == TRUE)
       .lines <- c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
-        unique(load_ls()$plot_df[, c("ggtext")])[-1L])
+        unique(load_ls()$global_view_df[, c("ggtext")])[-1L])
     writeLines(.lines)
   })
   outputOptions(output, "kurtosis_text",
@@ -172,6 +201,7 @@ server <- function(input, output, session){
     req(primary_obs())
     req(comparison_obs())
     
+    
     linked_plotly_func(
       load_ls(), primary_obs(), comparison_obs(),
       do_include_maha_qq = as.logical(input$do_include_maha_qq))
@@ -180,7 +210,7 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   
-  ### RESIDUAL PLOT, wants to go to residual tour
+  ### RESIDUAL PLOT, wants to become a residual tour
   output$residual_plot <- plotly::renderPlotly({
     req(load_ls())
     req(primary_obs())
@@ -260,22 +290,15 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = -300L) ## Eager evaluation
   
   
-  ## FINAL TOUR
-  output$cheem_tour <- plotly::renderPlotly({
+  ## TOUR, GGANIMATE VERSION
+  output$cheem_tour_gganimate <- renderImage({
     req(bas())
     req(load_ls())
     req(input$manip_var_nm)
-    req(primary_obs())
-    req(comparison_obs())
+    req(primary_obs_d())
+    req(comparison_obs_d())
     req(input$do_add_pcp_segments)
-    req(input$inc_vars)
-    
-    ## Filter to only selected data:
-    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    .idx_rownums <- TRUE
-    if(is.null(.d) == FALSE)
-      .idx_rownums <- load_ls()$decode_df$rownum %in% .d$key
-    
+    load_ls <- load_ls()
     bas <- bas()
     mv_nm <- input$manip_var_nm
     if(mv_nm %in% rownames(bas) == FALSE){
@@ -285,16 +308,68 @@ server <- function(input, output, session){
       return(NULL)
     }
     
+    ## Filter to only selected data:
+    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+    .idx_rownums <- TRUE
+    if(is.null(.d) == FALSE)
+      .idx_rownums <- load_ls$decode_df$rownum %in% .d$key
+    
+    ## Now make the animation
     ggt <- radial_cheem_ggtour(
-      load_ls(), bas, mv_nm,
+      load_ls, bas, mv_nm,
       primary_obs(), comparison_obs(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
-      rownum_idx = .idx_rownums, inc_vars = input$inc_vars
-      )
-    spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
-  }) ## Lazy eval, heavy work, let the other stuff calculate first.
-  outputOptions(output, "cheem_tour", ## LAZY eval, do last
+      rownum_idx = .idx_rownums, inc_vars = input$inc_vars,
+      angle = .2)
+    ## A temp file to save the output, will be removed later in renderImage
+    outfile <- tempfile(fileext = ".mp4")
+    browser()
+    animate_gganimate(
+      ggt,
+      # height = 720L, #width = 4,
+      # units = "px", ## "px", "in", "cm", or "mm."
+      #res = 300L, ## resolution (dpi)
+      render = gganimate::av_renderer("outfile.mp4"))
+    ## Return a list containing the filename
+    list(src = "outfile.mp4", contentType = "image/mp4")
+  }, deleteFile = TRUE)
+  outputOptions(output, "cheem_tour_gganimate", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)
+  # ## TOUR, PLOTLY VERSION: too many issues trying .mp4 gganimate
+  # output$cheem_tour_plotly <- plotly::renderPlotly({
+  #   req(bas())
+  #   req(load_ls())
+  #   req(input$manip_var_nm)
+  #   req(primary_obs())
+  #   req(comparison_obs())
+  #   req(input$do_add_pcp_segments)
+  #   req(input$inc_vars)
+  #   
+  #   ## Filter to only selected data:
+  #   .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+  #   .idx_rownums <- TRUE
+  #   if(is.null(.d) == FALSE)
+  #     .idx_rownums <- load_ls()$decode_df$rownum %in% .d$key
+  #   
+  #   bas <- bas()
+  #   mv_nm <- input$manip_var_nm
+  #   if(mv_nm %in% rownames(bas) == FALSE){
+  #     message(paste0(
+  #       "output$cheem_tour: input$manip_var_nm = '", mv_nm,
+  #       "' wasn't in the basis bas(). Shiny tried to update cheem_tour before valid manip_var_nm was passed..."))
+  #     return(NULL)
+  #   }
+  #   
+  #   ggt <- radial_cheem_ggtour(
+  #     load_ls(), bas, mv_nm,
+  #     primary_obs(), comparison_obs(),
+  #     do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
+  #     rownum_idx = .idx_rownums, inc_vars = input$inc_vars
+  #     )
+  #   spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
+  # }) ## Lazy eval, heavy work, let the other stuff calculate first.
+  # outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
+  #               suspendWhenHidden = TRUE, priority = -9999L)
   
   ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
@@ -306,7 +381,7 @@ server <- function(input, output, session){
     return(DT::datatable(.df_r[.df_r$rownum %in% .d$key, ], rownames = FALSE))
   })
   outputOptions(output, "selected_df",
-                suspendWhenHidden = FALSE, priority = 100L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation
 } ## Close function, assigning server object.
 
 shinyApp(ui = ui, server = server)

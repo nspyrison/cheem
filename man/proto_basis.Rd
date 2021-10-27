@@ -5,7 +5,7 @@
 \title{Adds the distribution of the row local attributions to a ggtour}
 \usage{
 proto_basis1d_distribution(
-  layer_ls,
+  cheem_ls,
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "top2d", "floor2d", "off"),
   shape = c(142, 124),
@@ -15,7 +15,7 @@ proto_basis1d_distribution(
 )
 }
 \arguments{
-\item{layer_ls}{A return from \code{nested_local_attr_layers()}, a list of data frames.}
+\item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
 
 \item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
@@ -39,15 +39,15 @@ is highlighted as a dotted line.}
 }
 \description{
 Adds the distribution of orthonormalized row values of
-the specified \code{local_attribution_df}. Does not at the basis itself,
+the specified local explanation \code{attr_df}. Does not draw the basis itself;
 use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-dat <- layer_ls$decode_df[, 8:11]
-clas <- layer_ls$decode_df$class
-shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
-bas <- basis_local_attribution(shap_df, nrow(dat))
+dat <- cheem_ls$decode_df[, 8:11]
+clas <- cheem_ls$decode_df$class
+attr_df <- cheem_ls$attr_df[1:nrow(dat), -5]
+bas <- basis_local_attribution(attr_df, nrow(dat))
 mv <- manip_var_of(bas) ## Warning is fine.
 
 ## 1D case:
@@ -57,7 +57,7 @@ debugonce(proto_basis1d)
 ggt <- ggtour(mt_path, dat) +
   proto_density(aes_args = list(color = clas, fill = clas)) +
   proto_basis1d() +
-  proto_basis1d_distribution(shap_df, group_by = clas)
+  proto_basis1d_distribution(attr_df, group_by = clas)
 \dontrun{
 animate_plotly(ggt)
 }

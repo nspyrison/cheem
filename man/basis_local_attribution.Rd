@@ -4,13 +4,10 @@
 \alias{basis_local_attribution}
 \title{Extract and format the 1D local attribution basis}
 \usage{
-basis_local_attribution(
-  local_attribution_df,
-  rownum = nrow(local_attribution_df)
-)
+basis_local_attribution(attr_df, rownum = nrow(attr_df))
 }
 \arguments{
-\item{local_attribution_df}{Return of a local attribution, such as
+\item{attr_df}{Return of a local attribution, such as
 treeshap_df.}
 
 \item{rownum}{The rownumber of the primary observation.}
@@ -20,7 +17,7 @@ A matrix of the 1D basis
 }
 \description{
 Internal function, Extract and format the 1D local attribution basis from
-the provided local_attribution_df.
+the provided local explanation's attribution.
 }
 \examples{
 la_df <- mtcars ## Pretend this is a local attribution data.frame

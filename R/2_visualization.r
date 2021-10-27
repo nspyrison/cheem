@@ -3,9 +3,9 @@
 #' Extract and format the 1D local attribution basis
 #' 
 #' Internal function, Extract and format the 1D local attribution basis from 
-#' the provided local_attribution_df.
+#' the provided local explanation's attribution.
 #' 
-#' @param local_attribution_df Return of a local attribution, such as 
+#' @param attr_df Return of a local attribution, such as 
 #' treeshap_df.
 #' @param rownum The rownumber of the primary observation.
 #' @return A matrix of the 1D basis
@@ -14,18 +14,15 @@
 #' la_df <- mtcars ## Pretend this is a local attribution data.frame
 #' basis_local_attribution(la_df, rownum = 10)
 basis_local_attribution <- function(
-  local_attribution_df,
-  rownum = nrow(local_attribution_df)
+  attr_df,
+  rownum = nrow(attr_df)
 ){
   ## Remove last column if layer_name
-  .col_idx <- -ncol(local_attribution_df)
-  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric == TRUE)
-    .col_idx <- 1L:ncol(local_attribution_df)
-  LA_df <- local_attribution_df[rownum, .col_idx]
+  attr_df <- attr_df[rownum, ]
   ## Extract formatted basis
-  LA_bas <- LA_df %>%
+  LA_bas <- attr_df %>%
     as.numeric %>%
-    matrix(ncol = 1L, dimnames = list(colnames(LA_df), "SHAP"))
+    matrix(ncol = 1L, dimnames = list(colnames(attr_df), "SHAP"))
   return(tourr::orthonormalise(LA_bas))
 }
 
@@ -33,10 +30,10 @@ basis_local_attribution <- function(
 #' Adds the distribution of the row local attributions to a ggtour
 #'
 #' Adds the distribution of orthonormalized row values of 
-#' the specified `local_attribution_df`. Does not at the basis itself, 
+#' the specified local explanation `attr_df`. Does not draw the basis itself; 
 #' use in conjunction with `proto_basis1d()`.
 #'
-#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param group_by Vector to group densities by. Originally _predicted_ class.
 #' @param position The position for the basis, one of: c("top1d", "floor1d",
 #' "top2d", "floor2d", "off"). 
@@ -56,10 +53,10 @@ basis_local_attribution <- function(
 #' @export
 #' @examples
 #' load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-#' dat <- layer_ls$decode_df[, 8:11]
-#' clas <- layer_ls$decode_df$class
-#' shap_df <- layer_ls$shap_df[1:nrow(dat), -5]
-#' bas <- basis_local_attribution(shap_df, nrow(dat))
+#' dat <- cheem_ls$decode_df[, 8:11]
+#' clas <- cheem_ls$decode_df$class
+#' attr_df <- cheem_ls$attr_df[1:nrow(dat), -5]
+#' bas <- basis_local_attribution(attr_df, nrow(dat))
 #' mv <- manip_var_of(bas) ## Warning is fine.
 #' 
 #' ## 1D case:
@@ -69,12 +66,12 @@ basis_local_attribution <- function(
 #' ggt <- ggtour(mt_path, dat) +
 #'   proto_density(aes_args = list(color = clas, fill = clas)) +
 #'   proto_basis1d() +
-#'   proto_basis1d_distribution(shap_df, group_by = clas)
+#'   proto_basis1d_distribution(attr_df, group_by = clas)
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
 proto_basis1d_distribution <- function(
-  layer_ls, ## Only for distribution of bases.
+  cheem_ls, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "top2d", "floor2d", "off"), ## Needs to match that of `proto_basis1d()`
   shape = c(142, 124), ## '|' for plotly and ggplot respectively
@@ -94,37 +91,31 @@ proto_basis1d_distribution <- function(
   if(position == "off") return()
   if(is.null(.facet_by) == FALSE) position = "floor1d"
   
-  local_attribution_df <- layer_ls$shap_df
-  ## Pivot longer:
-  ### ensure last col dropped if layer_name
-  .col_idx <- -ncol(local_attribution_df)
-  if(local_attribution_df[, ncol(local_attribution_df)] %>% is.numeric)
-    .col_idx <- 1L:ncol(local_attribution_df)
-  LA_df <- local_attribution_df[, .col_idx]
-  
-  ## Force orthonormalize each row.
-  .m <- sapply(1L:nrow(LA_df), function(i){
-    row_bas <- basis_local_attribution(LA_df, i)
-    LA_df[i, ] <<- tourr::orthonormalise(row_bas)
+  ## Pivot longer the local attributions
+  attr_df <- cheem_ls$attr_df
+  ## orthonormalize each row.
+  .m <- sapply(1L:nrow(attr_df), function(i){
+    row_bas <- basis_local_attribution(attr_df, i)
+    attr_df[i, ] <<- tourr::orthonormalise(row_bas)
   })
-  ## Pivot the SHAP values (columns) longer to rows.
-  .n <- nrow(LA_df)
-  .p <- ncol(LA_df)
-  LA_df$rownum <- 1L:.n
-  LA_df$group_by <- as.factor(group_by)
+  ## Pivot the attr values (columns) longer to rows.
+  .n <- nrow(attr_df)
+  .p <- ncol(attr_df)
+  attr_df$rownum <- 1L:.n
+  attr_df$group_by <- as.factor(group_by)
   
-  .p_df <- layer_ls$plot_df
+  .p_df <- cheem_ls$global_view_df
   .maha_dist_df <-
     .p_df[.p_df$layer_nm == "data" &
             .p_df$projection_nm == "QQ Mahalanobis distance", c(1L, 4L)]
   colnames(.maha_dist_df) <- c("rownum", "maha_dist")
-  .LA_df_lj <- dplyr::left_join(LA_df, .maha_dist_df, by = "rownum")
-  .LA_df_longer <- tidyr::pivot_longer(.LA_df_lj,
+  .attr_df_lj <- dplyr::left_join(attr_df, .maha_dist_df, by = "rownum")
+  .attr_df_longer <- tidyr::pivot_longer(.attr_df_lj,
                                        cols = !c(rownum, group_by, maha_dist),
                                        names_to = "var_name",
                                        values_to = "contribution")
   .df_basis_distr <- dplyr::mutate(
-    .LA_df_longer,
+    .attr_df_longer,
     .keep = "none",
     x = contribution,
     ## Must be reverse order; var 1 on top, highest value.
@@ -148,8 +139,8 @@ proto_basis1d_distribution <- function(
     .df_basis_distr <- spinifex:::.bind_elements2df(.basis_ls, .df_basis_distr)
   }
   
-  .alpha <- logistic_tform(nrow(local_attribution_df)) / 15L
-  ## Basis/attribution distribution of the rows of the LA_df
+  .alpha <- logistic_tform(nrow(cheem_ls$decode_df)) / 15L
+  ## Basis/attribution distribution of the rows of the attr_df
   rug_distr <- list(suppressWarnings(ggplot2::geom_point(
     ggplot2::aes(x, y, color = group_by, tooltip = rownum), .df_basis_distr,
     shape = shape, alpha = .alpha, size = 1.5)))
@@ -196,121 +187,6 @@ proto_basis1d_distribution <- function(
 }
 
 
-## shiny preprocess functions ---
-## NOTE: !!DEPRICATING!!!
-# #' Append corrupted observations and extract SHAP layer list.
-# #' 
-# #' Draws `n_cobs` from the `data` of the `target_level` for _each_ other level of 
-# #' the `class`. This is appended to the `data` and finally applied to 
-# #' `nested_local_attr_layers()`.
-# #' 
-# #' @param data A data.frame or matrix with data from all `class` levels, not just
-# #' the level sampled from.
-# #' @param class The variable to group points by. Originally the _predicted_
-# #'  class.
-# #' @param y The target variable of the model.
-# #' @param target_level The number of the level of `class` (cast as.factor) to 
-# #' sample from. 
-# #' @param n_cobs The number of Corrupted OBServations (cobs) to draw for _each_ 
-# #' other non-target level.
-# #' @param var_coeff Variance coefficient, closer to 0 make points near the 
-# #' median, above 1 makes more points further away from the median.
-# #' Defaults to 1.
-# #' @param verbose Logical, Whether or not the function should print tictoc time
-# #' info. Defaults to TRUE.
-# #' @param noisy Logical, Whether of not the function should play a beeper tone
-# #' upon completion. Defaults to TRUE.
-# #' @return A list of data.frames, the return of `nested_local_attr_layers()` of the 
-# #' `data` after appending the new corrupted observations.
-# # ## @export ## !!!DEPRECATING!!!
-# #' @examples
-# #' ## Data setup, palmerpenguins::penguins
-# #' raw <- spinifex::penguins
-# #' lvls <- levels(raw$species)
-# #' ## Filter to closest 2 classes
-# #' raw <- raw[raw$species %in% lvls[1:2], ]
-# #' dat <- as.data.frame(spinifex::scale_sd(raw[, 1:4]))
-# #' clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
-# #' 
-# #' ## Apply the functions
-# #' layer_ls <- assign_cobs_layer_ls(
-# #'   data = dat,
-# #'   class = clas,
-# #'   y = clas,
-# #'   target_level = 1,
-# #'   n_cobs = 2,
-# #'   var_coeff = .1)
-# #' 
-# #' ## Structure of the list.
-# #' names(layer_ls)
-# #' str(layer_ls$plot_df)
-# #' str(layer_ls$decode_df)
-# assign_cobs_layer_ls <- function(
-#   data,
-#   class,
-#   y, ## Factor implies classification, numeric implies regression
-#   target_level = 1,
-#   n_cobs = 2,
-#   var_coeff = .1,
-#   verbose = TRUE,
-#   noisy = TRUE
-# ){
-#   ## Initialize
-#   .clas_w_cobs <- as.factor(class)
-#   .x_w_cobs    <- as.data.frame(data)
-#   ## Classification/regression
-#   .prob_type   <- problem_type(y)
-#   if(.prob_type == "classification") .y_w_cobs <- as.integer(y)
-#   if(.prob_type == "regression")     .y_w_cobs <- y
-#   
-#   ## Append COBS if required ---
-#   if(n_cobs > 0L){
-#     set.seed(404L)
-#     .lvls <- levels(class)
-#     
-#     ## Sample cobs from level 1
-#     #.m <- sapply(1L, function(k){
-#     k <- target_level
-#     .not_k <- (1L:length(.lvls))[-k]
-#     .cobs_df_k <- rnorm_from(data[class == .lvls[k], ],
-#                              n_obs = n_cobs,
-#                              var_coeff = var_coeff)
-#     
-#     ## Replicate for every non-k level and assign a replicated set to each non-k level
-#     .cobs_df <- data.frame(NULL)
-#     .m <- sapply(1L:length(.not_k), function(i){
-#       .cobs_df <<- rbind(.cobs_df, .cobs_df_k)
-#     })
-#     .clas_w_cobs <<- factor(c(
-#       as.character(.clas_w_cobs), rep(.lvls[.not_k], times = n_cobs)), levels = .lvls)
-#     .x_w_cobs <<- rbind(.x_w_cobs, .cobs_df)
-#     if(.prob_type == "classification") ## Classification problem if Y is a factor
-#       ## treeshap wants integer classes :(.
-#       .y_w_cobs <<- c(.y_w_cobs, rep(.not_k, times = n_cobs))
-#     if(.prob_type == "regression") ## Regression problem if Y is numeric
-#       .y_w_cobs <<- c(.y_w_cobs, stats::rnorm(
-#         n_cobs, mean(y[class == .lvls[.not_k]]),
-#         sqrt(var_coeff) * stats::sd(y[class == .lvls[.not_k]])
-#       ))
-#   } ## End appending cobs.
-#   
-#   ### Create and global assign layer_ls ---
-#   .layer_ls <- nested_local_attr_layers(
-#     .x_w_cobs, .y_w_cobs, n_layers = 1L, basis_type = "pca",
-#     class = .clas_w_cobs, verbose = verbose, noisy = noisy)
-#   attr(.layer_ls, "n_cobs") <- n_cobs
-#   attr(.layer_ls, "var_coeff") <- var_coeff
-#   .n <- nrow(data)
-#   attr(.layer_ls, "cobs_msg") <- ifelse(n_cobs > 0L, paste0(
-#     "Level-courrupted observations in rows: ",
-#     (nrow(data) + 1L), " to ", nrow(.layer_ls$decode_df), "."),
-#     "") ## ""; no cobs added.
-#   
-#   ## Return
-#   return(.layer_ls)
-# }
-
-
 ## Shiny plot functions ------
 
 #' Linked `plotly` display, global view of data and attribution space.
@@ -318,7 +194,7 @@ proto_basis1d_distribution <- function(
 #' Given an attribution layer list, create a linked `plotly`of the global data-
 #' and attribution- spaces. Typically consumed directly by shiny app.
 #' 
-#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
 #' as a dashed line.
@@ -337,13 +213,13 @@ proto_basis1d_distribution <- function(
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' layer_ls <- nested_local_attr_layers(
+#' cheem_ls <- cheem_ls(
 #'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
-#' linked_plotly_func(layer_ls, primary_obs = 1, comparison_obs = 2)
+#' linked_plotly_func(cheem_ls, primary_obs = 1, comparison_obs = 2)
 ##TODO: example is missing comp obs; x and shap */x
 linked_plotly_func <- function(
-  layer_ls,
+  cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
   height_px = 640L,
@@ -352,35 +228,32 @@ linked_plotly_func <- function(
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_nm <- tooltip <- NULL
-  .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
+  .alpha <- logistic_tform(nrow(cheem_ls$decode_df), mid_pt = 500L)
   .xlab <- ifelse(do_include_maha_qq == FALSE, "PC1",
                   "PC1 | Quantile, chi-squared")
   .ylab <- ifelse(do_include_maha_qq == FALSE, "PC2",
                   "PC2 | Quantile, observed Mahalanobis distance")
   ## Remove QQ maha rows if needed
-  plot_df <- layer_ls$plot_df ## Init
+  global_view_df <- cheem_ls$global_view_df ## Init
   if(do_include_maha_qq == FALSE){
-    plot_df <- layer_ls$plot_df[
-      layer_ls$plot_df$projection_nm != "QQ Mahalanobis distance", ]
+    global_view_df <- cheem_ls$global_view_df[
+      cheem_ls$global_view_df$projection_nm != "QQ Mahalanobis distance", ]
     height_px <- height_px / 2L ## Half height display as qq maha is removed.
   }
-  ##TODO:!!! "problem_type" attr is only set in assign_cobs_layer_ls;
-  # wants to be set directly in nested_local_attr_layers
-  is_classification <- attr(layer_ls, "problem_type") == "classification"
-  # ifelse("is_misclassified" %in% colnames(layer_ls$decode_df), TRUE, FALSE)
+  is_classification <- attr(cheem_ls, "problem_type") == "classification"
   pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
   if(is_classification == TRUE) pred_clas <-
-    layer_ls$decode_df$predicted_class %>%
-    rep_len(nrow(plot_df)) %>%
+    cheem_ls$decode_df$predicted_class %>%
+    rep_len(nrow(global_view_df)) %>%
     as.factor()
   
   pts_highlight <- list()
   ## Red misclassified points, if present
   if(is_classification == TRUE){
-    .rn_misclass <- which(layer_ls$decode_df$is_misclassified == TRUE)
-    .idx_misclas <- plot_df$rownum %in% .rn_misclass
+    .rn_misclass <- which(cheem_ls$decode_df$is_misclassified == TRUE)
+    .idx_misclas <- global_view_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0L){
-      .df <- plot_df[.idx_misclas, ] # %>% highlight_key(~rownum)
+      .df <- global_view_df[.idx_misclas, ] # %>% highlight_key(~rownum)
       pts_highlight <- c(
         pts_highlight,
         ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
@@ -391,9 +264,9 @@ linked_plotly_func <- function(
   }
   ## Highlight comparison obs, if passed
   if(is.null(comparison_obs) == FALSE){
-    .idx_comp <- plot_df$rownum == comparison_obs
+    .idx_comp <- global_view_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L){
-      .df <- plot_df[.idx_comp, ]
+      .df <- global_view_df[.idx_comp, ]
       pts_highlight <- c(
         pts_highlight,
         ## Highlight comparison obs
@@ -404,9 +277,9 @@ linked_plotly_func <- function(
   }
   ## Highlight shap obs, if passed
   if(is.null(primary_obs) == FALSE){
-    .idx_shap <- plot_df$rownum == primary_obs
+    .idx_shap <- global_view_df$rownum == primary_obs
     if(sum(.idx_shap) > 0L){
-      .df <- plot_df[.idx_shap, ] # %>% highlight_key(~rownum)
+      .df <- global_view_df[.idx_shap, ] # %>% highlight_key(~rownum)
       pts_highlight <- c(
         pts_highlight,
         ggplot2::geom_point(ggplot2::aes(V1, V2),#, color = pred_clas[.idx_shap]),
@@ -427,7 +300,7 @@ linked_plotly_func <- function(
   
   ## ggplot
   gg <- ggplot2::ggplot(
-    data = plotly::highlight_key(plot_df, ~rownum),
+    data = plotly::highlight_key(global_view_df, ~rownum),
     mapping = ggplot2::aes(V1, V2)) +
     suppressWarnings(ggplot2::geom_point(
       ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas,
@@ -458,7 +331,7 @@ linked_plotly_func <- function(
 #' Create a linked `plotly`of the global data-
 #' and attribution- spaces. Typically consumed directly by shiny app.
 #' 
-#' @param layer_ls A return from `nested_local_attr_layers()`, a list of data frames.
+#' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param basis A 1D projection basis, typically a return of 
 #' `basis_local_attribution()`.
 #' @param mv_name The character string, _name_ of the Manipulation Variable.
@@ -485,51 +358,63 @@ linked_plotly_func <- function(
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' layer_ls <- nested_local_attr_layers(
-#'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' cheem_ls <- cheem_ls(
+#'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
-#' tgt_obs <- 1
-#' bas <- basis_local_attribution(layer_ls$shap_df, tgt_obs)
-#' ggt <- radial_cheem_ggtour(layer_ls, basis=bas, mv_name=colnames(X)[1], 
+#' bas <- basis_local_attribution(cheem_ls$attr_df, rownum = 1)
+#' ggt <- radial_cheem_ggtour(cheem_ls, basis=bas, mv_name=colnames(X)[1], 
 #'                            primary_obs=1, comparison_obs=2)
 #' spinifex::animate_plotly(ggt)
 radial_cheem_ggtour <- function(
-  layer_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
+  cheem_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
-  angle = .1,
+  angle = .2,
   rownum_idx = TRUE,
-  inc_vars = TRUE
+  inc_vars = NULL
 ){
   if(sum(rownum_idx) == 0L) stop("radial_cheem_ggtour: sum of rownum_idx was 0.")
+  decode_df <- cheem_ls$decode_df
   ## Initialization Y on basis
-  .y <- layer_ls$decode_df$y %>% matrix(ncol = 1L)
-  .col_idx <- which(colnames(layer_ls$decode_df) %in% inc_vars)
-  .df <- layer_ls$decode_df[, .col_idx] ## Numeric X variables
-  ## .df differs from .dat with the inclusion of a y var for regression.
+  .y <- decode_df$y %>% matrix(ncol = 1L)
+  if(is.null(inc_vars) == TRUE){
+    .cn <- colnames(decode_df)
+    inc_vars <- .cn[
+      which(!(.cn %in%
+          c("rownum", "class", "y", "prediction", "residual", "tooltip",
+            "maha_data", "maha_SHAP", "predicted_class",
+            "is_misclassification")))]
+  }
+  .col_idx <- which(colnames(decode_df) %in% inc_vars)
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
+  
+  ## Change rownum_idx from logical to numeric, replicate
+  if(identical(rownum_idx, TRUE) == TRUE) rownum_idx <- 1L:nrow(.df)
+  active_idx <- which(rownum_idx == TRUE)
+  bkg_idx <- which(rownum_idx == FALSE)
   
   ## Problem type: classification or regression?
-  .prob_type <- problem_type(layer_ls$decode_df$y) ## Either "classification" or "regression"
+  .prob_type <- problem_type(decode_df$y) ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
-    .pred_clas <- layer_ls$decode_df$predicted_class
-  .alpha <- logistic_tform(nrow(layer_ls$decode_df), mid_pt = 500L)
+    .pred_clas <- decode_df$predicted_class
+  .alpha <- logistic_tform(nrow(decode_df), mid_pt = 500L)
   
   ## Manual (radial) tour 1d
-  .mv <- which(colnames(layer_ls$shap_df) == mv_name)
+  .mv <- which(colnames(cheem_ls$attr_df) == mv_name)
   .mt_path <- spinifex::manual_tour(basis, manip_var = .mv)
   
   ### Classification case -----
   # Classification goes right into vis
   if(.prob_type == "classification"){
-    ## !!For classification densities only shown for selected data!!!
-    .dat <- spinifex::scale_01(.df)[rownum_idx, ]
+    ## classification; subset to selected data
+    .dat <- .dat[rownum_idx, ]
     
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas)) +
       proto_basis1d_distribution(
-        layer_ls, group_by = .pred_clas,
+        cheem_ls, group_by = .pred_clas,
         position = "top1d",
         shape = pcp_shape, ## '|' for gganimate/ggplot
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
@@ -555,55 +440,56 @@ radial_cheem_ggtour <- function(
   ### Regression case -----
   # Regression does some work to append y or y_hat to the basis
   if(.prob_type == "regression"){
-    ## y axis; full contribution of the y, regression var.
-    .tgt_dim <- c(dim(.mt_path) + c(1L, 1L, 0L))
-    .array <- array(NA, dim = .tgt_dim)
-    .m <- sapply(1L:.tgt_dim[3L], function(i){
-      .array[,, i] <<- tourr::orthonormalise(
-        matrix(
-          c(0L, .mt_path[,, i], c(1L, rep(0L, .tgt_dim[1L] - 1L))),
-          nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]
-        ))
-    })
-    dn <- dimnames(.mt_path)
-    dn[[1L]] <- c("Obs y", rownames(.mt_path))
-    dn[[2L]] <- c("Local explanation", "Observed y")
-    dimnames(.array) <- dn
-    attr(.array, "manip_var") <- attr(.mt_path, "manip_var")
-    attr(.array, "theta")     <- attr(.mt_path, "theta")
-    attr(.array, "phi_start") <- attr(.mt_path, "phi_start")
-    attr(.array, "phi_min")   <- attr(.mt_path, "phi_min")
-    attr(.array, "phi_max")   <- attr(.mt_path, "phi_max")
+    ## REMAKE WITH the new spinifex::proto_point1d_fixed_y()
+    # ## y axis; full contribution of the y, regression var.
+    # .tgt_dim <- c(dim(.mt_path) + c(1L, 1L, 0L))
+    # .array <- array(NA, dim = .tgt_dim)
+    # .m <- sapply(1L:.tgt_dim[3L], function(i){
+    #   .array[,, i] <<- tourr::orthonormalise(
+    #     matrix(
+    #       c(0L, .mt_path[,, i], c(1L, rep(0L, .tgt_dim[1L] - 1L))),
+    #       nrow = .tgt_dim[1L], ncol = .tgt_dim[2L]
+    #     ))
+    # })
+    # dn <- dimnames(.mt_path)
+    # dn[[1L]] <- c("Obs y", rownames(.mt_path))
+    # dn[[2L]] <- c("Local explanation", "Observed y")
+    # dimnames(.array) <- dn
+    # attr(.array, "manip_var") <- attr(.mt_path, "manip_var")
+    # attr(.array, "theta")     <- attr(.mt_path, "theta")
+    # attr(.array, "phi_start") <- attr(.mt_path, "phi_start")
+    # attr(.array, "phi_min")   <- attr(.mt_path, "phi_min")
+    # attr(.array, "phi_max")   <- attr(.mt_path, "phi_max")
     
-    ## Add y to .dat to project
-    .dat <- spinifex::scale_01(data.frame(.df, .y))
-    
-    ## Change rownum_idx from logical to numeric, replicate if needed
-    if(identical(rownum_idx, TRUE) == TRUE) rownum_idx <- rep_len(TRUE, nrow(.df))
-    active_idx <- which(rownum_idx == TRUE)
-    bkg_idx <- which(rownum_idx == FALSE)
-    .pred_clas <- rep_len(.pred_clas, nrow(.df))
-    
+    .dat <- .dat[rownum_idx, ] ## IDEALLY want to include grey points too; wants a data arg.
+    .dat_doubled <- rbind(.dat, .dat)
+    .facet_col   <- rep(c("observed y", "residual"), each = nrow(.dat))
+    .fixed_y <- c(spinifex::scale_sd(decode_df$y),
+                  spinifex::scale_sd(decode_df$residual))
     ## Plot
-    ggt <- spinifex::ggtour(.array, .dat, angle = angle) +
-      ## Manual axes titles
+    ggt <- spinifex::ggtour(.array, .dat_doubled, angle = angle) +
+      spinifex::facet_wrap_tour(facet_var = .facet_col, nrow = 1L) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection, 1D",
-                    y = "Observed y") +
-      ggplot2::theme(axis.title.y = ggplot2::element_text(vjust = .25))
-    ## Background, not selected points
-    if(length(bkg_idx) > 0L)
-      ggt <- ggt + spinifex::proto_highlight(
-        bkg_idx,
-        aes_args = list(shape = .pred_clas),
-        identity_args = list(alpha = .alpha, color = "grey80"))
-    ## Selected points
-    ggt <- ggt + spinifex::proto_highlight(
-      active_idx,
-      aes_args = list(color = .pred_clas, shape = .pred_clas),
-      identity_args = list(alpha = .alpha)) +
+                    y = "_basis_ | observed y | residual")
+    # ## Background, not selected points
+    # if(length(bkg_idx) > 0L)
+    #   ggt <- ggt + spinifex::proto_highlight(
+    #     bkg_idx,
+    #     aes_args = list(shape = .pred_clas),
+    #     identity_args = list(alpha = .alpha, color = "grey80"))
+    # ## Selected points
+    # ggt <- ggt + spinifex::proto_highlight(
+    #   active_idx,
+    #   aes_args = list(color = .pred_clas, shape = .pred_clas),
+    #   identity_args = list(alpha = .alpha))
+    ggt <- ggt +
+      spinifex::proto_point1d_fixed_y(
+        aes_args = list(color = .pred_clas, shape = .pred_clas),
+        identity_args = list(alpha = .alpha),
+        fixed_y = .fixed_y) +
       proto_basis1d_distribution(
-        layer_ls, group_by = .pred_clas,
+        cheem_ls, group_by = .pred_clas,
         position = "top2d",
         shape = c(142L, 124L), ## '|' for plotly/gganimate.
         do_add_pcp_segments = as.logical(do_add_pcp_segments),

@@ -5,20 +5,20 @@
 \title{Cheem tour; 1D manual tour on the selected attribution}
 \usage{
 radial_cheem_ggtour(
-  layer_ls,
+  cheem_ls,
   basis,
   mv_name,
   primary_obs,
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
-  angle = 0.1,
+  angle = 0.2,
   rownum_idx = TRUE,
-  inc_vars = TRUE
+  inc_vars = NULL
 )
 }
 \arguments{
-\item{layer_ls}{A return from \code{nested_local_attr_layers()}, a list of data frames.}
+\item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
 
 \item{basis}{A 1D projection basis, typically a return of
 \code{basis_local_attribution()}.}
@@ -60,12 +60,11 @@ X <- sub[, 2:5]
 Y <- sub$m2.price
 clas <- sub$district
 
-layer_ls <- nested_local_attr_layers(
-  x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+cheem_ls <- cheem_ls(
+  x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 
-tgt_obs <- 1
-bas <- basis_local_attribution(layer_ls$shap_df, tgt_obs)
-ggt <- radial_cheem_ggtour(layer_ls, basis=bas, mv_name=colnames(X)[1], 
+bas <- basis_local_attribution(cheem_ls$attr_df, rownum = 1)
+ggt <- radial_cheem_ggtour(cheem_ls, basis=bas, mv_name=colnames(X)[1], 
                            primary_obs=1, comparison_obs=2)
 spinifex::animate_plotly(ggt)
 }

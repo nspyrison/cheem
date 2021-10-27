@@ -87,9 +87,9 @@ length(unique(.rownums_to_keep)) ## of original 5000 row nums
 ## EXPORT OBJECTS ----
 if(interactive()){
   setwd("~/R/cheem")
-  save(layer_ls,
-       file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
+  saveRDS(cheem_ls,
+          file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
 }
 if(F) ## Not run, load cheem_ls
-  load("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
+  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
 

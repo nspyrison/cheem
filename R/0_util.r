@@ -9,9 +9,9 @@
 #' @return Logical, whether or not `x` is a discrete variable,
 #' @export
 #' @examples
-#' is_discrete(mtcars$mpg)
+#' is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
 #' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
-#' is_discrete(letters)
+#' is_discrete(letters)    ## Characters and factors labeled discrete.
 is_discrete <- function(x){
   is.factor(x) || is.character(x) || is.logical(x) ||
     (length(unique(x)) < 25L & is.numeric(x))
@@ -21,8 +21,9 @@ is_discrete <- function(x){
 #' 
 #' Whether the Y is a "classification", "regression" or ill-defined problem.
 #' Returns a character: "classification", "regression", or an error for strange 
-#' classes. Minor redundancy with is_discrete, though explicit, and does check 
-#' for strange classes.
+#' classes. Minor redundancy with is_discrete, though explicit. Could be useful
+#' for `DALEX::explain(type)` as it also expects "classification" or 
+#' "regression".
 #' @param y Response variable to be modeled
 #' @return Character in c("classification", "regression")
 #' @export
@@ -30,7 +31,6 @@ is_discrete <- function(x){
 #' problem_type(mtcars$mpg)
 #' problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' problem_type(letters)
-#TODO May want be deprecated in favor of is.discrete, this may be slightly safer if outside of the checks of is_discrete
 problem_type <- function(y){
   if(is_discrete(y) == TRUE) return("classification")
   if(is.numeric(y) == TRUE)  return("regression")

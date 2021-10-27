@@ -5,7 +5,7 @@
 \title{Linked \code{plotly} display, global view of data and attribution space.}
 \usage{
 linked_plotly_func(
-  layer_ls,
+  cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
   height_px = 640L,
@@ -14,7 +14,7 @@ linked_plotly_func(
 )
 }
 \arguments{
-\item{layer_ls}{A return from \code{nested_local_attr_layers()}, a list of data frames.}
+\item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
@@ -44,8 +44,8 @@ X <- sub[, 2:5]
 Y <- sub$m2.price
 clas <- sub$district
 
-layer_ls <- nested_local_attr_layers(
+cheem_ls <- cheem_ls(
   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
 
-linked_plotly_func(layer_ls, primary_obs = 1, comparison_obs = 2)
+linked_plotly_func(cheem_ls, primary_obs = 1, comparison_obs = 2)
 }

@@ -17,7 +17,7 @@ Whether or not a vector is a discrete variable, returns a logical.
 Typically used on the Y variable of a model.
 }
 \examples{
-is_discrete(mtcars$mpg)
+is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
 is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
-is_discrete(letters)
+is_discrete(letters)    ## Characters and factors labeled discrete.
 }

@@ -15,8 +15,9 @@ Character in c("classification", "regression")
 \description{
 Whether the Y is a "classification", "regression" or ill-defined problem.
 Returns a character: "classification", "regression", or an error for strange
-classes. Minor redundancy with is_discrete, though explicit, and does check
-for strange classes.
+classes. Minor redundancy with is_discrete, though explicit. Could be useful
+for \code{DALEX::explain(type)} as it also expects "classification" or
+"regression".
 }
 \examples{
 problem_type(mtcars$mpg)

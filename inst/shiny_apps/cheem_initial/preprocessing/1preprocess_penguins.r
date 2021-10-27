@@ -18,14 +18,15 @@ require("cheem")
 cheem_ls <- cheem_ls(
   x = X, y = Y, basis_type = "pca", class = clas)
 names(cheem_ls)
+cheem_ls$attr_df
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  save(cheem_ls,
-       file = "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
+  saveRDS(cheem_ls,
+          file = "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.rds")
 }
 if(F) ## Not run, load cheem_ls
-  load("./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.RData")
+  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.rds")
 
 

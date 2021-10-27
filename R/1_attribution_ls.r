@@ -168,12 +168,12 @@ local_attr_ls <- function(
     .model_performance_df$test_rsq <- .rsq_t
   }
   
-  ## treeshap, attribution matrix
-  sec_attr_mat <- system.time({
+  ##  attribution matrix, currently treeshap ----
+  sec_attr_df <- system.time({
     .m <- gc()
-    .shap <- treeshap_df(.mod, x)
-    .shap_xtest <- NULL ## Init
-    if(is.null(xtest) == FALSE) .shap_xtest <- treeshap_df(.mod, xtest)
+    .attr_df <- treeshap_df(.mod, x)
+    .attr_df_xtest <- NULL ## Init
+    if(is.null(xtest) == FALSE) .attr_df_xtest <- treeshap_df(.mod, xtest)
   })[3L]
   
   ## global_view of Attribution space ----
@@ -189,14 +189,14 @@ local_attr_ls <- function(
       .plot_clas <- .pred_clas else .plot_clas <- class
     .m <- gc()
     .global_view_df <- global_view_1sp(
-      .shap, y, basis_type, .plot_clas,
+      .attr_df, y, basis_type, .plot_clas,
       layer_name = layer_name)
   })[3L]
   
   ## $time_df, Execution time -----
   runtime_df <- data.frame(
-    runtime_seconds = c(sec_mod, sec_attr_mat, sec_global_view_attr_sp),
-    task = c("rf model", "rf SHAP {treeshap}", "global_view_df (PCA/Maha)"),
+    runtime_seconds = c(sec_mod, sec_attr_df, sec_global_view_attr_sp),
+    task = c("model (rF::rF)", "attribution (treeshap)", "global_view_df (PCA/Maha)"),
     layer = layer_name)
   if(verbose == TRUE) tictoc::toc()
   if(noisy == TRUE & sum(runtime_df$runtime_seconds) > 30L) beepr::beep(1L)
@@ -204,8 +204,8 @@ local_attr_ls <- function(
   return(list(global_view_df = .global_view_df,
               model = .mod, ## Heavy object
               model_performance_df = .model_performance_df,
-              shap_df = .shap,
-              shap_xtest_df = .shap_xtest, ## Typically NULL
+              attr_df = .attr_df,
+              attr_xtest_df = .attr_df_xtest, ## Typically NULL
               runtime_df = runtime_df))
 }
 
@@ -237,8 +237,8 @@ format_ls <- function(
 ){
   layer_nm <- "SHAP"
   d = 2L
-  rownum <- V2 <- layer_ls <- projection_nm <- NULL
-  if(verbose == TRUE) tictoc::tic("format_ls()")
+  rownum <- V2 <- projection_nm <- NULL
+  if(verbose == TRUE) tictoc::tic("format_ls")
   ## Init with data layer,
   sec_global_view_data_sp <- system.time({ ## Init with data layer.
     .mod  <- local_attr_ls$model
@@ -310,16 +310,16 @@ format_ls <- function(
   b_runtime_df <- rbind(
     data.frame(runtime_seconds = sec_global_view_data_sp,
                task = "global_view (PCA/Maha)", layer = "data"),
-    layer_ls$runtime_df)
+    local_attr_ls$runtime_df)
   
   if(verbose == TRUE) tictoc::toc()
   ret <- list(
     global_view_df = b_global_view_df, decode_df = decode_df,
-    model_performance_df = layer_ls$model_performance_df,
-    attr_mat_df = layer_ls$attr_mat_df, runtime_df = b_runtime_df
+    model_performance_df = local_attr_ls$model_performance_df,
+    attr_df = local_attr_ls$attr_df, runtime_df = b_runtime_df
   )
   ## Keep heavy model object? 
-  if(keep_model == TRUE) ret <- c(ret, model = layer_ls$model)
+  if(keep_model == TRUE) ret <- c(ret, model = local_attr_ls$model)
   return(ret)
 }
 
@@ -368,23 +368,23 @@ cheem_ls <- function(
 ){
   d = 2L
   if(verbose == TRUE){
-    writeLines(paste0("cheem_ls() started at ", Sys.time()))
-    tictoc::tic("cheem_ls()")
+    writeLines(paste0("cheem_ls started at ", Sys.time()))
+    tictoc::tic("cheem_ls total")
   }
   
   ### Create shap layers in a list
-  la_layer <- local_attr_ls(
+  la_ls <- local_attr_ls(
     x, y, xtest, ytest, ## Could be NULL
     loc_attr_nm, basis_type, class, verbose, noisy)
   
   ## Format into one list of formatted df rather than many lists of formatted df
   formated_ls <- format_ls(
-    la_layer, x, y, basis_type, class, keep_model, verbose)
+    la_ls, x, y, basis_type, class, keep_model, verbose)
   .m <- gc()
   if(noisy == TRUE) beepr::beep(2L)
   if(verbose == TRUE){
     tictoc::toc()
-    writeLines(paste0("cheem_ls() finished at ", Sys.time()))
+    writeLines(paste0("cheem_ls finished at ", Sys.time()))
   }
   attr(formated_ls, "problem_type") <- problem_type(y)
   return(formated_ls)
@@ -428,3 +428,32 @@ treeshap_df <- function(randomForest_model, data){
   return(ret)
 }
 
+
+if(F){ ## THERORETICAL DEV -----
+  ## TAKEAWAY:
+  #-CP and BD, each need DALEX::Explain;
+  #-basically want to extract a model-less DALEX::explain before model is removed. 
+  
+  ## Wrapper function to create a breakdown plot of the 
+  bd_plot <- function(explainer, new_obs){
+    parts_bd <- DALEX::predict_parts_break_down(explainer = , new_observation )
+    plot(parts_bd)
+  }
+  
+  # .explain <- DALEX::explain(model = model,
+  #                            data  = x,
+  #                            y     = y,
+  #                            type  = problem_type)
+  
+  ## Wrapper function for predict & plot cp profile
+  cp_profiles_plots <- function(explainer, new_obs, var_nms){
+    .pred_prof <- DALEX::predict_profile(explainer = explainer,
+                                         new_observation = new_obs)
+
+    return(
+    plot(.pred_prof, variables = var_nms) +
+      ggtitle::ggtitle("Ceteris-paribus profile", "")# +
+    # + ggplot2::ylim(min(y), max(y))
+    )
+  }
+}
