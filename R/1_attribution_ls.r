@@ -167,6 +167,7 @@ local_attr_ls <- function(
     .model_performance_df$test_rmse <- .rmse_t
     .model_performance_df$test_rsq <- .rsq_t
   }
+  row.names(model_performance_df) <- 1L
   
   ##  attribution matrix, currently treeshap ----
   sec_attr_df <- system.time({
@@ -309,8 +310,9 @@ format_ls <- function(
   ### Rbind runtime_df
   b_runtime_df <- rbind(
     data.frame(runtime_seconds = sec_global_view_data_sp,
-               task = "global_view (PCA/Maha)", layer = "data"),
+               task = "global_view_df (PCA/Maha)", layer = "data"),
     local_attr_ls$runtime_df)
+  row.names(b_runtime_df) <- 1L:nrow(b_runtime_df)
   
   if(verbose == TRUE) tictoc::toc()
   ret <- list(

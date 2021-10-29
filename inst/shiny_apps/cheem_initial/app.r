@@ -215,6 +215,7 @@ server <- function(input, output, session){
     req(load_ls())
     req(primary_obs())
     req(comparison_obs())
+
     decode_df <- load_ls()$decode_df
     prim_obs <- primary_obs()
     comp_obs <- comparison_obs()
@@ -228,7 +229,7 @@ server <- function(input, output, session){
     ## Filter to rownum and select columns
     active_df <- decode_df[.idx_rownums, ]
     bkg_df <- decode_df[!.idx_rownums, ]
-    .alpha <- logistic_tform(nrow(cheem_ls$decode_df), mid_pt = 500L)
+    .alpha <- logistic_tform(nrow(decode_df), mid_pt = 500L)
     .is_classification <- problem_type(decode_df$y) == "classification"
     .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
     
@@ -321,6 +322,10 @@ server <- function(input, output, session){
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
       rownum_idx = .idx_rownums, inc_vars = input$inc_vars,
       angle = .2)
+    ## may improve render time OF PLOTLY:
+    # %>% toWebGL() ?
+    # %>% partial_bundle() ?
+    
     ## A temp file to save the output, will be removed later in renderImage
     outfile <- tempfile(fileext = ".mp4")
     browser()
@@ -329,9 +334,9 @@ server <- function(input, output, session){
       # height = 720L, #width = 4,
       # units = "px", ## "px", "in", "cm", or "mm."
       #res = 300L, ## resolution (dpi)
-      render = gganimate::av_renderer("outfile.mp4"))
+      render = gganimate::av_renderer(outfile))
     ## Return a list containing the filename
-    list(src = "outfile.mp4", contentType = "image/mp4")
+    list(src = outfile, contentType = "image/mp4")
   }, deleteFile = TRUE)
   outputOptions(output, "cheem_tour_gganimate", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)

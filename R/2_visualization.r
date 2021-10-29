@@ -389,7 +389,7 @@ radial_cheem_ggtour <- function(
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
   
   ## Change rownum_idx from logical to numeric, replicate
-  if(identical(rownum_idx, TRUE) == TRUE) rownum_idx <- 1L:nrow(.df)
+  if(identical(rownum_idx, TRUE) == TRUE) rownum_idx <- 1L:nrow(decode_df)
   active_idx <- which(rownum_idx == TRUE)
   bkg_idx <- which(rownum_idx == FALSE)
   
@@ -467,7 +467,7 @@ radial_cheem_ggtour <- function(
     .fixed_y <- c(spinifex::scale_sd(decode_df$y),
                   spinifex::scale_sd(decode_df$residual))
     ## Plot
-    ggt <- spinifex::ggtour(.array, .dat_doubled, angle = angle) +
+    ggt <- spinifex::ggtour(.mt_path, .dat_doubled, angle = angle) +
       spinifex::facet_wrap_tour(facet_var = .facet_col, nrow = 1L) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection, 1D",
@@ -484,7 +484,7 @@ radial_cheem_ggtour <- function(
     #   aes_args = list(color = .pred_clas, shape = .pred_clas),
     #   identity_args = list(alpha = .alpha))
     ggt <- ggt +
-      spinifex::proto_point1d_fixed_y(
+      spinifex::proto_point.1d_fix_y(
         aes_args = list(color = .pred_clas, shape = .pred_clas),
         identity_args = list(alpha = .alpha),
         fixed_y = .fixed_y) +
@@ -496,7 +496,7 @@ radial_cheem_ggtour <- function(
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
       spinifex::proto_basis1d(position = "top2d", manip_col = "black") +
-      spinifex::proto_origin() +
+      #spinifex::proto_origin() +
       ## Highlight comparison obs
       spinifex::proto_highlight(
         comparison_obs,
