@@ -62,8 +62,8 @@ names(cheem_ls)
 ## V2 is observed maha
 {
   .raw_layer_ls <- cheem_ls ## backup
-  .maha_plot_df <- cheem_ls$plot_df[
-    cheem_ls$plot_df$projection_nm == "QQ Mahalanobis distance",]
+  .maha_plot_df <- cheem_ls$global_view_df[
+    cheem_ls$global_view_df$projection_nm == "QQ Mahalanobis distance",]
   ## Want to thin out lowest 90% of maha, but I don't trust the orderign of maha atm, so manual top 10%
   # hist(.maha_plot_df$V2)
   # idx_top_maha <- order(.maha_plot_df$V2, decreasing = T)
@@ -74,15 +74,14 @@ names(cheem_ls)
   ## THIN: just first 500 (top skill overall/potential) (as messi and van Dijk are 1 & 8)
   .rownums_to_keep <- 1:500
   ## Order of maha numbers is not correct atm
-  cheem_ls$plot_df <-
-    cheem_ls$plot_df[cheem_ls$plot_df$rownum %in% .rownums_to_keep,]
+  cheem_ls$global_view_df <-
+    cheem_ls$global_view_df[cheem_ls$global_view_df$rownum %in% .rownums_to_keep,]
   cheem_ls$decode_df <-
     cheem_ls$decode_df[cheem_ls$decode_df$rownum %in% .rownums_to_keep,]
-  cheem_ls$shap_df <- cheem_ls$shap_df[.rownums_to_keep,]
+  cheem_ls$attr_df <- cheem_ls$attr_df[.rownums_to_keep,]
 }
 length(.rownums_to_keep)
 length(unique(.rownums_to_keep)) ## of original 5000 row nums
-
 
 ## EXPORT OBJECTS ----
 if(interactive()){
@@ -91,5 +90,5 @@ if(interactive()){
           file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
 }
 if(F) ## Not run, load cheem_ls
-  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.RData")
+  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
 

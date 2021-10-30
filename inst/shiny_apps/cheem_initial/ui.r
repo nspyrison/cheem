@@ -94,9 +94,10 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Dashed line: location of primary observation (previously '*')."),
-  p("Dotted line: location of comparison observation (previously 'x')."),
-  shiny::imageOutput("cheem_tour_gganimate",
-                     width = "100%", height = "720px")
+  p("Dotted line: location of comparison observation (previously 'x').")
+  # shiny::imageOutput("cheem_tour_gganimate",
+  #                    width = "100%", height = "720px")
+  
   # fluidRow(
   #   ## Plotly, .html widget, animated radial tour:
   #   column(width = 6L,

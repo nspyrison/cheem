@@ -68,7 +68,7 @@ server <- function(input, output, session){
       ret <- diabetes_long_ls
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
-    var_nms <- colnames(out_ls$attr_df)
+    var_nms <- colnames(ret$attr_df)
     updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
                              choices = var_nms, selected = var_nms, inline = TRUE)
     
@@ -329,7 +329,6 @@ server <- function(input, output, session){
     
     ## A temp file to save the output, will be removed later in renderImage
     outfile <- tempfile(fileext = ".mp4")
-    browser()
     animate_gganimate(
       ggt,
       # height = 720L, #width = 4,
