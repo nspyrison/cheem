@@ -183,18 +183,18 @@ server <- function(input, output, session){
   outputOptions(output, "desc_rows",
                 suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
   
-  ### MAHA KURTOSIS TEXT, may be off at the moment.
-  output$kurtosis_text <- renderPrint({
-    req(load_ls())
-    req(input$do_include_maha_qq)
-    .lines <- ""
-    if(as.logical(input$do_include_maha_qq) == TRUE)
-      .lines <- c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
-        unique(load_ls()$global_view_df[, c("ggtext")])[-1L])
-    writeLines(.lines)
-  })
-  outputOptions(output, "kurtosis_text",
-                suspendWhenHidden = FALSE, priority = -199L) ## Eager evaluation
+  # ### MAHA KURTOSIS TEXT, may be off at the moment.
+  # output$kurtosis_text <- renderPrint({
+  #   req(load_ls())
+  #   req(input$do_include_maha_qq)
+  #   .lines <- ""
+  #   if(as.logical(input$do_include_maha_qq) == TRUE)
+  #     .lines <- c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
+  #       unique(load_ls()$global_view_df[, c("ggtext")])[-1L])
+  #   writeLines(.lines)
+  # })
+  # outputOptions(output, "kurtosis_text",
+  #               suspendWhenHidden = FALSE, priority = -199L) ## Eager evaluation
   
   ### GLOBAL VIEW PLOTLY
   output$linked_plotly <- plotly::renderPlotly({
@@ -203,8 +203,8 @@ server <- function(input, output, session){
     req(comparison_obs())
     
     linked_plotly_func(
-      load_ls(), primary_obs(), comparison_obs(),
-      do_include_maha_qq = as.logical(input$do_include_maha_qq))
+      load_ls(), primary_obs(), comparison_obs())
+      #, do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
   outputOptions(output, "linked_plotly",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation

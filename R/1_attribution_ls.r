@@ -34,39 +34,39 @@ global_view_1sp <- function(
 ){
   d = 2L ## Fixed display dimensionality
   tooltip <- 1L:nrow(x)
+  if(is.null(class)) class <- as.factor(FALSE) 
   
-  ## maha_vect_of() -----
-  if(is.null(class)) class <- as.factor(FALSE)
-  .lvls <- levels(class)
-  maha <- NULL
-  ## For each level of the class, find the in-class maha distances
-  .m <- sapply(1L:length(.lvls), function(k){
-    .sub <- x[class == .lvls[k], ]
-    .sub_maha <- stats::mahalanobis(
-      .sub, apply(.sub, 2L, stats::median), stats::cov(.sub)) %>%
-      matrix(ncol = 1L)
-    maha <<- c(maha, .sub_maha)
-  })
-  ## [01] normalize (outside class levels)
-  maha <- spinifex::scale_01(as.matrix(maha, ncol = 1L))
-  ## Maha quantiles
-  ### Theoretical chi sq quantiles, x of a QQ plot
-  .probs <- seq(.001, .999, length.out = nrow(x))
-  .qx_chisq <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
-  ### Sample/obs quantiles, y of a QQ plot
-  ord <- order(maha)
-  .qy_obs <- spinifex::scale_01(matrix(maha[ord]))
-  .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy_obs), "less")$p.value
-  .maha_skew_text <- paste0(
-    "  Anscombe-Glynn p-value: ",
-    format(signif(.AG_kurt_tst_p, 3L), scientific = TRUE), "\n",
-    "    (testing 1-tailed kurtosis)\n",
-    "  Kurtosis - 3: ", round(moments::kurtosis(.qy_obs) - 3L, 2L), "\n",
-    "  Skew: ", round(moments::skewness(.qy_obs), 2L), "\n")
-  inv_ord <- order(ord)
-  .qq_df <- data.frame(
-    1L:nrow(x), class, .qx_chisq[inv_ord], .qy_obs[inv_ord], y, layer_name,
-    "QQ Mahalanobis distance", tooltip, .maha_skew_text)
+  # ## maha_vect_of() -----
+  # .lvls <- levels(class)
+  # maha <- NULL
+  # ## For each level of the class, find the in-class maha distances
+  # .m <- sapply(1L:length(.lvls), function(k){
+  #   .sub <- x[class == .lvls[k], ]
+  #   .sub_maha <- stats::mahalanobis(
+  #     .sub, apply(.sub, 2L, stats::median), stats::cov(.sub)) %>%
+  #     matrix(ncol = 1L)
+  #   maha <<- c(maha, .sub_maha)
+  # })
+  # ## [01] normalize (outside class levels)
+  # maha <- spinifex::scale_01(as.matrix(maha, ncol = 1L))
+  # ## Maha quantiles
+  # ### Theoretical chi sq quantiles, x of a QQ plot
+  # .probs <- seq(.001, .999, length.out = nrow(x))
+  # .qx_chisq <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
+  # ### Sample/obs quantiles, y of a QQ plot
+  # ord <- order(maha)
+  # .qy_obs <- spinifex::scale_01(matrix(maha[ord]))
+  # .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy_obs), "less")$p.value
+  # .maha_skew_text <- paste0(
+  #   "  Anscombe-Glynn p-value: ",
+  #   format(signif(.AG_kurt_tst_p, 3L), scientific = TRUE), "\n",
+  #   "    (testing 1-tailed kurtosis)\n",
+  #   "  Kurtosis - 3: ", round(moments::kurtosis(.qy_obs) - 3L, 2L), "\n",
+  #   "  Skew: ", round(moments::skewness(.qy_obs), 2L), "\n")
+  # inv_ord <- order(ord)
+  # .qq_df <- data.frame(
+  #   1L:nrow(x), class, .qx_chisq[inv_ord], .qy_obs[inv_ord], y, layer_name,
+  #   "QQ Mahalanobis distance", tooltip, .maha_skew_text)
   
   ## $global_view_df -----
   basis_type <- match.arg(basis_type)
@@ -77,16 +77,15 @@ global_view_1sp <- function(
   proj <- spinifex::scale_01(proj) %>% as.data.frame()
   
   ## Column bind wider, order by rownum
-
   .global_view_df <- cbind(
     1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
   ## Row bind longer, adding QQ maha, and kurtosis info.
-  colnames(.qq_df) <- colnames(.global_view_df) <-
+  colnames(.global_view_df) <- #colnames(.qq_df) <- 
     c("rownum", "class", paste0("V", 1L:d), "y",
       "layer_nm", "projection_nm", "tooltip", "ggtext")
   
   ## 1 space's global view with attached basis
-  ret <- rbind(.global_view_df, .qq_df)
+  ret <- .global_view_df #rbind(.global_view_df, .qq_df)
   attr(ret, paste0("basis", layer_name))
   return(ret)
 }
@@ -202,7 +201,7 @@ local_attr_ls <- function(
   ## $time_df, Execution time -----
   runtime_df <- data.frame(
     runtime_seconds = c(sec_mod, sec_attr_df, sec_global_view_attr_sp),
-    task = c("model (rF::rF)", "attribution (treeshap)", "global_view_df (PCA/Maha)"),
+    task = c("model (rF::rF)", "attribution (treeshap)", "global_view_df (PCA)"),
     layer = layer_name)
   if(verbose == TRUE) tictoc::toc()
   if(noisy == TRUE & sum(runtime_df$runtime_seconds) > 30L) beepr::beep(1L)
@@ -315,7 +314,7 @@ format_ls <- function(
   ### Rbind runtime_df
   b_runtime_df <- rbind(
     data.frame(runtime_seconds = sec_global_view_data_sp,
-               task = "global_view_df (PCA/Maha)", layer = "data"),
+               task = "global_view_df (PCA)", layer = "data"),
     local_attr_ls$runtime_df)
   row.names(b_runtime_df) <- 1L:nrow(b_runtime_df)
   
