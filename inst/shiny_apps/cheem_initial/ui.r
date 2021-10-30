@@ -18,6 +18,12 @@ require(magrittr)
 ## Load prepared objs
 # preared objects now loaded in app.r; layer_ls reactive function.
 
+toy_ls <- readRDS("./data/2preprocess_toy_classification.rds")
+penguins_ls <- readRDS("./data/1preprocess_penguins.rds")
+fifa_ls <- readRDS("./data/3preprocess_fifa.rds")
+# apartments_ls <- readRDS("./data/4preprocess_apartments.rds")
+diabetes_wide_ls <- readRDS("./data/6preprocess_diabetes_wide.rds")
+diabetes_long_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
 
 ## UI content ----
 ### tab1_cheem -----

@@ -52,19 +52,20 @@ server <- function(input, output, session){
       label = "Comparison observation rownum, ('x' ponit):",
       min = 1L, max = .n_max, step = 1L, value = comparison_obs)
     
-    ### LOAD THE DATA
+    ### CHEEM_LS TO RETRUN
+    # all loaded at the top of ui.r
     if(dat == "toy classification")
-      out_ls <- readRDS("./data/2preprocess_toy_classification.rds")
+      ret <- toy_ls
     if(dat == "penguins")
-      out_ls <- readRDS("./data/1preprocess_penguins.rds")
+      ret <- penguins_ls
     if(dat == "fifa")
-      out_ls <- readRDS("./data/3preprocess_fifa.rds")
+      ret <- fifa_ls
     if(dat == "apartments")
-      out_ls <- readRDS("./data/4preprocess_apartments.rds")
+      ret <- apartments_ls
     if(dat == "diabetes (wide)")
-      out_ls <- readRDS("./data/6preprocess_diabetes_wide.rds")
+      ret <- diabetes_wide_ls
     if(dat == "diabetes (long)")
-      out_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
+      ret <- diabetes_long_ls
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
     var_nms <- colnames(out_ls$attr_df)
@@ -72,7 +73,7 @@ server <- function(input, output, session){
                              choices = var_nms, selected = var_nms, inline = TRUE)
     
     ## Return loaded cheem_ls
-    return(out_ls)
+    return(ret)
   })
   #load_ls_d <- load_ls %>%  debounce(millis = 100L)
  
