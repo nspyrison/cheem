@@ -33,6 +33,7 @@ global_view_1sp <- function(
   layer_name
 ){
   d = 2L ## Fixed display dimensionality
+  tooltip <- 1L:nrow(x)
   
   ## maha_vect_of() -----
   if(is.null(class)) class <- as.factor(FALSE)
@@ -53,7 +54,8 @@ global_view_1sp <- function(
   .probs <- seq(.001, .999, length.out = nrow(x))
   .qx_chisq <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
   ### Sample/obs quantiles, y of a QQ plot
-  .qy_obs <- spinifex::scale_01(matrix(stats::quantile(maha, probs = .probs)))
+  ord <- order(maha)
+  .qy_obs <- spinifex::scale_01(matrix(maha[ord]))
   .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy_obs), "less")$p.value
   .maha_skew_text <- paste0(
     "  Anscombe-Glynn p-value: ",
@@ -61,6 +63,10 @@ global_view_1sp <- function(
     "    (testing 1-tailed kurtosis)\n",
     "  Kurtosis - 3: ", round(moments::kurtosis(.qy_obs) - 3L, 2L), "\n",
     "  Skew: ", round(moments::skewness(.qy_obs), 2L), "\n")
+  inv_ord <- order(ord)
+  .qq_df <- data.frame(
+    1L:nrow(x), class, .qx_chisq[inv_ord], .qy_obs[inv_ord], y, layer_name,
+    "QQ Mahalanobis distance", tooltip, .maha_skew_text)
   
   ## $global_view_df -----
   basis_type <- match.arg(basis_type)
@@ -71,19 +77,18 @@ global_view_1sp <- function(
   proj <- spinifex::scale_01(proj) %>% as.data.frame()
   
   ## Column bind wider, order by rownum
-  tooltip <- 1L:nrow(x)
+
   .global_view_df <- cbind(
     1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
   ## Row bind longer, adding QQ maha, and kurtosis info.
-  .qq_df <- data.frame(1L:nrow(x), class, .qx_chisq, .qy_obs, y, layer_name,
-    "QQ Mahalanobis distance", tooltip, .maha_skew_text)
-  ##TODO: I don't trust this reorder; needs to be applied ONLY to .qx or .qy?
-  # .q_idx <- order(maha, decreasing = FALSE) ## Order by maha
-  # .qq_df <- .qq_df[.q_idx, ] ## Order by maha distances
   colnames(.qq_df) <- colnames(.global_view_df) <-
     c("rownum", "class", paste0("V", 1L:d), "y",
       "layer_nm", "projection_nm", "tooltip", "ggtext")
-  return(rbind(.global_view_df, .qq_df))
+  
+  ## 1 space's global view with attached basis
+  ret <- rbind(.global_view_df, .qq_df)
+  attr(ret, paste0("basis", layer_name))
+  return(ret)
 }
 
 #' Create the local attribution layer data.frame
@@ -167,7 +172,7 @@ local_attr_ls <- function(
     .model_performance_df$test_rmse <- .rmse_t
     .model_performance_df$test_rsq <- .rsq_t
   }
-  row.names(model_performance_df) <- 1L
+  row.names(.model_performance_df) <- 1L
   
   ##  attribution matrix, currently treeshap ----
   sec_attr_df <- system.time({
