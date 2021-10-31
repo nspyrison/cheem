@@ -69,18 +69,19 @@ global_view_1sp <- function(
   #   "QQ Mahalanobis distance", tooltip, .maha_skew_text)
   
   ## $global_view_df -----
+  x_std <- spinifex::scale_sd(x)
   basis_type <- match.arg(basis_type)
   basis <- switch(basis_type,
-                  pca  = spinifex::basis_pca(x, d),
-                  olda = spinifex::basis_olda(x, class, d))
-  proj <- as.matrix(x) %*% basis
+                  pca  = spinifex::basis_pca(x_std, d),
+                  olda = spinifex::basis_olda(x_std, class, d))
+  proj <- as.matrix(x_std) %*% basis
   proj <- spinifex::scale_01(proj) %>% as.data.frame()
   
   ## Column bind wider, order by rownum
   .global_view_df <- cbind(
     1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
   ## Row bind longer, adding QQ maha, and kurtosis info.
-  colnames(.global_view_df) <- #colnames(.qq_df) <- 
+  colnames(.global_view_df) <- #colnames(.qq_df) <-
     c("rownum", "class", paste0("V", 1L:d), "y",
       "layer_name", "projection_nm", "tooltip", "ggtext")
   
@@ -265,6 +266,7 @@ format_ls <- function(
   })[3L]
   .data_basis_nm <- paste0(basis_type, " basis of data")
   .data_basis <- attr(b_global_view_df, .data_basis_nm)
+  .attr_basis <- attr(local_attr_ls, paste0(basis_type, " basis of ", layer_name))
   ### global_view_df, bound longer
   b_global_view_df <- rbind(b_global_view_df, local_attr_ls$global_view_df)
   
@@ -308,7 +310,6 @@ format_ls <- function(
   #### (it doesn't know of the model, to check misclassification)
   b_global_view_df$tooltip <- dplyr::left_join(
     b_global_view_df, decode_df, c("rownum" = "rownum"))$tooltip.y
-  
   .maha_df <- b_global_view_df %>%
     dplyr::filter(projection_nm == "QQ Mahalanobis distance") %>%
     dplyr::select(rownum, V2, layer_name) %>%
@@ -324,20 +325,18 @@ format_ls <- function(
     local_attr_ls$runtime_df)
   row.names(b_runtime_df) <- 1L:nrow(b_runtime_df)
   
-  ## Attributes and return:
-  if(verbose == TRUE) tictoc::toc()
+  ## Return:
   ret <- list(
     global_view_df = b_global_view_df, decode_df = decode_df,
     model_performance_df = local_attr_ls$model_performance_df,
-    attr_df = local_attr_ls$attr_df, runtime_df = b_runtime_df
+    attr_df = local_attr_ls$attr_df, runtime_df = b_runtime_df,
+    problem_type = problem_type(y),
+    basis_ls = list(data_basis = .data_basis,
+                    attribution_basis = .attr_basis)
   )
-  attr(ret, "problem_type") <- problem_type(y)
-  .attr_basis <- attr(local_attr_ls, paste0(basis_type, " basis of ", layer_name))
-  basis_ls <- list(data_basis = .data_basis,
-                   attribution_basis = .attr_basis)
-  attr(ret, "basis_ls") <- basis_ls
   ## Keep heavy model object?
   if(keep_model == TRUE) ret <- c(ret, model = local_attr_ls$model)
+  if(verbose == TRUE) tictoc::toc()
   return(ret)
 }
 

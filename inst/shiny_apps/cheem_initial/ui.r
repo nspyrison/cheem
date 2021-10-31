@@ -35,7 +35,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
       "dat_char", "Data:",
       choices = c("toy classification", "penguins", "fifa", #"apartments",
                   "diabetes (wide)", "diabetes (long)"),
-      selected = "fifa"), #"toy classification"),
+      selected = "penguins"), #"toy classification"),
     h3("Preprocessing and data description"),
     htmlOutput("desc_rows"),
     p("3) Extract the SHAP matrix, that is SHAP values of EACH observation, via {treeshap}"),
@@ -46,7 +46,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   tags$hr(style = "border-color: grey;"),
   br(),
   
-  #### linked_plotly ----
+  #### global_view ----
   h4("PC1:2 of the data- and SHAP-spaces"),
   fluidRow(
     column(4L, numericInput( ## Updated by updateNumericInput
@@ -64,13 +64,8 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   p("Selection: click & drag to select points, double click to remove the selection."),
   p("-- Selecting points will highight them in all facets and display detiled information below."),
   ## Set w/h with: ggplotly(p) %>% layout(height = 800, width = 800)
-  fluidRow(
-    column(width = 6L,
-           plotly::plotlyOutput("linked_plotly") %>%
-             shinycssloaders::withSpinner(type = 8L)
-    ), column(width = 6L,
-              verbatimTextOutput("kurtosis_text"),
-    )),
+  plotly::plotlyOutput("linked_global_view") %>%
+    shinycssloaders::withSpinner(type = 8L),
   h4("Selected data:"),
   DT::DTOutput("selected_df")),
   tags$hr(style = "border-color: grey;"),
@@ -100,12 +95,12 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   
   fluidRow(
     ## Plotly, .html widget, animated radial tour:
-    column(width = 6L,
-           plotly::plotlyOutput(
-             "cheem_tour_plotly",
-             height = "720px", width = "500px") %>%
-             shinycssloaders::withSpinner(type = 8L)
-    ),
+    # column(width = 6L,
+    #        plotly::plotlyOutput(
+    #          "cheem_tour_plotly",
+    #          height = "720px", width = "500px") %>%
+    #          shinycssloaders::withSpinner(type = 8L)
+    # ),
     column(width = 6L,
            plotly::plotlyOutput("residual_plot",
                                 height = "400px", width = "400px") %>%

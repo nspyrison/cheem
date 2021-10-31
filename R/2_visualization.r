@@ -216,14 +216,14 @@ proto_basis1d_distribution <- function(
 #' cheem_ls <- cheem_ls(
 #'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
-#' linked_plotly_func(cheem_ls, primary_obs = 1, comparison_obs = 2)
+#' linked_global_view(cheem_ls, primary_obs = 1, comparison_obs = 2)
 ##TODO: example is missing comp obs; x and shap */x
-linked_plotly_func <- function(
+linked_global_view <- function(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
-  height_px = 640L,
-  width_px = 640L,
+  height_px = 480L,
+  width_px = 960L,
   do_include_maha_qq = FALSE
 ){
   ## Prevent global variable warnings:
@@ -240,7 +240,7 @@ linked_plotly_func <- function(
       cheem_ls$global_view_df$projection_nm != "QQ Mahalanobis distance", ]
     height_px <- height_px / 2L ## Half height display as qq maha is removed.
   }
-  is_classification <- attr(cheem_ls, "problem_type") == "classification"
+  is_classification <- cheem_ls$problem_type == "classification"
   pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
   if(is_classification == TRUE) pred_clas <-
     cheem_ls$decode_df$predicted_class %>%
@@ -298,6 +298,14 @@ linked_plotly_func <- function(
     )
   }
   
+  .bas_data <- cbind(
+    as.data.frame(cheem_ls$basis_ls$data_basis), layer_name = "data")
+  .map_to_data <- global_view_df[global_view_df$layer_name == "data", c("V1", "V2")]
+  .map_to_data[,1L] <-  .map_to_data[,1L] / 3L
+  .bas_attr <- cbind(
+    as.data.frame(cheem_ls$basis_ls$attribution_basis), layer_name = "SHAP")
+  .map_to_attr <- global_view_df[global_view_df$layer_name == "SHAP", c("V1", "V2")]
+  .map_to_attr[,1L] <- .map_to_attr[,1L] / 3L
   ## ggplot
   gg <- ggplot2::ggplot(
     data = plotly::highlight_key(global_view_df, ~rownum),
@@ -306,8 +314,10 @@ linked_plotly_func <- function(
       ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas,
                    tooltip = tooltip), alpha = .alpha)) +
     pts_highlight +
+    spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft") +
+    spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft") +
     ggplot2::facet_grid(rows = ggplot2::vars(projection_nm),
-                        cols = ggplot2::vars(layer_name), scales = "free") +
+                        cols = ggplot2::vars(layer_name)) +#, scales = "free") +
     ggplot2::theme_bw() +
     ggplot2::labs(x = .xlab, y = .ylab) +
     ggplot2::scale_color_brewer(palette = "Dark2") +

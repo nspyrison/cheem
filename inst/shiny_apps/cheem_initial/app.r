@@ -23,8 +23,8 @@ server <- function(input, output, session){
       comparison_obs <- 111L
     }
     if(dat == "penguins"){
-      primary_obs    <- 106L
-      comparison_obs <- 7L
+      primary_obs    <- 15L
+      comparison_obs <- 228L
     }
     if(dat == "fifa"){
       primary_obs    <- 1L
@@ -182,29 +182,16 @@ server <- function(input, output, session){
   outputOptions(output, "desc_rows",
                 suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
   
-  # ### MAHA KURTOSIS TEXT, may be off at the moment.
-  # output$kurtosis_text <- renderPrint({
-  #   req(load_ls())
-  #   req(input$do_include_maha_qq)
-  #   .lines <- ""
-  #   if(as.logical(input$do_include_maha_qq) == TRUE)
-  #     .lines <- c("Moments of the Mahalanobis distances of data- and SHAP-space respectively:", "",
-  #       unique(load_ls()$global_view_df[, c("ggtext")])[-1L])
-  #   writeLines(.lines)
-  # })
-  # outputOptions(output, "kurtosis_text",
-  #               suspendWhenHidden = FALSE, priority = -199L) ## Eager evaluation
-  
   ### GLOBAL VIEW PLOTLY
-  output$linked_plotly <- plotly::renderPlotly({
+  output$linked_global_view <- plotly::renderPlotly({
     req(load_ls())
     req(primary_obs())
     req(comparison_obs())
-    linked_plotly_func(
+    linked_global_view(
       load_ls(), primary_obs(), comparison_obs())
       #, do_include_maha_qq = as.logical(input$do_include_maha_qq))
   })
-  outputOptions(output, "linked_plotly",
+  outputOptions(output, "linked_global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   
@@ -239,7 +226,7 @@ server <- function(input, output, session){
         pts_highlight <- c(
           pts_highlight,
           ggplot2::geom_point(
-            ggplot2::aes(y, residual), active_df[.idx_misclas, ],
+            ggplot2::aes(prediction, residual), active_df[.idx_misclas, ],
             color = "red", fill = NA, shape = 21L, size = 3L)
         )
     }
@@ -259,7 +246,7 @@ server <- function(input, output, session){
           color = "black", size = 5L, shape = 8L, alpha = 0.8))
     bkg_pts <- NULL
     if(nrow(bkg_df) > 0L)
-      bkg_pts <- geom_point(aes(y, residual, shape = .pred_clas),
+      bkg_pts <- geom_point(aes(prediction, residual, shape = .pred_clas),
                             bkg_df, color = "grey80", alpha = .alpha)
     
     ## Plot
@@ -361,6 +348,7 @@ server <- function(input, output, session){
       return(NULL)
     }
     
+    browser() # CUASED issue when adding basis to global view.
     ggt <- radial_cheem_ggtour(
       load_ls(), bas, mv_nm,
       primary_obs(), comparison_obs(),

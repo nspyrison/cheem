@@ -19,6 +19,8 @@ require("cheem")
 cheem_ls <- cheem_ls(
   x = X, y = Y, basis_type = "pca", class = clas)
 names(cheem_ls)
+cheem_ls$basis_ls
+
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
@@ -28,5 +30,4 @@ if(interactive() == TRUE){
 }
 if(F) ## Not run, load cheem_ls
   cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.rds")
-
 
