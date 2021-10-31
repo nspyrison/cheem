@@ -365,8 +365,7 @@ server <- function(input, output, session){
       load_ls(), bas, mv_nm,
       primary_obs(), comparison_obs(),
       do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
-      rownum_idx = .idx_rownums, inc_vars = input$inc_vars
-      )
+      rownum_idx = .idx_rownums, inc_vars = input$inc_vars)
     spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last

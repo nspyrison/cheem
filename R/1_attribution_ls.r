@@ -82,11 +82,11 @@ global_view_1sp <- function(
   ## Row bind longer, adding QQ maha, and kurtosis info.
   colnames(.global_view_df) <- #colnames(.qq_df) <- 
     c("rownum", "class", paste0("V", 1L:d), "y",
-      "layer_nm", "projection_nm", "tooltip", "ggtext")
+      "layer_name", "projection_nm", "tooltip", "ggtext")
   
   ## 1 space's global view with attached basis
   ret <- .global_view_df #rbind(.global_view_df, .qq_df)
-  attr(ret, paste0("basis", layer_name))
+  attr(ret, paste0(basis_type, " basis of ", layer_name)) <- basis
   return(ret)
 }
 
@@ -206,12 +206,16 @@ local_attr_ls <- function(
   if(verbose == TRUE) tictoc::toc()
   if(noisy == TRUE & sum(runtime_df$runtime_seconds) > 30L) beepr::beep(1L)
   
-  return(list(global_view_df = .global_view_df,
-              model = .mod, ## Heavy object
-              model_performance_df = .model_performance_df,
-              attr_df = .attr_df,
-              attr_xtest_df = .attr_df_xtest, ## Typically NULL
-              runtime_df = runtime_df))
+  ## Keep attribution basis and return
+  LA_ls <- list(global_view_df = .global_view_df,
+                model = .mod, ## Heavy object, dropped but default in format_ls
+                model_performance_df = .model_performance_df,
+                attr_df = .attr_df,
+                attr_xtest_df = .attr_df_xtest, ## Typically NULL
+                runtime_df = runtime_df)
+  .basis_nm <- paste0(basis_type, " basis of ", layer_name)
+  attr(LA_ls, .basis_nm) <- attr(.global_view_df, .basis_nm)
+  return(LA_ls)
 }
 
 
@@ -240,7 +244,7 @@ format_ls <- function(
   keep_model = FALSE,
   verbose = TRUE
 ){
-  layer_nm <- "SHAP"
+  layer_name <- "SHAP"
   d = 2L
   rownum <- V2 <- projection_nm <- NULL
   if(verbose == TRUE) tictoc::tic("format_ls")
@@ -259,6 +263,8 @@ format_ls <- function(
       x, y, basis_type, .plot_clas, layer_name = "data")
     .m <- gc()
   })[3L]
+  .data_basis_nm <- paste0(basis_type, " basis of data")
+  .data_basis <- attr(b_global_view_df, .data_basis_nm)
   ### global_view_df, bound longer
   b_global_view_df <- rbind(b_global_view_df, local_attr_ls$global_view_df)
   
@@ -305,8 +311,8 @@ format_ls <- function(
   
   .maha_df <- b_global_view_df %>%
     dplyr::filter(projection_nm == "QQ Mahalanobis distance") %>%
-    dplyr::select(rownum, V2, layer_nm) %>%
-    tidyr::pivot_wider(names_from  = layer_nm, values_from = V2)
+    dplyr::select(rownum, V2, layer_name) %>%
+    tidyr::pivot_wider(names_from  = layer_name, values_from = V2)
   .lj <-  dplyr::left_join(decode_df, .maha_df, c("rownum" = "rownum"))
   decode_df$maha_data <- .lj$data
   decode_df$maha_SHAP <- .lj$SHAP
@@ -318,13 +324,19 @@ format_ls <- function(
     local_attr_ls$runtime_df)
   row.names(b_runtime_df) <- 1L:nrow(b_runtime_df)
   
+  ## Attributes and return:
   if(verbose == TRUE) tictoc::toc()
   ret <- list(
     global_view_df = b_global_view_df, decode_df = decode_df,
     model_performance_df = local_attr_ls$model_performance_df,
     attr_df = local_attr_ls$attr_df, runtime_df = b_runtime_df
   )
-  ## Keep heavy model object? 
+  attr(ret, "problem_type") <- problem_type(y)
+  .attr_basis <- attr(local_attr_ls, paste0(basis_type, " basis of ", layer_name))
+  basis_ls <- list(data_basis = .data_basis,
+                   attribution_basis = .attr_basis)
+  attr(ret, "basis_ls") <- basis_ls
+  ## Keep heavy model object?
   if(keep_model == TRUE) ret <- c(ret, model = local_attr_ls$model)
   return(ret)
 }
@@ -392,7 +404,6 @@ cheem_ls <- function(
     tictoc::toc()
     writeLines(paste0("cheem_ls finished at ", Sys.time()))
   }
-  attr(formated_ls, "problem_type") <- problem_type(y)
   return(formated_ls)
 }
 
