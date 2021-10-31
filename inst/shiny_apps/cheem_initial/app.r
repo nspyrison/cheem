@@ -119,7 +119,6 @@ server <- function(input, output, session){
     req(input$inc_vars)
     req(load_ls())
     req(primary_obs())
-    
     cheem_ls <- load_ls()
     attr_df <- cheem_ls$attr_df
     opts <- input$inc_vars
@@ -201,7 +200,6 @@ server <- function(input, output, session){
     req(load_ls())
     req(primary_obs())
     req(comparison_obs())
-    
     linked_plotly_func(
       load_ls(), primary_obs(), comparison_obs())
       #, do_include_maha_qq = as.logical(input$do_include_maha_qq))
@@ -215,7 +213,6 @@ server <- function(input, output, session){
     req(load_ls())
     req(primary_obs())
     req(comparison_obs())
-
     decode_df <- load_ls()$decode_df
     prim_obs <- primary_obs()
     comp_obs <- comparison_obs()
@@ -247,10 +244,10 @@ server <- function(input, output, session){
         )
     }
     ## Comp point
-    if(is.null(prim_obs) == FALSE)
+    if(is.null(comp_obs) == FALSE)
       pts_highlight <- c(
         pts_highlight,
-        geom_point(aes(y, residual),
+        geom_point(aes(prediction, residual),
           data = active_df[active_df$rownum == comp_obs, ],
           color = "black", size = 3L, shape = 4L, alpha = 0.6))
     ## Primary point
@@ -270,7 +267,7 @@ server <- function(input, output, session){
       ## Not selected background
       bkg_pts +
       ## Selected_df
-      geom_point(aes(y, residual, label = tooltip,
+      geom_point(aes(prediction, residual, label = tooltip,
                      color = .pred_clas, shape = .pred_clas),
                  active_df, alpha = .alpha) +
       pts_highlight +
@@ -360,7 +357,7 @@ server <- function(input, output, session){
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0(
         "output$cheem_tour: input$manip_var_nm = '", mv_nm,
-        "' wasn't in the basis bas(). Shiny tried to update cheem_tour before manip_var_nm..."))
+        "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
     
