@@ -24,7 +24,7 @@ server <- function(input, output, session){
     }
     if(dat == "penguins"){
       primary_obs    <- 15L
-      comparison_obs <- 228L
+      comparison_obs <- 282L
     }
     if(dat == "fifa"){
       primary_obs    <- 1L
@@ -35,12 +35,12 @@ server <- function(input, output, session){
       comparison_obs <- 487L
     }
     if(dat == "diabetes (wide)"){
-      primary_obs    <- 121L
-      comparison_obs <- 201L
+      primary_obs    <- 123L
+      comparison_obs <- 237L
     }
     if(dat == "diabetes (long)"){
-      primary_obs    <- 616L
-      comparison_obs <- 215L
+      primary_obs    <- 479L
+      comparison_obs <- 674L
     }
     .n_max <- 5000L
     updateNumericInput(
@@ -188,8 +188,8 @@ server <- function(input, output, session){
     req(primary_obs())
     req(comparison_obs())
     linked_global_view(
-      load_ls(), primary_obs(), comparison_obs())
-      #, do_include_maha_qq = as.logical(input$do_include_maha_qq))
+      load_ls(), primary_obs(), comparison_obs(),
+      height_px = 960L, width_px = 960L)
   })
   outputOptions(output, "linked_global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation

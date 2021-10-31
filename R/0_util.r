@@ -120,10 +120,10 @@ linear_tform = function(
 #' 
 #' @param n Number of observations to plot.
 #' @param mid_pt Inflection point that the logistic curve. Defaults to 1000.
-#' @param k_attenuation The steepness of the transition, larger is more 
-#' discrete transition. Quite sensitive and defaults to 0.01.
+#' @param k_attenuation The steepness of the transition, larger is a sharper
+#' transition. Quite sensitive and defaults to 5.
 #' @param ceiling The highest number returned. Defaults to 1.
-#' @param floor The lowest number returned. Defaults to 0.2.
+#' @param floor The lowest number returned. Defaults to 0.3.
 #' @return A scalar numeric, suggested value to set alpha opacity.
 #' @export
 #' @examples
@@ -134,9 +134,9 @@ linear_tform = function(
 #' x <- 1:2000
 #' plot(x, logistic_tform(x), col='blue')
 logistic_tform = function(
-  n, mid_pt = 1000L, k_attenuation = .01, ceiling = 1L, floor = .2
+  n, mid_pt = 1000, k_attenuation = 5, ceiling = 1, floor = .3
 ){
-  vec <- 1 / (1L + exp(k_attenuation * (n - mid_pt)))
+  vec <- 1L / (1L + exp(k_attenuation / 1000L * (n - mid_pt)))
   ceiling * (floor + (1L - floor) * vec)
 }
 

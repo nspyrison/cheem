@@ -57,14 +57,13 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
       min = 1L, max = 8L, step = 1L, value = 8L)),
     column(4L)
   ),
-  # selectInput("do_include_maha_qq", "Add Mahalanobis distance QQ plots?",
-  #             choices = c(FALSE, TRUE), selected = FALSE),
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
   p("Red circle around the point indicates a misclassified point."),
   p("Selection: click & drag to select points, double click to remove the selection."),
   p("-- Selecting points will highight them in all facets and display detiled information below."),
-  ## Set w/h with: ggplotly(p) %>% layout(height = 800, width = 800)
-  plotly::plotlyOutput("linked_global_view") %>%
+  ## Set w/h with: ggplotly(p, height = 800, width = 800)
+  plotly::plotlyOutput(
+    "linked_global_view", width = "100%", height = "480px") %>%
     shinycssloaders::withSpinner(type = 8L),
   h4("Selected data:"),
   DT::DTOutput("selected_df")),

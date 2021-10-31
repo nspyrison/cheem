@@ -8,9 +8,8 @@ linked_global_view(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
-  height_px = 640L,
-  width_px = 640L,
-  do_include_maha_qq = FALSE
+  height_px = 480L,
+  width_px = 960L
 )
 }
 \arguments{

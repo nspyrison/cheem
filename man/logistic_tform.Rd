@@ -4,25 +4,19 @@
 \alias{logistic_tform}
 \title{Logistic function to help set alpha opacity}
 \usage{
-logistic_tform(
-  n,
-  mid_pt = 1000L,
-  k_attenuation = 0.01,
-  ceiling = 1L,
-  floor = 0.2
-)
+logistic_tform(n, mid_pt = 1000, k_attenuation = 5, ceiling = 1, floor = 0.3)
 }
 \arguments{
 \item{n}{Number of observations to plot.}
 
 \item{mid_pt}{Inflection point that the logistic curve. Defaults to 1000.}
 
-\item{k_attenuation}{The steepness of the transition, larger is more
-discrete transition. Quite sensitive and defaults to 0.01.}
+\item{k_attenuation}{The steepness of the transition, larger is a sharper
+transition. Quite sensitive and defaults to 5.}
 
 \item{ceiling}{The highest number returned. Defaults to 1.}
 
-\item{floor}{The lowest number returned. Defaults to 0.2.}
+\item{floor}{The lowest number returned. Defaults to 0.3.}
 }
 \value{
 A scalar numeric, suggested value to set alpha opacity.

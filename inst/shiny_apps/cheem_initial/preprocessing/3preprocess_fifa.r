@@ -57,6 +57,7 @@ hist(Y)
 cheem_ls <- cheem_ls(
   x = X, y = Y, basis_type = "pca", class = clas)
 names(cheem_ls)
+cheem_ls$runtime_df
 
 ## Thin data, after model/layer_ls ----
 ## V2 is observed maha

@@ -223,8 +223,7 @@ linked_global_view <- function(
   primary_obs = NULL,
   comparison_obs = NULL,
   height_px = 480L,
-  width_px = 960L,
-  do_include_maha_qq = FALSE
+  width_px = 960L
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
@@ -235,11 +234,6 @@ linked_global_view <- function(
                   "PC2 | Quantile, observed Mahalanobis distance")
   ## Remove QQ maha rows if needed
   global_view_df <- cheem_ls$global_view_df ## Init
-  if(do_include_maha_qq == FALSE){
-    global_view_df <- cheem_ls$global_view_df[
-      cheem_ls$global_view_df$projection_nm != "QQ Mahalanobis distance", ]
-    height_px <- height_px / 2L ## Half height display as qq maha is removed.
-  }
   is_classification <- cheem_ls$problem_type == "classification"
   pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
   if(is_classification == TRUE) pred_clas <-
@@ -286,16 +280,6 @@ linked_global_view <- function(
                             .df, size = 5L, shape = 8L, color = "black")
       )
     }
-  }
-  ## Maha skew text,
-  #### geom_text not working with plotly... &
-  #### annotate() doesn't wor4d accross with facets...
-  if(do_include_maha_qq == TRUE){
-    pts_highlight <- c(
-      pts_highlight,
-      ggplot2::geom_text(ggplot2::aes(x = -Inf, y = Inf, label = ggtext),
-                         hjust = 0L, vjust = 1L, size = 3L)
-    )
   }
   
   .bas_data <- cbind(
