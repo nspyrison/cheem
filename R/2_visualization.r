@@ -228,11 +228,6 @@ linked_global_view <- function(
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
   .alpha <- logistic_tform(nrow(cheem_ls$decode_df), mid_pt = 500L)
-  .xlab <- ifelse(do_include_maha_qq == FALSE, "PC1",
-                  "PC1 | Quantile, chi-squared")
-  .ylab <- ifelse(do_include_maha_qq == FALSE, "PC2",
-                  "PC2 | Quantile, observed Mahalanobis distance")
-  ## Remove QQ maha rows if needed
   global_view_df <- cheem_ls$global_view_df ## Init
   is_classification <- cheem_ls$problem_type == "classification"
   pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
@@ -303,7 +298,7 @@ linked_global_view <- function(
     ggplot2::facet_grid(rows = ggplot2::vars(projection_nm),
                         cols = ggplot2::vars(layer_name)) +#, scales = "free") +
     ggplot2::theme_bw() +
-    ggplot2::labs(x = .xlab, y = .ylab) +
+    ggplot2::labs(x = "PC1", y = "PC2") +
     ggplot2::scale_color_brewer(palette = "Dark2") +
     ggplot2::theme(axis.text  = ggplot2::element_blank(),
                    axis.ticks = ggplot2::element_blank(),

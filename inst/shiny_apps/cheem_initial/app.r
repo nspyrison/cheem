@@ -147,34 +147,34 @@ server <- function(input, output, session){
       stop("data string not matched.")
     ## Load data:
     if(dat == "toy classification"){
-      he <- h4("Simulated triangle vertices")
-      l1 <- p("1) 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
-      l2 <- p("2) Create a random forest model classifying cluster level, given the continuous variables.")
+      he <- h3("Simulated triangle vertices")
+      l1 <- p("- 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
+      l2 <- p("1) Create a random forest model classifying cluster level, given the continuous variables.")
     }
     if(dat == "penguins"){
-      he <- h4("Palmer penguins")
-      l1 <- p("1) 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
-      l2 <- p("2) Create a random forest model classifying species from the physical measurements.")
+      he <- h3("Palmer penguins")
+      l1 <- p("- 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
+      l2 <- p("1) Create a random forest model classifying species from the physical measurements.")
     }
     if(dat == "fifa"){
-      he <- h4("FIFA soccer players, 2020 season")
-      l1 <- p("1) 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
-      l2 <- p("2) Create a random forest model regressing continuous wages from the skill aggregates.")
+      he <- h3("FIFA soccer players, 2020 season")
+      l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
+      l2 <- p("1) Create a random forest model regressing continuous wages from the skill aggregates.")
     }
     if(dat == "apartments"){
-      he <- h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
-      l1 <- p("1) 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
-      l2 <- p("2) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
+      he <- h3("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
+      l1 <- p("- 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
+      l2 <- p("1) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
     }
     if(dat == "diabetes (wide)"){
-      he <- h4("Pima Indians Diabetes (wide)")
-      l1 <- p("1) 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
+      he <- h3("Pima Indians Diabetes (wide)")
+      l1 <- p("- 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+      l2 <- p("1) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
     }
     if(dat == "diabetes (long)"){
-      he <- h4("Pima Indians Diabetes (long)")
-      l1 <- p("1) *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-      l2 <- p("2) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
+      he <- h3("Pima Indians Diabetes (long)")
+      l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+      l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
     }
     ## Return
     HTML(paste(he, l1, l2))
@@ -187,9 +187,10 @@ server <- function(input, output, session){
     req(load_ls())
     req(primary_obs())
     req(comparison_obs())
-    linked_global_view(
-      load_ls(), primary_obs(), comparison_obs(),
-      height_px = 960L, width_px = 960L)
+    suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
+      linked_global_view(
+        load_ls(), primary_obs(), comparison_obs(),
+        height_px = 480, width_px = 960L))
   })
   outputOptions(output, "linked_global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
@@ -349,10 +350,10 @@ server <- function(input, output, session){
     }
     
     browser() # CUASED issue when adding basis to global view.
+    debugonce(array2df)
     ggt <- radial_cheem_ggtour(
       load_ls(), bas, mv_nm,
       primary_obs(), comparison_obs(),
-      do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
       rownum_idx = .idx_rownums, inc_vars = input$inc_vars)
     spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
