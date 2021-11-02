@@ -124,13 +124,25 @@ server <- function(input, output, session){
     opts <- input$inc_vars
     clas <- cheem_ls$decode_df$class
     bas <- bas()
+    .prob_type <- cheem_ls$problem_type
+    .prim_obs <- primary_obs()
+    .comp_obs <- comparison_obs
     
     ## Select var with largest diff of median values between classes.
-    expect_bas <- apply(
-      attr_df[clas == clas[primary_obs()], opts], 2L, median) %>%
-      matrix(ncol = 1L, dimnames = list(opts, "SHAP"))
-    .diff <- abs(expect_bas - bas)
-    sel <- opts[which(.diff == max(.diff))]
+    if(.prob_type == "classification"){
+      expect_bas <- apply(
+        attr_df[clas == clas[.prim_obs], opts], 2L, median) %>%
+        matrix(ncol = 1L, dimnames = list(opts, "SHAP"))
+      .diff <- abs(expect_bas - bas)
+      sel <- opts[which(.diff == max(.diff))]
+    }else if(.prob_type == "regression"){
+      prim_bs  <- attr_df[.comp_obs,, drop = FALSE]
+      comp_bas <- attr_df[.comp_obs,, drop = FALSE]
+      .diff <- abs(comp_bas - prim_bs)
+      sel <- opts[which(.diff == max(.diff))]
+    } else stop("update manipulation variable: problem type not fit.")
+    
+    
     
     updateSelectInput(session, "manip_var_nm",
                       label = "Manipulation variable:",

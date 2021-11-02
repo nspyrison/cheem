@@ -49,13 +49,13 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #### global_view ----
   h3("Global view: PC1:2 approximations of data- and SHAP-spaces"),
   fluidRow(
-    column(4L, numericInput( ## Updated by updateNumericInput
+    column(3L, numericInput( ## Updated by updateNumericInput
       "primary_obs", label = "Primary observation rownum, ('*' point):",
       min = 1L, max = 1L, step = 1L, value = 1L)),
-    column(4L, numericInput( ## Updated by updateNumericInput
+    column(3L, numericInput( ## Updated by updateNumericInput
       "comparison_obs", label = "Comparison observation rownum, ('x' ponit):",
       min = 1L, max = 8L, step = 1L, value = 8L)),
-    column(4L)
+    column(6L)
   ),
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
   p("Red circle around the point indicates a misclassified point."),
@@ -71,20 +71,21 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   br(),
   
   #### Cheem tour ----
-  h3("Cheem tour, data-space projected through the 1d SHAP values of the primary observation."),
+  h3("Cheem tour"), 
+  p("The data-space projected through normalized SHAP values of the primary observation."),
   checkboxGroupInput(
     "inc_vars", label = "Inclusion variables",
     choices = c("bdy", "age", "rct", "atk", "def", "acc", "mvm", "pwr", "gk"),
     selected = c("atk", "def", "acc", "mvm", "pwr"),
     inline = TRUE),
   fluidRow(
-    column(width = 4L,
+    column(width = 3L,
            selectInput("manip_var_nm",
                        label = "Manipulation variable:",
                        choices  = NULL)), #"<Set in updateInput()>")),
-    column(width = 4L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
+    column(width = 3L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
                            c("Yes" = TRUE, "No" = FALSE))),
-    column(width = 4L)
+    column(width = 6L)
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Longer-dashed and dotted lines: location of primary & comparison observations respectively (previously '*'/'x')."),
@@ -95,7 +96,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     column(width = 8L,
            plotly::plotlyOutput(
              "cheem_tour_plotly",
-             height = "720px", width = "960px") %>%
+             height = "600px", width = "960px") %>%
              shinycssloaders::withSpinner(type = 8L)
     ),
     # column(width = 4L,
@@ -103,7 +104,8 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     #                             height = "400px", width = "400px") %>%
     #          shinycssloaders::withSpinner(type = 8L)
     # )
-  ) ## close fluidRow
+  ), ## close fluidRow
+  br(), br(), br(), br()
 ) ## Assign tab1_cheem
 
 ### tab_about -----
