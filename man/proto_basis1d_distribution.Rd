@@ -11,7 +11,8 @@ proto_basis1d_distribution(
   shape = c(142, 124),
   do_add_pcp_segments = TRUE,
   primary_obs = NULL,
-  comparison_obs = NULL
+  comparison_obs = NULL,
+  inc_vars = TRUE
 )
 }
 \arguments{
@@ -43,6 +44,7 @@ the specified local explanation \code{attr_df}. Does not draw the basis itself;
 use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
+library(cheem)
 load("./apps/cheem_penguins_classification/data/1preprocess.RData")
 dat <- cheem_ls$decode_df[, 8:11]
 clas <- cheem_ls$decode_df$class

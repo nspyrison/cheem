@@ -349,8 +349,9 @@ server <- function(input, output, session){
       return(NULL)
     }
     
-    browser() # CUASED issue when adding basis to global view.
-    debugonce(array2df)
+    # browser() # CAUSED issue when adding basis to global view.
+    # # debugonce(array2df)
+    # debugonce(proto_basis1d_distribution)
     ggt <- radial_cheem_ggtour(
       load_ls(), bas, mv_nm,
       primary_obs(), comparison_obs(),

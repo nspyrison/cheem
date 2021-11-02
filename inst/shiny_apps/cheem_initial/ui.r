@@ -47,7 +47,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   br(),
   
   #### global_view ----
-  h4("PC1:2 of the data- and SHAP-spaces"),
+  h3("Global view: PC1:2 approximations of data- and SHAP-spaces"),
   fluidRow(
     column(4L, numericInput( ## Updated by updateNumericInput
       "primary_obs", label = "Primary observation rownum, ('*' point):",
@@ -70,8 +70,8 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   tags$hr(style = "border-color: grey;"),
   br(),
   
-  #### Manual tour ----
-  h4("Manual tour, data-space projected through the 1d SHAP values of the primary observation."),
+  #### Cheem tour ----
+  h3("Cheem tour, data-space projected through the 1d SHAP values of the primary observation."),
   checkboxGroupInput(
     "inc_vars", label = "Inclusion variables",
     choices = c("bdy", "age", "rct", "atk", "def", "acc", "mvm", "pwr", "gk"),
@@ -92,17 +92,17 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #                    width = "100%", height = "720px")
   fluidRow(
     ## Plotly, .html widget, animated radial tour:
-    column(width = 6L,
-           # plotly::plotlyOutput(
-           #   "cheem_tour_plotly",
-           #   height = "720px", width = "500px") %>%
-           #   shinycssloaders::withSpinner(type = 8L)
-    ),
-    column(width = 6L,
-           plotly::plotlyOutput("residual_plot",
-                                height = "400px", width = "400px") %>%
+    column(width = 8L,
+           plotly::plotlyOutput(
+             "cheem_tour_plotly",
+             height = "720px", width = "960px") %>%
              shinycssloaders::withSpinner(type = 8L)
-    )
+    ),
+    # column(width = 4L,
+    #        plotly::plotlyOutput("residual_plot",
+    #                             height = "400px", width = "400px") %>%
+    #          shinycssloaders::withSpinner(type = 8L)
+    # )
   ) ## close fluidRow
 ) ## Assign tab1_cheem
 
