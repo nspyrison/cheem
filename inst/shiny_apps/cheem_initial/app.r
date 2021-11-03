@@ -11,12 +11,11 @@ server <- function(input, output, session){
   
   ## LOAD_LS, pass the cheem_ls from the selected data
   load_ls <- reactive({
-    req(input$dat_char)
-    dat <- input$dat_char
+    dat <- req(input$dat_char)
     if(!(dat %in% c("toy classification", "penguins", "fifa",
                     "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
-    
+
     ### BY PRODUCT: UPDATE PRIM/COMP OBS
     if(dat == "toy classification"){
       primary_obs    <- 18L
@@ -92,21 +91,17 @@ server <- function(input, output, session){
   
   ## BASIS FROM local explanation of promary obs
   bas <- reactive({
-    req(load_ls())
-    req(input$inc_vars)
-    req(primary_obs())
-    attr_df <- load_ls()$attr_df
-    if(all(input$inc_vars %in% colnames(attr_df)) == FALSE){
+    attr_df  <- req(load_ls()$attr_df)
+    inc_vars <- req(input$inc_vars)
+    prim_obs <- req(primary_obs())
+    if(all(inc_vars %in% colnames(attr_df)) == FALSE){
       message("bas(): bas tried to react before inc_vars updated...")
       return()
     }
     
-    bas <- basis_local_attribution(
-      attr_df[, input$inc_vars], primary_obs())
-    return(bas)
+    return(basis_local_attribution(
+      attr_df[, inc_vars], prim_obs))
   })
-  
-  
   
   ## Observers: updating inputs in the ui -----
   
@@ -115,45 +110,38 @@ server <- function(input, output, session){
     bas()
     primary_obs()
   },{
-    req(bas())
-    req(input$inc_vars)
-    req(load_ls())
-    req(primary_obs())
-    cheem_ls <- load_ls()
-    attr_df <- cheem_ls$attr_df
-    opts <- input$inc_vars
-    clas <- cheem_ls$decode_df$class
-    bas <- bas()
-    .prob_type <- cheem_ls$problem_type
-    .prim_obs <- primary_obs()
-    .comp_obs <- comparison_obs
+    bas       <- req(bas())
+    opts      <- req(input$inc_vars)
+    cheem_ls  <- req(load_ls())
+    .prim_obs <- req(primary_obs())
+    .comp_obs <- req(comparison_obs())
+    attr_df   <- cheem_ls$attr_df
+    clas      <- cheem_ls$decode_df$class
+    prob_type <- cheem_ls$problem_type
     
     ## Select var with largest diff of median values between classes.
-    if(.prob_type == "classification"){
+    if(prob_type == "classification"){
       expect_bas <- apply(
         attr_df[clas == clas[.prim_obs], opts], 2L, median) %>%
         matrix(ncol = 1L, dimnames = list(opts, "SHAP"))
       .diff <- abs(expect_bas - bas)
       sel <- opts[which(.diff == max(.diff))]
-    }else if(.prob_type == "regression"){
+    }else if(prob_type == "regression"){
       prim_bs  <- attr_df[.comp_obs,, drop = FALSE]
       comp_bas <- attr_df[.comp_obs,, drop = FALSE]
       .diff <- abs(comp_bas - prim_bs)
       sel <- opts[which(.diff == max(.diff))]
     } else stop("update manipulation variable: problem type not fit.")
     
-    
-    
     updateSelectInput(session, "manip_var_nm",
                       label = "Manipulation variable:",
                       choices  = opts,
                       selected = sel)
-  }, priority = 50L)
+  }, priority = 150L)
   
   ## Outputs -----
   output$desc_rows <- renderText({
-    req(input$dat_char)
-    dat <- input$dat_char
+    dat <- req(input$dat_char)
     if(!(dat %in% c("toy classification", "penguins", "fifa",
                     "apartments", "diabetes (wide)", "diabetes (long)")))
       stop("data string not matched.")
@@ -196,12 +184,12 @@ server <- function(input, output, session){
   
   ### GLOBAL VIEW PLOTLY
   output$linked_global_view <- plotly::renderPlotly({
-    req(load_ls())
-    req(primary_obs())
-    req(comparison_obs())
+    cheem_ls <- req(load_ls())
+    .prim_obs <- req(primary_obs())
+    .comp_obs <- req(comparison_obs())
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
       linked_global_view(
-        load_ls(), primary_obs(), comparison_obs(),
+        cheem_ls, .prim_obs, .comp_obs,
         height_px = 480, width_px = 960L))
   })
   outputOptions(output, "linked_global_view",
@@ -210,12 +198,11 @@ server <- function(input, output, session){
   
   ### RESIDUAL PLOT, wants to become a residual tour
   output$residual_plot <- plotly::renderPlotly({
-    req(load_ls())
-    req(primary_obs())
-    req(comparison_obs())
-    decode_df <- load_ls()$decode_df
-    prim_obs <- primary_obs()
-    comp_obs <- comparison_obs()
+    cheem_ls  <- req(load_ls())
+    prim_obs  <- req(primary_obs())
+    comp_obs  <- req(comparison_obs())
+    decode_df <- cheem_ls$decode_df
+    prob_type <- cheem_ls$problem_type
     
     ## Index of selected data:
     .d <- plotly::event_data("plotly_selected") ## selected in global view
@@ -227,12 +214,11 @@ server <- function(input, output, session){
     active_df <- decode_df[.idx_rownums, ]
     bkg_df <- decode_df[!.idx_rownums, ]
     .alpha <- logistic_tform(nrow(decode_df), mid_pt = 500L)
-    .is_classification <- problem_type(decode_df$y) == "classification"
     .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
     
     ## Red misclassified points, if applicable
     pts_highlight <- list()
-    if(.is_classification == TRUE){
+    if(prob_type == "classification"){
       .pred_clas <- active_df$predicted_class
       .idx_misclas <- which(active_df$is_misclassified == TRUE)
       if(sum(.idx_misclas) > 0L)
@@ -338,22 +324,15 @@ server <- function(input, output, session){
   #               suspendWhenHidden = TRUE, priority = -9999L)
   ## TOUR, PLOTLY VERSION: too many issues trying .mp4 gganimate
   output$cheem_tour_plotly <- plotly::renderPlotly({
-    req(bas())
-    req(load_ls())
-    req(input$manip_var_nm)
-    req(primary_obs())
-    req(comparison_obs())
-    req(input$do_add_pcp_segments)
-    req(input$inc_vars)
+    bas      <- req(bas())
+    cheem_ls <- req(load_ls())
+    prim_obs <- req(primary_obs())
+    comp_obs <- req(comparison_obs())
+    mv_nm    <- req(input$manip_var_nm)
+    add_pcp  <- req(input$do_add_pcp_segments)
+    inc_vars <- req(input$inc_vars)
+    prob_type <- cheem_ls$problem_type
     
-    ## Filter to only selected data:
-    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    .idx_rownums <- TRUE
-    if(is.null(.d) == FALSE)
-      .idx_rownums <- load_ls()$decode_df$rownum %in% .d$key
-    
-    bas <- bas()
-    mv_nm <- input$manip_var_nm
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0(
         "output$cheem_tour: input$manip_var_nm = '", mv_nm,
@@ -361,13 +340,20 @@ server <- function(input, output, session){
       return(NULL)
     }
     
+    ## Filter to only selected data:
+    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
+    .idx_rownums <- TRUE
+    if(is.null(.d) == FALSE)
+      .idx_rownums <- cheem_ls$decode_df$rownum %in% .d$key
+    
     # browser() # CAUSED issue when adding basis to global view.
     # # debugonce(array2df)
     # debugonce(proto_basis1d_distribution)
     ggt <- radial_cheem_ggtour(
-      load_ls(), bas, mv_nm,
-      primary_obs(), comparison_obs(),
-      rownum_idx = .idx_rownums, inc_vars = input$inc_vars)
+      cheem_ls, bas, mv_nm,
+      prim_obs, comp_obs,
+      do_add_pcp_segments = add_pcp,
+      rownum_idx = .idx_rownums, inc_vars = inc_vars)
     spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
@@ -377,7 +363,7 @@ server <- function(input, output, session){
   output$selected_df <- DT::renderDT({ ## Original data of selection
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
     if(is.null(.d)) return(NULL)
-    .df <- load_ls()$decode_df
+    .df <- cheem_ls$decode_df
     .df_r <- data.frame(lapply(
       .df, function(c) if(is.numeric(c)) round(c, 2L) else c))
     return(DT::datatable(.df_r[.df_r$rownum %in% .d$key, ], rownames = FALSE))

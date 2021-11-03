@@ -92,31 +92,24 @@ proto_basis1d_distribution <- function(
   if(position == "off") return()
   if(is.null(.facet_by) == FALSE) position = "floor1d"
   
-  ## Pivot longer the local attributions
   attr_df <- cheem_ls$attr_df
-  .col_idx <- which(colnames(attr_df) %in% inc_vars)
-  attr_df <- attr_df[, .col_idx]
-  ## orthonormalize each row.
+  .n <- nrow(attr_df)
+  .p <- ncol(attr_df)
+  if(inc_vars != TRUE)
+    attr_df <- attr_df[, which(colnames(attr_df) %in% inc_vars)]
+  
+  ## Orthonormalize each row.
   .m <- sapply(1L:nrow(attr_df), function(i){
     row_bas <- basis_local_attribution(attr_df, i)
     attr_df[i, ] <<- tourr::orthonormalise(row_bas)
   })
   ## Pivot the attr values (columns) longer to rows.
-  .n <- nrow(attr_df)
-  .p <- ncol(attr_df)
   attr_df$rownum <- 1L:.n
   attr_df$group_by <- as.factor(group_by)
-  
-  .p_df <- cheem_ls$global_view_df
-  .maha_dist_df <-
-    .p_df[.p_df$layer_name == "data" &
-            .p_df$projection_nm == "QQ Mahalanobis distance", c(1L, 4L)]
-  colnames(.maha_dist_df) <- c("rownum", "maha_dist")
-  .attr_df_lj <- dplyr::left_join(attr_df, .maha_dist_df, by = "rownum")
-  .attr_df_longer <- tidyr::pivot_longer(.attr_df_lj,
-                                       cols = !c(rownum, group_by, maha_dist),
-                                       names_to = "var_name",
-                                       values_to = "contribution")
+  .attr_df_longer <- tidyr::pivot_longer(attr_df,
+                                         cols = !c(rownum, group_by),
+                                         names_to = "var_name",
+                                         values_to = "contribution")
   .df_basis_distr <- dplyr::mutate(
     .attr_df_longer,
     .keep = "none",
@@ -441,8 +434,7 @@ radial_cheem_ggtour <- function(
       .facet_col_bgk <- rep(c("observed y", "residual"), each = nrow(.dat_bgk))
       .fixed_y_bgk   <- c(spinifex::scale_sd(decode_df$y[!rownum_idx]),
                           spinifex::scale_sd(decode_df$residual)[!rownum_idx])
-      proto_bkg <-
-        spinifex::proto_point.1d_fix_y(
+      proto_bkg <- spinifex::proto_point.1d_fix_y(
           aes_args = list(shape = .pred_clas[!rownum_idx]),
           identity_args = list(alpha = .alpha, color = "grey80"),
           data = .dat_doub_bgk,
@@ -458,18 +450,22 @@ radial_cheem_ggtour <- function(
                          spinifex::scale_sd(decode_df$residual)[rownum_idx])
     
     browser()
+    debugonce(proto_highlight)
+    ## The issue with proto_highlight is that it passes different data that 
+    ## doesn't have fixed_y/wrap. data arg may not be reliable because of this, 
+    ## may need to go to go back to rownum_index, more robust with logical and numeric.
     ggt <- spinifex::ggtour(.mt_path, .dat_doub_fore, angle = angle) +
-      #spinifex::facet_wrap_tour(facet_var = .facet_col_fore, nrow = 1L) +
+      spinifex::facet_wrap_tour(facet_var = .facet_col_fore, nrow = 1L) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection, 1D",
                     y = "_basis_ | observed y | residual") +
       #proto_bkg +
       ## Foreground
-      spinifex::proto_point.1d_fix_y(
+      spinifex::proto_point.1d_fix_y( ## Wants to come early as it appends data$y
         aes_args = list(color = .pred_clas, shape = .pred_clas),
         identity_args = list(alpha = .alpha),
         fixed_y = .fixed_y_fore) +
-      spinifex::proto_frame_cor(data = .dat_fore) +
+      # spinifex::proto_frame_cor(data = .dat_fore) + ## Doesn't know of fixed y...
       proto_basis1d_distribution(
         cheem_ls, group_by = .pred_clas,
         position = "top2d",

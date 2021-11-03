@@ -18,6 +18,8 @@ require(magrittr)
 ## Load prepared objs
 # preared objects now loaded in app.r; layer_ls reactive function.
 
+options(show.error.locations=TRUE)
+options(error = traceback)
 toy_ls <- readRDS("./data/2preprocess_toy_classification.rds")
 penguins_ls <- readRDS("./data/1preprocess_penguins.rds")
 fifa_ls <- readRDS("./data/3preprocess_fifa.rds")
@@ -35,7 +37,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
       "dat_char", "Data:",
       choices = c("toy classification", "penguins", "fifa", #"apartments",
                   "diabetes (wide)", "diabetes (long)"),
-      selected = "penguins"), #"toy classification"),
+      selected = "fifa"), #"toy classification"),
     h2("Preprocessing and data description"),
     htmlOutput("desc_rows"),
     p("2) Extract the SHAP matrix, (the SHAP values at EACH observation), via {treeshap}"),
