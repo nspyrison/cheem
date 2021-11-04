@@ -140,3 +140,34 @@ logistic_tform = function(
   ceiling * (floor + (1L - floor) * vec)
 }
 
+
+#' Assure a full lengthed logical index
+#' 
+#' Suggests a alpha opacity to plot with as a function of the number of 
+#' observation.
+#' 
+#' @param .n Number of observations to plot.
+#' @param mid_pt Inflection point that the logistic curve. Defaults to 1000.
+#' @param k_attenuation The steepness of the transition, larger is a sharper
+#' transition. Quite sensitive and defaults to 5.
+#' @param ceiling The highest number returned. Defaults to 1.
+#' @param floor The lowest number returned. Defaults to 0.3.
+#' @return A scalar numeric, suggested value to set alpha opacity.
+#' @export
+#' @examples
+#' ## Suggest an opacity to use in plotting:
+#' (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
+#'
+#' ## Visualize
+#' x <- 1:2000
+#' plot(x, logistic_tform(x), col='blue')
+as_logical_index <- function(index, .n){
+  if(missing(.n) == TRUE) stop("as_logical_index: .n is missing.")
+  if(is.numeric(index) == TRUE){
+    rep_f <- rep(FALSE, .n)
+    rep_f[index] <- TRUE
+    index <- rep_f
+  }
+  if(identical(index, TRUE)) index <- rep(TRUE, .n)
+  index
+}

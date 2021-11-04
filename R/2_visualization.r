@@ -52,17 +52,17 @@ basis_local_attribution <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-#' dat <- cheem_ls$decode_df[, 8:11]
-#' clas <- cheem_ls$decode_df$class
-#' attr_df <- cheem_ls$attr_df[1:nrow(dat), -5]
+#' set.dir(~)
+#' .cheem_ls <- readRDS(here::here("inst/shiny_apps/cheem_initial/data//1preprocess_penguins.rds"))
+#' dat <- .cheem_ls$decode_df[, 8:11]
+#' clas <- .cheem_ls$decode_df$class
+#' attr_df <- .cheem_ls$attr_df[1:nrow(dat), -5]
 #' bas <- basis_local_attribution(attr_df, nrow(dat))
 #' mv <- manip_var_of(bas) ## Warning is fine.
 #' 
 #' ## 1D case:
 #' mt_path <- manual_tour(bas, mv)
 #' 
-#' debugonce(proto_basis1d)
 #' ggt <- ggtour(mt_path, dat) +
 #'   proto_density(aes_args = list(color = clas, fill = clas)) +
 #'   proto_basis1d() +
@@ -81,7 +81,7 @@ proto_basis1d_distribution <- function(
   inc_vars = TRUE
 ){
   ## Prevent global variable warnings:
-  .facet_by <- rownum <- maha_dist <- contribution <- var_name <-
+  rownum <- contribution <- var_name <-
     .map_to_unitbox <- .map_to_data <- .map_to_density <- .d <-
     .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
@@ -90,7 +90,6 @@ proto_basis1d_distribution <- function(
   shape <- shape[1L] ## match.arg only for character values.
   if(shape %in% c(142L, 124L) == FALSE) warning("Unexpected shape used in proto_basis1d_distribution.")
   if(position == "off") return()
-  if(is.null(.facet_by) == FALSE) position = "floor1d"
   
   attr_df <- cheem_ls$attr_df
   .n <- nrow(attr_df)
@@ -119,9 +118,16 @@ proto_basis1d_distribution <- function(
     var_name = var_name,
     var_num = rep_len(.p:1L, .n * .p),
     rownum = rownum,
-    group_by = group_by,
-    maha_dist = maha_dist) %>%
+    group_by = group_by) %>%
     as.data.frame()
+  
+  ## IF FACETED:
+  if(.is_faceted == TRUE){
+    position = "floor1d"
+    ## "_basis_" becomes an honorary level of facet_var
+    .df_basis_distr <- spinifex:::.bind_elements2df( ## basis facet always on first/top level
+      list(facet_var = rep_len("_basis_", nrow(.df_basis_distr))), .df_basis_distr)
+  }
   
   ## Map them to position
   if(.d == 1L){
@@ -129,17 +135,12 @@ proto_basis1d_distribution <- function(
   } else .map_to_tgt <- .map_to_data
   .df_basis_distr <- spinifex::map_relative(
     .df_basis_distr, position, .map_to_tgt)
-  ## Add facet level if needed
-  if(is.null(.facet_by) == FALSE){
-    .basis_ls <- list(facet_by = rep_len("_basis_", nrow(.df_zero)))
-    .df_basis_distr <- spinifex:::.bind_elements2df(.basis_ls, .df_basis_distr)
-  }
   
   .alpha <- logistic_tform(nrow(cheem_ls$decode_df)) / 15L
   ## Basis/attribution distribution of the rows of the attr_df
   rug_distr <- list(suppressWarnings(ggplot2::geom_point(
-    ggplot2::aes(x, y, color = group_by, tooltip = rownum), .df_basis_distr,
-    shape = shape, alpha = .alpha, size = 1.5)))
+    ggplot2::aes(x, y, color = group_by, tooltip = rownum),
+    .df_basis_distr, shape = shape, alpha = .alpha, size = 1.5)))
   
   ## Add PCP lines if needed.
   if(do_add_pcp_segments == TRUE){
@@ -331,7 +332,7 @@ linked_global_view <- function(
 #' 142 or 124, '|' for `plotly` and `gganimate` respectively. Defaults to 142, 
 #' '|' for `plotly`.
 #' @param angle The step size between interpolated frames, in radians.
-#' @param rownum_idx Numeric index of selected observations. Logial
+#' @param row_idx Numeric index of selected observations. Logial
 #' Defaults to TRUE; 1:n.
 #' @param inc_vars A vector of the names of the variables to include in the projection.
 #' @return `plotly` plot of the global view, first 2 components of the basis of
@@ -355,11 +356,12 @@ radial_cheem_ggtour <- function(
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .2,
-  rownum_idx = TRUE,
+  row_idx = TRUE,
   inc_vars = NULL
 ){
-  if(sum(rownum_idx) == 0L) stop("radial_cheem_ggtour: sum of rownum_idx was 0.")
+  if(sum(row_idx) == 0L) stop("radial_cheem_ggtour: sum of row_idx was 0.")
   decode_df <- cheem_ls$decode_df
+  .n <- nrow(decode_df)
   ## Initialization Y on basis
   .y <- decode_df$y %>% matrix(ncol = 1L)
   if(is.null(inc_vars) == TRUE){
@@ -373,13 +375,10 @@ radial_cheem_ggtour <- function(
   .col_idx <- which(colnames(decode_df) %in% inc_vars)
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
   
-  ## Change rownum_idx from numeric to logical if needed, replicate
-  if(is.numeric(rownum_idx) == TRUE){
-    rep_f <- rep(FALSE, nrow(decode_df))
-    rep_f[rownum_idx] <- TRUE
-    rownum_idx <- rep_f
-  }
-  if(identical(rownum_idx, TRUE)) rownum_idx <- rep(TRUE, nrow(decode_df))
+  ## Change row_idx from numeric to logical if needed and replicate
+  row_idx  <- as_logical_index(row_idx, .n)
+  .prim_obs <- as_logical_index(primary_obs, .n)
+  .comp_obs <- as_logical_index(comparison_obs, .n)
   
   ## Problem type: classification or regression?
   .prob_type <- problem_type(decode_df$y) ## Either "classification" or "regression"
@@ -396,7 +395,7 @@ radial_cheem_ggtour <- function(
   # Classification goes right into vis
   if(.prob_type == "classification"){
     ## classification; subset to selected data
-    .dat <- .dat[rownum_idx, ]
+    .dat <- .dat[row_idx, ]
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas)) +
@@ -405,20 +404,20 @@ radial_cheem_ggtour <- function(
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
         identity_args = list(linetype = 3L, alpha = 0.8, color = "black"),
-        data = .dat[comparison_obs,, drop = FALSE],
+        data = .dat[.comp_obs,, drop = FALSE],
         mark_initial = FALSE) +
       ## Highlight shap obs
       spinifex::proto_highlight1d(
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"),
-        data = .dat[primary_obs,, drop = FALSE],
+        data = .dat[.prim_obs,, drop = FALSE],
         mark_initial = FALSE) +
       proto_basis1d_distribution(
         cheem_ls, group_by = .pred_clas,
         position = "top1d",
         shape = pcp_shape, ## '|' for gganimate/ggplot
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
-        primary_obs = primary_obs,
-        comparison_obs = comparison_obs, 
+        primary_obs = .prim_obs,
+        comparison_obs = .comp_obs, 
         inc_vars = inc_vars)
     ## No frame correlation for a 1D projection
   }
@@ -428,29 +427,27 @@ radial_cheem_ggtour <- function(
   if(.prob_type == "regression"){
     ## Background:
     proto_bkg <- list()
-    if(sum(!rownum_idx) > 0L){
-      .dat_bgk       <- .dat[!rownum_idx, ]
+    if(sum(!row_idx) > 0L){
+      .dat_bgk       <- .dat[!row_idx, ]
       .dat_doub_bgk  <- rbind(.dat_bgk, .dat_bgk)
       .facet_col_bgk <- rep(c("observed y", "residual"), each = nrow(.dat_bgk))
-      .fixed_y_bgk   <- c(spinifex::scale_sd(decode_df$y[!rownum_idx]),
-                          spinifex::scale_sd(decode_df$residual)[!rownum_idx])
+      .fixed_y_bgk   <- c(spinifex::scale_sd(decode_df$y[!row_idx]),
+                          spinifex::scale_sd(decode_df$residual)[!row_idx])
       proto_bkg <- spinifex::proto_point.1d_fix_y(
-          aes_args = list(shape = .pred_clas[!rownum_idx]),
+          aes_args = list(shape = .pred_clas[!row_idx]),
           identity_args = list(alpha = .alpha, color = "grey80"),
           data = .dat_doub_bgk,
           fixed_y = .fixed_y_bgk)
     }
-    .dat_doub_prim <- rbind(.dat[primary_obs, ], .dat[primary_obs, ])
-    .dat_doub_comp <- rbind(.dat[comparison_obs, ], .dat[comparison_obs, ])
+    .doub_prim_obs <- c(.prim_obs, .prim_obs) ## full lenghth logical
+    .doub_comp_obs <- c(.comp_obs, .comp_obs) ## full lenghth logical
     ## Foreground:
-    .dat_fore       <- .dat[rownum_idx, ]
+    .dat_fore       <- .dat[row_idx, ]
     .dat_doub_fore  <- rbind(.dat_fore, .dat_fore)
     .facet_col_fore <- rep(c("observed y", "residual"), each = nrow(.dat_fore))
-    .fixed_y_fore   <- c(spinifex::scale_sd(decode_df$y[rownum_idx]),
-                         spinifex::scale_sd(decode_df$residual)[rownum_idx])
+    .fixed_y_fore   <- c(spinifex::scale_sd(decode_df$y[row_idx]),
+                         spinifex::scale_sd(decode_df$residual)[row_idx])
     
-    browser()
-    debugonce(proto_highlight)
     ## The issue with proto_highlight is that it passes different data that 
     ## doesn't have fixed_y/wrap. data arg may not be reliable because of this, 
     ## may need to go to go back to rownum_index, more robust with logical and numeric.
@@ -476,13 +473,13 @@ radial_cheem_ggtour <- function(
       spinifex::proto_basis1d(position = "top2d", manip_col = "black") +
       ## Highlight comparison obs
       spinifex::proto_highlight(
+        row_index = .doub_comp_obs,
         identity_args = list(size = 3L, shape = 4L, alpha = 0.6, color = "black"),
-        data = .dat_doub_comp,
         mark_initial = FALSE) +
       ## Highlight primary obs
       spinifex::proto_highlight(
+        row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"),
-        data = .dat_doub_prim,
         mark_initial = FALSE)
   }
   
