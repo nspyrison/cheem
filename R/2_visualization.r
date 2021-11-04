@@ -94,7 +94,7 @@ proto_basis1d_distribution <- function(
   attr_df <- cheem_ls$attr_df
   .n <- nrow(attr_df)
   .p <- ncol(attr_df)
-  if(inc_vars != TRUE)
+  if(identical(inc_vars, TRUE) == FALSE)
     attr_df <- attr_df[, which(colnames(attr_df) %in% inc_vars)]
   
   ## Orthonormalize each row.
@@ -376,7 +376,7 @@ radial_cheem_ggtour <- function(
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
   
   ## Change row_idx from numeric to logical if needed and replicate
-  row_idx  <- as_logical_index(row_idx, .n)
+  row_idx   <- as_logical_index(row_idx, .n)
   .prim_obs <- as_logical_index(primary_obs, .n)
   .comp_obs <- as_logical_index(comparison_obs, .n)
   
@@ -403,13 +403,13 @@ radial_cheem_ggtour <- function(
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
+        row_index = .comp_obs,
         identity_args = list(linetype = 3L, alpha = 0.8, color = "black"),
-        data = .dat[.comp_obs,, drop = FALSE],
         mark_initial = FALSE) +
       ## Highlight shap obs
       spinifex::proto_highlight1d(
+        row_index = .prim_obs,
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"),
-        data = .dat[.prim_obs,, drop = FALSE],
         mark_initial = FALSE) +
       proto_basis1d_distribution(
         cheem_ls, group_by = .pred_clas,
@@ -417,7 +417,7 @@ radial_cheem_ggtour <- function(
         shape = pcp_shape, ## '|' for gganimate/ggplot
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs,
-        comparison_obs = .comp_obs, 
+        comparison_obs = .comp_obs,
         inc_vars = inc_vars)
     ## No frame correlation for a 1D projection
   }
@@ -448,9 +448,6 @@ radial_cheem_ggtour <- function(
     .fixed_y_fore   <- c(spinifex::scale_sd(decode_df$y[row_idx]),
                          spinifex::scale_sd(decode_df$residual)[row_idx])
     
-    ## The issue with proto_highlight is that it passes different data that 
-    ## doesn't have fixed_y/wrap. data arg may not be reliable because of this, 
-    ## may need to go to go back to rownum_index, more robust with logical and numeric.
     ggt <- spinifex::ggtour(.mt_path, .dat_doub_fore, angle = angle) +
       spinifex::facet_wrap_tour(facet_var = .facet_col_fore, nrow = 1L) +
       # Plotly can't handle text rotation in geom_text/annotate.

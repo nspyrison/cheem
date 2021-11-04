@@ -29,15 +29,21 @@ diabetes_long_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
 
 ## UI content ----
 ### tab1_cheem -----
+expected_data_char <- c(
+  "toy classification", "penguins", "fifa", #"apartments",
+  "diabetes (wide)", "diabetes (long)", "<upload preprocessed cheem_ls (.rds file)>")
 tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #### Top text description -----
   fluidRow(
     ## Choose data:
     selectInput(
       "dat_char", "Data:",
-      choices = c("toy classification", "penguins", "fifa", #"apartments",
-                  "diabetes (wide)", "diabetes (long)"),
-      selected = "fifa"), #"toy classification"),
+      choices = expected_data_char,
+      selected = "penguins"), #"toy classification"),
+    conditionalPanel(
+      "input.dat_char == '<upload preprocessed cheem_ls (.rds file)>'",
+      fileInput("in_cheem_ls", "<preprocessed cheem_ls saved to .rds>",
+                multiple = FALSE, accept = c("text/rds", ".rds"))),
     h2("Preprocessing and data description"),
     htmlOutput("desc_rows"),
     p("2) Extract the SHAP matrix, (the SHAP values at EACH observation), via {treeshap}"),
@@ -98,7 +104,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     column(width = 8L,
            plotly::plotlyOutput(
              "cheem_tour_plotly",
-             height = "600px", width = "960px") %>%
+             height = "600px", width = "1440px") %>%
              shinycssloaders::withSpinner(type = 8L)
     ),
     # column(width = 4L,

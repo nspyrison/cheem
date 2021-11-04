@@ -13,7 +13,7 @@ radial_cheem_ggtour(
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
   angle = 0.2,
-  rownum_idx = TRUE,
+  row_idx = TRUE,
   inc_vars = NULL
 )
 }
@@ -41,7 +41,7 @@ line segments to the basis display.}
 
 \item{angle}{The step size between interpolated frames, in radians.}
 
-\item{rownum_idx}{Numeric index of selected observations. Logial
+\item{row_idx}{Numeric index of selected observations. Logial
 Defaults to TRUE; 1:n.}
 
 \item{inc_vars}{A vector of the names of the variables to include in the projection.}

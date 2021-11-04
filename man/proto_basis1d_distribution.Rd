@@ -45,17 +45,17 @@ use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 library(cheem)
-load("./apps/cheem_penguins_classification/data/1preprocess.RData")
-dat <- cheem_ls$decode_df[, 8:11]
-clas <- cheem_ls$decode_df$class
-attr_df <- cheem_ls$attr_df[1:nrow(dat), -5]
+set.dir(~)
+.cheem_ls <- readRDS(here::here("inst/shiny_apps/cheem_initial/data//1preprocess_penguins.rds"))
+dat <- .cheem_ls$decode_df[, 8:11]
+clas <- .cheem_ls$decode_df$class
+attr_df <- .cheem_ls$attr_df[1:nrow(dat), -5]
 bas <- basis_local_attribution(attr_df, nrow(dat))
 mv <- manip_var_of(bas) ## Warning is fine.
 
 ## 1D case:
 mt_path <- manual_tour(bas, mv)
 
-debugonce(proto_basis1d)
 ggt <- ggtour(mt_path, dat) +
   proto_density(aes_args = list(color = clas, fill = clas)) +
   proto_basis1d() +

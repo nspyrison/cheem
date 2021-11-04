@@ -374,10 +374,15 @@ format_ls <- function(
 #' X_test  <- sub[.idx_test, 2:5]
 #' Y_test  <- sub$m2.price[.idx_test]
 #' 
-#' cheem_ls <- cheem_ls(
+#' .cheem_ls <- cheem_ls(
 #'   x = X_train, y = Y_train, xtest = X_test, ytest = Y_test,
-#'   basis_type = "pca", class = clas)
-#' names(cheem_ls)
+#'   basis_type = "pca", class = clas,
+#'   keep_model = FALSE, verbose = TRUE, noisy = TRUE)
+#' names(.cheem_ls)
+#' 
+#' ## Save for used with shiny app (expects .rds):
+#' if(F) ## don't accidentally save a local file.
+#'   saveRDS(.cheem_ls, "./my_cheem_ls.rds")
 cheem_ls <- function(
   x, y, xtest = NULL, ytest = NULL, basis_type = c("pca", "olda"),
   class = NULL, loc_attr_nm = "SHAP", keep_model = FALSE,

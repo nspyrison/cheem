@@ -12,36 +12,34 @@ server <- function(input, output, session){
   ## LOAD_LS, pass the cheem_ls from the selected data
   load_ls <- reactive({
     dat <- req(input$dat_char)
-    if(!(dat %in% c("toy classification", "penguins", "fifa",
-                    "apartments", "diabetes (wide)", "diabetes (long)")))
+    if(dat %in% expected_data_char == FALSE)
       stop("data string not matched.")
-
+    
     ### BY PRODUCT: UPDATE PRIM/COMP OBS
     if(dat == "toy classification"){
       primary_obs    <- 18L
       comparison_obs <- 111L
-    }
-    if(dat == "penguins"){
+    }else if(dat == "penguins"){
       primary_obs    <- 15L
       comparison_obs <- 282L
-    }
-    if(dat == "fifa"){
+    }else if(dat == "fifa"){
       primary_obs    <- 1L
       comparison_obs <- 8L
-    }
-    if(dat == "apartments"){
+    }else if(dat == "apartments"){
       primary_obs    <- 485L
       comparison_obs <- 487L
-    }
-    if(dat == "diabetes (wide)"){
+    }else if(dat == "diabetes (wide)"){
       primary_obs    <- 123L
       comparison_obs <- 237L
-    }
-    if(dat == "diabetes (long)"){
+    }else if(dat == "diabetes (long)"){
       primary_obs    <- 479L
       comparison_obs <- 674L
+    }else{ ## _ie._ user loaded data; no priors of good obs to pick.
+      primary_obs    <- 1L
+      comparison_obs <- 2L
     }
-    .n_max <- 5000L
+      
+    .n_max <- 1e6
     updateNumericInput(
       session, "primary_obs",
       label = "Primary observation rownum, ('*' point):",
@@ -53,18 +51,16 @@ server <- function(input, output, session){
     
     ### CHEEM_LS TO RETRUN
     # all loaded at the top of ui.r
-    if(dat == "toy classification")
-      ret <- toy_ls
-    if(dat == "penguins")
-      ret <- penguins_ls
-    if(dat == "fifa")
-      ret <- fifa_ls
-    if(dat == "apartments")
-      ret <- apartments_ls
-    if(dat == "diabetes (wide)")
-      ret <- diabetes_wide_ls
-    if(dat == "diabetes (long)")
-      ret <- diabetes_long_ls
+    if(dat == "toy classification"){    ret <- toy_ls
+    }else if(dat == "penguins"){        ret <- penguins_ls
+    }else if(dat == "fifa"){            ret <- fifa_ls
+    }else if(dat == "apartments"){      ret <- apartments_ls
+    }else if(dat == "diabetes (wide)"){ ret <- diabetes_wide_ls
+    }else if(dat == "diabetes (long)"){ ret <- diabetes_long_ls
+    }else{ ## User uploaded data
+      tryCatch(ret <- readRDS(input$in_cheem_ls$datapath),
+               error = function(e) stop(safeError(e)))
+    }
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
     var_nms <- colnames(ret$attr_df)
@@ -127,12 +123,11 @@ server <- function(input, output, session){
       .diff <- abs(expect_bas - bas)
       sel <- opts[which(.diff == max(.diff))]
     }else if(prob_type == "regression"){
-      prim_bs  <- attr_df[.comp_obs,, drop = FALSE]
+      prim_bas <- attr_df[.prim_obs,, drop = FALSE]
       comp_bas <- attr_df[.comp_obs,, drop = FALSE]
-      .diff <- abs(comp_bas - prim_bs)
+      .diff <- abs(comp_bas - prim_bas)
       sel <- opts[which(.diff == max(.diff))]
     } else stop("update manipulation variable: problem type not fit.")
-    
     updateSelectInput(session, "manip_var_nm",
                       label = "Manipulation variable:",
                       choices  = opts,
@@ -142,39 +137,37 @@ server <- function(input, output, session){
   ## Outputs -----
   output$desc_rows <- renderText({
     dat <- req(input$dat_char)
-    if(!(dat %in% c("toy classification", "penguins", "fifa",
-                    "apartments", "diabetes (wide)", "diabetes (long)")))
+    if(dat %in% expected_data_char == FALSE)
       stop("data string not matched.")
     ## Load data:
     if(dat == "toy classification"){
       he <- h3("Simulated triangle vertices")
       l1 <- p("- 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
       l2 <- p("1) Create a random forest model classifying cluster level, given the continuous variables.")
-    }
-    if(dat == "penguins"){
+    }else if(dat == "penguins"){
       he <- h3("Palmer penguins")
       l1 <- p("- 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
       l2 <- p("1) Create a random forest model classifying species from the physical measurements.")
-    }
-    if(dat == "fifa"){
+    }else if(dat == "fifa"){
       he <- h3("FIFA soccer players, 2020 season")
       l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
       l2 <- p("1) Create a random forest model regressing continuous wages from the skill aggregates.")
-    }
-    if(dat == "apartments"){
+    }else if(dat == "apartments"){
       he <- h3("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
       l1 <- p("- 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
       l2 <- p("1) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
-    }
-    if(dat == "diabetes (wide)"){
+    }else if(dat == "diabetes (wide)"){
       he <- h3("Pima Indians Diabetes (wide)")
       l1 <- p("- 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
       l2 <- p("1) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
-    }
-    if(dat == "diabetes (long)"){
+    }else if(dat == "diabetes (long)"){
       he <- h3("Pima Indians Diabetes (long)")
       l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
       l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
+    }else { ## _ie_ user uploaded data
+      he <- h3("User uploaded data")
+      l1 <- NULL
+      l2 <- p("1) Create a random forest model")
     }
     ## Return
     HTML(paste(he, l1, l2))
@@ -342,18 +335,18 @@ server <- function(input, output, session){
     
     ## Filter to only selected data:
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    .idx_rownums <- TRUE
-    if(is.null(.d) == FALSE)
+    if(is.null(.d) == FALSE){
       .idx_rownums <- cheem_ls$decode_df$rownum %in% .d$key
+    }else
+      .idx_rownums <- TRUE
     
-    # browser() # CAUSED issue when adding basis to global view.
-    # # debugonce(array2df)
-    # debugonce(proto_basis1d_distribution)
     ggt <- radial_cheem_ggtour(
       cheem_ls, bas, mv_nm,
       prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,
       row_idx = .idx_rownums, inc_vars = inc_vars)
+    browser()
+    debugonce(animate_plotly)
     spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
