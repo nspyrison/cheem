@@ -168,7 +168,7 @@ proto_basis1d_distribution <- function(
           .df_pcp[.df_pcp$rownum == comparison_obs, ],
           color = "black", size = .8, alpha = .6, linetype = 3L)))
     ## Add primary_obs highlight
-    if(length(primary_obs) > 0L)
+    if(sum(primary_obs) > 0L)
       pcp_lines <- c(
         pcp_lines,
         suppressWarnings(ggplot2::geom_segment(
@@ -364,21 +364,15 @@ radial_cheem_ggtour <- function(
   .n <- nrow(decode_df)
   ## Initialization Y on basis
   .y <- decode_df$y %>% matrix(ncol = 1L)
-  if(is.null(inc_vars) == TRUE){
-    .cn <- colnames(decode_df)
-    inc_vars <- .cn[which(
-      !(.cn %in%
-          c("rownum", "class", "y", "prediction", "residual", "tooltip",
-            "maha_data", "maha_SHAP", "predicted_class",
-            "is_misclassification")))]
-  }
+  if(is.null(inc_vars) == TRUE) 
+    inc_vars <- colnames(cheem_ls$attr_df)
   .col_idx <- which(colnames(decode_df) %in% inc_vars)
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
   
   ## Change row_idx from numeric to logical if needed and replicate
   row_idx   <- as_logical_index(row_idx, .n)
-  .prim_obs <- as_logical_index(primary_obs, .n)
-  .comp_obs <- as_logical_index(comparison_obs, .n)
+  .prim_obs <- primary_obs    # proto_basis1d_distribution EXPECTS NUMERIC INDEX;
+  .comp_obs <- comparison_obs # don't coerce to logical index.
   
   ## Problem type: classification or regression?
   .prob_type <- problem_type(decode_df$y) ## Either "classification" or "regression"
@@ -396,6 +390,9 @@ radial_cheem_ggtour <- function(
   if(.prob_type == "classification"){
     ## classification; subset to selected data
     .dat <- .dat[row_idx, ]
+    # browser()
+    # ## seems like proto_basis1d_distribution isn't working atleast as static ggplot2
+    # debugonce(proto_basis1d_distribution)
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas)) +
@@ -425,40 +422,47 @@ radial_cheem_ggtour <- function(
   ### Regression case -----
   # Regression does some work to append y or y_hat to the basis
   if(.prob_type == "regression"){
+    .fixed_y <- c(spinifex::scale_sd(decode_df$y),
+                  spinifex::scale_sd(decode_df$residual))
+    .col <- decode_df$residual ## Want to be able to color on residual.
+    
     ## Background:
     proto_bkg <- list()
     if(sum(!row_idx) > 0L){
       .dat_bgk       <- .dat[!row_idx, ]
       .dat_doub_bgk  <- rbind(.dat_bgk, .dat_bgk)
       .facet_col_bgk <- rep(c("observed y", "residual"), each = nrow(.dat_bgk))
-      .fixed_y_bgk   <- c(spinifex::scale_sd(decode_df$y[!row_idx]),
-                          spinifex::scale_sd(decode_df$residual)[!row_idx])
-      proto_bkg <- spinifex::proto_point.1d_fix_y(
-          aes_args = list(shape = .pred_clas[!row_idx]),
-          identity_args = list(alpha = .alpha, color = "grey80"),
-          data = .dat_doub_bgk,
-          fixed_y = .fixed_y_bgk)
+      .fixed_y_bgk   <- .fixed_y[c(!row_idx, !row_idx)]
     }
-    .doub_prim_obs <- c(.prim_obs, .prim_obs) ## full lenghth logical
-    .doub_comp_obs <- c(.comp_obs, .comp_obs) ## full lenghth logical
+    .doub_prim_obs <- c(.prim_obs, .n + .prim_obs) ## MUST BE NUMERIC FOR OTHER...
+    .doub_comp_obs <- c(.comp_obs, .n + .comp_obs) ## MUST BE NUMERIC FOR OTHER...
     ## Foreground:
     .dat_fore       <- .dat[row_idx, ]
     .dat_doub_fore  <- rbind(.dat_fore, .dat_fore)
     .facet_col_fore <- rep(c("observed y", "residual"), each = nrow(.dat_fore))
-    .fixed_y_fore   <- c(spinifex::scale_sd(decode_df$y[row_idx]),
-                         spinifex::scale_sd(decode_df$residual)[row_idx])
+    .fixed_y_fore   <- .fixed_y[c(row_idx, row_idx)]
     
+    if(sum(!row_idx) > 0L){
+      messgae("proto_point.1d_fix_y has data arg, which won't play nice with facet_wrap_tour.
+              may need to go to a row_index arg to accomadate.")
+      browser()
+    }
     ggt <- spinifex::ggtour(.mt_path, .dat_doub_fore, angle = angle) +
       spinifex::facet_wrap_tour(facet_var = .facet_col_fore, nrow = 1L) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection, 1D",
-                    y = "_basis_ | observed y | residual") +
-      #proto_bkg +
-      ## Foreground
-      spinifex::proto_point.1d_fix_y( ## Wants to come early as it appends data$y
-        aes_args = list(color = .pred_clas, shape = .pred_clas),
-        identity_args = list(alpha = .alpha),
-        fixed_y = .fixed_y_fore) +
+                    y = "_basis_ | observed y | residual")
+    if(sum(!row_idx) > 0L)
+      ggt <- ggt + spinifex::proto_point.1d_fix_y( ## cannot be made before ggtour()
+        aes_args = list(shape = .pred_clas),
+        identity_args = list(alpha = .alpha, color = "grey80"),
+        data = .dat_doub_bgk,
+        fixed_y = .fixed_y_bgk)
+    ## Foreground
+    ggt <- ggt + spinifex::proto_point.1d_fix_y( ## Wants to come early as it appends data$y
+      aes_args = list(color = .pred_clas, shape = .pred_clas),
+      identity_args = list(alpha = .alpha),
+      fixed_y = .fixed_y_fore) +
       # spinifex::proto_frame_cor(data = .dat_fore) + ## Doesn't know of fixed y...
       proto_basis1d_distribution(
         cheem_ls, group_by = .pred_clas,

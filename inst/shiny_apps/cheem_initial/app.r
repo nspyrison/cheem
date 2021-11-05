@@ -345,8 +345,11 @@ server <- function(input, output, session){
       prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,
       row_idx = .idx_rownums, inc_vars = inc_vars)
-    browser()
-    debugonce(animate_plotly)
+    
+    # browser()
+    # debugonce(radial_cheem_ggtour)
+    # debugonce(animate_plotly)
+    spinifex::filmstrip(ggt)
     spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
@@ -356,7 +359,7 @@ server <- function(input, output, session){
   output$selected_df <- DT::renderDT({ ## Original data of selection
     .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
     if(is.null(.d)) return(NULL)
-    .df <- cheem_ls$decode_df
+    .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(
       .df, function(c) if(is.numeric(c)) round(c, 2L) else c))
     return(DT::datatable(.df_r[.df_r$rownum %in% .d$key, ], rownames = FALSE))
