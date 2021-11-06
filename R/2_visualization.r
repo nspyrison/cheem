@@ -208,16 +208,17 @@ proto_basis1d_distribution <- function(
 #' the data- and attribution- spaces.
 #' @export
 #' @examples
+#' library(cheem)
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' X <- sub[, 2:5]
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' cheem_ls <- cheem_ls(
+#' .cheem_ls <- cheem_ls(
 #'   x=X, y=Y, class=clas, verbose=T, noisy=T)
 #' 
 #' linked_global_view(
-#'   cheem_ls, primary_obs = 1, comparison_obs = 2)
+#'   .cheem_ls, primary_obs = 1, comparison_obs = 2)
 linked_global_view <- function(
   cheem_ls,
   primary_obs = NULL,

@@ -32,7 +32,7 @@ global_view_1sp <- function(
   class = NULL, ## class req for olda, add to _df's
   layer_name
 ){
-  d = 2L ## Fixed display dimensionality
+  d <- 2L ## Fixed display dimensionality
   tooltip <- 1L:nrow(x)
   if(is.null(class)) class <- as.factor(FALSE) 
   
@@ -114,6 +114,7 @@ global_view_1sp <- function(
 #' @return A data.frame, for the full local attribution matrix.
 #' @export
 #' @examples
+#' library(cheem)
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' x <- sub[, 2:5]
 #' y <- sub$m2.price
@@ -130,7 +131,7 @@ local_attr_ls <- function(
 ){
   if(verbose == TRUE)
     tictoc::tic(paste0("local_attr_ls -- ", layer_name))
-  d = 2L
+  d <- 2L
   basis_type <- match.arg(basis_type)
   
   ## RF model -----
@@ -247,10 +248,10 @@ format_ls <- function(
 ){
   if(verbose == TRUE) tictoc::tic("format_ls")
   layer_name <- "SHAP"
-  d = 2L
-  rownum <- V2 <- projection_nm <- NULL
+  d <- 2L
   basis_type <- match.arg(basis_type)
-
+  rownum <- V2 <- projection_nm <- NULL
+  
   ## Init with data layer,
   sec_global_view_data_sp <- system.time({ ## Init with data layer.
     .mod  <- local_attr_ls$model
@@ -390,11 +391,12 @@ cheem_ls <- function(
   class = NULL, loc_attr_nm = "SHAP", keep_model = FALSE,
   verbose = TRUE, noisy = TRUE
 ){
-  d = 2L
   if(verbose == TRUE){
     writeLines(paste0("cheem_ls started at ", Sys.time()))
     tictoc::tic("cheem_ls total")
   }
+  d <- 2L
+  basis_type <- match.arg(basis_type)
   
   ### Create shap layers in a list
   la_ls <- local_attr_ls(
