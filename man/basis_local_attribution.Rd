@@ -4,13 +4,12 @@
 \alias{basis_local_attribution}
 \title{Extract and format the 1D local attribution basis}
 \usage{
-basis_local_attribution(attr_df, rownum = nrow(attr_df))
+basis_local_attribution(attr_df, rownum = 1)
 }
 \arguments{
-\item{attr_df}{Return of a local attribution, such as
-treeshap_df.}
+\item{attr_df}{Return of a local attribution, such as treeshap_df.}
 
-\item{rownum}{The rownumber of the primary observation.}
+\item{rownum}{The rownumber of the primary observation. Defaults to 1.}
 }
 \value{
 A matrix of the 1D basis

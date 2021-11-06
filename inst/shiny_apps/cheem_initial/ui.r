@@ -19,7 +19,7 @@ require(magrittr)
 # preared objects now loaded in app.r; layer_ls reactive function.
 
 options(show.error.locations=TRUE)
-options(error = traceback)
+#options(error = traceback)
 toy_ls <- readRDS("./data/2preprocess_toy_classification.rds")
 penguins_ls <- readRDS("./data/1preprocess_penguins.rds")
 fifa_ls <- readRDS("./data/3preprocess_fifa.rds")
@@ -39,7 +39,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     selectInput(
       "dat_char", "Data:",
       choices = expected_data_char,
-      selected = "fifa"), #"toy classification"),
+      selected = "penguins"), #"toy classification"),
     conditionalPanel(
       "input.dat_char == '<upload preprocessed cheem_ls (.rds file)>'",
       fileInput("in_cheem_ls", "<preprocessed cheem_ls saved to .rds>",

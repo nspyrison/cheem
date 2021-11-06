@@ -5,9 +5,8 @@
 #' Internal function, Extract and format the 1D local attribution basis from 
 #' the provided local explanation's attribution.
 #' 
-#' @param attr_df Return of a local attribution, such as 
-#' treeshap_df.
-#' @param rownum The rownumber of the primary observation.
+#' @param attr_df Return of a local attribution, such as treeshap_df.
+#' @param rownum The rownumber of the primary observation. Defaults to 1.
 #' @return A matrix of the 1D basis
 #' @export
 #' @examples
@@ -15,7 +14,7 @@
 #' basis_local_attribution(la_df, rownum = 10)
 basis_local_attribution <- function(
   attr_df,
-  rownum = nrow(attr_df)
+  rownum = 1
 ){
   ## Remove last column if layer_name
   attr_df <- attr_df[rownum, ]
@@ -52,33 +51,35 @@ basis_local_attribution <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' set.dir(~)
-#' .cheem_ls <- readRDS(here::here("inst/shiny_apps/cheem_initial/data//1preprocess_penguins.rds"))
-#' dat <- .cheem_ls$decode_df[, 8:11]
-#' clas <- .cheem_ls$decode_df$class
-#' attr_df <- .cheem_ls$attr_df[1:nrow(dat), -5]
-#' bas <- basis_local_attribution(attr_df, nrow(dat))
-#' mv <- manip_var_of(bas) ## Warning is fine.
+#' X    <- tourr::flea[, 1:6]
+#' clas <- tourr::flea$species
+#' Y    <- as.integer(clas)
 #' 
-#' ## 1D case:
+#' .cheem_ls <- cheem_ls(
+#'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' 
+#' bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+#' mv <- manip_var_of(bas)
 #' mt_path <- manual_tour(bas, mv)
 #' 
-#' ggt <- ggtour(mt_path, dat) +
+#' X_scl <- spinifex::scale_sd(X)
+#' ggt <- ggtour(mt_path, X_scl, angle = .3) +
 #'   proto_density(aes_args = list(color = clas, fill = clas)) +
 #'   proto_basis1d() +
-#'   proto_basis1d_distribution(attr_df, group_by = clas)
+#'   proto_basis1d_distribution(.cheem_ls$attr_df, group_by = clas)
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
 proto_basis1d_distribution <- function(
-  cheem_ls, ## Only for distribution of bases.
+  attr_df, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "top2d", "floor2d", "off"), ## Needs to match that of `proto_basis1d()`
   shape = c(142, 124), ## '|' for plotly and ggplot respectively
   do_add_pcp_segments = TRUE,
-  primary_obs = NULL,
-  comparison_obs = NULL,
-  inc_vars = TRUE
+  primary_obs = 1,
+  comparison_obs = 2,
+  inc_vars = NULL,
+  row_index = NULL
 ){
   ## Prevent global variable warnings:
   rownum <- contribution <- var_name <-
@@ -91,14 +92,16 @@ proto_basis1d_distribution <- function(
   if(shape %in% c(142L, 124L) == FALSE) warning("Unexpected shape used in proto_basis1d_distribution.")
   if(position == "off") return()
   
-  attr_df <- cheem_ls$attr_df
+  ## Subset rows then columns
+  if(is.null(row_index) == FALSE)
+    attr_df <- attr_df[c(row_index, primary_obs, comparison_obs), ]
+  if(is.null(inc_vars) == FALSE)
+    attr_df <- attr_df[, colnames(attr_df) %in% inc_vars]
   .n <- nrow(attr_df)
   .p <- ncol(attr_df)
-  if(identical(inc_vars, TRUE) == FALSE)
-    attr_df <- attr_df[, which(colnames(attr_df) %in% inc_vars)]
   
   ## Orthonormalize each row.
-  .m <- sapply(1L:nrow(attr_df), function(i){
+  .m <- sapply(1L:.n, function(i){
     row_bas <- basis_local_attribution(attr_df, i)
     attr_df[i, ] <<- tourr::orthonormalise(row_bas)
   })
@@ -136,7 +139,7 @@ proto_basis1d_distribution <- function(
   .df_basis_distr <- spinifex::map_relative(
     .df_basis_distr, position, .map_to_tgt)
   
-  .alpha <- logistic_tform(nrow(cheem_ls$decode_df)) / 15L
+  .alpha <- logistic_tform(.n) / 15L
   ## Basis/attribution distribution of the rows of the attr_df
   rug_distr <- list(suppressWarnings(ggplot2::geom_point(
     ggplot2::aes(x, y, color = group_by, tooltip = rownum),
@@ -211,7 +214,7 @@ proto_basis1d_distribution <- function(
 #' clas <- sub$district
 #' 
 #' cheem_ls <- cheem_ls(
-#'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+#'   x=X, y=Y, class=clas, verbose=T, noisy=T)
 #' 
 #' linked_global_view(
 #'   cheem_ls, primary_obs = 1, comparison_obs = 2)
@@ -283,6 +286,7 @@ linked_global_view <- function(
   .map_to_attr <- global_view_df[global_view_df$layer_name == "SHAP", c("V1", "V2")]
   .map_to_attr[,1L] <- .map_to_attr[,1L] / 3L
   ## ggplot
+  browser()
   gg <- ggplot2::ggplot(
     data = plotly::highlight_key(global_view_df, ~rownum),
     mapping = ggplot2::aes(V1, V2)) +
@@ -332,7 +336,7 @@ linked_global_view <- function(
 #' 142 or 124, '|' for `plotly` and `gganimate` respectively. Defaults to 142, 
 #' '|' for `plotly`.
 #' @param angle The step size between interpolated frames, in radians.
-#' @param row_idx Numeric index of selected observations. Logial
+#' @param row_index Numeric index of selected observations. 
 #' Defaults to TRUE; 1:n.
 #' @param inc_vars A vector of the names of the variables to include in the projection.
 #' @return `plotly` plot of the global view, first 2 components of the basis of
@@ -348,34 +352,37 @@ linked_global_view <- function(
 #'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
 #' bas <- basis_local_attribution(cheem_ls$attr_df, rownum = 1)
-#' ggt <- radial_cheem_ggtour(cheem_ls, basis=bas, mv_name=colnames(X)[1], 
-#'                            primary_obs=1, comparison_obs=2)
+#' ggt <- radial_cheem_ggtour(
+#'   cheem_ls, basis=bas, mv_name=colnames(X)[1],
+#'   primary_obs=1, comparison_obs=2)
 #' spinifex::animate_plotly(ggt)
 radial_cheem_ggtour <- function(
-  cheem_ls, basis, mv_name, primary_obs, comparison_obs = NULL,
+  cheem_ls, basis, mv_name, primary_obs, comparison_obs,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .2,
-  row_idx = TRUE,
+  row_index = NULL,
   inc_vars = NULL
 ){
-  if(sum(row_idx) == 0L) stop("radial_cheem_ggtour: sum of row_idx was 0.")
+  if(is.null(row_index) == FALSE)
+    if(sum(row_index) == 0L)
+      stop("radial_cheem_ggtour: sum of row_index was 0.")
   decode_df <- cheem_ls$decode_df
   .n <- nrow(decode_df)
   ## Initialization Y on basis
   .y <- decode_df$y %>% matrix(ncol = 1L)
-  if(is.null(inc_vars) == TRUE) 
+  if(is.null(inc_vars) == TRUE)
     inc_vars <- colnames(cheem_ls$attr_df)
-  .col_idx <- which(colnames(decode_df) %in% inc_vars)
+  .col_idx <- colnames(decode_df) %in% inc_vars
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
   
-  ## Change row_idx from numeric to logical if needed and replicate
-  row_idx   <- as_logical_index(row_idx, .n)
+  ## Change row_index from numeric to logical if needed and replicate
   .prim_obs <- primary_obs    # proto_basis1d_distribution EXPECTS NUMERIC INDEX;
   .comp_obs <- comparison_obs # don't coerce to logical index.
+  foreground_index <- as_logical_index(c(row_index, .prim_obs, .comp_obs), .n)
   
   ## Problem type: classification or regression?
-  .prob_type <- problem_type(decode_df$y) ## Either "classification" or "regression"
+  .prob_type <- cheem_ls$problem_type ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- decode_df$predicted_class
@@ -388,14 +395,10 @@ radial_cheem_ggtour <- function(
   ### Classification case -----
   # Classification goes right into vis
   if(.prob_type == "classification"){
-    ## classification; subset to selected data
-    .dat <- .dat[row_idx, ]
-    # browser()
-    # ## seems like proto_basis1d_distribution isn't working atleast as static ggplot2
-    # debugonce(proto_basis1d_distribution)
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
-        aes_args = list(color = .pred_clas, fill = .pred_clas)) +
+        aes_args = list(color = .pred_clas, fill = .pred_clas),
+        row_index = foreground_index) +
       spinifex::proto_basis1d(manip_col = "black") +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
@@ -409,13 +412,14 @@ radial_cheem_ggtour <- function(
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"),
         mark_initial = FALSE) +
       proto_basis1d_distribution(
-        cheem_ls, group_by = .pred_clas,
+        cheem_ls$attr_df, group_by = .pred_clas,
         position = "top1d",
         shape = pcp_shape, ## '|' for gganimate/ggplot
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs,
         comparison_obs = .comp_obs,
-        inc_vars = inc_vars)
+        inc_vars = inc_vars,
+        row_index = row_index)
     ## No frame correlation for a 1D projection
   }
   
@@ -428,22 +432,22 @@ radial_cheem_ggtour <- function(
     
     ## Background:
     proto_bkg <- list()
-    if(sum(!row_idx) > 0L){
-      .dat_bgk       <- .dat[!row_idx, ]
+    if(sum(!row_index) > 0L){
+      .dat_bgk       <- .dat[!row_index, ]
       .dat_doub_bgk  <- rbind(.dat_bgk, .dat_bgk)
       .facet_col_bgk <- rep(c("observed y", "residual"), each = nrow(.dat_bgk))
-      .fixed_y_bgk   <- .fixed_y[c(!row_idx, !row_idx)]
+      .fixed_y_bgk   <- .fixed_y[c(!row_index, !row_index)]
     }
     .doub_prim_obs <- c(.prim_obs, .n + .prim_obs) ## MUST BE NUMERIC FOR OTHER...
     .doub_comp_obs <- c(.comp_obs, .n + .comp_obs) ## MUST BE NUMERIC FOR OTHER...
     ## Foreground:
-    .dat_fore       <- .dat[row_idx, ]
+    .dat_fore       <- .dat[row_index, ]
     .dat_doub_fore  <- rbind(.dat_fore, .dat_fore)
     .facet_col_fore <- rep(c("observed y", "residual"), each = nrow(.dat_fore))
-    .fixed_y_fore   <- .fixed_y[c(row_idx, row_idx)]
+    .fixed_y_fore   <- .fixed_y[c(row_index, row_index)]
     
-    if(sum(!row_idx) > 0L){
-      messgae("proto_point.1d_fix_y has data arg, which won't play nice with facet_wrap_tour.
+    if(sum(!row_index) > 0L){
+      message("proto_point.1d_fix_y has data arg, which won't play nice with facet_wrap_tour.
               may need to go to a row_index arg to accomadate.")
       browser()
     }
@@ -452,7 +456,7 @@ radial_cheem_ggtour <- function(
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection, 1D",
                     y = "_basis_ | observed y | residual")
-    if(sum(!row_idx) > 0L)
+    if(sum(!row_index) > 0L)
       ggt <- ggt + spinifex::proto_point.1d_fix_y( ## cannot be made before ggtour()
         aes_args = list(shape = .pred_clas),
         identity_args = list(alpha = .alpha, color = "grey80"),
@@ -465,7 +469,7 @@ radial_cheem_ggtour <- function(
       fixed_y = .fixed_y_fore) +
       # spinifex::proto_frame_cor(data = .dat_fore) + ## Doesn't know of fixed y...
       proto_basis1d_distribution(
-        cheem_ls, group_by = .pred_clas,
+        cheem_ls$attr_df, group_by = .pred_clas,
         position = "top2d",
         shape = c(142L, 124L), ## '|' for plotly/gganimate.
         do_add_pcp_segments = as.logical(do_add_pcp_segments),

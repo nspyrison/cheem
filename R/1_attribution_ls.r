@@ -128,9 +128,10 @@ local_attr_ls <- function(
   basis_type = c("pca", "olda"), class = NULL, ## class req for olda
   verbose = TRUE, noisy = TRUE
 ){
-  d = 2L
   if(verbose == TRUE)
     tictoc::tic(paste0("local_attr_ls -- ", layer_name))
+  d = 2L
+  basis_type <- match.arg(basis_type)
   
   ## RF model -----
   .is_y_disc <- is_discrete(y)
@@ -244,10 +245,12 @@ format_ls <- function(
   keep_model = FALSE,
   verbose = TRUE
 ){
+  if(verbose == TRUE) tictoc::tic("format_ls")
   layer_name <- "SHAP"
   d = 2L
   rownum <- V2 <- projection_nm <- NULL
-  if(verbose == TRUE) tictoc::tic("format_ls")
+  basis_type <- match.arg(basis_type)
+
   ## Init with data layer,
   sec_global_view_data_sp <- system.time({ ## Init with data layer.
     .mod  <- local_attr_ls$model

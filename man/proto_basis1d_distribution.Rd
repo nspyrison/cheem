@@ -5,19 +5,18 @@
 \title{Adds the distribution of the row local attributions to a ggtour}
 \usage{
 proto_basis1d_distribution(
-  cheem_ls,
+  attr_df,
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "top2d", "floor2d", "off"),
   shape = c(142, 124),
   do_add_pcp_segments = TRUE,
-  primary_obs = NULL,
-  comparison_obs = NULL,
-  inc_vars = TRUE
+  primary_obs = 1,
+  comparison_obs = 2,
+  inc_vars = NULL,
+  row_index = NULL
 )
 }
 \arguments{
-\item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
-
 \item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
 \item{position}{The position for the basis, one of: c("top1d", "floor1d",
@@ -37,6 +36,8 @@ as a dashed line.}
 
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
+
+\item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
 }
 \description{
 Adds the distribution of orthonormalized row values of
@@ -45,21 +46,22 @@ use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 library(cheem)
-set.dir(~)
-.cheem_ls <- readRDS(here::here("inst/shiny_apps/cheem_initial/data//1preprocess_penguins.rds"))
-dat <- .cheem_ls$decode_df[, 8:11]
-clas <- .cheem_ls$decode_df$class
-attr_df <- .cheem_ls$attr_df[1:nrow(dat), -5]
-bas <- basis_local_attribution(attr_df, nrow(dat))
-mv <- manip_var_of(bas) ## Warning is fine.
+X    <- tourr::flea[, 1:6]
+clas <- tourr::flea$species
+Y    <- as.integer(clas)
 
-## 1D case:
+.cheem_ls <- cheem_ls(
+  x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+
+bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+mv <- manip_var_of(bas)
 mt_path <- manual_tour(bas, mv)
 
-ggt <- ggtour(mt_path, dat) +
+X_scl <- spinifex::scale_sd(X)
+ggt <- ggtour(mt_path, X_scl, angle = .3) +
   proto_density(aes_args = list(color = clas, fill = clas)) +
   proto_basis1d() +
-  proto_basis1d_distribution(attr_df, group_by = clas)
+  proto_basis1d_distribution(.cheem_ls$attr_df, group_by = clas)
 \dontrun{
 animate_plotly(ggt)
 }

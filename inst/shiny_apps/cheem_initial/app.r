@@ -38,7 +38,7 @@ server <- function(input, output, session){
       primary_obs    <- 1L
       comparison_obs <- 2L
     }
-      
+    
     .n_max <- 1e6
     updateNumericInput(
       session, "primary_obs",
@@ -73,20 +73,22 @@ server <- function(input, output, session){
   })
   #load_ls_d <- load_ls %>%  debounce(millis = 100L)
  
+  
+  
   ## PIMARY & COMPARISON OBS, & thier debounced versions
   #### debounce; try to reduce multiple renders as a 3 digit number is typed
   primary_obs <- reactive({
     req(input$primary_obs)
     input$primary_obs
   })
-  primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
+  #primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
   comparison_obs <- reactive({
     req(input$comparison_obs)
     input$comparison_obs
   })
-  comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
+  #comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
   
-  ## BASIS FROM local explanation of promary obs
+  ## Basis; the local explanation's attributon of the primary obs
   bas <- reactive({
     attr_df  <- req(load_ls()$attr_df)
     inc_vars <- req(input$inc_vars)
@@ -100,13 +102,20 @@ server <- function(input, output, session){
       attr_df[, inc_vars], prim_obs))
   })
   
+  sel_rownums <- reactive({
+    ## Row NUMBER index of data selected in linked global view
+    .d <- plotly::event_data("plotly_selected")
+    if(is.null(.d)) return(TRUE)
+    return(.d$key)
+  })
+  
   ## Observers: updating inputs in the ui -----
   
   ## UPDATE MANIPULATION VARIABLE INPUT
   observeEvent({
     bas()
     primary_obs()
-  },{
+  }, {
     bas       <- req(bas())
     opts      <- req(input$inc_vars)
     .prim_obs <- req(primary_obs())
@@ -128,8 +137,7 @@ server <- function(input, output, session){
   ## Outputs -----
   output$desc_rows <- renderText({
     dat <- req(input$dat_char)
-    if(dat %in% expected_data_char == FALSE)
-      stop("data string not matched.")
+    
     ## Load data:
     if(dat == "toy classification"){
       he <- h3("Simulated triangle vertices")
@@ -179,133 +187,45 @@ server <- function(input, output, session){
   outputOptions(output, "linked_global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
-  
-  ### RESIDUAL PLOT, wants to become a residual tour
-  output$residual_plot <- plotly::renderPlotly({
-    cheem_ls  <- req(load_ls())
-    prim_obs  <- req(primary_obs())
-    comp_obs  <- req(comparison_obs())
-    decode_df <- cheem_ls$decode_df
-    prob_type <- cheem_ls$problem_type
-    
-    ## Index of selected data:
-    .d <- plotly::event_data("plotly_selected") ## selected in global view
-    .idx_rownums <- TRUE
-    if(is.null(.d) == FALSE)
-      .idx_rownums <- decode_df$rownum %in% c(.d$key, prim_obs, comp_obs)
-    
-    ## Filter to rownum and select columns
-    active_df <- decode_df[.idx_rownums, ]
-    bkg_df <- decode_df[!.idx_rownums, ]
-    .alpha <- logistic_tform(nrow(decode_df), mid_pt = 500L)
-    .pred_clas <- as.factor(FALSE) ## dummy pred_clas for regression
-    
-    ## Red misclassified points, if applicable
-    pts_highlight <- list()
-    if(prob_type == "classification"){
-      .pred_clas <- active_df$predicted_class
-      .idx_misclas <- which(active_df$is_misclassified == TRUE)
-      if(sum(.idx_misclas) > 0L)
-        pts_highlight <- c(
-          pts_highlight,
-          ggplot2::geom_point(
-            ggplot2::aes(prediction, residual), active_df[.idx_misclas, ],
-            color = "red", fill = NA, shape = 21L, size = 3L)
-        )
-    }
-    ## Comp point
-    if(is.null(comp_obs) == FALSE)
-      pts_highlight <- c(
-        pts_highlight,
-        geom_point(aes(prediction, residual),
-          data = active_df[active_df$rownum == comp_obs, ],
-          color = "black", size = 3L, shape = 4L, alpha = 0.6))
-    ## Primary point
-    if(is.null(prim_obs) == FALSE)
-      pts_highlight <- c(
-        pts_highlight,
-        geom_point(aes(prediction, residual),
-          data = active_df[active_df$rownum == prim_obs, ],
-          color = "black", size = 5L, shape = 8L, alpha = 0.8))
-    bkg_pts <- NULL
-    if(nrow(bkg_df) > 0L)
-      bkg_pts <- geom_point(aes(prediction, residual, shape = .pred_clas),
-                            bkg_df, color = "grey80", alpha = .alpha)
-    
-    ## Plot
-    gg <- ggplot() +
-      ## Not selected background
-      bkg_pts +
-      ## Selected_df
-      geom_point(aes(prediction, residual, label = tooltip,
-                     color = .pred_clas, shape = .pred_clas),
-                 active_df, alpha = .alpha) +
-      pts_highlight +
-      theme_bw() +
-      scale_color_brewer(palette = "Dark2") +
-      labs(x = "Prediction", y = "Residual")
-    
-    ## Return
-    plotly::ggplotly(p = gg, tooltip = "label") %>%
-      ## Remove button bar and zoom box
-      plotly::config(displayModeBar = FALSE,
-                     modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d")) %>%
-      ## Remove legends and axis lines
-      plotly::layout(showlegend = FALSE, dragmode = FALSE,
-                     xaxis = list(scaleanchor = "y", scalaratio = 1L))
-  })
-  outputOptions(output, "residual_plot",
-                suspendWhenHidden = FALSE, priority = -300L) ## Eager evaluation
-  
-
-  ## TOUR, PLOTLY VERSION: too many issues trying .mp4 gganimate
+  ## Plotly tour
   output$cheem_tour_plotly <- plotly::renderPlotly({
-    bas      <- req(bas())
-    cheem_ls <- req(load_ls())
-    prim_obs <- req(primary_obs())
-    comp_obs <- req(comparison_obs())
-    mv_nm    <- req(input$manip_var_nm)
-    add_pcp  <- req(input$do_add_pcp_segments)
-    inc_vars <- req(input$inc_vars)
-    prob_type <- cheem_ls$problem_type
+    bas        <- req(bas())
+    cheem_ls   <- req(load_ls())
+    prim_obs   <- req(primary_obs())
+    comp_obs   <- req(comparison_obs())
+    mv_nm      <- req(input$manip_var_nm)
+    add_pcp    <- req(input$do_add_pcp_segments)
+    inc_vars   <- req(input$inc_vars)
+    idx_rownum <- req(sel_rownums()) ## NULL returns TRUE
     
     if(mv_nm %in% rownames(bas) == FALSE){
-      message(paste0(
-        "output$cheem_tour: input$manip_var_nm = '", mv_nm,
-        "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
+      message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
+                     "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
     
-    ## Filter to only selected data:
-    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    if(is.null(.d) == FALSE){
-      .idx_rownums <- cheem_ls$decode_df$rownum %in% .d$key
-    }else
-      .idx_rownums <- TRUE
-    
+    browser()
+    debugonce(radial_cheem_ggtour)
     ggt <- radial_cheem_ggtour(
       cheem_ls, bas, mv_nm,
       prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,
-      row_idx = .idx_rownums, inc_vars = inc_vars)
+      row_index = idx_rownum, inc_vars = inc_vars)
     
-    # browser()
-    # debugonce(radial_cheem_ggtour)
-    # debugonce(animate_plotly)
-    spinifex::filmstrip(ggt)
-    spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## faster, but more issues than plotly...
+    spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)
   
   ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
-    .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-    if(is.null(.d)) return(NULL)
+    idx_rownum <- req(sel_rownums()) ## NULL returns TRUE
+    if(is.null(idx_rownum)) return(NULL)
+    
     .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(
       .df, function(c) if(is.numeric(c)) round(c, 2L) else c))
-    return(DT::datatable(.df_r[.df_r$rownum %in% .d$key, ], rownames = FALSE))
+    return(DT::datatable(.df_r[idx_rownum,, drop = FALSE], rownames = FALSE))
   })
   outputOptions(output, "selected_df",
                 suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation

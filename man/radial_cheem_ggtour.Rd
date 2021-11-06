@@ -9,11 +9,11 @@ radial_cheem_ggtour(
   basis,
   mv_name,
   primary_obs,
-  comparison_obs = NULL,
+  comparison_obs,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
   angle = 0.2,
-  row_idx = TRUE,
+  row_index = NULL,
   inc_vars = NULL
 )
 }
@@ -41,7 +41,7 @@ line segments to the basis display.}
 
 \item{angle}{The step size between interpolated frames, in radians.}
 
-\item{row_idx}{Numeric index of selected observations. Logial
+\item{row_index}{Numeric index of selected observations.
 Defaults to TRUE; 1:n.}
 
 \item{inc_vars}{A vector of the names of the variables to include in the projection.}
@@ -64,7 +64,8 @@ cheem_ls <- cheem_ls(
   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 
 bas <- basis_local_attribution(cheem_ls$attr_df, rownum = 1)
-ggt <- radial_cheem_ggtour(cheem_ls, basis=bas, mv_name=colnames(X)[1], 
-                           primary_obs=1, comparison_obs=2)
+ggt <- radial_cheem_ggtour(
+  cheem_ls, basis=bas, mv_name=colnames(X)[1],
+  primary_obs=1, comparison_obs=2)
 spinifex::animate_plotly(ggt)
 }

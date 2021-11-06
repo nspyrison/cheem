@@ -44,7 +44,8 @@ Y <- sub$m2.price
 clas <- sub$district
 
 cheem_ls <- cheem_ls(
-  x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
+  x=X, y=Y, class=clas, verbose=T, noisy=T)
 
-linked_global_view(cheem_ls, primary_obs = 1, comparison_obs = 2)
+linked_global_view(
+  cheem_ls, primary_obs = 1, comparison_obs = 2)
 }
