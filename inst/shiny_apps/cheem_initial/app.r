@@ -266,55 +266,7 @@ server <- function(input, output, session){
   outputOptions(output, "residual_plot",
                 suspendWhenHidden = FALSE, priority = -300L) ## Eager evaluation
   
-  
-  # ## TOUR, GGANIMATE VERSION
-  # output$cheem_tour_gganimate <- renderImage({
-  #   req(bas())
-  #   req(load_ls())
-  #   req(input$manip_var_nm)
-  #   req(primary_obs_d())
-  #   req(comparison_obs_d())
-  #   req(input$do_add_pcp_segments)
-  #   load_ls <- load_ls()
-  #   bas <- bas()
-  #   mv_nm <- input$manip_var_nm
-  #   if(mv_nm %in% rownames(bas) == FALSE){
-  #     message(paste0(
-  #       "output$cheem_tour: input$manip_var_nm = '", mv_nm,
-  #       "' wasn't in the basis bas(). Shiny tried to update cheem_tour before valid manip_var_nm was passed..."))
-  #     return(NULL)
-  #   }
-  #   
-  #   ## Filter to only selected data:
-  #   .d <- plotly::event_data("plotly_selected") ## What plotly sees as selected
-  #   .idx_rownums <- TRUE
-  #   if(is.null(.d) == FALSE)
-  #     .idx_rownums <- load_ls$decode_df$rownum %in% .d$key
-  #   
-  #   ## Now make the animation
-  #   ggt <- radial_cheem_ggtour(
-  #     load_ls, bas, mv_nm,
-  #     primary_obs(), comparison_obs(),
-  #     do_add_pcp_segments = as.logical(input$do_add_pcp_segments),
-  #     row_idx = .idx_rownums, inc_vars = input$inc_vars,
-  #     angle = .2)
-  #   ## may improve render time OF PLOTLY:
-  #   # %>% toWebGL() ?
-  #   # %>% partial_bundle() ?
-  #   
-  #   ## A temp file to save the output, will be removed later in renderImage
-  #   outfile <- tempfile(fileext = ".mp4")
-  #   animate_gganimate(
-  #     ggt,
-  #     # height = 720L, #width = 4,
-  #     # units = "px", ## "px", "in", "cm", or "mm."
-  #     #res = 300L, ## resolution (dpi)
-  #     render = gganimate::av_renderer(outfile))
-  #   ## Return a list containing the filename
-  #   list(src = outfile, contentType = "image/mp4")
-  # }, deleteFile = TRUE)
-  # outputOptions(output, "cheem_tour_gganimate", ## LAZY eval, do last
-  #               suspendWhenHidden = TRUE, priority = -9999L)
+
   ## TOUR, PLOTLY VERSION: too many issues trying .mp4 gganimate
   output$cheem_tour_plotly <- plotly::renderPlotly({
     bas      <- req(bas())

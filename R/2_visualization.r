@@ -213,8 +213,8 @@ proto_basis1d_distribution <- function(
 #' cheem_ls <- cheem_ls(
 #'   x=X, y=Y, n_layers=1, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
-#' linked_global_view(cheem_ls, primary_obs = 1, comparison_obs = 2)
-##TODO: example is missing comp obs; x and shap */x
+#' linked_global_view(
+#'   cheem_ls, primary_obs = 1, comparison_obs = 2)
 linked_global_view <- function(
   cheem_ls,
   primary_obs = NULL,

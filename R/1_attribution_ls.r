@@ -195,8 +195,7 @@ local_attr_ls <- function(
       .plot_clas <- .pred_clas else .plot_clas <- class
     .m <- gc()
     .global_view_df <- global_view_1sp(
-      .attr_df, y, basis_type, .plot_clas,
-      layer_name = layer_name)
+      .attr_df, y, basis_type, .plot_clas, layer_name = layer_name)
   })[3L]
   
   ## $time_df, Execution time -----
@@ -448,6 +447,13 @@ treeshap_df <- function(randomForest_model, data){
   attr(ret, "data") <- .tshap_ls[[2L]] ## Also a data.frame
   return(ret)
 }
+
+
+
+
+default_rf <- 
+
+
 
 
 if(F){ ## THERORETICAL DEV -----

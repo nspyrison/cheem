@@ -97,22 +97,10 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Longer-dashed and dotted lines: location of primary & comparison observations respectively (previously '*'/'x')."),
-  # shiny::imageOutput("cheem_tour_gganimate",
-  #                    width = "100%", height = "720px")
-  fluidRow(
-    ## Plotly, .html widget, animated radial tour:
-    column(width = 8L,
-           plotly::plotlyOutput(
-             "cheem_tour_plotly",
-             height = "600px", width = "1440px") %>%
-             shinycssloaders::withSpinner(type = 8L)
-    ),
-    # column(width = 4L,
-    #        plotly::plotlyOutput("residual_plot",
-    #                             height = "400px", width = "400px") %>%
-    #          shinycssloaders::withSpinner(type = 8L)
-    # )
-  ), ## close fluidRow
+  plotly::plotlyOutput(
+    "cheem_tour_plotly",
+    height = "600px", width = "1440px") %>%
+    shinycssloaders::withSpinner(type = 8L),
   br(), br(), br(), br()
 ) ## Assign tab1_cheem
 
