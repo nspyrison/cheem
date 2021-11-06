@@ -58,7 +58,8 @@ server <- function(input, output, session){
     }else if(dat == "diabetes (wide)"){ ret <- diabetes_wide_ls
     }else if(dat == "diabetes (long)"){ ret <- diabetes_long_ls
     }else{ ## User uploaded data
-      tryCatch(ret <- readRDS(input$in_cheem_ls$datapath),
+      file_path <- req(input$in_cheem_ls$datapath)
+      tryCatch(ret <- readRDS(file_path),
                error = function(e) stop(safeError(e)))
     }
     
@@ -108,26 +109,16 @@ server <- function(input, output, session){
   },{
     bas       <- req(bas())
     opts      <- req(input$inc_vars)
-    cheem_ls  <- req(load_ls())
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
-    attr_df   <- cheem_ls$attr_df
-    clas      <- cheem_ls$decode_df$class
-    prob_type <- cheem_ls$problem_type
+    attr_df   <- req(load_ls())$attr_df
     
-    ## Select var with largest diff of median values between classes.
-    if(prob_type == "classification"){
-      expect_bas <- apply(
-        attr_df[clas == clas[.prim_obs], opts], 2L, median) %>%
-        matrix(ncol = 1L, dimnames = list(opts, "SHAP"))
-      .diff <- abs(expect_bas - bas)
-      sel <- opts[which(.diff == max(.diff))]
-    }else if(prob_type == "regression"){
-      prim_bas <- attr_df[.prim_obs,, drop = FALSE]
-      comp_bas <- attr_df[.comp_obs,, drop = FALSE]
-      .diff <- abs(comp_bas - prim_bas)
-      sel <- opts[which(.diff == max(.diff))]
-    } else stop("update manipulation variable: problem type not fit.")
+    ## Select var with largest difference between primary and comparison obs.
+    prim_bas <- attr_df[.prim_obs,, drop = FALSE]
+    comp_bas <- attr_df[.comp_obs,, drop = FALSE]
+    .diff <- abs(comp_bas - prim_bas)
+    sel <- opts[which(.diff == max(.diff))]
+    
     updateSelectInput(session, "manip_var_nm",
                       label = "Manipulation variable:",
                       choices  = opts,
