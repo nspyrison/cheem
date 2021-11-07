@@ -51,10 +51,10 @@ basis_local_attribution <- function(
 #' @export
 #' @examples
 #' library(cheem)
+#' ## Classification:
 #' X    <- tourr::flea[, 1:6]
 #' clas <- tourr::flea$species
 #' Y    <- as.integer(clas)
-#' 
 #' .cheem_ls <- cheem_ls(
 #'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
@@ -70,6 +70,21 @@ basis_local_attribution <- function(
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
+#' 
+#' ## Regression:
+#' sub <- DALEX::apartments[1:200, 1:6]
+#' X <- sub[, 2:5]
+#' Y <- sub$m2.price
+#' clas <- sub$district
+#' 
+#' .cheem_ls <- cheem_ls(
+#'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' 
+#' bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+#' ggt <- radial_cheem_ggtour(
+#'   .cheem_ls, basis=bas, mv_name=colnames(X)[1],
+#'   primary_obs=1, comparison_obs=2)
+#' spinifex::animate_plotly(ggt)
 proto_basis1d_distribution <- function(
   attr_df, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
@@ -93,8 +108,10 @@ proto_basis1d_distribution <- function(
   if(position == "off") return()
   
   ## Subset rows then columns
-  if(is.null(row_index) == FALSE)
-    attr_df <- attr_df[c(row_index, primary_obs, comparison_obs), ]
+  if(is.null(row_index) == FALSE){
+    attr_df  <- attr_df[ c(row_index, primary_obs, comparison_obs), ]
+    group_by <- group_by[c(row_index, primary_obs, comparison_obs)]
+  }
   if(is.null(inc_vars) == FALSE)
     attr_df <- attr_df[, colnames(attr_df) %in% inc_vars]
   .n <- nrow(attr_df)
@@ -105,6 +122,7 @@ proto_basis1d_distribution <- function(
     row_bas <- basis_local_attribution(attr_df, i)
     attr_df[i, ] <<- tourr::orthonormalise(row_bas)
   })
+  
   ## Pivot the attr values (columns) longer to rows.
   attr_df$rownum <- 1L:.n
   attr_df$group_by <- as.factor(group_by)
@@ -141,7 +159,7 @@ proto_basis1d_distribution <- function(
   
   .alpha <- logistic_tform(.n) / 15L
   ## Basis/attribution distribution of the rows of the attr_df
-  rug_distr <- list(suppressWarnings(ggplot2::geom_point(
+  ret <- list(suppressWarnings(ggplot2::geom_point(
     ggplot2::aes(x, y, color = group_by, tooltip = rownum),
     .df_basis_distr, shape = shape, alpha = .alpha, size = 1.5)))
   
@@ -178,12 +196,12 @@ proto_basis1d_distribution <- function(
           ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
           .df_pcp[.df_pcp$rownum == primary_obs, ],
           color = "black", size = 1L, alpha = .8, linetype = 2L)))
-    ## Return
-    return(c(rug_distr, pcp_lines))
+    ## ret is the rug distribution atm
+    ret <- c(ret, pcp_lines)
   }
   
-  ## Return proto
-  return(rug_distr)
+  ## Return
+  return(ret)
 }
 
 
@@ -228,22 +246,55 @@ linked_global_view <- function(
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
-  .alpha <- logistic_tform(nrow(cheem_ls$decode_df), mid_pt = 500L)
-  global_view_df <- cheem_ls$global_view_df ## Init
+  ## Initialize
+  global_view_df <- cheem_ls$global_view_df 
   is_classification <- cheem_ls$problem_type == "classification"
-  pred_clas <- as.factor(FALSE) ## If regression; dummy pred_clas
-  if(is_classification == TRUE) pred_clas <-
-    cheem_ls$decode_df$predicted_class %>%
-    rep_len(nrow(global_view_df)) %>%
-    as.factor()
+  ## Aesthetics
+  .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
+  if(is_classification == TRUE){
+    global_view_df$pred_clas <- global_view_df$color <-
+      cheem_ls$decode_df$predicted_class %>%
+      rep_len(nrow(global_view_df)) %>%
+      as.factor()
+  }  
+  if(is_classification == FALSE){ ## Regression
+    global_view_df$pred_clas <- as.factor(FALSE) ## dummy pred_clas
+    global_view_df$color <- cheem_ls$decode_df$residual %>%
+      rep_len(nrow(global_view_df))
+  }
   
+  ## Get the bases of the global view, map them
+  .bas_data <- cbind(
+    as.data.frame(cheem_ls$basis_ls$data_basis), layer_name = "data")
+  .map_to_data <- global_view_df[global_view_df$layer_name == "data", c("V1", "V2")]
+  .map_to_data[, 1L] <-  .map_to_data[, 1L] / 3L
+  .bas_attr <- cbind(
+    as.data.frame(cheem_ls$basis_ls$attribution_basis), layer_name = "SHAP")
+  .map_to_attr <- global_view_df[global_view_df$layer_name == "SHAP", c("V1", "V2")]
+  .map_to_attr[, 1L] <- .map_to_attr[, 1L] / 3L
+  
+  ## Proto for points
+  if(is_classification == TRUE)
+    pts_main <- list(
+      suppressWarnings(ggplot2::geom_point(
+        ggplot2::aes(color = color, shape = pred_clas, 
+                     tooltip = tooltip), alpha = .alpha)),
+      ggplot2::scale_color_brewer(palette = "Dark2"))
+  if(is_classification == FALSE)
+    pts_main <- list(
+      suppressWarnings(ggplot2::geom_point(
+        ggplot2::aes(color = color, shape = pred_clas,
+                     tooltip = tooltip),  alpha = .alpha)),
+      scale_colour_gradient2(trans = "reverse"))
+  
+  ## Proto for highlighted points
   pts_highlight <- list()
   ## Red misclassified points, if present
   if(is_classification == TRUE){
     .rn_misclass <- which(cheem_ls$decode_df$is_misclassified == TRUE)
     .idx_misclas <- global_view_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0L){
-      .df <- global_view_df[.idx_misclas, ] # %>% highlight_key(~rownum)
+      .df <- global_view_df[.idx_misclas, ]
       pts_highlight <- c(
         pts_highlight,
         ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
@@ -260,7 +311,7 @@ linked_global_view <- function(
       pts_highlight <- c(
         pts_highlight,
         ## Highlight comparison obs
-        ggplot2::geom_point(ggplot2::aes(V1, V2), #, color = pred_clas[.idx_comp]),
+        ggplot2::geom_point(ggplot2::aes(V1, V2),
                             .df, size = 3L, shape = 4L, color = "black")
       )
     }
@@ -269,39 +320,28 @@ linked_global_view <- function(
   if(is.null(primary_obs) == FALSE){
     .idx_shap <- global_view_df$rownum == primary_obs
     if(sum(.idx_shap) > 0L){
-      .df <- global_view_df[.idx_shap, ] # %>% highlight_key(~rownum)
+      .df <- global_view_df[.idx_shap, ]
       pts_highlight <- c(
         pts_highlight,
-        ggplot2::geom_point(ggplot2::aes(V1, V2),#, color = pred_clas[.idx_shap]),
+        ggplot2::geom_point(ggplot2::aes(V1, V2),
                             .df, size = 5L, shape = 8L, color = "black")
       )
     }
   }
   
-  .bas_data <- cbind(
-    as.data.frame(cheem_ls$basis_ls$data_basis), layer_name = "data")
-  .map_to_data <- global_view_df[global_view_df$layer_name == "data", c("V1", "V2")]
-  .map_to_data[,1L] <-  .map_to_data[,1L] / 3L
-  .bas_attr <- cbind(
-    as.data.frame(cheem_ls$basis_ls$attribution_basis), layer_name = "SHAP")
-  .map_to_attr <- global_view_df[global_view_df$layer_name == "SHAP", c("V1", "V2")]
-  .map_to_attr[,1L] <- .map_to_attr[,1L] / 3L
-  ## ggplot
-  browser()
+  ## Visualize
   gg <- ggplot2::ggplot(
     data = plotly::highlight_key(global_view_df, ~rownum),
     mapping = ggplot2::aes(V1, V2)) +
-    suppressWarnings(ggplot2::geom_point(
-      ggplot2::aes(V1, V2, color = pred_clas, shape = pred_clas,
-                   tooltip = tooltip), alpha = .alpha)) +
+    pts_main +
     pts_highlight +
     spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft") +
     spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft") +
-    ggplot2::facet_grid(rows = ggplot2::vars(projection_nm),
-                        cols = ggplot2::vars(layer_name)) +#, scales = "free") +
+    ggplot2::coord_fixed() +
+    ggplot2::facet_grid(#rows = ggplot2::vars(projection_nm),
+                        cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
     ggplot2::labs(x = "PC1", y = "PC2") +
-    ggplot2::scale_color_brewer(palette = "Dark2") +
     ggplot2::theme(axis.text  = ggplot2::element_blank(),
                    axis.ticks = ggplot2::element_blank(),
                    legend.position = "off")
@@ -344,17 +384,18 @@ linked_global_view <- function(
 #' the data- and attribution- spaces.
 #' @export
 #' @examples
+#' library(cheem)
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' X <- sub[, 2:5]
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' cheem_ls <- cheem_ls(
+#' .cheem_ls <- cheem_ls(
 #'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
-#' bas <- basis_local_attribution(cheem_ls$attr_df, rownum = 1)
+#' bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
 #' ggt <- radial_cheem_ggtour(
-#'   cheem_ls, basis=bas, mv_name=colnames(X)[1],
+#'   .cheem_ls, basis=bas, mv_name=colnames(X)[1],
 #'   primary_obs=1, comparison_obs=2)
 #' spinifex::animate_plotly(ggt)
 radial_cheem_ggtour <- function(
@@ -370,25 +411,25 @@ radial_cheem_ggtour <- function(
       stop("radial_cheem_ggtour: sum of row_index was 0.")
   decode_df <- cheem_ls$decode_df
   .n <- nrow(decode_df)
-  ## Initialization Y on basis
-  .y <- decode_df$y %>% matrix(ncol = 1L)
   if(is.null(inc_vars) == TRUE)
     inc_vars <- colnames(cheem_ls$attr_df)
   .col_idx <- colnames(decode_df) %in% inc_vars
-  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
+  if(is.null(row_index)) row_index <- 1L:.n
+  .prim_obs <- primary_obs    # Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
+  .comp_obs <- comparison_obs # Don't coerce to logical index.
   
+  ## Subset columns and scalce plot data
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd()
   ## Change row_index from numeric to logical if needed and replicate
-  .prim_obs <- primary_obs    # proto_basis1d_distribution EXPECTS NUMERIC INDEX;
-  .comp_obs <- comparison_obs # don't coerce to logical index.
-  foreground_index <- as_logical_index(c(row_index, .prim_obs, .comp_obs), .n)
+  sel_index <- as_logical_index(
+    c(row_index, .prim_obs, .comp_obs), nrow(decode_df))
   
   ## Problem type: classification or regression?
   .prob_type <- cheem_ls$problem_type ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- decode_df$predicted_class
-  .alpha <- logistic_tform(nrow(decode_df), mid_pt = 500L)
-  
+  .alpha <- logistic_tform(nrow(decode_df))
   ## Manual (radial) tour 1d
   .mv <- which(colnames(cheem_ls$attr_df) == mv_name)
   .mt_path <- spinifex::manual_tour(basis, manip_var = .mv)
@@ -399,7 +440,7 @@ radial_cheem_ggtour <- function(
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
-        row_index = foreground_index) +
+        row_index = sel_index) +
       spinifex::proto_basis1d(manip_col = "black") +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
@@ -433,50 +474,53 @@ radial_cheem_ggtour <- function(
     
     ## Background:
     proto_bkg <- list()
-    if(sum(!row_index) > 0L){
-      .dat_bgk       <- .dat[!row_index, ]
-      .dat_doub_bgk  <- rbind(.dat_bgk, .dat_bgk)
-      .facet_col_bgk <- rep(c("observed y", "residual"), each = nrow(.dat_bgk))
-      .fixed_y_bgk   <- .fixed_y[c(!row_index, !row_index)]
+    if(sum(!sel_index) > 0L){
+      .dat_bgk   <- .dat[!sel_index, ]
+      .dat_bgk   <- rbind(.dat_bgk, .dat_bgk)
+      .facet_bgk <- rep(c("observed y", "residual"), each = nrow(.dat_bgk))
+      .idx_bkg   <- c(!sel_index, !sel_index)
+      .fix_y_bgk <- .fixed_y[.idx_bkg]
     }
     .doub_prim_obs <- c(.prim_obs, .n + .prim_obs) ## MUST BE NUMERIC FOR OTHER...
     .doub_comp_obs <- c(.comp_obs, .n + .comp_obs) ## MUST BE NUMERIC FOR OTHER...
     ## Foreground:
-    .dat_fore       <- .dat[row_index, ]
-    .dat_doub_fore  <- rbind(.dat_fore, .dat_fore)
-    .facet_col_fore <- rep(c("observed y", "residual"), each = nrow(.dat_fore))
-    .fixed_y_fore   <- .fixed_y[c(row_index, row_index)]
+    .dat_fore   <- .dat[sel_index, ]
+    .dat_fore   <- rbind(.dat_fore, .dat_fore)
+    .facet_fore <- rep(c("observed y", "residual"), each = nrow(.dat_fore))
+    .idx_fore   <- c(sel_index, sel_index)
+    .fix_y_fore <- .fixed_y[.idx_fore]
+    ## Facet indexes:
+    .idx_obs_y  <- c(sel_index, rep(FALSE, .n))
+    .idx_resid  <- c(rep(FALSE, .n), sel_index)
     
-    if(sum(!row_index) > 0L){
-      message("proto_point.1d_fix_y has data arg, which won't play nice with facet_wrap_tour.
-              may need to go to a row_index arg to accomadate.")
-      browser()
-    }
-    ggt <- spinifex::ggtour(.mt_path, .dat_doub_fore, angle = angle) +
-      spinifex::facet_wrap_tour(facet_var = .facet_col_fore, nrow = 1L) +
+    ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
+      spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
       # Plotly can't handle text rotation in geom_text/annotate.
-      ggplot2::labs(x = "Attribution projection, 1D",
-                    y = "_basis_ | observed y | residual")
-    if(sum(!row_index) > 0L)
+      ggplot2::labs(x = "Attribution projection",
+                    y = "observed y | residual")
+    ## Background
+    if(sum(!sel_index) > 0L)
       ggt <- ggt + spinifex::proto_point.1d_fix_y( ## cannot be made before ggtour()
         aes_args = list(shape = .pred_clas),
         identity_args = list(alpha = .alpha, color = "grey80"),
-        data = .dat_doub_bgk,
-        fixed_y = .fixed_y_bgk)
+        row_index = .idx_bkg,
+        fixed_y = .fix_y_bgk)
     ## Foreground
     ggt <- ggt + spinifex::proto_point.1d_fix_y( ## Wants to come early as it appends data$y
       aes_args = list(color = .pred_clas, shape = .pred_clas),
       identity_args = list(alpha = .alpha),
-      fixed_y = .fixed_y_fore) +
-      # spinifex::proto_frame_cor(data = .dat_fore) + ## Doesn't know of fixed y...
+      row_index = .idx_fore,
+      fixed_y = .fix_y_fore) +
+      spinifex::proto_frame_cor2(row_index = .idx_obs_y) +
+      spinifex::proto_frame_cor2(row_index = .idx_resid) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, group_by = .pred_clas,
-        position = "top2d",
+        position = "floor2d",
         shape = c(142L, 124L), ## '|' for plotly/gganimate.
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs,
         comparison_obs = comparison_obs) +
-      spinifex::proto_basis1d(position = "top2d", manip_col = "black") +
+      spinifex::proto_basis1d(position = "floor2d", manip_col = "black") +
       ## Highlight comparison obs
       spinifex::proto_highlight(
         row_index = .doub_comp_obs,

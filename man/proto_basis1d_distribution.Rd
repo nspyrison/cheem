@@ -46,10 +46,10 @@ use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 library(cheem)
+## Classification:
 X    <- tourr::flea[, 1:6]
 clas <- tourr::flea$species
 Y    <- as.integer(clas)
-
 .cheem_ls <- cheem_ls(
   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 
@@ -65,5 +65,20 @@ ggt <- ggtour(mt_path, X_scl, angle = .3) +
 \dontrun{
 animate_plotly(ggt)
 }
+
+## Regression:
+sub <- DALEX::apartments[1:200, 1:6]
+X <- sub[, 2:5]
+Y <- sub$m2.price
+clas <- sub$district
+
+.cheem_ls <- cheem_ls(
+  x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+
+bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+ggt <- radial_cheem_ggtour(
+  .cheem_ls, basis=bas, mv_name=colnames(X)[1],
+  primary_obs=1, comparison_obs=2)
+spinifex::animate_plotly(ggt)
 }
 \concept{ggtour proto}

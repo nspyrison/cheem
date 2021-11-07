@@ -105,7 +105,7 @@ server <- function(input, output, session){
   sel_rownums <- reactive({
     ## Row NUMBER index of data selected in linked global view
     .d <- plotly::event_data("plotly_selected")
-    if(is.null(.d)) return(TRUE)
+    if(is.null(.d)) return(NULL)
     return(.d$key)
   })
   
@@ -196,7 +196,7 @@ server <- function(input, output, session){
     mv_nm      <- req(input$manip_var_nm)
     add_pcp    <- req(input$do_add_pcp_segments)
     inc_vars   <- req(input$inc_vars)
-    idx_rownum <- req(sel_rownums()) ## NULL returns TRUE
+    idx_rownum <- sel_rownums() ## NULL is no selection
     
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
@@ -204,8 +204,6 @@ server <- function(input, output, session){
       return(NULL)
     }
     
-    browser()
-    debugonce(radial_cheem_ggtour)
     ggt <- radial_cheem_ggtour(
       cheem_ls, bas, mv_nm,
       prim_obs, comp_obs,
@@ -219,7 +217,7 @@ server <- function(input, output, session){
   
   ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
-    idx_rownum <- req(sel_rownums()) ## NULL returns TRUE
+    idx_rownum <- sel_rownums() ## NULL is no selection
     if(is.null(idx_rownum)) return(NULL)
     
     .df <- req(load_ls())$decode_df

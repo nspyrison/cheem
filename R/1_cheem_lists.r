@@ -2,6 +2,109 @@
 # 2) local explanations (language is already generalized)
 ##TODO: Some functions lacking examples.
 
+#' @export
+#' @examples
+#' library(cheem)
+#' sub <- DALEX::apartments[1:200, 1:5]
+#' x <- sub[, 2:5]
+#' y <- sub$m2.price
+#' 
+#' .rf_fit <- default_rf(x, y)
+#' .shap_df <- treeshap_df(.rf_fit, data = xdat)
+default_rf <- function(
+  x, y, verbose = TRUE
+){
+  if(verbose) tictoc::tic("default_rf")
+  .is_y_disc <- is_discrete(y)
+  ## Default hyperparameters, (hp)
+  .hp_mtry <- ifelse(.is_y_disc == TRUE, sqrt(ncol(x)), ncol(x) / 3L)
+  .hp_node <- ifelse(.is_y_disc == TRUE, 1L, 5L)
+  .hp_node <- max(.hp_node, nrow(x) / 500L)
+  .hp_ntree <- 500L / 4L ## A function of the data, atleast not as liberal as the default 500 trees
+  suppressWarnings(
+    ## suppresses: The response has five or fewer unique values.  Are you sure?
+    .mod <- randomForest::randomForest(
+      y~., data = data.frame(y, x),
+      mtry = .hp_mtry, nodesize = .hp_node, ntree = .hp_ntree)
+  )
+  class(.mod) <- rev(class(.mod)) ## Make "radomForest" first
+  .m <- gc()
+  if(verbose) tictoc::toc()
+  return(.mod)
+}
+
+
+#' Extract the full SHAP matrix of a randomForest model
+#' 
+#' Currently internal function, wants to be generalized. 
+#' Extracts a lighter version of the treeshap *.unify of a randomForest.
+#' 
+#' @param randomForest_model The return of fitted randomForest::randomForest 
+#' model.
+#' @param x The explanatory data (without response) to extract the local 
+#' attributions of.
+#' @return A dataframe of the local attributions.
+#' @export
+#' @examples
+#' library(cheem)
+#' sub <- DALEX::apartments[1:200, 1:5]
+#' x <- sub[, 2:5]
+#' y <- sub$m2.price
+#' 
+#' .rf_fit <- default_rf(x, y)
+#' .shap_df <- treeshap_df(.rf_fit, x = x)
+treeshap_df <- function(
+  randomForest_model,
+  x, 
+  verbose = TRUE
+){
+  if(verbose) tictoc::tic("treeshap_df")
+  .rfu <- treeshap::randomForest.unify(randomForest_model, x)
+  .tshap_ls <- treeshap::treeshap(.rfu, x = x)
+  .tshap_ls <- .tshap_ls[c(1L, 4L)]
+  ## Keeping only c(1,4); reduces ~98.5% of the obj size, keep shap values make data attr.
+  ## But, we lose the iBreakdown-like plot of treeshap::plot_contribution when we take this apart.
+  ret <- .tshap_ls[[1L]]
+  
+  attr(ret, "class") <- c("treeshap_df", "data.frame")
+  attr(ret, "data") <- .tshap_ls[[2L]] ## Also a data.frame
+  if(verbose) tictoc::toc()
+  return(ret)
+}
+
+
+model_performance_df <- function(
+  model,
+  x,
+  y,
+  xtest,
+  ytest
+){
+  #### MANUALLY created, different than the performance created by the rf fit...
+  .pred <- stats::predict(model, x)
+  .resid <- y - .pred
+  .rss  <- sum(.resid^2L)
+  .tss  <- sum((y - mean(y))^2L)
+  .mse  <- 1L / nrow(x) * .rss %>% round(2L)
+  .rmse <- sqrt(.mse) %>% round(2L)
+  .rsq  <- 1L - (.rss / .tss) %>% round(4L)
+  .model_performance_df <- data.frame(
+    model_type = class(model)[1L],
+    hp_mtry = .hp_mtry, hp_node = .hp_node, hp_ntree = .hp_ntree,
+    mse = .mse, rmse = .rmse, rsq = .rsq, model_runtime_sec = sec_mod)
+  if(is.null(xtest) == FALSE & is.null(ytest) == FALSE){
+    .rss_t  <- sum((ytest - stats::predict(model, xtest))^2L)
+    .tss_t  <- sum((ytest - mean(ytest))^2L)
+    .mse_t  <- 1L / nrow(x) * .rss_t %>% round(2L)
+    .rmse_t <- sqrt(.mse_t) %>% round(2L)
+    .rsq_t  <- 1L - (.rss_t/.tss_t) %>% round(4L)
+    .model_performance_df$test_mse  <- .mse_t
+    .model_performance_df$test_rmse <- .rmse_t
+    .model_performance_df$test_rsq  <- .rsq_t
+  }
+  row.names(.model_performance_df) <- 1L
+  return(.model_performance_df)
+}
 
 #' Create the plot data.frame for the global linked plotly display.
 #' 
@@ -30,63 +133,28 @@
 global_view_1sp <- function(
   x, y, basis_type = c("pca", "olda"),
   class = NULL, ## class req for olda, add to _df's
-  layer_name
+  layer_name = class(x)[1]
 ){
   d <- 2L ## Fixed display dimensionality
-  tooltip <- 1L:nrow(x)
-  if(is.null(class)) class <- as.factor(FALSE) 
-  
-  # ## maha_vect_of() -----
-  # .lvls <- levels(class)
-  # maha <- NULL
-  # ## For each level of the class, find the in-class maha distances
-  # .m <- sapply(1L:length(.lvls), function(k){
-  #   .sub <- x[class == .lvls[k], ]
-  #   .sub_maha <- stats::mahalanobis(
-  #     .sub, apply(.sub, 2L, stats::median), stats::cov(.sub)) %>%
-  #     matrix(ncol = 1L)
-  #   maha <<- c(maha, .sub_maha)
-  # })
-  # ## [01] normalize (outside class levels)
-  # maha <- spinifex::scale_01(as.matrix(maha, ncol = 1L))
-  # ## Maha quantiles
-  # ### Theoretical chi sq quantiles, x of a QQ plot
-  # .probs <- seq(.001, .999, length.out = nrow(x))
-  # .qx_chisq <- spinifex::scale_01(matrix(stats::qchisq(.probs, df = nrow(x) - 1L)))
-  # ### Sample/obs quantiles, y of a QQ plot
-  # ord <- order(maha)
-  # .qy_obs <- spinifex::scale_01(matrix(maha[ord]))
-  # .AG_kurt_tst_p <- moments::anscombe.test(as.vector(.qy_obs), "less")$p.value
-  # .maha_skew_text <- paste0(
-  #   "  Anscombe-Glynn p-value: ",
-  #   format(signif(.AG_kurt_tst_p, 3L), scientific = TRUE), "\n",
-  #   "    (testing 1-tailed kurtosis)\n",
-  #   "  Kurtosis - 3: ", round(moments::kurtosis(.qy_obs) - 3L, 2L), "\n",
-  #   "  Skew: ", round(moments::skewness(.qy_obs), 2L), "\n")
-  # inv_ord <- order(ord)
-  # .qq_df <- data.frame(
-  #   1L:nrow(x), class, .qx_chisq[inv_ord], .qy_obs[inv_ord], y, layer_name,
-  #   "QQ Mahalanobis distance", tooltip, .maha_skew_text)
-  
-  ## $global_view_df -----
-  x_std <- spinifex::scale_sd(x)
   basis_type <- match.arg(basis_type)
+  if(is.null(class)) class <- as.factor(FALSE)
+  tooltip <- 1L:nrow(x)
+  if(is.null(rownames(x)) == FALSE)
+    if(does_contain_nonnumeric(rownames(x)) == TRUE)
+      tooltip <- paste0("row: ", tooltip, ", ", rownames(x))
+  
+  ## Projection
+  x_std <- spinifex::scale_sd(x)
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
-  proj <- as.matrix(x_std) %*% basis
-  proj <- spinifex::scale_01(proj) %>% as.data.frame()
+  proj <- x_std %*% basis %>% as.data.frame()
+  #proj <- spinifex::scale_01(proj) %>% as.data.frame()
   
-  ## Column bind wider, order by rownum
-  .global_view_df <- cbind(
-    1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
-  ## Row bind longer, adding QQ maha, and kurtosis info.
-  colnames(.global_view_df) <- #colnames(.qq_df) <-
-    c("rownum", "class", paste0("V", 1L:d), "y",
-      "layer_name", "projection_nm", "tooltip", "ggtext")
-  
-  ## 1 space's global view with attached basis
-  ret <- .global_view_df #rbind(.global_view_df, .qq_df)
+  ## Column bind wide
+  ret <- cbind(1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
+  colnames(ret) <- c("rownum", "class", paste0("V", 1L:d), "y",
+                     "layer_name", "projection_nm", "tooltip", "ggtext")
   attr(ret, paste0(basis_type, " basis of ", layer_name)) <- basis
   return(ret)
 }
@@ -104,7 +172,8 @@ global_view_1sp <- function(
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used.
 #' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca".
+#' attribution space from. Expects "pca" or "olda" (requires `clas`).
+#'  Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
 #'  class.
 #' @param verbose Logical, Whether or not the function should print tictoc time
@@ -129,60 +198,17 @@ local_attr_ls <- function(
   basis_type = c("pca", "olda"), class = NULL, ## class req for olda
   verbose = TRUE, noisy = TRUE
 ){
-  if(verbose == TRUE)
-    tictoc::tic(paste0("local_attr_ls -- ", layer_name))
+  if(verbose) tictoc::tic(paste0("local_attr_ls -- ", layer_name))
   d <- 2L
   basis_type <- match.arg(basis_type)
   
-  ## RF model -----
-  .is_y_disc <- is_discrete(y)
-  sec_mod <- system.time({
-    .m <- gc()
-    ## Default hyperparameters, (hp)
-    .hp_mtry <- ifelse(.is_y_disc == TRUE, sqrt(ncol(x)), ncol(x) / 3L)
-    .hp_node <- ifelse(.is_y_disc == TRUE, 1L, 5L)
-    .hp_node <- max(.hp_node, nrow(x) / 500L)
-    .hp_ntree <- 500L / 4L ## A function of the data, atleast not as liberal as the default 500 trees
-    suppressWarnings(
-      ## suppresses: The response has five or fewer unique values.  Are you sure?
-      .mod <- randomForest::randomForest(
-        y~., data = data.frame(y, x),
-        mtry = .hp_mtry, nodesize = .hp_node, ntree = .hp_ntree)
-    )
-  })[3L]
-  
-  ## $model_performance_df -----
-  #### MANUALLY created, different than the performance created by the rf fit...
-  .pred <- stats::predict(.mod, x)
-  .resid <- y - .pred
-  .rss <- sum(.resid^2L)
-  .tss <- sum((y - mean(y))^2L)
-  .mse <- 1L / nrow(x) * .rss %>% round(2L)
-  .rmse <- sqrt(.mse) %>% round(2L)
-  .rsq <- 1L - (.rss / .tss) %>% round(4L)
-  .model_performance_df <- data.frame(
-    model_type = "randomForest",
-    hp_mtry = .hp_mtry, hp_node = .hp_node, hp_ntree = .hp_ntree,
-    mse = .mse, rmse = .rmse, rsq = .rsq, model_runtime_sec = sec_mod)
-  if(is.null(xtest) == FALSE & is.null(ytest) == FALSE){
-    .rss_t <- sum((ytest - stats::predict(.mod, xtest))^2L)
-    .tss_t <- sum((ytest - mean(ytest))^2L)
-    .mse_t <- 1L / nrow(x) * .rss_t %>% round(2L)
-    .rmse_t <- sqrt(.mse_t) %>% round(2L)
-    .rsq_t <- 1L - (.rss_t/.tss_t) %>% round(4L)
-    .model_performance_df$test_mse <- .mse_t
-    .model_performance_df$test_rmse <- .rmse_t
-    .model_performance_df$test_rsq <- .rsq_t
-  }
-  row.names(.model_performance_df) <- 1L
-  
-  ##  attribution matrix, currently treeshap ----
-  sec_attr_df <- system.time({
-    .m <- gc()
-    .attr_df <- treeshap_df(.mod, x)
-    .attr_df_xtest <- NULL ## Init
-    if(is.null(xtest) == FALSE) .attr_df_xtest <- treeshap_df(.mod, xtest)
-  })[3L]
+  # ##attribution matrix, currently treeshap ----
+  # sec_attr_df <- system.time({
+  #   .m <- gc()
+  #   .attr_df <- treeshap_df(.mod, x)
+  #   .attr_df_xtest <- NULL ## Init
+  #   if(is.null(xtest) == FALSE) .attr_df_xtest <- treeshap_df(.mod, xtest)
+  # })[3L]
   
   ## global_view of Attribution space ----
   sec_global_view_attr_sp <- system.time({
@@ -418,40 +444,7 @@ cheem_ls <- function(
 
 
 
-#' Extract the full SHAP matrix of a randomForest model
-#' 
-#' Currently internal function, wants to be generalized. 
-#' Extracts a lighter version of the treeshap *.unify of a randomForest.
-#' 
-#' @param randomForest_model The return of fitted randomForest::randomForest 
-#' model.
-#' @param data Data to extract the local attributions of.
-#' @return A dataframe of the local attributions.
-#' @export
-#' @examples
-#' sub <- DALEX::apartments[1:200, 1:5]
-#' x <- sub[, 2:5]
-#' y <- sub$m2.price
-#' 
-#' ## Fit a {randomForest} model, 
-#' # model fit slightly slower fit than {ranger},
-#' # but treeshap iis much faster than {ranger}
-#' .rf <- randomForest::randomForest(y ~ ., data = data.frame(y, x))
-#' system.time(
-#'  df_shap <- treeshap_df(.rf, data = xdat)
-#' )[3]
-treeshap_df <- function(randomForest_model, data){
-  .rfu <- treeshap::randomForest.unify(randomForest_model, data)
-  .tshap_ls <- treeshap::treeshap(.rfu, x = data)
-  .tshap_ls <- .tshap_ls[c(1L, 4L)]
-  ## Keeping only c(1,4); reduces ~98.5% of the obj size, keep shap values make data attr.
-  ## But, we lose the iBreakdown-like plot of treeshap::plot_contribution when we take this apart.
-  ret <- .tshap_ls[[1L]]
-  
-  attr(ret, "class") <- c("treeshap_df", "data.frame")
-  attr(ret, "data") <- .tshap_ls[[2L]] ## Also a data.frame
-  return(ret)
-}
+
 
 
 

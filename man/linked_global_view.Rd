@@ -38,14 +38,15 @@ Given an attribution layer list, create a linked \code{plotly}of the global data
 and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
+library(cheem)
 sub <- DALEX::apartments[1:200, 1:6]
 X <- sub[, 2:5]
 Y <- sub$m2.price
 clas <- sub$district
 
-cheem_ls <- cheem_ls(
+.cheem_ls <- cheem_ls(
   x=X, y=Y, class=clas, verbose=T, noisy=T)
 
 linked_global_view(
-  cheem_ls, primary_obs = 1, comparison_obs = 2)
+  .cheem_ls, primary_obs = 1, comparison_obs = 2)
 }
