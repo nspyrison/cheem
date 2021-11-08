@@ -1,28 +1,29 @@
 ## Dependencies ------
 ## Local files
-require("cheem")
-
+require(cheem)
 
 #### A simplified version
 set.seed(20211105)
-X <- data.frame(x1 = rnorm(200, 5, 1),
-                x2 = rnorm(200, 5, 1),
-                x3 = rnorm(200, 5, 1),
-                x4 = rnorm(200, 5, 1))
-Y <- X$x1 + X$x2 + (X$x1 * X$x2) + .1 * X$x3 + .1 * X$x4
+X <- data.frame(x1 = runif(200, 0, 5),
+                x2 = runif(200, 0, 5),
+                x3 = runif(200, 0, 5),
+                x4 = runif(200, 0, 5),
+                x5 = runif(200, 0, 5))
+Y <- X$x1 + X$x2 + (X$x1 * X$x2) + .1 * X$x3 + .1 * X$x4 + 0 * X$x5
 
-## cheem_ls -----
-cheem_ls <- cheem_ls(
-  x = X, y = Y, basis_type = "pca", class = NULL)
-names(cheem_ls)
-
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X)
+this_ls <- cheem_ls(X, Y,
+                    model = rf_fit,
+                    attr_df = shap_df)
+linked_global_view(this_ls)
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  saveRDS(cheem_ls,
+  saveRDS(this_ls,
           file = "./inst/shiny_apps/cheem_initial/data/8preprocess_toy_regression.rds")
 }
 if(F) ## Not run, load cheem_ls
-  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/8preprocess_toy_regression.rds")
+  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/8preprocess_toy_regression.rds")
 

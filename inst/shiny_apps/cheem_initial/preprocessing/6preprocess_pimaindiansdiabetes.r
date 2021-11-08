@@ -1,6 +1,6 @@
 ## Dependencies ------
 ## Local files
-require("cheem")
+require(cheem)
 {
   dat_wide <- spinifex::PimaIndiansDiabetes_wide
   X_wide <- dat_wide[, -9]
@@ -13,32 +13,34 @@ require("cheem")
 }
 
 ## diabetes wide: -----
-### cheem_ls -----
-cheem_ls <- cheem_ls(
-  x = X_wide, y = Y_wide, basis_type = "pca", class = clas_wide)
-names(cheem_ls)
+rf_fit  <- default_rf(X_wide, Y_wide)
+shap_df <- attr_df_treeshap(rf_fit, X_wide)
+this_ls <- cheem_ls(X_wide, Y_wide, class = clas_wide,
+                    model = rf_fit,
+                    attr_df = shap_df)
 
 ### EXPORT OBJECTS -----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  saveRDS(cheem_ls,
-       file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.rds")
+  saveRDS(this_ls,
+          file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.rds")
 }
-if(F) ## Not run, load cheem_ls
-  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.rds")
+if(F) ## Not run, load this_ls
+  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_wide.rds")
 
 
 ## diabetes long: -----
-### cheem_ls -----
-cheem_ls <- cheem_ls(
-  x = X_long, y = Y_long, basis_type = "pca", class = clas_long)
-names(cheem_ls)
+rf_fit  <- default_rf(X_long, Y_long)
+shap_df <- attr_df_treeshap(rf_fit, X_long)
+this_ls <- cheem_ls(X_long, Y_long, class = clas_long,
+                    model = rf_fit,
+                    attr_df = shap_df)
 
 ### EXPORT OBJECTS -----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  saveRDS(cheem_ls,
+  saveRDS(this_ls,
           file = "./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.rds")
 }
-if(F) ## Not run, load cheem_ls
-  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.rds")
+if(F) ## Not run, load this_ls
+  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/6preprocess_diabetes_long.rds")

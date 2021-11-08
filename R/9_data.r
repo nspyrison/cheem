@@ -1,14 +1,13 @@
-
-
 ## Ames housing 2018 ----
 #' Ames housing data 2018
 #' 
 #' Cleaned house price data for Ames, Iowa, USA from 2018. Only complete 
 #' numeric observations remain.
-#' @format A data frame with 2291 rows and 19 numeric variables, SalesPrice, the response variable, and 3 class variables
+#' @format A data frame with 2290 rows and 19 numeric variables, SalesPrice, the response variable, and 3 class variables
 #' @source {Kaggle, Ames Housing Dataset} \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
 #' Replicating this dataset:
 #' ```
+#' if(F) browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
 #' ames <- readr::read_csv("./ignore/AmesHousing.csv")
 #' amesHousing2018_raw <- data.frame(ames)
 #' save(amesHousing2018_raw, file = "./data/amesHousing2018_raw.rda")
@@ -16,7 +15,7 @@
 #' ## Complete rows and numeric variables
 #' ames1 <- ames[, unlist(lapply(ames, is.numeric))]
 #' ames1$Bathrooms <- ames1$`Full Bath` + ames1$`Half Bath`
-#' ames1 <- ames1[, c(1:18, 37, 19:36)]
+#' ames1 <- ames1[, c(1:18, 38, 19:37)]
 #' col_idx <- !(colnames(ames1) %in%
 #'                c("Order", "Mas Vnr Area", "BsmtFin SF 1", "BsmtFin SF 2",
 #'                  "Bsmt Full Bath", "Bsmt Half Bath", "Fireplaces",
@@ -37,7 +36,7 @@
 #' col_idx_char <- which(names(ames_clas) %in% c("MS.SubClass", "MS.Zoning", "Neighborhood"))
 #' classes <- ames_clas[row_idx, col_idx_char]
 #' 
-#' amesHousing2018 <- data.frame(ames2, classes)
+#' amesHousing2018 <- data.frame(ames2, classes)[-147, ] ## huge residual
 #' ## save(amesHousing2018, file = "./data/amesHousing2018.rda")
 #' 
 #' .thin_col_idx <- names(amesHousing2018) %in% c(
@@ -49,12 +48,14 @@
 #' ```
 #' @examples
 #' library(cheem)
-#' X <- amesHousing2018[1:500, 1:18]
-#' Y <- log(amesHousing2018$SalePrice[1:500])
-#' clas <- amesHousing2018$MS.Zoning[1:500]
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)

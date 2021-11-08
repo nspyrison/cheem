@@ -27,10 +27,12 @@ Internal function, used downstream in cheem_ls.
 }
 \examples{
 library(cheem)
-sub <- DALEX::apartments[1:200, 1:5]
-x <- sub[, 2:5]
-y <- sub$m2.price
+## Regression:
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:10]
+Y <- log(sub$SalePrice)
+clas <- sub$MS.Zoning
 
-.rf_fit <- default_rf(x, y)
-model_performance_df(.rf_fit, x)
+rf_fit <- default_rf(X, Y)
+model_performance_df(rf_fit, X)
 }

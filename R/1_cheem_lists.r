@@ -19,12 +19,17 @@
 #' @export
 #' @examples
 #' library(cheem)
-#' sub <- DALEX::apartments[1:200, 1:5]
-#' x <- sub[, 2:5]
-#' y <- sub$m2.price
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' .rf_fit <- default_rf(x, y)
-#' .shap_df <- attr_df_treeshap(.rf_fit, x)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 default_rf <- function(
   x, y, verbose = TRUE,
   hp_ntree = 125,
@@ -63,12 +68,17 @@ default_rf <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' sub <- DALEX::apartments[1:200, 1:5]
-#' x <- sub[, 2:5]
-#' y <- sub$m2.price
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' .rf_fit <- default_rf(x, y)
-#' .shap_df <- attr_df_treeshap(.rf_fit, x)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 attr_df_treeshap <- function(
   randomForest_model,
   x,
@@ -76,7 +86,10 @@ attr_df_treeshap <- function(
   verbose = TRUE,
   noisy = TRUE
 ){
-  if(verbose) tictoc::tic("attr_df_treeshap")
+  if(verbose){
+    writeLines(paste0("Started attr_df_treeshap() at: ", Sys.time()))
+    tictoc::tic("attr_df_treeshap")
+  }
   .rfu <- treeshap::randomForest.unify(randomForest_model, x)
   ret <- treeshap::treeshap(.rfu, x = x)
   if(keep_heavy == FALSE)
@@ -105,12 +118,14 @@ attr_df_treeshap <- function(
 # #' @export
 #' @examples
 #' library(cheem)
-#' sub <- DALEX::apartments[1:200, 1:5]
-#' x <- sub[, 2:5]
-#' y <- sub$m2.price
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' .rf_fit <- default_rf(x, y)
-#' model_performance_df(.rf_fit, x)
+#' rf_fit <- default_rf(X, Y)
+#' model_performance_df(rf_fit, X)
 model_performance_df <- function(
   model
 ){
@@ -158,15 +173,18 @@ model_performance_df <- function(
 #' @return A data.frame, for the global linked plotly display.
 # #' @export
 #' @examples
-#' sub <- DALEX::apartments[1:200, 1:6]
-#' x <- sub[, 2:5]
-#' y <- sub$m2.price
-#' clas <- sub$district
+#' library(cheem)
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' ret <- global_view_1layer(
-#'   x, y, class = clas,
-#'   basis_type = "pca", layer_name = "data")
-#' str(ret)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 global_view_1layer <- function(
   x, y, 
   class = NULL, ## required for olda
@@ -219,20 +237,20 @@ global_view_1layer <- function(
 #' @examples
 #' library(cheem)
 #' ## Regression:
-#' x <- sub[, 2:5]
-#' y <- sub$m2.price
-#' clas <- sub$district
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' .rf_fit <- default_rf(x, y)
-#' .shap_df <- attr_df_treeshap(.rf_fit, x)
-#' out_ls <- cheem_ls(x, y, class = clas,
-#'                    model = .rf_fit,
-#'                    attr_df = .shap_df)
-#' names(out_ls)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' 
 #' ## Save for used with shiny app (expects .rds):
 #' if(F) ## Don't accidentally save.
-#'   saveRDS(out_ls, "./my_cheem_ls.rds")
+#'   saveRDS(this_ls, "./my_cheem_ls.rds")
 cheem_ls <- function(
   x, y, class = NULL,
   model, attr_df,
@@ -266,10 +284,10 @@ cheem_ls <- function(
     residual = y - predict(model), x) ##, attr_df) ## duplicate col names and long.
   if(is_classification){
     .pred_clas <- as.factor(levels(class)[round(predict(model))])
-    .is_missclas <- .pred_clas!= class
+    .is_misclass <- .pred_clas!= class
     .decode_middle <- data.frame(
       predicted_class = .pred_clas,
-      is_misclassified = .is_missclas)
+      is_misclassified = .is_misclass)
     .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
   }else{
     .decode_df <- cbind(.decode_left, .decode_right)
@@ -285,9 +303,9 @@ cheem_ls <- function(
       tooltip <- paste0(tooltip, ", ", rownames(x))
   if(is_classification){
     ### Classification extension
-    tooltip[.is_missclas] <- paste0(
-      tooltip[.is_missclas],
-      "\nMisclassified! predicted: ", .pred_clas[.is_missclas],
+    tooltip[.is_misclass] <- paste0(
+      tooltip[.is_misclass],
+      "\nMisclassified! predicted: ", .pred_clas[.is_misclass],
       ", observed: ", class[.is_misclass])
     tooltip[!.is_misclass] <- paste0(
       tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])

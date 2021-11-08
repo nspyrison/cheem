@@ -1,6 +1,6 @@
 ## Dependencies ------
 ## Local files
-require("cheem")
+require(cheem)
 ## Data simulation functions ------
 ##TODO!! wants to be local in /R/
 source("../spinifex_study/apps_supplementary/data_simulation/_sim_user_study.r")
@@ -62,28 +62,31 @@ this_sim_mvtnorm_cl <- function(
 
 ## Create the data & shap layer_ls -----
 #cr_simulation() ## see obj `sim_EEE_p4`
-dat <- sim_EEE_p4
+X <- sim_EEE_p4
 .lvls <- LETTERS[1:3]
-y <- attr(sim_EEE_p4, "cluster") %>% as.integer()
+Y <- attr(sim_EEE_p4, "cluster") %>% as.integer()
 clas <- factor(.lvls[y], levels = .lvls)
 str(sim_EEE_p4)
 
 ## Visualize
-require("ggplot2")
-ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
+if(F){
+  require(ggplot2)
+  ggplot(sim_EEE_p4, aes(V1, V2, color = clas, shape = clas)) + geom_point()
+}
 
-## cheem_ls -----
-cheem_ls <- cheem_ls(
-  x = dat, y = y, basis_type = "pca", class = clas)
-names(cheem_ls)
-
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X)
+this_ls <- cheem_ls(X, Y, class = clas,
+                    model = rf_fit,
+                    attr_df = shap_df)
+names(this_ls)
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
-  saveRDS(cheem_ls,
+  saveRDS(this_ls,
           file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.rds")
 }
-if(F) ## Not run, load cheem_ls
-  cheem_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.rds")
+if(F) ## Not run, load this_ls
+  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.rds")
 

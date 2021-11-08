@@ -37,10 +37,15 @@ hyperparameter defaults and consistent arguments with \code{cheem}.
 }
 \examples{
 library(cheem)
-sub <- DALEX::apartments[1:200, 1:5]
-x <- sub[, 2:5]
-y <- sub$m2.price
+## Regression:
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:10]
+Y <- log(sub$SalePrice)
+clas <- sub$MS.Zoning
 
-.rf_fit <- default_rf(x, y)
-.shap_df <- attr_df_treeshap(.rf_fit, x)
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+this_ls <- cheem_ls(X, Y, class = clas,
+                    model = rf_fit,
+                    attr_df = shap_df)
 }

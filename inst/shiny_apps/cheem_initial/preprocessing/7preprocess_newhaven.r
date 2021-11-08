@@ -5,7 +5,6 @@ require("YaleToolkit")
 help(package = "YaleToolkit") ## No new haven data 
 data() ## No new haven data 
 
-# 
 # ## Setup ------
 # .raw <- DALEX::apartments ## 1000 x 6. Y | 4 Xs | 1 class
 # Y <- .raw[,1]

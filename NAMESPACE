@@ -3,6 +3,7 @@
 export("%>%")
 export(as_logical_index)
 export(attr_df_treeshap)
+export(basis_local_attribution)
 export(cheem_ls)
 export(default_rf)
 export(does_contain_nonnumeric)

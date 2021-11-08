@@ -39,16 +39,17 @@ and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
 library(cheem)
-sub <- DALEX::apartments[1:200, 1:6]
-X <- sub[, 2:5]
-Y <- sub$m2.price
-clas <- sub$district
+## Regression:
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:10]
+Y <- log(sub$SalePrice)
+clas <- sub$MS.Zoning
 
-rf_fit <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X)
-this_ls <- cheem_ls(x, y, class = clas,
-                   model = rf_fit,
-                   attr_df = shap_df)
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+this_ls <- cheem_ls(X, Y, class = clas,
+                    model = rf_fit,
+                    attr_df = shap_df)
 
 linked_global_view(this_ls)
 }

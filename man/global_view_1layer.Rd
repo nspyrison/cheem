@@ -34,13 +34,16 @@ Internal function, the plot data.frame of 1 layer, consumed downstream in
 cheem_ls.
 }
 \examples{
-sub <- DALEX::apartments[1:200, 1:6]
-x <- sub[, 2:5]
-y <- sub$m2.price
-clas <- sub$district
+library(cheem)
+## Regression:
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:10]
+Y <- log(sub$SalePrice)
+clas <- sub$MS.Zoning
 
-ret <- global_view_1layer(
-  x, y, class = clas,
-  basis_type = "pca", layer_name = "data")
-str(ret)
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+this_ls <- cheem_ls(X, Y, class = clas,
+                    model = rf_fit,
+                    attr_df = shap_df)
 }

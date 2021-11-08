@@ -46,18 +46,18 @@ consumed
 \examples{
 library(cheem)
 ## Regression:
-x <- sub[, 2:5]
-y <- sub$m2.price
-clas <- sub$district
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:10]
+Y <- log(sub$SalePrice)
+clas <- sub$MS.Zoning
 
-.rf_fit <- default_rf(x, y)
-.shap_df <- attr_df_treeshap(.rf_fit, x)
-out_ls <- cheem_ls(x, y, class = clas,
-                   model = .rf_fit,
-                   attr_df = .shap_df)
-names(out_ls)
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+this_ls <- cheem_ls(X, Y, class = clas,
+                    model = rf_fit,
+                    attr_df = shap_df)
 
 ## Save for used with shiny app (expects .rds):
 if(F) ## Don't accidentally save.
-  saveRDS(out_ls, "./my_cheem_ls.rds")
+  saveRDS(this_ls, "./my_cheem_ls.rds")
 }

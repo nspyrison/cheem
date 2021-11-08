@@ -8,10 +8,10 @@
 #' @param attr_df Return of a local attribution, such as treeshap_df.
 #' @param rownum The rownumber of the primary observation. Defaults to 1.
 #' @return A matrix of the 1D basis
-# #' @export
+#' @export
 #' @examples
-#' la_df <- mtcars ## Pretend this is a local attribution data.frame
-#' basis_local_attribution(la_df, rownum = 10)
+#' attr_df <- mtcars ## Pretend this is a local attribution data.frame
+#' cheem:::basis_local_attribution(attr_df, rownum = 10)
 basis_local_attribution <- function(
   attr_df,
   rownum = 1
@@ -51,14 +51,19 @@ basis_local_attribution <- function(
 #' @export
 #' @examples
 #' library(cheem)
+#' library(spinifex)
 #' ## Classification:
-#' X    <- tourr::flea[, 1:6]
-#' clas <- tourr::flea$species
+#' X    <- flea[, 1:6]
+#' clas <- flea$species
 #' Y    <- as.integer(clas)
-#' .cheem_ls <- cheem_ls(
-#'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
 #' 
-#' bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
+#' 
+#' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' mv <- manip_var_of(bas)
 #' mt_path <- manual_tour(bas, mv)
 #' 
@@ -66,25 +71,32 @@ basis_local_attribution <- function(
 #' ggt <- ggtour(mt_path, X_scl, angle = .3) +
 #'   proto_density(aes_args = list(color = clas, fill = clas)) +
 #'   proto_basis1d() +
-#'   proto_basis1d_distribution(.cheem_ls$attr_df, group_by = clas)
+#'   proto_basis1d_distribution(shap_df, group_by = clas)
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
 #' 
+#' library(cheem)
+#' library(spinifex)
 #' ## Regression:
-#' sub <- DALEX::apartments[1:200, 1:6]
-#' X <- sub[, 2:5]
-#' Y <- sub$m2.price
-#' clas <- sub$district
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' .cheem_ls <- cheem_ls(
-#'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' 
-#' bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+#' bas <- basis_local_attribution(shap_df, rownum = 1)
+#' mv  <- manip_var_of(bas)
 #' ggt <- radial_cheem_ggtour(
-#'   .cheem_ls, basis=bas, mv_name=colnames(X)[1],
-#'   primary_obs=1, comparison_obs=2)
-#' spinifex::animate_plotly(ggt)
+#'   this_ls, basis = bas, manip_var = mv, angle = .3)
+#' \dontrun{
+#' animate_plotly(ggt)
+#' }
 proto_basis1d_distribution <- function(
   attr_df, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
@@ -227,16 +239,17 @@ proto_basis1d_distribution <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' sub <- DALEX::apartments[1:200, 1:6]
-#' X <- sub[, 2:5]
-#' Y <- sub$m2.price
-#' clas <- sub$district
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
 #' 
-#' rf_fit <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X)
-#' this_ls <- cheem_ls(x, y, class = clas,
-#'                    model = rf_fit,
-#'                    attr_df = shap_df)
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' 
 #' linked_global_view(this_ls)
 linked_global_view <- function(
@@ -280,7 +293,7 @@ linked_global_view <- function(
   if(is_classification == TRUE)
     pts_main <- list(
       suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = color, shape = pred_clas, 
+        ggplot2::aes(color = color, shape = pred_clas,
                      tooltip = tooltip), alpha = .alpha)),
       ggplot2::scale_color_brewer(palette = "Dark2"))
   if(is_classification == FALSE)
@@ -288,9 +301,9 @@ linked_global_view <- function(
       suppressWarnings(ggplot2::geom_point(
         ggplot2::aes(color = color, shape = pred_clas,
                      tooltip = tooltip),  alpha = .alpha)),
-      scale_colour_gradient2(low = scales::muted("blue"),
-                             mid = "white",
-                             high = scales::muted("red")))
+      ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
+                                      mid = "grey80",
+                                      high = scales::muted("red")))
   
   ## Proto for highlighted points
   pts_highlight <- list()
@@ -370,7 +383,7 @@ linked_global_view <- function(
 #' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param basis A 1D projection basis, typically a return of 
 #' `basis_local_attribution()`.
-#' @param mv_name The character string, _name_ of the Manipulation Variable.
+#' @param manip_var The , _number_ of the manipulation variable.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
 #' as a dashed line.
@@ -390,25 +403,26 @@ linked_global_view <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression
-#' sub <- amesHousing2018_thin[, 1:6]
+#' library(spinifex)
+#' ## Regression:
 #' X <- sub[, 2:5]
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' rf_fit <- default_rf(X, Y)
+#' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X)
-#' this_ls <- cheem_ls(x, y, class = clas,
-#'                    model = rf_fit,
-#'                    attr_df = shap_df)
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' 
 #' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' ggt <- radial_cheem_ggtour(
-#'   this_ls, basis=bas, mv_name=colnames(X)[1],
-#'   primary_obs=1, comparison_obs=2)
-#' spinifex::animate_plotly(ggt)
+#'   this_ls, basis = bas, manip_var = 1)
+#' \dontrun{
+#' animate_plotly(ggt)
+#' }
 radial_cheem_ggtour <- function(
-  cheem_ls, basis, mv_name, primary_obs, comparison_obs,
+  cheem_ls, basis, manip_var, primary_obs, comparison_obs,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .2,
@@ -440,8 +454,7 @@ radial_cheem_ggtour <- function(
     .pred_clas <- decode_df$predicted_class
   .alpha <- logistic_tform(nrow(decode_df))
   ## Manual (radial) tour 1d
-  .mv <- which(colnames(cheem_ls$attr_df) == mv_name)
-  .mt_path <- spinifex::manual_tour(basis, manip_var = .mv)
+  .mt_path <- spinifex::manual_tour(basis, manip_var)
   
   ### Classification case -----
   # Classification goes right into vis

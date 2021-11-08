@@ -22,22 +22,28 @@ server <- function(input, output, session){
     }else if(dat == "penguins"){
       primary_obs    <- 15L
       comparison_obs <- 282L
+    }else if(dat == "toy regression"){
+      primary_obs    <- 11L
+      comparison_obs <- 116L
     }else if(dat == "fifa"){
       primary_obs    <- 1L
       comparison_obs <- 8L
-    }else if(dat == "apartments"){
-      primary_obs    <- 485L
-      comparison_obs <- 487L
-    }else if(dat == "diabetes (wide)"){
-      primary_obs    <- 123L
-      comparison_obs <- 237L
-    }else if(dat == "diabetes (long)"){
-      primary_obs    <- 479L
-      comparison_obs <- 674L
+    }else if(dat == "ames housing 2018"){
+      primary_obs    <- 1703L
+      comparison_obs <- 1368L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       primary_obs    <- 1L
       comparison_obs <- 2L
     }
+    # }else if(dat == "apartments"){
+    #   primary_obs    <- 485L
+    #   comparison_obs <- 487L
+    # }else if(dat == "diabetes (wide)"){
+    #   primary_obs    <- 123L
+    #   comparison_obs <- 237L
+    # }else if(dat == "diabetes (long)"){
+    #   primary_obs    <- 479L
+    #   comparison_obs <- 674L
     
     .n_max <- 1e6
     updateNumericInput(
@@ -203,9 +209,10 @@ server <- function(input, output, session){
                      "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
+    mv <- which(mv_nm %in% rownames(bas))
     
     ggt <- radial_cheem_ggtour(
-      cheem_ls, bas, mv_nm,
+      cheem_ls, bas, mv,
       prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,
       row_index = idx_rownum, inc_vars = inc_vars)

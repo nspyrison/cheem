@@ -7,7 +7,7 @@
 radial_cheem_ggtour(
   cheem_ls,
   basis,
-  mv_name,
+  manip_var,
   primary_obs,
   comparison_obs,
   do_add_pcp_segments = TRUE,
@@ -23,7 +23,7 @@ radial_cheem_ggtour(
 \item{basis}{A 1D projection basis, typically a return of
 \code{basis_local_attribution()}.}
 
-\item{mv_name}{The character string, \emph{name} of the Manipulation Variable.}
+\item{manip_var}{The , \emph{number} of the manipulation variable.}
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
@@ -56,21 +56,22 @@ and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
 library(cheem)
-## Regression
-sub <- amesHousing2018_thin[, 1:6]
+library(spinifex)
+## Regression:
 X <- sub[, 2:5]
 Y <- sub$m2.price
 clas <- sub$district
 
-rf_fit <- default_rf(X, Y)
+rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X)
-this_ls <- cheem_ls(x, y, class = clas,
-                   model = rf_fit,
-                   attr_df = shap_df)
+this_ls <- cheem_ls(X, Y, class = clas,
+                    model = rf_fit,
+                    attr_df = shap_df)
 
 bas <- basis_local_attribution(shap_df, rownum = 1)
 ggt <- radial_cheem_ggtour(
-  this_ls, basis=bas, mv_name=colnames(X)[1],
-  primary_obs=1, comparison_obs=2)
-spinifex::animate_plotly(ggt)
+  this_ls, basis = bas, manip_var = 1)
+\dontrun{
+animate_plotly(ggt)
+}
 }

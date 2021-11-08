@@ -9,29 +9,30 @@ require(shiny)
 require(shinythemes) ## Themes for shiny, think preset css styling.
 require(shinycssloaders) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
 require(DT) ## For html table and buttons
-## Load a few app function
+## Dependancies
 require(cheem) ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
 require(spinifex)
 require(plotly)
 require(gganimate) ## Not in use atm
 require(magrittr)
-## Load prepared objs
-# preared objects now loaded in app.r; layer_ls reactive function.
+options(show.error.locations = TRUE)
 
-options(show.error.locations=TRUE)
-#options(error = traceback)
-toy_ls <- readRDS("./data/2preprocess_toy_classification.rds")
+## Load prepared cheem_ls() returns
 penguins_ls <- readRDS("./data/1preprocess_penguins.rds")
-fifa_ls <- readRDS("./data/3preprocess_fifa.rds")
-# apartments_ls <- readRDS("./data/4preprocess_apartments.rds")
-diabetes_wide_ls <- readRDS("./data/6preprocess_diabetes_wide.rds")
-diabetes_long_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
+toy_ls      <- readRDS("./data/2preprocess_toy_classification.rds")
+fifa_ls     <- readRDS("./data/3preprocess_fifa.rds")
+ames2018_ls <- readRDS("./data/7preprocess_ames2018.rds")
+toy_reg_ls  <- readRDS("./data/8preprocess_toy_regression.rds")
+# diabetes_wide_ls <- readRDS("./data/6preprocess_diabetes_wide.rds")
+# diabetes_long_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
 
 ## UI content ----
 ### tab1_cheem -----
 expected_data_char <- c(
-  "toy classification", "penguins", "fifa", #"apartments",
-  "diabetes (wide)", "diabetes (long)", "<upload preprocessed cheem_ls (.rds file)>")
+  "toy classification", "penguins",
+  "toy regression", "fifa", "ames housing 2018",
+  #"diabetes (wide)", "diabetes (long)", 
+  "<Upload saved cheem_ls (.rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #### Top text description -----
   fluidRow(

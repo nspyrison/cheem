@@ -19,6 +19,6 @@ Internal function, Extract and format the 1D local attribution basis from
 the provided local explanation's attribution.
 }
 \examples{
-la_df <- mtcars ## Pretend this is a local attribution data.frame
-basis_local_attribution(la_df, rownum = 10)
+attr_df <- mtcars ## Pretend this is a local attribution data.frame
+cheem:::basis_local_attribution(attr_df, rownum = 10)
 }
