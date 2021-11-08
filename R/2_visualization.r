@@ -8,7 +8,7 @@
 #' @param attr_df Return of a local attribution, such as treeshap_df.
 #' @param rownum The rownumber of the primary observation. Defaults to 1.
 #' @return A matrix of the 1D basis
-#' @export
+# #' @export
 #' @examples
 #' la_df <- mtcars ## Pretend this is a local attribution data.frame
 #' basis_local_attribution(la_df, rownum = 10)
@@ -232,11 +232,13 @@ proto_basis1d_distribution <- function(
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' .cheem_ls <- cheem_ls(
-#'   x=X, y=Y, class=clas, verbose=T, noisy=T)
+#' rf_fit <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X)
+#' this_ls <- cheem_ls(x, y, class = clas,
+#'                    model = rf_fit,
+#'                    attr_df = shap_df)
 #' 
-#' linked_global_view(
-#'   .cheem_ls, primary_obs = 1, comparison_obs = 2)
+#' linked_global_view(this_ls)
 linked_global_view <- function(
   cheem_ls,
   primary_obs = NULL,
@@ -248,7 +250,7 @@ linked_global_view <- function(
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
   ## Initialize
   global_view_df <- cheem_ls$global_view_df 
-  is_classification <- cheem_ls$problem_type == "classification"
+  is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
   if(is_classification == TRUE){
@@ -263,14 +265,15 @@ linked_global_view <- function(
       rep_len(nrow(global_view_df))
   }
   
+  u_nms <- unique(global_view_df$layer_name)
   ## Get the bases of the global view, map them
-  .bas_data <- cbind(
-    as.data.frame(cheem_ls$basis_ls$data_basis), layer_name = "data")
-  .map_to_data <- global_view_df[global_view_df$layer_name == "data", c("V1", "V2")]
-  .map_to_data[, 1L] <-  .map_to_data[, 1L] / 3L
-  .bas_attr <- cbind(
-    as.data.frame(cheem_ls$basis_ls$attribution_basis), layer_name = "SHAP")
-  .map_to_attr <- global_view_df[global_view_df$layer_name == "SHAP", c("V1", "V2")]
+  .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
+                          layer_name = u_nms[1L])
+  .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
+  .map_to_data[, 1L] <- .map_to_data[, 1L] / 3L
+  .bas_attr <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
+                          layer_name = u_nms[2L])
+  .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
   .map_to_attr[, 1L] <- .map_to_attr[, 1L] / 3L
   
   ## Proto for points
@@ -285,7 +288,9 @@ linked_global_view <- function(
       suppressWarnings(ggplot2::geom_point(
         ggplot2::aes(color = color, shape = pred_clas,
                      tooltip = tooltip),  alpha = .alpha)),
-      scale_colour_gradient2(trans = "reverse"))
+      scale_colour_gradient2(low = scales::muted("blue"),
+                             mid = "white",
+                             high = scales::muted("red")))
   
   ## Proto for highlighted points
   pts_highlight <- list()
@@ -385,17 +390,21 @@ linked_global_view <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' sub <- DALEX::apartments[1:200, 1:6]
+#' ## Regression
+#' sub <- amesHousing2018_thin[, 1:6]
 #' X <- sub[, 2:5]
 #' Y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' .cheem_ls <- cheem_ls(
-#'   x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+#' rf_fit <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X)
+#' this_ls <- cheem_ls(x, y, class = clas,
+#'                    model = rf_fit,
+#'                    attr_df = shap_df)
 #' 
-#' bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+#' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' ggt <- radial_cheem_ggtour(
-#'   .cheem_ls, basis=bas, mv_name=colnames(X)[1],
+#'   this_ls, basis=bas, mv_name=colnames(X)[1],
 #'   primary_obs=1, comparison_obs=2)
 #' spinifex::animate_plotly(ggt)
 radial_cheem_ggtour <- function(
@@ -425,7 +434,7 @@ radial_cheem_ggtour <- function(
     c(row_index, .prim_obs, .comp_obs), nrow(decode_df))
   
   ## Problem type: classification or regression?
-  .prob_type <- cheem_ls$problem_type ## Either "classification" or "regression"
+  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
   .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- decode_df$predicted_class

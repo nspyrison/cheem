@@ -44,9 +44,11 @@ X <- sub[, 2:5]
 Y <- sub$m2.price
 clas <- sub$district
 
-.cheem_ls <- cheem_ls(
-  x=X, y=Y, class=clas, verbose=T, noisy=T)
+rf_fit <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X)
+this_ls <- cheem_ls(x, y, class = clas,
+                   model = rf_fit,
+                   attr_df = shap_df)
 
-linked_global_view(
-  .cheem_ls, primary_obs = 1, comparison_obs = 2)
+linked_global_view(this_ls)
 }

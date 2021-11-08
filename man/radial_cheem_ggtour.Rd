@@ -56,17 +56,21 @@ and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
 library(cheem)
-sub <- DALEX::apartments[1:200, 1:6]
+## Regression
+sub <- amesHousing2018_thin[, 1:6]
 X <- sub[, 2:5]
 Y <- sub$m2.price
 clas <- sub$district
 
-.cheem_ls <- cheem_ls(
-  x=X, y=Y, basis_type="pca", class=clas, verbose=T, noisy=T)
+rf_fit <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X)
+this_ls <- cheem_ls(x, y, class = clas,
+                   model = rf_fit,
+                   attr_df = shap_df)
 
-bas <- basis_local_attribution(.cheem_ls$attr_df, rownum = 1)
+bas <- basis_local_attribution(shap_df, rownum = 1)
 ggt <- radial_cheem_ggtour(
-  .cheem_ls, basis=bas, mv_name=colnames(X)[1],
+  this_ls, basis=bas, mv_name=colnames(X)[1],
   primary_obs=1, comparison_obs=2)
 spinifex::animate_plotly(ggt)
 }

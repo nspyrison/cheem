@@ -2,6 +2,20 @@
 # 2) local explanations (language is already generalized)
 ##TODO: Some functions lacking examples.
 
+#' Random forest model via randomForest
+#' 
+#' A wrapper function for `randomForest::randomForest()` with more modest 
+#' hyperparameter defaults and consistent arguments with `cheem`.
+#' 
+#' @param x The explanatory variables of the model.
+#' @param y The target variable of the model.
+#' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
+#' @param hp_ntree Hyper parameter, the number of trees to grow.
+#' @param hp_mtry Hyper parameter, the number variables randomly sampled at 
+#' each split.
+#' @param hp_nodesize Hyperparameter, Minimum size of terminal nodes. 
+#' Setting this number larger causes smaller trees to be grown (and thus take less time).
+#' @return A randomForest model.
 #' @export
 #' @examples
 #' library(cheem)
@@ -10,22 +24,18 @@
 #' y <- sub$m2.price
 #' 
 #' .rf_fit <- default_rf(x, y)
-#' .shap_df <- treeshap_df(.rf_fit, data = xdat)
+#' .shap_df <- attr_df_treeshap(.rf_fit, x)
 default_rf <- function(
-  x, y, verbose = TRUE
+  x, y, verbose = TRUE,
+  hp_ntree = 125,
+  hp_mtry = ifelse(is_discrete(y), sqrt(ncol(x)), ncol(x) / 3),
+  hp_nodesize = max(ifelse(is_discrete(y), 1, 5), nrow(x) / 500)
 ){
   if(verbose) tictoc::tic("default_rf")
-  .is_y_disc <- is_discrete(y)
-  ## Default hyperparameters, (hp)
-  .hp_mtry <- ifelse(.is_y_disc == TRUE, sqrt(ncol(x)), ncol(x) / 3L)
-  .hp_node <- ifelse(.is_y_disc == TRUE, 1L, 5L)
-  .hp_node <- max(.hp_node, nrow(x) / 500L)
-  .hp_ntree <- 500L / 4L ## A function of the data, atleast not as liberal as the default 500 trees
-  suppressWarnings(
-    ## suppresses: The response has five or fewer unique values.  Are you sure?
+  suppressWarnings(## suppresses: The response has five or fewer unique values.  Are you sure?
     .mod <- randomForest::randomForest(
       y~., data = data.frame(y, x),
-      mtry = .hp_mtry, nodesize = .hp_node, ntree = .hp_ntree)
+      mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree)
   )
   class(.mod) <- rev(class(.mod)) ## Make "radomForest" first
   .m <- gc()
@@ -34,15 +44,21 @@ default_rf <- function(
 }
 
 
-#' Extract the full SHAP matrix of a randomForest model
+#' Extract the full treeSHAP data.frame of a randomForest model
 #' 
-#' Currently internal function, wants to be generalized. 
-#' Extracts a lighter version of the treeshap *.unify of a randomForest.
+#' A data.frame of each observations treeSHAP variable attributions of a
+#' randomForest model. 
+#' A wrapper for `treeshap::randomForest.unify` and `treeshap::treeshap`.
 #' 
 #' @param randomForest_model The return of fitted randomForest::randomForest 
 #' model.
 #' @param x The explanatory data (without response) to extract the local 
 #' attributions of.
+#' @param keep_heavy Logical, if the heavy items "interactions",
+#'  "unified_model", and "observations" should be kept. Defaults to FALSE.
+#' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
+#' @param noisy Logical, if a tone should be played on completion. 
+#' Defaults to TRUE.
 #' @return A dataframe of the local attributions.
 #' @export
 #' @examples
@@ -52,64 +68,84 @@ default_rf <- function(
 #' y <- sub$m2.price
 #' 
 #' .rf_fit <- default_rf(x, y)
-#' .shap_df <- treeshap_df(.rf_fit, x = x)
-treeshap_df <- function(
+#' .shap_df <- attr_df_treeshap(.rf_fit, x)
+attr_df_treeshap <- function(
   randomForest_model,
-  x, 
-  verbose = TRUE
+  x,
+  keep_heavy = FALSE,
+  verbose = TRUE,
+  noisy = TRUE
 ){
-  if(verbose) tictoc::tic("treeshap_df")
+  if(verbose) tictoc::tic("attr_df_treeshap")
   .rfu <- treeshap::randomForest.unify(randomForest_model, x)
-  .tshap_ls <- treeshap::treeshap(.rfu, x = x)
-  .tshap_ls <- .tshap_ls[c(1L, 4L)]
-  ## Keeping only c(1,4); reduces ~98.5% of the obj size, keep shap values make data attr.
+  ret <- treeshap::treeshap(.rfu, x = x)
+  if(keep_heavy == FALSE)
+    ret <- ret[[1L]]
+  ## Keeping only 1; reduces ~99% of the obj size, keep shap values.
   ## But, we lose the iBreakdown-like plot of treeshap::plot_contribution when we take this apart.
-  ret <- .tshap_ls[[1L]]
   
-  attr(ret, "class") <- c("treeshap_df", "data.frame")
-  attr(ret, "data") <- .tshap_ls[[2L]] ## Also a data.frame
+  attr(ret, "class") <- c("treeshap", "data.frame")
   if(verbose) tictoc::toc()
+  if(noisy) beepr::beep(1L)
   return(ret)
 }
 
-
+#' Extract higher level model performance
+#' 
+#' Internal function, used downstream in cheem_ls.
+#' 
+#' @param model A model object
+#' @param x The explanatory data (without response) to extract the local 
+#' attributions of.
+#' @param y The target variable of the model.
+#' @param xtest Optional, out Of Sample data to find the local attribution of.
+#' @param ytest Optional, out Of Sample response to measure x with 
+#' if provided.
+#' @return A dataframe of the local attributions.
+# #' @export
+#' @examples
+#' library(cheem)
+#' sub <- DALEX::apartments[1:200, 1:5]
+#' x <- sub[, 2:5]
+#' y <- sub$m2.price
+#' 
+#' .rf_fit <- default_rf(x, y)
+#' model_performance_df(.rf_fit, x)
 model_performance_df <- function(
-  model,
-  x,
-  y,
-  xtest,
-  ytest
+  model
 ){
-  #### MANUALLY created, different than the performance created by the rf fit...
-  .pred <- stats::predict(model, x)
-  .resid <- y - .pred
-  .rss  <- sum(.resid^2L)
-  .tss  <- sum((y - mean(y))^2L)
-  .mse  <- 1L / nrow(x) * .rss %>% round(2L)
-  .rmse <- sqrt(.mse) %>% round(2L)
-  .rsq  <- 1L - (.rss / .tss) %>% round(4L)
-  .model_performance_df <- data.frame(
+  #### Following the functions in {Metrics}
+  # liable to differ from the performance of the model object (due to adj values?)
+  # but at least consistent format and measures.
+  y       <- model$y
+  .pred   <- stats::predict(model)
+  .e      <- y - .pred ## Residual
+  .se     <- .e^2L
+  .sse    <- sum(.se)
+  .mse    <- mean(.se)
+  .rmse   <- sqrt(.mse)
+  .rse    <- .sse / sum((y - mean(y))^2L)
+  .r2     <- 1L - .rse
+  .r2_adj <- 1L -(.mse / var(y))
+  .auc    <- Metrics::auc(y, .pred)
+  # .mae  <- mean(abs(.e))
+  # .mad  <- .mae / length(y)
+  #.ROC <- ROCR::
+  return(data.frame(row.names = 1L,
     model_type = class(model)[1L],
-    hp_mtry = .hp_mtry, hp_node = .hp_node, hp_ntree = .hp_ntree,
-    mse = .mse, rmse = .rmse, rsq = .rsq, model_runtime_sec = sec_mod)
-  if(is.null(xtest) == FALSE & is.null(ytest) == FALSE){
-    .rss_t  <- sum((ytest - stats::predict(model, xtest))^2L)
-    .tss_t  <- sum((ytest - mean(ytest))^2L)
-    .mse_t  <- 1L / nrow(x) * .rss_t %>% round(2L)
-    .rmse_t <- sqrt(.mse_t) %>% round(2L)
-    .rsq_t  <- 1L - (.rss_t/.tss_t) %>% round(4L)
-    .model_performance_df$test_mse  <- .mse_t
-    .model_performance_df$test_rmse <- .rmse_t
-    .model_performance_df$test_rsq  <- .rsq_t
-  }
-  row.names(.model_performance_df) <- 1L
-  return(.model_performance_df)
+    sse  = .sse,
+    mse  = .mse,
+    rmse = .rmse,
+    rse  = .rse,
+    r2   = .r2,
+    r2_adj = .r2_adj,
+    auc = .auc))
 }
 
 #' Create the plot data.frame for the global linked plotly display.
 #' 
-#' Internal function, the plot data.frame of 1 layer, consumed in 
-#' local_attr_ls() and format_ls().
+#' Internal function, the plot data.frame of 1 layer, consumed downstream in 
+#' cheem_ls.
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
@@ -120,28 +156,27 @@ model_performance_df <- function(
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used.
 #' @return A data.frame, for the global linked plotly display.
-#' @export
+# #' @export
 #' @examples
 #' sub <- DALEX::apartments[1:200, 1:6]
 #' x <- sub[, 2:5]
 #' y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' ret <- global_view_1sp(x, y, basis_type = "pca",
-#'                        class = clas, layer_name ="SHAP")
+#' ret <- global_view_1layer(
+#'   x, y, class = clas,
+#'   basis_type = "pca", layer_name = "data")
 #' str(ret)
-global_view_1sp <- function(
-  x, y, basis_type = c("pca", "olda"),
-  class = NULL, ## class req for olda, add to _df's
+global_view_1layer <- function(
+  x, y, 
+  class = NULL, ## required for olda
+  basis_type = c("pca", "olda"),
   layer_name = class(x)[1]
 ){
   d <- 2L ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
-  tooltip <- 1L:nrow(x)
-  if(is.null(rownames(x)) == FALSE)
-    if(does_contain_nonnumeric(rownames(x)) == TRUE)
-      tooltip <- paste0("row: ", tooltip, ", ", rownames(x))
+  tooltip <- 1L:nrow(x) ## placeholder, decode_df makes a better tooltip.
   
   ## Projection
   x_std <- spinifex::scale_sd(x)
@@ -149,26 +184,26 @@ global_view_1sp <- function(
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
   proj <- x_std %*% basis %>% as.data.frame()
-  #proj <- spinifex::scale_01(proj) %>% as.data.frame()
+  proj <- spinifex::scale_01(proj)
   
   ## Column bind wide
-  ret <- cbind(1L:nrow(x), class, proj, y, layer_name, basis_type, tooltip, "")
-  colnames(ret) <- c("rownum", "class", paste0("V", 1L:d), "y",
-                     "layer_name", "projection_nm", "tooltip", "ggtext")
-  attr(ret, paste0(basis_type, " basis of ", layer_name)) <- basis
+  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, tooltip, proj)
+  colnames(ret) <- c("basis_type", "layer_name", "rownum",
+                     "class", "tooltip", paste0("V", 1L:d))
+  attr(ret, paste0(basis_type, ":", layer_name)) <- basis
   return(ret)
 }
 
 #' Create the local attribution layer data.frame
 #' 
-#' Internal function, the local attribution layer data.frame of 1 layer, consumed in 
-#' local_attr_ls().
+#' Internal function, the local attribution layer data.frame of 1 layer, 
+#' consumed 
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
-#' @param xtest Optional, out Of Sample data to find the local attribution of.
-#' @param ytest Optional, out Of Sample response to measure x with 
-#' if provided.
+# #'  @param xtest Optional, out Of Sample data to find the local attribution of.
+# #'  @param ytest Optional, out Of Sample response to measure x with 
+# #'  if provided.
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used.
 #' @param basis_type The type of basis used to approximate the data and 
@@ -176,282 +211,108 @@ global_view_1sp <- function(
 #'  Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
 #'  class.
-#' @param verbose Logical, Whether or not the function should print tictoc time
-#' info. Defaults to TRUE.
-#' @param noisy Logical, Whether of not the function should play a beeper tone
-#' upon completion. Defaults to TRUE.
+#' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
+#' @param noisy Logical, if a tone should be played on completion. 
+#' Defaults to TRUE.
 #' @return A data.frame, for the full local attribution matrix.
 #' @export
 #' @examples
 #' library(cheem)
-#' sub <- DALEX::apartments[1:200, 1:6]
+#' ## Regression:
 #' x <- sub[, 2:5]
 #' y <- sub$m2.price
 #' clas <- sub$district
 #' 
-#' ret <- local_attr_ls(
-#'   x, y, layer_name = "typically 'data'/'<attribution name>'",
-#'   basis_type = "pca", class = clas)
-#' names(ret)
-local_attr_ls <- function(
-  x, y, xtest = NULL, ytest = NULL, layer_name = "UNAMED",
-  basis_type = c("pca", "olda"), class = NULL, ## class req for olda
-  verbose = TRUE, noisy = TRUE
+#' .rf_fit <- default_rf(x, y)
+#' .shap_df <- attr_df_treeshap(.rf_fit, x)
+#' out_ls <- cheem_ls(x, y, class = clas,
+#'                    model = .rf_fit,
+#'                    attr_df = .shap_df)
+#' names(out_ls)
+#' 
+#' ## Save for used with shiny app (expects .rds):
+#' if(F) ## Don't accidentally save.
+#'   saveRDS(out_ls, "./my_cheem_ls.rds")
+cheem_ls <- function(
+  x, y, class = NULL,
+  model, attr_df,
+  basis_type = c("pca", "olda"), ## class req for olda
+  layer_name = class(model)[1],
+  verbose = TRUE,
+  keep_model = FALSE
 ){
-  if(verbose) tictoc::tic(paste0("local_attr_ls -- ", layer_name))
+  ## Initialize -----
+  if(verbose) tictoc::tic("cheem_ls")
   d <- 2L
   basis_type <- match.arg(basis_type)
-  
-  # ##attribution matrix, currently treeshap ----
-  # sec_attr_df <- system.time({
-  #   .m <- gc()
-  #   .attr_df <- treeshap_df(.mod, x)
-  #   .attr_df_xtest <- NULL ## Init
-  #   if(is.null(xtest) == FALSE) .attr_df_xtest <- treeshap_df(.mod, xtest)
-  # })[3L]
-  
-  ## global_view of Attribution space ----
-  sec_global_view_attr_sp <- system.time({
-    ## If classification, use .pred_clas over class
-    is_classification <- problem_type(y) == "classification"
-    if(is_classification == TRUE){
-      .lvls <- levels(class)
-      .pred_clas <- as.factor(.lvls[round(.pred)])
-    }
-    ## wants if() assignment over ifelse assignment for some reason
-    if(is_classification == TRUE)
-      .plot_clas <- .pred_clas else .plot_clas <- class
-    .m <- gc()
-    .global_view_df <- global_view_1sp(
-      .attr_df, y, basis_type, .plot_clas, layer_name = layer_name)
-  })[3L]
-  
-  ## $time_df, Execution time -----
-  runtime_df <- data.frame(
-    runtime_seconds = c(sec_mod, sec_attr_df, sec_global_view_attr_sp),
-    task = c("model (rF::rF)", "attribution (treeshap)", "global_view_df (PCA)"),
-    layer = layer_name)
-  if(verbose == TRUE) tictoc::toc()
-  if(noisy == TRUE & sum(runtime_df$runtime_seconds) > 30L) beepr::beep(1L)
-  
-  ## Keep attribution basis and return
-  LA_ls <- list(global_view_df = .global_view_df,
-                model = .mod, ## Heavy object, dropped but default in format_ls
-                model_performance_df = .model_performance_df,
-                attr_df = .attr_df,
-                attr_xtest_df = .attr_df_xtest, ## Typically NULL
-                runtime_df = runtime_df)
-  .basis_nm <- paste0(basis_type, " basis of ", layer_name)
-  attr(LA_ls, .basis_nm) <- attr(.global_view_df, .basis_nm)
-  return(LA_ls)
-}
-
-
-#' Format the nested local attribution layers
-#' 
-#' Internal function, formats all layers of all data.frames, consumed in 
-#' local_attr_ls().
-#' 
-#' @param local_attr_ls A return from `local_attr_ls()`.
-#' @param x The explanatory variables of the model.
-#' @param y The target variable of the model.
-#' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca".
-#' @param class The variable to group points by. Originally the _predicted_
-#'  class.
-#' @param keep_model Whether or not to keep the (sizable) model object. 
-#' Defaults to FALSE.
-#' @param verbose Logical, Whether or not the function should print tictoc time
-#' info.
-#' @return A list of formated data frames.
-#' @export
-format_ls <- function(
-  local_attr_ls, x, y,
-  basis_type = c("pca", "olda"),
-  class = NULL,
-  keep_model = FALSE,
-  verbose = TRUE
-){
-  if(verbose == TRUE) tictoc::tic("format_ls")
-  layer_name <- "SHAP"
-  d <- 2L
-  basis_type <- match.arg(basis_type)
+  is_classification <- is_discrete(y)
   rownum <- V2 <- projection_nm <- NULL
   
-  ## Init with data layer,
-  sec_global_view_data_sp <- system.time({ ## Init with data layer.
-    .mod  <- local_attr_ls$model
-    .pred <- stats::predict(.mod)
-    .plot_clas <- class # Init regression plot class
-    is_classification <- problem_type(y) == "classification"
-    if(is_classification == TRUE){
-      .lvls <- levels(class)
-      .pred_clas <- as.factor(.lvls[round(.pred)])
-      .plot_clas <- .pred_clas
-    }
-    b_global_view_df <- global_view_1sp( ## Only data, but will be bound in next chunck
-      x, y, basis_type, .plot_clas, layer_name = "data")
-    .m <- gc()
-  })[3L]
-  .data_basis_nm <- paste0(basis_type, " basis of data")
-  .data_basis <- attr(b_global_view_df, .data_basis_nm)
-  .attr_basis <- attr(local_attr_ls, paste0(basis_type, " basis of ", layer_name))
-  ### global_view_df, bound longer
-  b_global_view_df <- rbind(b_global_view_df, local_attr_ls$global_view_df)
+  ## Global view -----
+  .glob_dat  <- global_view_1layer(x, y, class, basis_type, "data")
+  .glob_attr <- global_view_1layer(attr_df, y, class, basis_type, class(attr_df)[1L])
+  .glob_view <- rbind(.glob_dat, .glob_attr)
+  ## list of global view bases
+  .dat_bas  <- attributes(.glob_dat)[length(attributes(.glob_dat))]
+  .attr_bas <- attributes(.glob_attr)[length(attributes(.glob_attr))]
+  .glob_basis_ls <- c(.dat_bas, .attr_bas)
   
-  ## decode_df_of -----
-  #### A decode display table at the observation/instance grain
-  if(is.null(class)) class <- as.factor(FALSE)
-  is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
-  decode_df <- data.frame(rownum = 1L:nrow(x), class = class, y)
-  .is_misclass <- NULL
-  decode_df <- cbind(decode_df, .pred, y - .pred) ## Layer residual
-  if(is_classification == TRUE){
-    .lvls <- levels(class)
-    .pred_clas <- as.factor(.lvls[round(.pred)])
-    .is_misclass <- .pred_clas != class
-    decode_df <- cbind(decode_df, .pred_clas, .is_misclass)
+  ## decode_df ----
+  if(is.null(class)) class <- factor(FALSE) ## dummy factor
+  .decode_left <- data.frame(
+    rownum = 1L:nrow(x), class = class, y,
+    prediction = predict(model))
+  .decode_right <- data.frame(
+    residual = y - predict(model), x) ##, attr_df) ## duplicate col names and long.
+  if(is_classification){
+    .pred_clas <- as.factor(levels(class)[round(predict(model))])
+    .is_missclas <- .pred_clas!= class
+    .decode_middle <- data.frame(
+      predicted_class = .pred_clas,
+      is_misclassified = .is_missclas)
+    .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
+  }else{
+    .decode_df <- cbind(.decode_left, .decode_right)
   }
+  ## Round numeric columns for readability.
+  sapply(.decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c)
   
-  ## bind wider, adding x, and tooltip
-  tooltip <- 1L:nrow(x) ## Init, if rownames null, just row numbers
-  ### Add rownames to tooltip if meaningful
+  ## Add tooltip ----
+  tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip
   if(is.null(rownames(x)) == FALSE)
+    ### Character rownames?
     if(does_contain_nonnumeric(rownames(x)) == TRUE)
-      tooltip <- paste0("row: ", tooltip, ", ", rownames(x))
-  ### If misclassified, add msg to tooltip.
-  is_classification <- ifelse(length(unique(y)) < 5L, TRUE, FALSE)
-  if(is_classification == TRUE){
-    tooltip[.is_misclass] <- paste0(
-      tooltip[.is_misclass],
-      "\nMisclassified! predicted: ", .pred_clas[.is_misclass],
+      tooltip <- paste0(tooltip, ", ", rownames(x))
+  if(is_classification){
+    ### Classification extension
+    tooltip[.is_missclas] <- paste0(
+      tooltip[.is_missclas],
+      "\nMisclassified! predicted: ", .pred_clas[.is_missclas],
       ", observed: ", class[.is_misclass])
     tooltip[!.is_misclass] <- paste0(
       tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])
+  }else{
+    ### Regression extension
+    tooltip <- paste0(
+      tooltip, "\nresidual: ", .decode_df$residual)
   }
-  decode_df <- cbind(decode_df, x, tooltip)
-  .nms <- c("rownum", "class", "y", "prediction", "residual")
-  if(is_classification == TRUE){
-    .nms <- c(.nms, "predicted_class", "is_misclassified", names(x), "tooltip")
-  }else{.nms <- c(.nms, names(x), "tooltip")}
-  names(decode_df) <- .nms
-  ## Also add tooltip to global_view
-  #### (it doesn't know of the model, to check misclassification)
-  b_global_view_df$tooltip <- dplyr::left_join(
-    b_global_view_df, decode_df, c("rownum" = "rownum"))$tooltip.y
-  .maha_df <- b_global_view_df %>%
-    dplyr::filter(projection_nm == "QQ Mahalanobis distance") %>%
-    dplyr::select(rownum, V2, layer_name) %>%
-    tidyr::pivot_wider(names_from  = layer_name, values_from = V2)
-  .lj <-  dplyr::left_join(decode_df, .maha_df, c("rownum" = "rownum"))
-  decode_df$maha_data <- .lj$data
-  decode_df$maha_SHAP <- .lj$SHAP
+  .glob_view$tooltip <- c(tooltip, tooltip)
+  .decode_df$tooltip <- tooltip
   
-  ### Rbind runtime_df
-  b_runtime_df <- rbind(
-    data.frame(runtime_seconds = sec_global_view_data_sp,
-               task = "global_view_df (PCA)", layer = "data"),
-    local_attr_ls$runtime_df)
-  row.names(b_runtime_df) <- 1L:nrow(b_runtime_df)
-  
-  ## Return:
-  ret <- list(
-    global_view_df = b_global_view_df, decode_df = decode_df,
-    model_performance_df = local_attr_ls$model_performance_df,
-    attr_df = local_attr_ls$attr_df, runtime_df = b_runtime_df,
-    problem_type = problem_type(y),
-    basis_ls = list(data_basis = .data_basis,
-                    attribution_basis = .attr_basis)
-  )
-  ## Keep heavy model object?
-  if(keep_model == TRUE) ret <- c(ret, model = local_attr_ls$model)
-  if(verbose == TRUE) tictoc::toc()
-  return(ret)
-}
-
-#' Format the nested local attribution layers
-#' 
-#' Internal function, formats all layers of all data.frames, consumed in 
-#' local_attr_ls().
-#' 
-#' @param x The explanatory variables of the model.
-#' @param y The target variable of the model
-#' @param xtest Optional, Out Of Sample data to find the local attribution of.
-#' @param ytest Optional, Out Of Sample response to measure xtext with 
-#' if provided.
-#' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca".
-#' @param class The variable to group points by. Originally the _predicted_
-#'  class.
-#' @param loc_attr_nm Name of the layer/attribution. Defaults to "SHAP".
-#' @param keep_model Whether or not to keep the (sizable) model object. 
-#' Defaults to FALSE.
-#' @param verbose Logical, Whether or not the function should print tictoc time
-#' info. Defaults to TRUE.
-#' @param noisy Logical, Whether or not the function should play a beepr tone
-#' upon completion. Defaults to TRUE.
-#' @return A list of formatted data frames.
-#' @export
-#' @examples
-#' sub <- DALEX::apartments[1:200, 1:6]
-#' set.seed(303)
-#' .idx_test <- sample(
-#'   1:nrow(sub), size = round(.2 * nrow(sub))) ## 20% index for testing
-#' X_train <- sub[-.idx_test, 2:5]
-#' Y_train <- sub$m2.price[-.idx_test]
-#' clas <- sub$district[-.idx_test]
-#' X_test  <- sub[.idx_test, 2:5]
-#' Y_test  <- sub$m2.price[.idx_test]
-#' 
-#' .cheem_ls <- cheem_ls(
-#'   x = X_train, y = Y_train, xtest = X_test, ytest = Y_test,
-#'   basis_type = "pca", class = clas,
-#'   keep_model = FALSE, verbose = TRUE, noisy = TRUE)
-#' names(.cheem_ls)
-#' 
-#' ## Save for used with shiny app (expects .rds):
-#' if(F) ## don't accidentally save a local file.
-#'   saveRDS(.cheem_ls, "./my_cheem_ls.rds")
-cheem_ls <- function(
-  x, y, xtest = NULL, ytest = NULL, basis_type = c("pca", "olda"),
-  class = NULL, loc_attr_nm = "SHAP", keep_model = FALSE,
-  verbose = TRUE, noisy = TRUE
-){
-  if(verbose == TRUE){
-    writeLines(paste0("cheem_ls started at ", Sys.time()))
-    tictoc::tic("cheem_ls total")
-  }
-  d <- 2L
-  basis_type <- match.arg(basis_type)
-  
-  ### Create shap layers in a list
-  la_ls <- local_attr_ls(
-    x, y, xtest, ytest, ## Could be NULL
-    loc_attr_nm, basis_type, class, verbose, noisy)
-  
-  ## Format into one list of formatted df rather than many lists of formatted df
-  formated_ls <- format_ls(
-    la_ls, x, y, basis_type, class, keep_model, verbose)
+  ## Cleanup and return
+  ret_ls <- list(
+    type = problem_type(y),
+    model = model, ## <-- only difference
+    model_performance_df = model_performance_df(model),
+    attr_df = attr_df,
+    global_view_df = .glob_view,
+    global_view_basis_ls = .glob_basis_ls,
+    decode_df = .decode_df)
   .m <- gc()
-  if(noisy == TRUE) beepr::beep(2L)
-  if(verbose == TRUE){
-    tictoc::toc()
-    writeLines(paste0("cheem_ls finished at ", Sys.time()))
-  }
-  return(formated_ls)
+  if(keep_model) ret_ls <- c(ret_ls, model = model)
+  if(verbose) tictoc::toc()
+  return(ret_ls)
 }
-
-
-
-
-
-
-
-
-
-default_rf <- 
-
-
 
 
 if(F){ ## THERORETICAL DEV -----

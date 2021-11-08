@@ -1,5 +1,5 @@
 ## Dependencies ------
-require("cheem")
+require(cheem)
 
 ## Data preprocess ------
 ## Data setup, spinifex::penguins
