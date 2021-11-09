@@ -8,6 +8,8 @@ linked_global_view(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
+  color = NULL,
+  shape = NULL,
   height_px = 480L,
   width_px = 960L
 )
@@ -22,12 +24,20 @@ as a dashed line.}
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
 
+\item{color}{A vector to map to the point color.
+Classification case defaults to predicted class, regression case defaults to
+class if passed to cheem_ls(), else residual.}
+
+\item{shape}{A vector to map to the point shape.
+Classification case defaults to predicted class, regression case defaults to
+class.}
+
 \item{height_px}{The height in pixels of the returned \code{plotly} plot.}
 
 \item{width_px}{The width in pixels of the returned \code{plotly} plot.}
 
 \item{do_include_maha_qq}{Logical, whether or not to add the qq plots of the
-Mahalanobis distance for the data- and attribution- spaces}
+Mahalanobis distance for the data- and attribution- spaces.}
 }
 \value{
 \code{plotly} plot of the global view, first 2 components of the basis of
@@ -48,8 +58,8 @@ clas <- sub$MS.Zoning
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+                     model = rf_fit,
+                     attr_df = shap_df)
 
 linked_global_view(this_ls)
 }

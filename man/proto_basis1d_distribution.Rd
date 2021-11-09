@@ -55,8 +55,8 @@ Y    <- as.integer(clas)
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+                     model = rf_fit,
+                     attr_df = shap_df)
 
 bas <- basis_local_attribution(shap_df, rownum = 1)
 mv <- manip_var_of(bas)
@@ -75,15 +75,15 @@ library(cheem)
 library(spinifex)
 ## Regression:
 sub <- amesHousing2018_thin[1:200, ]
-X <- sub[, 1:10]
+X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
-clas <- sub$MS.Zoning
+clas <- sub$ZoneMS
 
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+                     model = rf_fit,
+                     attr_df = shap_df)
 
 bas <- basis_local_attribution(shap_df, rownum = 1)
 mv  <- manip_var_of(bas)

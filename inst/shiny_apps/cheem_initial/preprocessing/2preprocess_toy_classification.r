@@ -65,7 +65,7 @@ this_sim_mvtnorm_cl <- function(
 X <- sim_EEE_p4
 .lvls <- LETTERS[1:3]
 Y <- attr(sim_EEE_p4, "cluster") %>% as.integer()
-clas <- factor(.lvls[y], levels = .lvls)
+clas <- factor(.lvls[Y], levels = .lvls)
 str(sim_EEE_p4)
 
 ## Visualize

@@ -19,6 +19,14 @@ Internal function, Extract and format the 1D local attribution basis from
 the provided local explanation's attribution.
 }
 \examples{
-attr_df <- mtcars ## Pretend this is a local attribution data.frame
-cheem:::basis_local_attribution(attr_df, rownum = 10)
+library(cheem)
+## Regression:
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:9]
+Y <- log(sub$SalePrice)
+clas <- sub$ZoneMS
+
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!#' basis_local_attribution(attr_df, rownum = 10)
+basis_local_attribution(shap_df, rownum = 1)
 }

@@ -14,7 +14,9 @@ radial_cheem_ggtour(
   pcp_shape = c(142, 124),
   angle = 0.2,
   row_index = NULL,
-  inc_vars = NULL
+  inc_vars = NULL,
+  reg_color = NULL,
+  reg_shape = NULL
 )
 }
 \arguments{
@@ -45,6 +47,12 @@ line segments to the basis display.}
 Defaults to TRUE; 1:n.}
 
 \item{inc_vars}{A vector of the names of the variables to include in the projection.}
+
+\item{reg_color}{For regression cases, the color of the points.
+Defaults to class if passed to cheem_ls(), else residual.}
+
+\item{reg_shape}{For regression cases, the shape of the points.
+Defaults to class.}
 }
 \value{
 \code{plotly} plot of the global view, first 2 components of the basis of
@@ -65,8 +73,8 @@ clas <- sub$district
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X)
 this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+                     model = rf_fit,
+                     attr_df = shap_df)
 
 bas <- basis_local_attribution(shap_df, rownum = 1)
 ggt <- radial_cheem_ggtour(

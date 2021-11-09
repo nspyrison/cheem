@@ -21,9 +21,9 @@
 #' library(cheem)
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
+#' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
@@ -70,9 +70,9 @@ default_rf <- function(
 #' library(cheem)
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
+#' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
@@ -115,14 +115,14 @@ attr_df_treeshap <- function(
 #' @param ytest Optional, out Of Sample response to measure x with 
 #' if provided.
 #' @return A dataframe of the local attributions.
-# #' @export
+#' @export
 #' @examples
 #' library(cheem)
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
+#' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' clas <- sub$ZoneMS
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' model_performance_df(rf_fit, X)
@@ -176,9 +176,9 @@ model_performance_df <- function(
 #' library(cheem)
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
+#' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
@@ -238,15 +238,15 @@ global_view_1layer <- function(
 #' library(cheem)
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
+#' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
 #' 
 #' ## Save for used with shiny app (expects .rds):
 #' if(F) ## Don't accidentally save.
@@ -293,7 +293,8 @@ cheem_ls <- function(
     .decode_df <- cbind(.decode_left, .decode_right)
   }
   ## Round numeric columns for readability.
-  sapply(.decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c)
+  .decode_df <- data.frame(lapply(
+    .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
   
   ## Add tooltip ----
   tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip

@@ -1,18 +1,17 @@
 # FIFA regression, save layer_ls for app -----
 ## Dependencies ------
 require(cheem)
-dat <- amesHousing2018_thin
-X <- dat[, 1:10]
-Y <- log(dat$SalePrice)
-clas <- dat$MS.Zoning
+dat  <- amesHousing2018_thin
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
+clas <- dat$ZoneMS
 
 rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X) ## 93.27 sec
+shap_df <- attr_df_treeshap(rf_fit, X) ## ~82 sec
 this_ls <- cheem_ls(X, Y,
                     model = rf_fit,
                     attr_df = shap_df)
-linked_global_view(this_ls)
-
+#linked_global_view(this_ls)
 
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){

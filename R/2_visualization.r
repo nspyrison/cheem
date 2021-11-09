@@ -10,8 +10,16 @@
 #' @return A matrix of the 1D basis
 #' @export
 #' @examples
-#' attr_df <- mtcars ## Pretend this is a local attribution data.frame
-#' cheem:::basis_local_attribution(attr_df, rownum = 10)
+#' library(cheem)
+#' ## Regression:
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:9]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$ZoneMS
+#' 
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!#' basis_local_attribution(attr_df, rownum = 10)
+#' basis_local_attribution(shap_df, rownum = 1)
 basis_local_attribution <- function(
   attr_df,
   rownum = 1
@@ -21,7 +29,7 @@ basis_local_attribution <- function(
   ## Extract formatted basis
   LA_bas <- attr_df %>%
     as.numeric %>%
-    matrix(ncol = 1L, dimnames = list(colnames(attr_df), "SHAP"))
+    matrix(ncol = 1L, dimnames = list(colnames(attr_df), class(attr_df)[1]))
   return(tourr::orthonormalise(LA_bas))
 }
 
@@ -60,8 +68,8 @@ basis_local_attribution <- function(
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
 #' 
 #' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' mv <- manip_var_of(bas)
@@ -80,15 +88,15 @@ basis_local_attribution <- function(
 #' library(spinifex)
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
+#' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
 #' 
 #' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' mv  <- manip_var_of(bas)
@@ -233,7 +241,13 @@ proto_basis1d_distribution <- function(
 #' @param height_px The height in pixels of the returned `plotly` plot.
 #' @param width_px The width in pixels of the returned `plotly` plot.
 #' @param do_include_maha_qq Logical, whether or not to add the qq plots of the
-#' Mahalanobis distance for the data- and attribution- spaces
+#' Mahalanobis distance for the data- and attribution- spaces.
+#' @param color A vector to map to the point color.
+#' Classification case defaults to predicted class, regression case defaults to
+#' class if passed to cheem_ls(), else residual.
+#' @param shape A vector to map to the point shape.
+#' Classification case defaults to predicted class, regression case defaults to
+#' class.
 #' @return `plotly` plot of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
@@ -248,14 +262,16 @@ proto_basis1d_distribution <- function(
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
 #' 
 #' linked_global_view(this_ls)
 linked_global_view <- function(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
+  color = NULL,
+  shape = NULL, 
   height_px = 480L,
   width_px = 960L
 ){
@@ -266,20 +282,27 @@ linked_global_view <- function(
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
-  if(is_classification == TRUE){
-    global_view_df$pred_clas <- global_view_df$color <-
-      cheem_ls$decode_df$predicted_class %>%
-      rep_len(nrow(global_view_df)) %>%
-      as.factor()
-  }  
-  if(is_classification == FALSE){ ## Regression
-    global_view_df$pred_clas <- as.factor(FALSE) ## dummy pred_clas
-    global_view_df$color <- cheem_ls$decode_df$residual %>%
-      rep_len(nrow(global_view_df))
+  ## setup shape and color
+  if(this_ls$type == "classification"){
+    if(is.null(color)) color <- cheem_ls$decode_df$predicted_class %>% as.factor()
+    if(is.null(shape)) shape <- cheem_ls$decode_df$predicted_class %>% as.factor()
+  }else{
+    ## Regression or unexpected type
+    if(length(unique(cheem_ls$decode_df$class)) > 1L){
+      ## Class defined
+      if(is.null(color)) color <- cheem_ls$decode_df$class %>% as.factor()
+      if(is.null(shape)) shape <- cheem_ls$decode_df$class %>% as.factor()
+    }else{
+      ## Class not defined
+      if(is.null(color)) color <- cheem_ls$decode_df$residual
+      if(is.null(shape)) shape <- as.factor(FALSE)
+    }
   }
+  global_view_df$color <- color %>% rep_len(nrow(global_view_df))
+  global_view_df$shape <- shape %>% rep_len(nrow(global_view_df))
   
-  u_nms <- unique(global_view_df$layer_name)
   ## Get the bases of the global view, map them
+  u_nms <- unique(global_view_df$layer_name)
   .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
                           layer_name = u_nms[1L])
   .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
@@ -289,21 +312,26 @@ linked_global_view <- function(
   .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
   .map_to_attr[, 1L] <- .map_to_attr[, 1L] / 3L
   
-  ## Proto for points
-  if(is_classification == TRUE)
+  ## Proto for main points
+  pts_main <- list()
+  if(is_discrete(color) == TRUE){
+    ### Discrete color mapping
     pts_main <- list(
       suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = color, shape = pred_clas,
+        ggplot2::aes(color = color, shape = shape,
                      tooltip = tooltip), alpha = .alpha)),
       ggplot2::scale_color_brewer(palette = "Dark2"))
-  if(is_classification == FALSE)
+  }
+  if(is_discrete(global_view_df$color) == FALSE){
+    ### continuous color mapping
     pts_main <- list(
       suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = color, shape = pred_clas,
+        ggplot2::aes(color = color, shape = shape,
                      tooltip = tooltip),  alpha = .alpha)),
       ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
                                       mid = "grey80",
                                       high = scales::muted("red")))
+  }
   
   ## Proto for highlighted points
   pts_highlight <- list()
@@ -398,6 +426,10 @@ linked_global_view <- function(
 #' @param row_index Numeric index of selected observations. 
 #' Defaults to TRUE; 1:n.
 #' @param inc_vars A vector of the names of the variables to include in the projection.
+#' @param reg_color For regression cases, the color of the points. 
+#' Defaults to class if passed to cheem_ls(), else residual.
+#' @param reg_shape For regression cases, the shape of the points.
+#' Defaults to class.
 #' @return `plotly` plot of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
@@ -412,8 +444,8 @@ linked_global_view <- function(
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X)
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
 #' 
 #' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' ggt <- radial_cheem_ggtour(
@@ -427,7 +459,9 @@ radial_cheem_ggtour <- function(
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .2,
   row_index = NULL,
-  inc_vars = NULL
+  inc_vars = NULL,
+  reg_color = NULL,
+  reg_shape = NULL
 ){
   if(is.null(row_index) == FALSE)
     if(sum(row_index) == 0L)
@@ -449,7 +483,6 @@ radial_cheem_ggtour <- function(
   
   ## Problem type: classification or regression?
   .prob_type <- cheem_ls$type ## Either "classification" or "regression"
-  .pred_clas <- as.factor(FALSE) ## Initialize dummy predicted class
   if(.prob_type == "classification")
     .pred_clas <- decode_df$predicted_class
   .alpha <- logistic_tform(nrow(decode_df))
@@ -492,7 +525,14 @@ radial_cheem_ggtour <- function(
   if(.prob_type == "regression"){
     .fixed_y <- c(spinifex::scale_sd(decode_df$y),
                   spinifex::scale_sd(decode_df$residual))
-    .col <- decode_df$residual ## Want to be able to color on residual.
+    ## Class defined
+    if(length(unique(cheem_ls$decode_df$class)) > 1L){
+      if(is.null(reg_color)) reg_color <- cheem_ls$decode_df$class %>% as.factor()
+      if(is.null(reg_shape)) reg_shape <- cheem_ls$decode_df$class %>% as.factor()
+    }else{ ## Class not defined
+      if(is.null(reg_color)) reg_color <- cheem_ls$decode_df$residual
+      if(is.null(reg_shape)) reg_shape <- as.factor(FALSE)
+    }
     
     ## Background:
     proto_bkg <- list()
@@ -523,13 +563,13 @@ radial_cheem_ggtour <- function(
     ## Background
     if(sum(!sel_index) > 0L)
       ggt <- ggt + spinifex::proto_point.1d_fix_y( ## cannot be made before ggtour()
-        aes_args = list(shape = .pred_clas),
+        aes_args = list(shape = reg_shape),
         identity_args = list(alpha = .alpha, color = "grey80"),
         row_index = .idx_bkg,
         fixed_y = .fix_y_bgk)
     ## Foreground
     ggt <- ggt + spinifex::proto_point.1d_fix_y( ## Wants to come early as it appends data$y
-      aes_args = list(color = .pred_clas, shape = .pred_clas),
+      aes_args = list(color = reg_color, shape = reg_shape),
       identity_args = list(alpha = .alpha),
       row_index = .idx_fore,
       fixed_y = .fix_y_fore) +

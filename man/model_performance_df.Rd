@@ -29,9 +29,9 @@ Internal function, used downstream in cheem_ls.
 library(cheem)
 ## Regression:
 sub <- amesHousing2018_thin[1:200, ]
-X <- sub[, 1:10]
+X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
-clas <- sub$MS.Zoning
+clas <- sub$ZoneMS
 
 rf_fit <- default_rf(X, Y)
 model_performance_df(rf_fit, X)
