@@ -15,59 +15,56 @@ server <- function(input, output, session){
     if(dat %in% expected_data_char == FALSE)
       stop("data string not matched.")
     
-    ### BY PRODUCT: UPDATE PRIM/COMP OBS
     if(dat == "toy classification"){
-      primary_obs    <- 18L
-      comparison_obs <- 111L
+      ret      <- toy_ls
+      prim_obs <- 18L
+      comp_obs <- 111L
     }else if(dat == "penguins"){
-      primary_obs    <- 15L
-      comparison_obs <- 282L
+      ret      <- penguins_ls
+      prim_obs <- 15L
+      comp_obs <- 282L
     }else if(dat == "toy regression"){
-      primary_obs    <- 11L
-      comparison_obs <- 116L
+      ret      <- toy_reg_ls
+      prim_obs <- 11L
+      comp_obs <- 116L
     }else if(dat == "fifa"){
-      primary_obs    <- 1L
-      comparison_obs <- 8L
+      ret      <- fifa_ls
+      prim_obs <- 1L
+      comp_obs <- 8L
     }else if(dat == "ames housing 2018"){
-      primary_obs    <- 1703L
-      comparison_obs <- 1368L
+      ret      <- ames2018_ls
+      prim_obs <- 1703L
+      comp_obs <- 1374L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
-      primary_obs    <- 1L
-      comparison_obs <- 2L
+      file_path <- req(input$in_cheem_ls$datapath)
+      tryCatch(ret <- readRDS(file_path),
+               error = function(e) stop(safeError(e)))
+      prim_obs <- 1L
+      comp_obs <- 2L
     }
     # }else if(dat == "apartments"){
-    #   primary_obs    <- 485L
-    #   comparison_obs <- 487L
+    #   ret            <- apartments_ls
+    #   prim_obs <- 485L
+    #   comp_obs <- 487L
     # }else if(dat == "diabetes (wide)"){
-    #   primary_obs    <- 123L
-    #   comparison_obs <- 237L
+    #   ret            <- diabetes_wide_ls
+    #   prim_obs <- 123L
+    #   comp_obs <- 237L
     # }else if(dat == "diabetes (long)"){
-    #   primary_obs    <- 479L
-    #   comparison_obs <- 674L
+    #   ret      <- diabetes_long_ls
+    #   prim_obs <- 479L
+    #   comp_obs <- 674L
     
+    ### BY PRODUCT: UPDATE PRIM/COMP OBS
     .n_max <- 1e6
     updateNumericInput(
       session, "primary_obs",
       label = "Primary observation rownum, ('*' point):",
-      min = 1L, max = .n_max, step = 1L, value = primary_obs)
+      min = 1L, max = .n_max, step = 1L, value = prim_obs)
     updateNumericInput(
       session, "comparison_obs",
       label = "Comparison observation rownum, ('x' ponit):",
-      min = 1L, max = .n_max, step = 1L, value = comparison_obs)
-    
-    ### CHEEM_LS TO RETRUN
-    # all loaded at the top of ui.r
-    if(dat == "toy classification"){    ret <- toy_ls
-    }else if(dat == "penguins"){        ret <- penguins_ls
-    }else if(dat == "fifa"){            ret <- fifa_ls
-    }else if(dat == "apartments"){      ret <- apartments_ls
-    }else if(dat == "diabetes (wide)"){ ret <- diabetes_wide_ls
-    }else if(dat == "diabetes (long)"){ ret <- diabetes_long_ls
-    }else{ ## User uploaded data
-      file_path <- req(input$in_cheem_ls$datapath)
-      tryCatch(ret <- readRDS(file_path),
-               error = function(e) stop(safeError(e)))
-    }
+      min = 1L, max = .n_max, step = 1L, value = comp_obs)
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
     var_nms <- colnames(ret$attr_df)

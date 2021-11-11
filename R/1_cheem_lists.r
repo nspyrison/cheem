@@ -42,7 +42,7 @@ default_rf <- function(
       y~., data = data.frame(y, x),
       mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree)
   )
-  class(.mod) <- rev(class(.mod)) ## Make "radomForest" first
+  
   .m <- gc()
   if(verbose) tictoc::toc()
   return(.mod)
@@ -79,6 +79,7 @@ default_rf <- function(
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
+#' linked_global_view(this_ls)
 attr_df_treeshap <- function(
   randomForest_model,
   x,
@@ -91,13 +92,13 @@ attr_df_treeshap <- function(
     tictoc::tic("attr_df_treeshap")
   }
   .rfu <- treeshap::randomForest.unify(randomForest_model, x)
-  ret <- treeshap::treeshap(.rfu, x = x)
+  ret  <- treeshap::treeshap(.rfu, x = x)
   if(keep_heavy == FALSE)
     ret <- ret[[1L]]
   ## Keeping only 1; reduces ~99% of the obj size, keep shap values.
   ## But, we lose the iBreakdown-like plot of treeshap::plot_contribution when we take this apart.
   
-  attr(ret, "class") <- c("treeshap", "data.frame")
+  class(ret) <- c("data.frame", "treeshap")
   if(verbose) tictoc::toc()
   if(noisy) beepr::beep(1L)
   return(ret)
@@ -147,7 +148,7 @@ model_performance_df <- function(
   # .mad  <- .mae / length(y)
   #.ROC <- ROCR::
   return(data.frame(row.names = 1L,
-    model_type = class(model)[1L],
+    model_type = class(model)[length(class(model))],
     sse  = .sse,
     mse  = .mse,
     rmse = .rmse,
@@ -268,7 +269,8 @@ cheem_ls <- function(
   
   ## Global view -----
   .glob_dat  <- global_view_1layer(x, y, class, basis_type, "data")
-  .glob_attr <- global_view_1layer(attr_df, y, class, basis_type, class(attr_df)[1L])
+  .glob_attr <- global_view_1layer(attr_df, y, class, basis_type, 
+                                   class(attr_df)[length(class(attr_df))])
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## list of global view bases
   .dat_bas  <- attributes(.glob_dat)[length(attributes(.glob_dat))]

@@ -81,14 +81,15 @@ clas <- sub$ZoneMS
 
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
 
-bas <- basis_local_attribution(shap_df, rownum = 1)
+bas <- basis_pca(X)
 mv  <- manip_var_of(bas)
-ggt <- radial_cheem_ggtour(
-  this_ls, basis = bas, manip_var = mv, angle = .3)
+mt_path <- manual_tour(bas, mv)
+
+ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
+  proto_point() +
+  proto_basis1d(position = "top2d") +
+  proto_basis1d_distribution(shap_df, group_by = clas, position = "top2d")
 \dontrun{
 animate_plotly(ggt)
 }

@@ -8,15 +8,13 @@ radial_cheem_ggtour(
   cheem_ls,
   basis,
   manip_var,
-  primary_obs,
-  comparison_obs,
+  primary_obs = NULL,
+  comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124),
   angle = 0.2,
   row_index = NULL,
-  inc_vars = NULL,
-  reg_color = NULL,
-  reg_shape = NULL
+  inc_vars = NULL
 )
 }
 \arguments{
@@ -47,12 +45,6 @@ line segments to the basis display.}
 Defaults to TRUE; 1:n.}
 
 \item{inc_vars}{A vector of the names of the variables to include in the projection.}
-
-\item{reg_color}{For regression cases, the color of the points.
-Defaults to class if passed to cheem_ls(), else residual.}
-
-\item{reg_shape}{For regression cases, the shape of the points.
-Defaults to class.}
 }
 \value{
 \code{plotly} plot of the global view, first 2 components of the basis of
@@ -64,11 +56,11 @@ and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
 library(cheem)
-library(spinifex)
 ## Regression:
-X <- sub[, 2:5]
-Y <- sub$m2.price
-clas <- sub$district
+sub <- amesHousing2018_thin[1:200, ]
+X <- sub[, 1:9]
+Y <- log(sub$SalePrice)
+clas <- sub$ZoneMS
 
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X)
@@ -77,8 +69,24 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      attr_df = shap_df)
 
 bas <- basis_local_attribution(shap_df, rownum = 1)
-ggt <- radial_cheem_ggtour(
-  this_ls, basis = bas, manip_var = 1)
+ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
+\dontrun{
+spinifex::animate_plotly(ggt)
+}
+
+## Classification:
+X    <- flea[, 1:6]
+clas <- flea$species
+Y    <- as.integer(clas)
+
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+this_ls <- cheem_ls(X, Y, class = clas,
+                     model = rf_fit,
+                     attr_df = shap_df)
+
+bas <- basis_local_attribution(shap_df, rownum = 1)
+ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
 \dontrun{
 animate_plotly(ggt)
 }
