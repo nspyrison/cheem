@@ -86,7 +86,8 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      attr_df = shap_df)
 
 bas <- basis_local_attribution(shap_df, rownum = 1)
-ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
+ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1,
+  primary_obs = 1, comparison_obs = 2)
 \dontrun{
 animate_plotly(ggt)
 }

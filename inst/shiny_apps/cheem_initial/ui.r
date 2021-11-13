@@ -40,7 +40,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     selectInput(
       "dat_char", "Data:",
       choices = expected_data_char,
-      selected = "toy regression"), #"toy classification"),
+      selected = "penguins"), #"toy classification"),
     conditionalPanel(
       "input.dat_char == '<upload preprocessed cheem_ls (.rds file)>'",
       fileInput("in_cheem_ls", "<preprocessed cheem_ls saved to .rds>",

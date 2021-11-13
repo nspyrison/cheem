@@ -11,7 +11,7 @@ cheem_ls(
   model,
   attr_df,
   basis_type = c("pca", "olda"),
-  layer_name = class(model)[1],
+  layer_name = class(model)[length(class(model))],
   verbose = TRUE,
   keep_model = FALSE
 )
@@ -29,7 +29,7 @@ attribution space from. Expects "pca" or "olda" (requires \code{clas}).
 Defaults to "pca".}
 
 \item{layer_name}{Character layer name, typically the type of local
-attribution used.}
+attribution used. Defaults to the last class of the model.}
 
 \item{verbose}{Logical, if runtime should be printed. Defaults to TRUE.}
 

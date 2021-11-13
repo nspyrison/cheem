@@ -82,14 +82,44 @@ clas <- sub$ZoneMS
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 
-bas <- basis_pca(X)
-mv  <- manip_var_of(bas)
-mt_path <- manual_tour(bas, mv)
+bas_p <- basis_local_attribution(shap_df, rownum = 1)
+bas_c <- basis_local_attribution(shap_df, rownum = 2)
+diff <- abs(bas_p - bas_c)
+mv <- which(diff == max(diff))
+mt_path <- manual_tour(bas_p, mv)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
   proto_point() +
+  proto_basis1d_distribution(
+    attr_df = shap_df, group_by = clas, position = "top2d",
+    primary_obs = 1, comparison_obs = 2)
   proto_basis1d(position = "top2d") +
-  proto_basis1d_distribution(shap_df, group_by = clas, position = "top2d")
+  proto_origin()
+\dontrun{
+animate_plotly(ggt)
+}
+
+## Classification:
+X    <- flea[, 1:6]
+clas <- flea$species
+Y    <- as.integer(clas)
+
+rf_fit  <- default_rf(X, Y)
+shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+
+bas_p <- basis_local_attribution(shap_df, rownum = 1)
+bas_c <- basis_local_attribution(shap_df, rownum = 2)
+diff <- abs(bas_p - bas_c)
+mv <- which(diff == max(diff))
+mt_path <- manual_tour(bas_p, mv)
+
+ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
+  proto_density() +
+  proto_basis1d_distribution(
+    attr_df = shap_df, group_by = clas, position = "top1d",
+    primary_obs = 1, comparison_obs = 2) +
+  proto_basis1d(position = "top1d") +
+  proto_origin1d()
 \dontrun{
 animate_plotly(ggt)
 }

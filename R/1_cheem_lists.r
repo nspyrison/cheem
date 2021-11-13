@@ -165,12 +165,12 @@ model_performance_df <- function(
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
-#' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca".
 #' @param class The variable to group points by. Originally the _predicted_
 #'  class.
+#' @param basis_type The type of basis used to approximate the data and 
+#' attribution space from. Defaults to "pca".
 #' @param layer_name Character layer name, typically the type of local 
-#' attribution used.
+#' attribution used. Defaults to the name of the last class of x.
 #' @return A data.frame, for the global linked plotly display.
 # #' @export
 #' @examples
@@ -187,10 +187,10 @@ model_performance_df <- function(
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
 global_view_1layer <- function(
-  x, y, 
+  x, y,
   class = NULL, ## required for olda
   basis_type = c("pca", "olda"),
-  layer_name = class(x)[1]
+  layer_name = class(x)[length(class(x))] ## Name of the last class _ie_ `treeshap``
 ){
   d <- 2L ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
@@ -224,7 +224,7 @@ global_view_1layer <- function(
 # #'  @param ytest Optional, out Of Sample response to measure x with 
 # #'  if provided.
 #' @param layer_name Character layer name, typically the type of local 
-#' attribution used.
+#' attribution used. Defaults to the last class of the model.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Expects "pca" or "olda" (requires `clas`).
 #'  Defaults to "pca".
@@ -256,7 +256,7 @@ cheem_ls <- function(
   x, y, class = NULL,
   model, attr_df,
   basis_type = c("pca", "olda"), ## class req for olda
-  layer_name = class(model)[1],
+  layer_name = class(model)[length(class(model))],
   verbose = TRUE,
   keep_model = FALSE
 ){

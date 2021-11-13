@@ -28,7 +28,7 @@ dat <- .dat_less_ys %>%
     bdy = (weight_kg+(height_cm/100L)^2L)/2L, ## bmi wasn't working well after 01 scaling.
     age = age,
     react = movement_reactions,
-    atk = (attacking_finishing+skill_long_passing+attacking_volleys+
+    off = (attacking_finishing+skill_long_passing+attacking_volleys+
              power_long_shots+skill_curve+mentality_positioning+attacking_crossing+
              attacking_short_passing+skill_dribbling+skill_ball_control)/10L,
     def = (defending_sliding_tackle+mentality_interceptions+

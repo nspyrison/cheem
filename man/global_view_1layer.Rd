@@ -9,7 +9,7 @@ global_view_1layer(
   y,
   class = NULL,
   basis_type = c("pca", "olda"),
-  layer_name = class(x)[1]
+  layer_name = class(x)[length(class(x))]
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ class.}
 attribution space from. Defaults to "pca".}
 
 \item{layer_name}{Character layer name, typically the type of local
-attribution used.}
+attribution used. Defaults to the name of the last class of x.}
 }
 \value{
 A data.frame, for the global linked plotly display.

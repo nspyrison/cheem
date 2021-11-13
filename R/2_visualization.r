@@ -95,17 +95,48 @@ basis_local_attribution <- function(
 #' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
 #' 
-#' bas <- basis_pca(X)
-#' mv  <- manip_var_of(bas)
-#' mt_path <- manual_tour(bas, mv)
+#' bas_p <- basis_local_attribution(shap_df, rownum = 1)
+#' bas_c <- basis_local_attribution(shap_df, rownum = 2)
+#' diff <- abs(bas_p - bas_c)
+#' mv <- which(diff == max(diff))
+#' mt_path <- manual_tour(bas_p, mv)
 #' 
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
 #'   proto_point() +
+#'   proto_basis1d_distribution(
+#'     attr_df = shap_df, group_by = clas, position = "top2d",
+#'     primary_obs = 1, comparison_obs = 2)
 #'   proto_basis1d(position = "top2d") +
-#'   proto_basis1d_distribution(shap_df, group_by = clas, position = "top2d")
+#'   proto_origin()
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
+#' 
+#' ## Classification:
+#' X    <- flea[, 1:6]
+#' clas <- flea$species
+#' Y    <- as.integer(clas)
+#' 
+#' rf_fit  <- default_rf(X, Y)
+#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#'
+#' bas_p <- basis_local_attribution(shap_df, rownum = 1)
+#' bas_c <- basis_local_attribution(shap_df, rownum = 2)
+#' diff <- abs(bas_p - bas_c)
+#' mv <- which(diff == max(diff))
+#' mt_path <- manual_tour(bas_p, mv)
+#' 
+#' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
+#'   proto_density() +
+#'   proto_basis1d_distribution(
+#'     attr_df = shap_df, group_by = clas, position = "top1d",
+#'     primary_obs = 1, comparison_obs = 2) +
+#'   proto_basis1d(position = "top1d") +
+#'   proto_origin1d()
+#' \dontrun{
+#' animate_plotly(ggt)
+#' }
+
 proto_basis1d_distribution <- function(
   attr_df, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
@@ -130,8 +161,10 @@ proto_basis1d_distribution <- function(
   
   ## Subset rows then columns
   if(is.null(row_index) == FALSE){
-    attr_df  <- attr_df[ c(row_index, primary_obs, comparison_obs), ]
-    group_by <- group_by[c(row_index, primary_obs, comparison_obs)]
+    ## enforce keep prim/comp obs
+    row_index[c(primary_obs, comparison_obs)] <- TRUE
+    attr_df  <- attr_df[ row_index, ]
+    group_by <- group_by[row_index]
   }
   if(is.null(inc_vars) == FALSE)
     attr_df <- attr_df[, colnames(attr_df) %in% inc_vars]
@@ -140,8 +173,7 @@ proto_basis1d_distribution <- function(
   
   ## Orthonormalize each row.
   .m <- sapply(1L:.n, function(i){
-    row_bas <- basis_local_attribution(attr_df, i)
-    attr_df[i, ] <<- tourr::orthonormalise(row_bas)
+    attr_df[i, ] <<- basis_local_attribution(attr_df, i)
   })
   
   ## Pivot the attr values (columns) longer to rows.
@@ -169,15 +201,15 @@ proto_basis1d_distribution <- function(
   }
   
   ## Map them to position
-  if(position %in% c("top1d, floor1d")){.map_to_tgt <- .map_to_density
+  if(position %in% c("top1d", "floor1d")){.map_to_tgt <- .map_to_density
   }else .map_to_tgt <- .map_to_data
   .df_basis_distr <- spinifex::map_relative(
     .df_basis_distr, position, .map_to_tgt)
   
-  .alpha <- logistic_tform(.n) / 15L
+  .alpha <- logistic_tform(.n) / 5L
   ## Basis/attribution distribution of the rows of the attr_df
   ret <- list(suppressWarnings(ggplot2::geom_point(
-    ggplot2::aes(x, y, color = group_by, tooltip = rownum),
+    ggplot2::aes(x, y, color = group_by),
     .df_basis_distr, shape = shape, alpha = .alpha, size = 1.5)))
   
   ## Add PCP lines if needed.
@@ -445,7 +477,8 @@ linked_global_view <- function(
 #' bas <- basis_local_attribution(shap_df, rownum = 1)
 #' ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
 #' \dontrun{
-#' spinifex::animate_plotly(ggt)
+#' spinifex::animate_plotly(ggt) ## Error in paste(group, frame, sep = "-") : object 'group' not found 
+#' spinifex::animate_gganimate(ggt) ## Error in `$<-.data.frame`(`*tmp*`, "group", value = "") : replacement has 1 row, data has 0 
 #' }
 #' 
 #' ## Classification:
@@ -460,7 +493,8 @@ linked_global_view <- function(
 #'                      attr_df = shap_df)
 #' 
 #' bas <- basis_local_attribution(shap_df, rownum = 1)
-#' ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
+#' ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1,
+#'   primary_obs = 1, comparison_obs = 2)
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
@@ -493,8 +527,8 @@ radial_cheem_ggtour <- function(
   ggt <- spinifex::last_ggtour()
   
   ## Change row_index from numeric to logical if needed and replicate
-  sel_index <- as_logical_index(
-    c(row_index, .prim_obs, .comp_obs), nrow(decode_df))
+  row_index <- as_logical_index(row_index, nrow(decode_df))
+  row_index[c(.prim_obs, .comp_obs)] <- TRUE
   
   ## Problem type: classification or regression?
   .prob_type <- cheem_ls$type ## Either "classification" or "regression"
@@ -510,7 +544,12 @@ radial_cheem_ggtour <- function(
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
-        row_index = sel_index) +
+        row_index = row_index) +
+      proto_basis1d_distribution(
+        cheem_ls$attr_df, group_by = .pred_clas, position = "top1d",
+        do_add_pcp_segments = as.logical(do_add_pcp_segments),
+        primary_obs = .prim_obs, comparison_obs = .comp_obs,
+        shape = pcp_shape, inc_vars = inc_vars, row_index = row_index) +
       spinifex::proto_basis1d(position = "top1d", manip_col = "black") +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
@@ -520,12 +559,7 @@ radial_cheem_ggtour <- function(
       ## Highlight shap obs
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
-        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black")) +
-      proto_basis1d_distribution(
-        cheem_ls$attr_df, group_by = .pred_clas, position = "top1d",
-        do_add_pcp_segments = as.logical(do_add_pcp_segments),
-        primary_obs = .prim_obs, comparison_obs = .comp_obs,
-        shape = pcp_shape, inc_vars = inc_vars, row_index = row_index)
+        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
   }
   
   ### Regression case -----
@@ -550,13 +584,15 @@ radial_cheem_ggtour <- function(
     .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
     .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
     ## Foreground:
-    .dat_fore   <- rbind(.dat[sel_index, ], .dat[sel_index, ])
-    .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat_fore)))
-    .idx_fore   <- c(sel_index, sel_index)
+    .dat_fore   <- rbind(.dat[row_index, ], .dat[row_index, ])
+    .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat)))
+    .idx_fore   <- c(row_index, row_index)
     .fix_y_fore <- .fixed_y[.idx_fore]
+    .df_hline <- data.frame(x=0, facet_var = "residual")
     
     if(F){ ## Testing minimal example
-      spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
+      ggt <-
+        spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
         spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
         spinifex::append_fixed_y(fixed_y = .fix_y_fore) +
         spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.7, -.1)) +
@@ -575,8 +611,7 @@ radial_cheem_ggtour <- function(
       spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.7, .3)) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
-      ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5),
-                     #legend.position = "off"
+      ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5),#legend.position = "off"
                      ) +
       # scale_col +
       ## Foreground
@@ -596,11 +631,12 @@ radial_cheem_ggtour <- function(
       ## Highlight primary obs
       spinifex::proto_highlight(
         row_index = .doub_prim_obs,
-        identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"))
+        identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
+      ggplot2::geom_hline(aes(yintercept = x), .df_hline) +
+      spinifex::proto_origin()
   }
   
   ## Return the static ggtour, animate in app
   return(ggt)
 }
-
 
