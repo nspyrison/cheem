@@ -131,7 +131,7 @@ basis_local_attribution <- function(
 #'   proto_basis1d_distribution(
 #'     attr_df = shap_df, group_by = clas, position = "top1d",
 #'     primary_obs = 1, comparison_obs = 2) +
-#'   proto_basis1d(position = "top1d") +
+#'   proto_basis1d(position = "bottom1d") +
 #'   proto_origin1d()
 #' \dontrun{
 #' animate_plotly(ggt)
@@ -201,10 +201,8 @@ proto_basis1d_distribution <- function(
   }
   
   ## Map them to position
-  if(position %in% c("top1d", "floor1d")){.map_to_tgt <- .map_to_density
-  }else .map_to_tgt <- .map_to_data
   .df_basis_distr <- spinifex::map_relative(
-    .df_basis_distr, position, .map_to_tgt)
+    .df_basis_distr, position, .map_to_data)
   
   .alpha <- logistic_tform(.n) / 5L
   ## Basis/attribution distribution of the rows of the attr_df
@@ -212,7 +210,30 @@ proto_basis1d_distribution <- function(
     ggplot2::aes(x, y, color = group_by),
     .df_basis_distr, shape = shape, alpha = .alpha, size = 1.5)))
   
-  ## Add PCP lines if needed.
+  #### Add basis rectangle/dashed zero line ----
+  ## Initialize data.frames, before scaling
+  .df_rect <- data.frame(x = c(-1L, 1L), y = c(.5, .p + .5) / .p)
+  .df_seg0 <- data.frame(x = 0L, y = c(.5, .p + .5) / .p)
+  .df_rect <- map_relative(.df_rect, position, .map_to_data)
+  .df_seg0 <- map_relative(.df_seg0, position, .map_to_data)
+  if(.is_faceted){
+    .facet_var <- list(facet_var = "_basis_")
+    .df_rect <- spinifex:::.bind_elements2df(.facet_var, .df_rect)
+    .df_seg0 <- spinifex:::.bind_elements2df(.facet_var, .df_seg0)
+  }
+  ## add protos
+  ret <- c(
+    ret, 
+    ggplot2::geom_segment(
+      ggplot2::aes(x = min(x), y = min(y), xend = max(x), yend = max(y)),
+      .df_seg0, color = "grey80", linetype = 2L),
+    ## Outside rectangle, grey60, unit-width, (height = p+1)
+    ggplot2::geom_rect(
+      ggplot2::aes(xmin = min(x), xmax = max(x), ymin = min(y), ymax = max(y)),
+      .df_rect, fill = NA, color = "grey60"))
+           
+  
+  #### Add PCP lines if needed. ----
   if(do_add_pcp_segments == TRUE){
     ## Make the right table to inner join to.
     .df_basis_distr2 <- dplyr::mutate(
@@ -550,7 +571,7 @@ radial_cheem_ggtour <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         shape = pcp_shape, inc_vars = inc_vars, row_index = row_index) +
-      spinifex::proto_basis1d(position = "top1d", manip_col = "black") +
+      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
@@ -585,7 +606,7 @@ radial_cheem_ggtour <- function(
     .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
     ## Foreground:
     .dat_fore   <- rbind(.dat[row_index, ], .dat[row_index, ])
-    .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat)))
+    .facet_fore <- factor(rep(c("observed y", "residual"), length.out = nrow(.dat_fore)))
     .idx_fore   <- c(row_index, row_index)
     .fix_y_fore <- .fixed_y[.idx_fore]
     .df_hline <- data.frame(x=0, facet_var = "residual")
@@ -599,8 +620,8 @@ radial_cheem_ggtour <- function(
         ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
         ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90, vjust = 0.5)) +
         proto_point() +
-        proto_basis1d_distribution(cheem_ls$attr_df, position = "floor2d") +
-        proto_basis1d("floor2d") +
+        proto_basis1d_distribution(cheem_ls$attr_df, position = "floor1d") +
+        proto_basis1d("bottom1d") +
         spinifex::proto_highlight(row_index = .doub_comp_obs) +
         spinifex::proto_highlight(row_index = .doub_prim_obs)
     }
@@ -611,7 +632,7 @@ radial_cheem_ggtour <- function(
       spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.7, .3)) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
-      ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5),#legend.position = "off"
+      ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)#legend.position = "off"
                      ) +
       # scale_col +
       ## Foreground
@@ -620,10 +641,10 @@ radial_cheem_ggtour <- function(
         #aes_args = list(color = reg_color, shape = reg_shape),
         identity_args = list(alpha = .alpha), row_index = .idx_fore) +
       proto_basis1d_distribution(
-        cheem_ls$attr_df, position = "floor2d", shape = c(142L, 124L),
+        cheem_ls$attr_df, position = "floor1d", shape = c(142L, 124L),
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = primary_obs, comparison_obs = comparison_obs) +
-      spinifex::proto_basis1d(position = "floor2d", manip_col = "black") +
+      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
       ## Highlight comparison obs
       spinifex::proto_highlight(
         row_index = .doub_comp_obs,
@@ -632,7 +653,7 @@ radial_cheem_ggtour <- function(
       spinifex::proto_highlight(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
-      ggplot2::geom_hline(aes(yintercept = x), .df_hline) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = x), .df_hline) +
       spinifex::proto_origin()
   }
   

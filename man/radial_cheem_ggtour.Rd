@@ -71,7 +71,8 @@ this_ls <- cheem_ls(X, Y, class = clas,
 bas <- basis_local_attribution(shap_df, rownum = 1)
 ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
 \dontrun{
-spinifex::animate_plotly(ggt)
+spinifex::animate_plotly(ggt) ## Error in paste(group, frame, sep = "-") : object 'group' not found 
+spinifex::animate_gganimate(ggt) ## Error in `$<-.data.frame`(`*tmp*`, "group", value = "") : replacement has 1 row, data has 0 
 }
 
 ## Classification:

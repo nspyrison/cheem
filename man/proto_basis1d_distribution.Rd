@@ -118,7 +118,7 @@ ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
   proto_basis1d_distribution(
     attr_df = shap_df, group_by = clas, position = "top1d",
     primary_obs = 1, comparison_obs = 2) +
-  proto_basis1d(position = "top1d") +
+  proto_basis1d(position = "bottom1d") +
   proto_origin1d()
 \dontrun{
 animate_plotly(ggt)
