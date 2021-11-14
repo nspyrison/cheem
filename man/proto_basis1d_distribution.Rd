@@ -7,7 +7,7 @@
 proto_basis1d_distribution(
   attr_df,
   group_by = as.factor(FALSE),
-  position = c("top1d", "floor1d", "top2d", "floor2d", "off"),
+  position = c("top1d", "floor1d", "bottom1d", "off"),
   shape = c(142, 124),
   do_add_pcp_segments = TRUE,
   primary_obs = 1,
@@ -20,7 +20,7 @@ proto_basis1d_distribution(
 \item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
 \item{position}{The position for the basis, one of: c("top1d", "floor1d",
-"top2d", "floor2d", "off").
+"bottom1d", "off").
 Defaults to "top1d"; basis above the density curves.}
 
 \item{shape}{Number specifying the shape of the basis distribution points.
@@ -87,13 +87,15 @@ bas_c <- basis_local_attribution(shap_df, rownum = 2)
 diff <- abs(bas_p - bas_c)
 mv <- which(diff == max(diff))
 mt_path <- manual_tour(bas_p, mv)
+fixed_pred <- predict(rf_fit)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
+  append_fixed_y(fixed_y = fixed_pred) +
   proto_point() +
   proto_basis1d_distribution(
-    attr_df = shap_df, group_by = clas, position = "top2d",
-    primary_obs = 1, comparison_obs = 2)
-  proto_basis1d(position = "top2d") +
+    attr_df = shap_df, group_by = clas, position = "top1d",
+    primary_obs = 1, comparison_obs = 2) +
+  proto_basis1d(position = "bottom1d") +
   proto_origin()
 \dontrun{
 animate_plotly(ggt)
