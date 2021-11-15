@@ -29,8 +29,8 @@ c_bas_attr <- basis_attr_df(attr_df = c_attr, 1)
 r_bas_attr <- basis_attr_df(attr_df = r_attr, 2)
 
 test_that("basis_attr", {
-  expect_is(c_bas_attr, "matrix")
-  expect_is(r_bas_attr, "matrix")
+  expect_equal(class(c_bas_attr), c("matrix", "array"))
+  expect_equal(class(r_bas_attr), c("matrix", "array"))
 })
 
 ## proto_basis1d_distribution -----
@@ -42,24 +42,22 @@ r_ggt <- ggtour(r_bas_attr, scale_sd(r_X), angle = .3) +
     attr_df = r_attr, group_by = r_clas, primary_obs = 1, comparison_obs = 2)
 
 test_that("proto_basis1d_distribution", {
-  expect_is(c_ggt, c("gg", "ggplot"))
-  expect_is(r_ggt, c("gg", "ggplot"))
+  expect_equal(class(c_ggt), c("gg", "ggplot"))
+  expect_equal(class(r_ggt), c("gg", "ggplot"))
 })
 
 ## global_view -----
-?global_view
-
 c_gv <- global_view(c_chee)
 r_gv <- global_view(r_chee)
 test_that("global_view", {
-  expect_is(c_gv, c("plotly", "htmlwidget"))
-  expect_is(r_gv, c("plotly", "htmlwidget"))
+  expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+  expect_equal(class(r_gv), c("plotly", "htmlwidget"))
 })
 
 ## radial_cheem_tour -----
 c_ggt <- radial_cheem_tour(c_chee, c_bas_attr, manip_var = 1L, 1L, 2L)
 r_ggt <- radial_cheem_tour(r_chee, r_bas_attr, manip_var = 1L, 1L, 2L)
 test_that("radial_cheem_tour", {
-  expect_is(c_ggt, c("gg", "ggplot"))
-  expect_is(r_ggt, c("gg", "ggplot"))
+  expect_equal(class(c_ggt), c("gg", "ggplot"))
+  expect_equal(class(r_ggt), c("gg", "ggplot"))
 })

@@ -103,7 +103,7 @@ basis_attr_df <- function(
 #' diff <- abs(bas_p - bas_c)
 #' mv <- which(diff == max(diff))
 #' mt_path <- manual_tour(bas_p, mv)
-#' fixed_pred <- predict(rf_fit)
+#' fixed_pred <- stats::predict(rf_fit)
 #' 
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
 #'   append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
@@ -157,7 +157,7 @@ proto_basis1d_distribution <- function(
   if(is.matrix(attr_df) & ncol(attr_df) < 3L)
     stop("proto_basis1d_distribution: attr_df was matrix and less than 3 columns, was the basis of the attr_df used?")
   ## Prevent global variable warnings:
-  rownum <- contribution <- var_name <-
+  rownum <- contribution <- var_name <- .is_faceted <-
     .map_to_unitbox <- .map_to_data <- .map_to_density <- .d <-
     .df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
@@ -221,8 +221,8 @@ proto_basis1d_distribution <- function(
   ## Initialize data.frames, before scaling
   .df_rect <- data.frame(x = c(-1L, 1L), y = c(.5, .p + .5) / .p)
   .df_seg0 <- data.frame(x = 0L, y = c(.5, .p + .5) / .p)
-  .df_rect <- map_relative(.df_rect, position, .map_to_data)
-  .df_seg0 <- map_relative(.df_seg0, position, .map_to_data)
+  .df_rect <- spinifex::map_relative(.df_rect, position, .map_to_data)
+  .df_seg0 <- spinifex::map_relative(.df_seg0, position, .map_to_data)
   if(.is_faceted){
     .facet_var <- list(facet_var = "_basis_")
     .df_rect <- spinifex:::.bind_elements2df(.facet_var, .df_rect)
@@ -630,12 +630,12 @@ radial_cheem_tour <- function(
         spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.7, -.1)) +
         ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
         ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
-        proto_point() +
+        spinifex::proto_point() +
         proto_basis1d_distribution(cheem_ls$attr_df, position = "floor1d") +
-        proto_basis1d("floor1d") +
+        spinifex::proto_basis1d("floor1d") +
         spinifex::proto_highlight(row_index = .doub_comp_obs) +
         spinifex::proto_highlight(row_index = .doub_prim_obs)
-      animate_plotly(ggt)
+      spinifex::animate_plotly(ggt)
     }
     # browser()
     # debugonce(proto_point)
@@ -665,7 +665,7 @@ radial_cheem_tour <- function(
       spinifex::proto_highlight(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
-      #ggplot2::geom_hline(ggplot2::aes(yintercept = x), .df_hline) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = x), .df_hline) +
       spinifex::proto_origin()
   }
   

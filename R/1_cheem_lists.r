@@ -144,20 +144,22 @@ model_performance_df <- function(
   .rmse   <- sqrt(.mse)
   .rse    <- .sse / sum((y - mean(y))^2L)
   .r2     <- 1L - .rse
-  .r2_adj <- 1L -(.mse / var(y))
-  .auc    <- Metrics::auc(y, .pred)
+  .r2_adj <- 1L -(.mse / stats::var(y))
+  # .auc    <- Metrics::auc(y, .pred)
   # .mae  <- mean(abs(.e))
   # .mad  <- .mae / length(y)
-  #.ROC <- ROCR::
-  return(data.frame(row.names = 1L,
+  # .ROC <- ROCR::
+  return(data.frame(
+    row.names = 1L,
     model_type = class(model)[length(class(model))],
     sse  = .sse,
     mse  = .mse,
     rmse = .rmse,
     rse  = .rse,
     r2   = .r2,
-    r2_adj = .r2_adj,
-    auc = .auc))
+    r2_adj = .r2_adj
+    #,auc = .auc
+  ))
 }
 
 #' Create the plot data.frame for the global linked plotly display.
@@ -223,9 +225,6 @@ global_view_1layer <- function(
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
-# #'  @param xtest Optional, out Of Sample data to find the local attribution of.
-# #'  @param ytest Optional, out Of Sample response to measure x with 
-# #'  if provided.
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used. Defaults to the last class of the model.
 #' @param basis_type The type of basis used to approximate the data and 
@@ -285,12 +284,12 @@ cheem_ls <- function(
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
   .decode_left <- data.frame(
     rownum = 1L:nrow(x), class = class, y,
-    prediction = predict(model))
+    prediction = stats::predict(model))
   .decode_right <- data.frame(
-    residual = y - predict(model), x) ##, attr_df) ## duplicate col names and long.
+    residual = y - stats::predict(model), x) ##, attr_df) ## duplicate col names and long.
   if(is_classification){
     .pred_clas <- factor(
-      levels(class)[round(predict(model))], levels = levels(class))
+      levels(class)[round(stats::predict(model))], levels = levels(class))
     .is_misclass <- .pred_clas!= class
     .decode_middle <- data.frame(
       predicted_class = .pred_clas,
@@ -328,7 +327,6 @@ cheem_ls <- function(
   ## Cleanup and return
   ret_ls <- list(
     type = problem_type(y),
-    model = model, ## <-- only difference
     model_performance_df = model_performance_df(model),
     attr_df = attr_df,
     global_view_df = .glob_view,

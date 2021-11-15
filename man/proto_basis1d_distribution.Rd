@@ -89,7 +89,7 @@ bas_c <- basis_attr_df(shap_df, rownum = 2)
 diff <- abs(bas_p - bas_c)
 mv <- which(diff == max(diff))
 mt_path <- manual_tour(bas_p, mv)
-fixed_pred <- predict(rf_fit)
+fixed_pred <- stats::predict(rf_fit)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
   append_fixed_y(fixed_y = scale_sd(fixed_pred)) +

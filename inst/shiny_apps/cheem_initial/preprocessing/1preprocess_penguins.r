@@ -1,9 +1,9 @@
 ## Dependencies ------
-require(cheem)
-
-## Data preprocess ------
-## Data setup, spinifex::penguins
 {
+  require(cheem)
+  
+  ## Data preprocess ------
+  ## Data setup, spinifex::penguins
   raw <- spinifex::penguins
   clas <- raw$species
   lvls <- levels(clas)
