@@ -21,7 +21,7 @@
 
 rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X) ## ~82 sec
-this_ls <- cheem_ls(X, Y,
+this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)
 names(this_ls)
