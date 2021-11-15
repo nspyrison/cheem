@@ -7,7 +7,7 @@
 #' 
 #' @param attr_df Return of a local attribution, such as treeshap_df.
 #' @param rownum The rownumber of the primary observation. Defaults to 1.
-#' @return A matrix of the 1D basis
+#' @return A matrix of the 1D basis.
 #' @export
 #' @examples
 #' library(cheem)
@@ -18,9 +18,10 @@
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!#' basis_local_attribution(attr_df, rownum = 10)
-#' basis_local_attribution(shap_df, rownum = 1)
-basis_local_attribution <- function(
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' basis_attr_df(shap_df, rownum = 1)
+basis_attr_df <- function(
   attr_df,
   rownum = 1
 ){
@@ -66,12 +67,13 @@ basis_local_attribution <- function(
 #' Y    <- as.integer(clas)
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
-#' bas <- basis_local_attribution(shap_df, rownum = 1)
+#' bas <- basis_attr_df(shap_df, rownum = 1)
 #' mv <- manip_var_of(bas)
 #' mt_path <- manual_tour(bas, mv)
 #' 
@@ -93,18 +95,19 @@ basis_local_attribution <- function(
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
-#' bas_p <- basis_local_attribution(shap_df, rownum = 1)
-#' bas_c <- basis_local_attribution(shap_df, rownum = 2)
+#' bas_p <- basis_attr_df(shap_df, rownum = 1)
+#' bas_c <- basis_attr_df(shap_df, rownum = 2)
 #' diff <- abs(bas_p - bas_c)
 #' mv <- which(diff == max(diff))
 #' mt_path <- manual_tour(bas_p, mv)
 #' fixed_pred <- predict(rf_fit)
 #' 
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-#'   append_fixed_y(fixed_y = fixed_pred) +
-#'   proto_point() +
+#'   append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
+#'   proto_point(list(color = clas, shape = clas)) +
 #'   proto_basis1d_distribution(
 #'     attr_df = shap_df, group_by = clas, position = "top1d",
 #'     primary_obs = 1, comparison_obs = 2) +
@@ -120,16 +123,17 @@ basis_local_attribution <- function(
 #' Y    <- as.integer(clas)
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #'
-#' bas_p <- basis_local_attribution(shap_df, rownum = 1)
-#' bas_c <- basis_local_attribution(shap_df, rownum = 2)
+#' bas_p <- basis_attr_df(shap_df, rownum = 1)
+#' bas_c <- basis_attr_df(shap_df, rownum = 2)
 #' diff <- abs(bas_p - bas_c)
 #' mv <- which(diff == max(diff))
 #' mt_path <- manual_tour(bas_p, mv)
 #' 
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-#'   proto_density() +
+#'   proto_density(list(color = clas, fill = clas)) +
 #'   proto_basis1d_distribution(
 #'     attr_df = shap_df, group_by = clas, position = "top1d",
 #'     primary_obs = 1, comparison_obs = 2) +
@@ -150,6 +154,8 @@ proto_basis1d_distribution <- function(
   inc_vars = NULL,
   row_index = NULL
 ){
+  if(is.matrix(attr_df) & ncol(attr_df) < 3L)
+    stop("proto_basis1d_distribution: attr_df was matrix and less than 3 columns, was the basis of the attr_df used?")
   ## Prevent global variable warnings:
   rownum <- contribution <- var_name <-
     .map_to_unitbox <- .map_to_data <- .map_to_density <- .d <-
@@ -175,14 +181,13 @@ proto_basis1d_distribution <- function(
   
   ## Orthonormalize each row.
   .m <- sapply(1L:.n, function(i){
-    attr_df[i, ] <<- basis_local_attribution(attr_df, i)
+    attr_df[i, ] <<- basis_attr_df(attr_df, i)
   })
   
   ## Pivot the attr values (columns) longer to rows.
   attr_df$rownum <- 1L:.n
   attr_df$group_by <- as.factor(group_by)
   class(attr_df) <- "data.frame"
-  
   .attr_df_longer <- tidyr::pivot_longer(attr_df,
                                          cols = !c(rownum, group_by),
                                          names_to = "var_name",
@@ -298,7 +303,7 @@ proto_basis1d_distribution <- function(
 #' @param shape A vector to map to the point shape.
 #' Classification case defaults to predicted class, regression case defaults to
 #' class.
-#' @return `plotly` plot of the global view, first 2 components of the basis of
+#' @return `plotly` html widget of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
 #' @examples
@@ -310,13 +315,14 @@ proto_basis1d_distribution <- function(
 #' clas <- sub$MS.Zoning
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
-#' linked_global_view(this_ls)
-linked_global_view <- function(
+#' global_view(this_ls)
+global_view <- function(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
@@ -460,7 +466,7 @@ linked_global_view <- function(
 #' 
 #' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param basis A 1D projection basis, typically a return of 
-#' `basis_local_attribution()`.
+#' `basis_attr_df()`.
 #' @param manip_var The , _number_ of the manipulation variable.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
@@ -480,8 +486,9 @@ linked_global_view <- function(
 # #' Defaults to class if passed to cheem_ls(), else residual.
 # #' @param reg_shape For regression cases, the shape of the points.
 # #' Defaults to class.
-#' @return `plotly` plot of the global view, first 2 components of the basis of
-#' the data- and attribution- spaces.
+#' @return `ggplot` of the cheem tour, animation frames of a radial tour
+#' manipulating the contribution of a selected tour. Consumed by a 
+#' `spinifex::animate_*` function.
 #' @export
 #' @examples
 #' library(cheem)
@@ -497,11 +504,10 @@ linked_global_view <- function(
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
-#' bas <- basis_local_attribution(shap_df, rownum = 1)
-#' ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1)
+#' bas <- basis_attr_df(shap_df, rownum = 1)
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 #' \dontrun{
-#' spinifex::animate_plotly(ggt) ## Error in paste(group, frame, sep = "-") : object 'group' not found 
-#' spinifex::animate_gganimate(ggt) ## Error in `$<-.data.frame`(`*tmp*`, "group", value = "") : replacement has 1 row, data has 0 
+#' spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
 #' 
 #' ## Classification:
@@ -510,18 +516,19 @@ linked_global_view <- function(
 #' Y    <- as.integer(clas)
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
-#' bas <- basis_local_attribution(shap_df, rownum = 1)
-#' ggt <- radial_cheem_ggtour(this_ls, basis = bas, manip_var = 1,
+#' bas <- basis_attr_df(shap_df, rownum = 1)
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
 #'   primary_obs = 1, comparison_obs = 2)
 #' \dontrun{
-#' animate_plotly(ggt)
+#' spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
-radial_cheem_ggtour <- function(
+radial_cheem_tour <- function(
   cheem_ls, basis, manip_var,
   primary_obs = NULL,
   comparison_obs = NULL,
@@ -535,7 +542,7 @@ radial_cheem_ggtour <- function(
 ){
   if(is.null(row_index) == FALSE)
     if(sum(row_index) == 0L)
-      stop("radial_cheem_ggtour: sum of row_index was 0.")
+      stop("radial_cheem_tour: sum of row_index was 0.")
   decode_df <- cheem_ls$decode_df
   .n <- nrow(decode_df)
   if(is.null(inc_vars) == TRUE)

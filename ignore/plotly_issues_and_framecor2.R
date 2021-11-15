@@ -2,7 +2,7 @@
 ## Setup ----
 require(spinifex)
 require(cheem)
-#?cheem::radial_cheem_ggtour()
+#?cheem::radial_cheem_tour()
 
 sub <- amesHousing2018_thin[1:200, ]
 X <- sub[, 1:9]
@@ -16,10 +16,10 @@ this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df); Sys.sleep(.01);
 
-bas <- basis_local_attribution(shap_df, rownum = 1)
+bas <- basis_attr_df(shap_df, rownum = 1)
 # Error in paste(group, frame, sep = "-") : object 'group' not found
-#debugonce(radial_cheem_ggtour)
-ggt <- radial_cheem_ggtour(
+#debugonce(radial_cheem_tour)
+ggt <- radial_cheem_tour(
   this_ls, basis = bas, manip_var = 1, angle = .5)
 
 ## Error in the regression case ----
@@ -31,9 +31,9 @@ animate_gganimate(ggt) ## toggles back and forth (with frame cor2)
 # Error in `$<-.data.frame`(`*tmp*`, "group", value = "") : 
 #   replacement has 1 row, data has 0 
 
-## Trouble shooting radial_cheem_ggtour errors:
-#debugonce(radial_cheem_ggtour)
-ggt <- radial_cheem_ggtour( 
+## Trouble shooting radial_cheem_tour errors:
+#debugonce(radial_cheem_tour)
+ggt <- radial_cheem_tour( 
   this_ls, basis = bas, manip_var = 1, angle = .5)
 
 

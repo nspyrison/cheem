@@ -101,8 +101,7 @@ server <- function(input, output, session){
       return()
     }
     
-    return(basis_local_attribution(
-      attr_df[, inc_vars], prim_obs))
+    return(basis_attr_df(attr_df[, inc_vars], prim_obs))
   })
   
   sel_rownums <- reactive({
@@ -178,16 +177,16 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
   
   ### GLOBAL VIEW PLOTLY
-  output$linked_global_view <- plotly::renderPlotly({
+  output$global_view <- plotly::renderPlotly({
     cheem_ls <- req(load_ls())
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
-      linked_global_view(
+      global_view(
         cheem_ls, .prim_obs, .comp_obs,
         height_px = 480, width_px = 960L))
   })
-  outputOptions(output, "linked_global_view",
+  outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   ## Plotly tour
@@ -208,7 +207,7 @@ server <- function(input, output, session){
     }
     mv <- which(mv_nm %in% rownames(bas))
     
-    ggt <- radial_cheem_ggtour(
+    ggt <- radial_cheem_tour(
       cheem_ls, bas, mv,
       prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,

@@ -26,7 +26,8 @@
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
@@ -75,11 +76,12 @@ default_rf <- function(
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
-#' linked_global_view(this_ls)
+#' global_view(this_ls)
 attr_df_treeshap <- function(
   randomForest_model,
   x,
@@ -182,7 +184,8 @@ model_performance_df <- function(
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
@@ -244,7 +247,8 @@ global_view_1layer <- function(
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
@@ -285,7 +289,8 @@ cheem_ls <- function(
   .decode_right <- data.frame(
     residual = y - predict(model), x) ##, attr_df) ## duplicate col names and long.
   if(is_classification){
-    .pred_clas <- as.factor(levels(class)[round(predict(model))])
+    .pred_clas <- factor(
+      levels(class)[round(predict(model))], levels = levels(class))
     .is_misclass <- .pred_clas!= class
     .decode_middle <- data.frame(
       predicted_class = .pred_clas,

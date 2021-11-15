@@ -44,7 +44,8 @@ Y <- log(sub$SalePrice)
 clas <- sub$ZoneMS
 
 rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+## Long runtime for full datasets:
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)

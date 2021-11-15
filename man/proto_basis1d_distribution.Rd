@@ -53,12 +53,13 @@ clas <- flea$species
 Y    <- as.integer(clas)
 
 rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+## Long runtime for full datasets:
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 
-bas <- basis_local_attribution(shap_df, rownum = 1)
+bas <- basis_attr_df(shap_df, rownum = 1)
 mv <- manip_var_of(bas)
 mt_path <- manual_tour(bas, mv)
 
@@ -80,18 +81,19 @@ Y <- log(sub$SalePrice)
 clas <- sub$ZoneMS
 
 rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+## Long runtime for full datasets:
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
-bas_p <- basis_local_attribution(shap_df, rownum = 1)
-bas_c <- basis_local_attribution(shap_df, rownum = 2)
+bas_p <- basis_attr_df(shap_df, rownum = 1)
+bas_c <- basis_attr_df(shap_df, rownum = 2)
 diff <- abs(bas_p - bas_c)
 mv <- which(diff == max(diff))
 mt_path <- manual_tour(bas_p, mv)
 fixed_pred <- predict(rf_fit)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-  append_fixed_y(fixed_y = fixed_pred) +
-  proto_point() +
+  append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
+  proto_point(list(color = clas, shape = clas)) +
   proto_basis1d_distribution(
     attr_df = shap_df, group_by = clas, position = "top1d",
     primary_obs = 1, comparison_obs = 2) +
@@ -107,16 +109,17 @@ clas <- flea$species
 Y    <- as.integer(clas)
 
 rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X) ## Long runtime!
+## Long runtime for full datasets:
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
-bas_p <- basis_local_attribution(shap_df, rownum = 1)
-bas_c <- basis_local_attribution(shap_df, rownum = 2)
+bas_p <- basis_attr_df(shap_df, rownum = 1)
+bas_c <- basis_attr_df(shap_df, rownum = 2)
 diff <- abs(bas_p - bas_c)
 mv <- which(diff == max(diff))
 mt_path <- manual_tour(bas_p, mv)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-  proto_density() +
+  proto_density(list(color = clas, fill = clas)) +
   proto_basis1d_distribution(
     attr_df = shap_df, group_by = clas, position = "top1d",
     primary_obs = 1, comparison_obs = 2) +

@@ -1,5 +1,5 @@
+## Utility functions -----
 
-## Small utility functions -----
 #' Check if a vector is discrete
 #' 
 #' Whether or not a vector is a discrete variable, returns a logical.
@@ -141,7 +141,7 @@ logistic_tform = function(
 }
 
 
-#' Assure a full lengthed logical index
+#' Assure a full length logical index
 #' 
 #' Suggests a alpha opacity to plot with as a function of the number of 
 #' observation.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/0_util.r
 \name{as_logical_index}
 \alias{as_logical_index}
-\title{Assure a full lengthed logical index}
+\title{Assure a full length logical index}
 \usage{
 as_logical_index(index, .n)
 }

@@ -72,7 +72,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   p("-- Selecting points will highight them in all facets and display detiled information below."),
   ## Set w/h with: ggplotly(p, height = 800, width = 800)
   plotly::plotlyOutput(
-    "linked_global_view", width = "100%", height = "480px") %>%
+    "global_view", width = "100%", height = "480px") %>%
     shinycssloaders::withSpinner(type = 8L),
   h4("Selected data:"),
   DT::DTOutput("selected_df")),
