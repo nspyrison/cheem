@@ -35,9 +35,6 @@ class.}
 \item{height_px}{The height in pixels of the returned \code{plotly} plot.}
 
 \item{width_px}{The width in pixels of the returned \code{plotly} plot.}
-
-\item{do_include_maha_qq}{Logical, whether or not to add the qq plots of the
-Mahalanobis distance for the data- and attribution- spaces.}
 }
 \value{
 \code{plotly} html widget of the global view, first 2 components of the basis of

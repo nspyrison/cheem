@@ -4,32 +4,20 @@
 \alias{as_logical_index}
 \title{Assure a full length logical index}
 \usage{
-as_logical_index(index, .n)
+as_logical_index(index, n)
 }
 \arguments{
-\item{.n}{Number of observations to plot.}
+\item{index}{A vector, typically a numeric row index of the data to
+coerce to a logical index.}
 
-\item{mid_pt}{Inflection point that the logistic curve. Defaults to 1000.}
-
-\item{k_attenuation}{The steepness of the transition, larger is a sharper
-transition. Quite sensitive and defaults to 5.}
-
-\item{ceiling}{The highest number returned. Defaults to 1.}
-
-\item{floor}{The lowest number returned. Defaults to 0.3.}
-}
-\value{
-A scalar numeric, suggested value to set alpha opacity.
+\item{n}{Single numeric, the number of rows of the data use as a replicate
+return length.}
 }
 \description{
 Suggests a alpha opacity to plot with as a function of the number of
 observation.
 }
 \examples{
-## Suggest an opacity to use in plotting:
-(my_alpha <- logistic_tform(nrow(spinifex::penguins)))
-
-## Visualize
-x <- 1:2000
-plot(x, logistic_tform(x), col='blue')
+## Coerce a numeric index to logical:
+as_logical_index(c(1, 4:10, 15), nrow(mtcars))
 }

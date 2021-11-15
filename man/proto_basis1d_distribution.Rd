@@ -17,6 +17,9 @@ proto_basis1d_distribution(
 )
 }
 \arguments{
+\item{attr_df}{An data frame, the attributions of a local explanation,
+such as a return from \code{attr_df_treeshap()}.}
+
 \item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
 \item{position}{The position for the basis, one of: c("top1d", "floor1d",
@@ -37,7 +40,11 @@ as a dashed line.}
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
 
-\item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
+\item{inc_vars}{A character vector, the names of the variables to keep.
+Defaults to NULL, all variables kept.}
+
+\item{row_index}{A numeric or logical vector, the index of the rows to keep.
+Defaults to NULL, all rows kept.}
 }
 \description{
 Adds the distribution of orthonormalized row values of

@@ -7,7 +7,8 @@
 basis_attr_df(attr_df, rownum = 1)
 }
 \arguments{
-\item{attr_df}{Return of a local attribution, such as treeshap_df.}
+\item{attr_df}{A data frame of local explanation attributions,
+such as a return from \code{attr_df_treeshap()}.}
 
 \item{rownum}{The rownumber of the primary observation. Defaults to 1.}
 }

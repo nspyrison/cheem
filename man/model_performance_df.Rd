@@ -7,17 +7,8 @@
 model_performance_df(model)
 }
 \arguments{
-\item{model}{A model object}
-
-\item{x}{The explanatory data (without response) to extract the local
-attributions of.}
-
-\item{y}{The target variable of the model.}
-
-\item{xtest}{Optional, out Of Sample data to find the local attribution of.}
-
-\item{ytest}{Optional, out Of Sample response to measure x with
-if provided.}
+\item{model}{A non-linear model, originally a \code{randomForest::randomForest}
+model fit, or a return from \code{default_rf()}.}
 }
 \value{
 A dataframe of the local attributions.

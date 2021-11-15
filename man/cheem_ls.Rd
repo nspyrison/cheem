@@ -24,6 +24,12 @@ cheem_ls(
 \item{class}{The variable to group points by. Originally the \emph{predicted}
 class.}
 
+\item{model}{A non-linear model, originally a \code{randomForest::randomForest}
+model fit, or a return from \code{default_rf()}.}
+
+\item{attr_df}{A data frame of local explanation attributions,
+such as a return from \code{attr_df_treeshap()}.}
+
 \item{basis_type}{The type of basis used to approximate the data and
 attribution space from. Expects "pca" or "olda" (requires \code{clas}).
 Defaults to "pca".}
@@ -33,8 +39,8 @@ attribution used. Defaults to the last class of the model.}
 
 \item{verbose}{Logical, if runtime should be printed. Defaults to TRUE.}
 
-\item{noisy}{Logical, if a tone should be played on completion.
-Defaults to TRUE.}
+\item{keep_model}{Logical, if the heavy model object should be kept.
+Defaults to FALSE.}
 }
 \value{
 A data.frame, for the full local attribution matrix.

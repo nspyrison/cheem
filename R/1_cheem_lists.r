@@ -110,13 +110,8 @@ attr_df_treeshap <- function(
 #' 
 #' Internal function, used downstream in cheem_ls.
 #' 
-#' @param model A model object
-#' @param x The explanatory data (without response) to extract the local 
-#' attributions of.
-#' @param y The target variable of the model.
-#' @param xtest Optional, out Of Sample data to find the local attribution of.
-#' @param ytest Optional, out Of Sample response to measure x with 
-#' if provided.
+#' @param model A non-linear model, originally a `randomForest::randomForest`
+#' model fit, or a return from `default_rf()`.
 #' @return A dataframe of the local attributions.
 #' @export
 #' @examples
@@ -191,7 +186,7 @@ model_performance_df <- function(
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
-global_view_1layer <- function(
+global_view_df_1layer <- function(
   x, y,
   class = NULL, ## required for olda
   basis_type = c("pca", "olda"),
@@ -225,16 +220,20 @@ global_view_1layer <- function(
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
+#' @param class The variable to group points by. Originally the _predicted_
+#'  class.
+#' @param model A non-linear model, originally a `randomForest::randomForest`
+#' model fit, or a return from `default_rf()`.
+#' @param attr_df A data frame of local explanation attributions,
+#' such as a return from `attr_df_treeshap()`.
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used. Defaults to the last class of the model.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Expects "pca" or "olda" (requires `clas`).
 #'  Defaults to "pca".
-#' @param class The variable to group points by. Originally the _predicted_
-#'  class.
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
-#' @param noisy Logical, if a tone should be played on completion. 
-#' Defaults to TRUE.
+#' @param keep_model Logical, if the heavy model object should be kept.
+#' Defaults to FALSE.
 #' @return A data.frame, for the full local attribution matrix.
 #' @export
 #' @examples
@@ -268,12 +267,12 @@ cheem_ls <- function(
   d <- 2L
   basis_type <- match.arg(basis_type)
   is_classification <- is_discrete(y)
-  rownum <- V2 <- projection_nm <- NULL
+  rownum <- V2 <- projection_nm <- x <- NULL
   
   ## Global view -----
-  .glob_dat  <- global_view_1layer(x, y, class, basis_type, "data")
-  .glob_attr <- global_view_1layer(attr_df, y, class, basis_type, 
-                                   class(attr_df)[length(class(attr_df))])
+  .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")
+  .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, 
+                                      class(attr_df)[length(class(attr_df))])
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## list of global view bases
   .dat_bas  <- attributes(.glob_dat)[length(attributes(.glob_dat))]

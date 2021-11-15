@@ -146,28 +146,23 @@ logistic_tform = function(
 #' Suggests a alpha opacity to plot with as a function of the number of 
 #' observation.
 #' 
-#' @param .n Number of observations to plot.
-#' @param mid_pt Inflection point that the logistic curve. Defaults to 1000.
-#' @param k_attenuation The steepness of the transition, larger is a sharper
-#' transition. Quite sensitive and defaults to 5.
-#' @param ceiling The highest number returned. Defaults to 1.
-#' @param floor The lowest number returned. Defaults to 0.3.
-#' @return A scalar numeric, suggested value to set alpha opacity.
+#' @param index A vector, typically a numeric row index of the data to
+#' coerce to a logical index.
+#' @param n Single numeric, the number of rows of the data use as a replicate
+#' return length.
 #' @export
 #' @examples
-#' ## Suggest an opacity to use in plotting:
-#' (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
-#'
-#' ## Visualize
-#' x <- 1:2000
-#' plot(x, logistic_tform(x), col='blue')
-as_logical_index <- function(index, .n){
-  if(missing(.n) == TRUE) stop("as_logical_index: .n is missing.")
+#' ## Coerce a numeric index to logical:
+#' as_logical_index(c(1, 4:10, 15), nrow(mtcars))
+as_logical_index <- function(index, n){
+  if(is.logical(index) & length(index) != n)
+    stop("as_logical_index: `index` was logical, but not of length `n`.")
   if(is.numeric(index) == TRUE){
-    rep_f <- rep(FALSE, .n)
+    rep_f <- rep(FALSE, n)
     rep_f[index] <- TRUE
     index <- rep_f
   }
-  if(identical(index, TRUE)) index <- rep(TRUE, .n)
-  index
+  if(identical(index, TRUE)) index <- rep(TRUE, n)
+
+  return(index)
 }

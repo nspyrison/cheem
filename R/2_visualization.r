@@ -5,7 +5,8 @@
 #' Internal function, Extract and format the 1D local attribution basis from 
 #' the provided local explanation's attribution.
 #' 
-#' @param attr_df Return of a local attribution, such as treeshap_df.
+#' @param attr_df A data frame of local explanation attributions,
+#'  such as a return from `attr_df_treeshap()`.
 #' @param rownum The rownumber of the primary observation. Defaults to 1.
 #' @return A matrix of the 1D basis.
 #' @export
@@ -41,7 +42,8 @@ basis_attr_df <- function(
 #' the specified local explanation `attr_df`. Does not draw the basis itself; 
 #' use in conjunction with `proto_basis1d()`.
 #'
-#' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
+#' @param attr_df An data frame, the attributions of a local explanation, 
+#' such as a return from `attr_df_treeshap()`.
 #' @param group_by Vector to group densities by. Originally _predicted_ class.
 #' @param position The position for the basis, one of: c("top1d", "floor1d",
 #' "bottom1d", "off"). 
@@ -56,6 +58,10 @@ basis_attr_df <- function(
 #' as a dashed line.
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line.
+#' @param inc_vars A character vector, the names of the variables to keep. 
+#' Defaults to NULL, all variables kept.
+#' @param row_index A numeric or logical vector, the index of the rows to keep.
+#' Defaults to NULL, all rows kept.
 #' @family ggtour proto
 #' @export
 #' @examples
@@ -142,7 +148,6 @@ basis_attr_df <- function(
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
-
 proto_basis1d_distribution <- function(
   attr_df, ## Only for distribution of bases.
   group_by = as.factor(FALSE),
@@ -295,8 +300,6 @@ proto_basis1d_distribution <- function(
 #' is highlighted as a dotted line.
 #' @param height_px The height in pixels of the returned `plotly` plot.
 #' @param width_px The width in pixels of the returned `plotly` plot.
-#' @param do_include_maha_qq Logical, whether or not to add the qq plots of the
-#' Mahalanobis distance for the data- and attribution- spaces.
 #' @param color A vector to map to the point color.
 #' Classification case defaults to predicted class, regression case defaults to
 #' class if passed to cheem_ls(), else residual.
