@@ -51,6 +51,20 @@ consumed
 }
 \examples{
 library(cheem)
+library(spinifex)
+
+## Classification:
+X    <- penguins[, 1:4]
+clas <- penguins$species
+Y    <- as.integer(clas)
+
+rf_fit  <- default_rf(X, Y)
+## Long runtime for full datasets:
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+this_ls <- cheem_ls(X, Y, class = clas,
+                     model = rf_fit,
+                     attr_df = shap_df)
+
 ## Regression:
 sub <- amesHousing2018_thin[1:200, ]
 X <- sub[, 1:9]
@@ -65,6 +79,6 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      attr_df = shap_df)
 
 ## Save for used with shiny app (expects .rds):
-if(F) ## Don't accidentally save.
+if(FALSE) ## Don't accidentally save.
   saveRDS(this_ls, "./my_cheem_ls.rds")
 }

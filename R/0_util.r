@@ -105,7 +105,7 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #'
 #' ## Visualize
 #' x <- 1:2000
-#' plot(x, linear_tform(x), col='blue')
+#' plot(x, sapply(x, linear_tform), col = 'blue')
 linear_tform = function(
   n, appox_max_n = 5000L, ceiling = 1, floor = .2
 ){
@@ -132,7 +132,7 @@ linear_tform = function(
 #'
 #' ## Visualize
 #' x <- 1:2000
-#' plot(x, logistic_tform(x), col='blue')
+#' plot(x, logistic_tform(x), col = 'blue')
 logistic_tform = function(
   n, mid_pt = 1000, k_attenuation = 5, ceiling = 1, floor = .3
 ){

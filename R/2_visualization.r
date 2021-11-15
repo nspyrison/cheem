@@ -1,4 +1,4 @@
-## spinifex proto_* extensions ----
+## proto_* extensions ----
 
 #' Extract and format the 1D local attribution basis
 #' 
@@ -12,7 +12,7 @@
 #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression:
+#' 
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
@@ -67,34 +67,7 @@ basis_attr_df <- function(
 #' @examples
 #' library(cheem)
 #' library(spinifex)
-#' ## Classification:
-#' X    <- flea[, 1:6]
-#' clas <- flea$species
-#' Y    <- as.integer(clas)
 #' 
-#' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                      model = rf_fit,
-#'                      attr_df = shap_df)
-#' 
-#' bas <- basis_attr_df(shap_df, rownum = 1)
-#' mv <- manip_var_of(bas)
-#' mt_path <- manual_tour(bas, mv)
-#' 
-#' X_scl <- spinifex::scale_sd(X)
-#' ggt <- ggtour(mt_path, X_scl, angle = .3) +
-#'   proto_density(aes_args = list(color = clas, fill = clas)) +
-#'   proto_basis1d() +
-#'   proto_basis1d_distribution(shap_df, group_by = clas)
-#' \dontrun{
-#' animate_plotly(ggt)
-#' }
-#' 
-#' library(cheem)
-#' library(spinifex)
-#' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
@@ -119,32 +92,6 @@ basis_attr_df <- function(
 #'     primary_obs = 1, comparison_obs = 2) +
 #'   proto_basis1d(position = "bottom1d") +
 #'   proto_origin()
-#' \dontrun{
-#' animate_plotly(ggt)
-#' }
-#' 
-#' ## Classification:
-#' X    <- flea[, 1:6]
-#' clas <- flea$species
-#' Y    <- as.integer(clas)
-#' 
-#' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-#'
-#' bas_p <- basis_attr_df(shap_df, rownum = 1)
-#' bas_c <- basis_attr_df(shap_df, rownum = 2)
-#' diff <- abs(bas_p - bas_c)
-#' mv <- which(diff == max(diff))
-#' mt_path <- manual_tour(bas_p, mv)
-#' 
-#' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-#'   proto_density(list(color = clas, fill = clas)) +
-#'   proto_basis1d_distribution(
-#'     attr_df = shap_df, group_by = clas, position = "top1d",
-#'     primary_obs = 1, comparison_obs = 2) +
-#'   proto_basis1d(position = "bottom1d") +
-#'   proto_origin1d()
 #' \dontrun{
 #' animate_plotly(ggt)
 #' }
@@ -285,7 +232,7 @@ proto_basis1d_distribution <- function(
 }
 
 
-## Shiny plot functions ------
+## completed visuals ------
 
 #' Linked `plotly` display, global view of data and attribution space.
 #' 
@@ -311,7 +258,7 @@ proto_basis1d_distribution <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression:
+#' 
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:10]
 #' Y <- log(sub$SalePrice)
@@ -323,7 +270,6 @@ proto_basis1d_distribution <- function(
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
-#' 
 #' global_view(this_ls)
 global_view <- function(
   cheem_ls,
@@ -495,6 +441,27 @@ global_view <- function(
 #' @export
 #' @examples
 #' library(cheem)
+#' library(spinifex)
+#' 
+#' ## Classification:
+#' X    <- penguins[, 1:4]
+#' clas <- penguins$species
+#' Y    <- as.integer(clas)
+#' 
+#' rf_fit  <- default_rf(X, Y)
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
+#' 
+#' bas <- basis_attr_df(shap_df, rownum = 1)
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
+#'   primary_obs = 1, comparison_obs = 2)
+#' \dontrun{
+#' animate_gganimate(ggt, render = gganimate::av_renderer())
+#' }
+#' 
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
@@ -510,26 +477,7 @@ global_view <- function(
 #' bas <- basis_attr_df(shap_df, rownum = 1)
 #' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 #' \dontrun{
-#' spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
-#' }
-#' 
-#' ## Classification:
-#' X    <- flea[, 1:6]
-#' clas <- flea$species
-#' Y    <- as.integer(clas)
-#' 
-#' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                      model = rf_fit,
-#'                      attr_df = shap_df)
-#' 
-#' bas <- basis_attr_df(shap_df, rownum = 1)
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
-#'   primary_obs = 1, comparison_obs = 2)
-#' \dontrun{
-#' spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
+#' animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
 radial_cheem_tour <- function(
   cheem_ls, basis, manip_var,
@@ -626,7 +574,7 @@ radial_cheem_tour <- function(
     .fix_y_fore <- .fixed_y[.idx_fore]
     .df_hline <- data.frame(x = 0L, facet_var = "residual")
     
-    if(F){ ## Testing minimal example
+    if(FALSE){ ## Testing minimal example
       ggt <-
         spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
         spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +

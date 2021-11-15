@@ -19,7 +19,7 @@
 #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression:
+#' 
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
@@ -31,6 +31,7 @@
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
+#' global_view(this_ls)
 default_rf <- function(
   x, y, verbose = TRUE,
   hp_ntree = 125,
@@ -69,7 +70,7 @@ default_rf <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression:
+#' 
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
@@ -116,14 +117,14 @@ attr_df_treeshap <- function(
 #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression:
+#' 
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
 #' clas <- sub$ZoneMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' model_performance_df(rf_fit, X)
+#' model_performance_df(rf_fit)
 model_performance_df <- function(
   model
 ){
@@ -140,12 +141,13 @@ model_performance_df <- function(
   .rse    <- .sse / sum((y - mean(y))^2L)
   .r2     <- 1L - .rse
   .r2_adj <- 1L -(.mse / stats::var(y))
+  ## We could be at this all day...
   # .auc    <- Metrics::auc(y, .pred)
   # .mae  <- mean(abs(.e))
   # .mad  <- .mae / length(y)
   # .ROC <- ROCR::
   return(data.frame(
-    row.names = 1L,
+    row.names = NULL,
     model_type = class(model)[length(class(model))],
     sse  = .sse,
     mse  = .mse,
@@ -174,7 +176,7 @@ model_performance_df <- function(
 # #' @export
 #' @examples
 #' library(cheem)
-#' ## Regression:
+#' 
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
 #' Y <- log(sub$SalePrice)
@@ -238,6 +240,20 @@ global_view_df_1layer <- function(
 #' @export
 #' @examples
 #' library(cheem)
+#' library(spinifex)
+#' 
+#' ## Classification:
+#' X    <- penguins[, 1:4]
+#' clas <- penguins$species
+#' Y    <- as.integer(clas)
+#' 
+#' rf_fit  <- default_rf(X, Y)
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
+#' 
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
 #' X <- sub[, 1:9]
@@ -252,7 +268,7 @@ global_view_df_1layer <- function(
 #'                      attr_df = shap_df)
 #' 
 #' ## Save for used with shiny app (expects .rds):
-#' if(F) ## Don't accidentally save.
+#' if(FALSE) ## Don't accidentally save.
 #'   saveRDS(this_ls, "./my_cheem_ls.rds")
 cheem_ls <- function(
   x, y, class = NULL,
@@ -338,7 +354,7 @@ cheem_ls <- function(
 }
 
 
-if(F){ ## THERORETICAL DEV -----
+if(FALSE){ ## THERORETICAL DEV -----
   ## TAKEAWAY:
   #-CP and BD, each need DALEX::Explain;
   #-basically want to extract a model-less DALEX::explain before model is removed. 

@@ -7,7 +7,8 @@
 #' @source {Kaggle, Ames Housing Dataset} \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
 #' Replicating this dataset:
 #' ```
-#' if(F) browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
+#' if(FALSE) ## Don't accidentally open the URL.
+#'   browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
 #' ames <- readr::read_csv("./ignore/AmesHousing.csv")
 #' amesHousing2018_raw <- data.frame(ames)
 #' ## save(amesHousing2018_raw, file = "./data/amesHousing2018_raw.rda")
@@ -68,7 +69,7 @@
 #' global_view(this_ls)
 #' 
 #' ## Save for used with shiny app (expects .rds):
-#' if(F) ## Don't accidentally save.
+#' if(FALSE) ## Don't accidentally save.
 #'   saveRDS(out_ls, "./my_cheem_ls.rds")
 "amesHousing2018"
 

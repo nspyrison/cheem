@@ -21,7 +21,7 @@ the provided local explanation's attribution.
 }
 \examples{
 library(cheem)
-## Regression:
+
 sub <- amesHousing2018_thin[1:200, ]
 X <- sub[, 1:9]
 Y <- log(sub$SalePrice)

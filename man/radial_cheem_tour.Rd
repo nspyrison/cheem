@@ -57,6 +57,27 @@ and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
 library(cheem)
+library(spinifex)
+
+## Classification:
+X    <- penguins[, 1:4]
+clas <- penguins$species
+Y    <- as.integer(clas)
+
+rf_fit  <- default_rf(X, Y)
+## Long runtime for full datasets:
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+this_ls <- cheem_ls(X, Y, class = clas,
+                     model = rf_fit,
+                     attr_df = shap_df)
+
+bas <- basis_attr_df(shap_df, rownum = 1)
+ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
+  primary_obs = 1, comparison_obs = 2)
+\dontrun{
+animate_gganimate(ggt, render = gganimate::av_renderer())
+}
+
 ## Regression:
 sub <- amesHousing2018_thin[1:200, ]
 X <- sub[, 1:9]
@@ -72,25 +93,6 @@ this_ls <- cheem_ls(X, Y, class = clas,
 bas <- basis_attr_df(shap_df, rownum = 1)
 ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 \dontrun{
-spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
-}
-
-## Classification:
-X    <- flea[, 1:6]
-clas <- flea$species
-Y    <- as.integer(clas)
-
-rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-
-bas <- basis_attr_df(shap_df, rownum = 1)
-ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
-  primary_obs = 1, comparison_obs = 2)
-\dontrun{
-spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
+animate_gganimate(ggt, render = gganimate::av_renderer())
 }
 }

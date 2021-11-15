@@ -31,5 +31,5 @@ observation.
 
 ## Visualize
 x <- 1:2000
-plot(x, logistic_tform(x), col='blue')
+plot(x, logistic_tform(x), col = 'blue')
 }

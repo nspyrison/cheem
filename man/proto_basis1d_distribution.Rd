@@ -54,34 +54,7 @@ use in conjunction with \code{proto_basis1d()}.
 \examples{
 library(cheem)
 library(spinifex)
-## Classification:
-X    <- flea[, 1:6]
-clas <- flea$species
-Y    <- as.integer(clas)
 
-rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-
-bas <- basis_attr_df(shap_df, rownum = 1)
-mv <- manip_var_of(bas)
-mt_path <- manual_tour(bas, mv)
-
-X_scl <- spinifex::scale_sd(X)
-ggt <- ggtour(mt_path, X_scl, angle = .3) +
-  proto_density(aes_args = list(color = clas, fill = clas)) +
-  proto_basis1d() +
-  proto_basis1d_distribution(shap_df, group_by = clas)
-\dontrun{
-animate_plotly(ggt)
-}
-
-library(cheem)
-library(spinifex)
-## Regression:
 sub <- amesHousing2018_thin[1:200, ]
 X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
@@ -106,32 +79,6 @@ ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
     primary_obs = 1, comparison_obs = 2) +
   proto_basis1d(position = "bottom1d") +
   proto_origin()
-\dontrun{
-animate_plotly(ggt)
-}
-
-## Classification:
-X    <- flea[, 1:6]
-clas <- flea$species
-Y    <- as.integer(clas)
-
-rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-
-bas_p <- basis_attr_df(shap_df, rownum = 1)
-bas_c <- basis_attr_df(shap_df, rownum = 2)
-diff <- abs(bas_p - bas_c)
-mv <- which(diff == max(diff))
-mt_path <- manual_tour(bas_p, mv)
-
-ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-  proto_density(list(color = clas, fill = clas)) +
-  proto_basis1d_distribution(
-    attr_df = shap_df, group_by = clas, position = "top1d",
-    primary_obs = 1, comparison_obs = 2) +
-  proto_basis1d(position = "bottom1d") +
-  proto_origin1d()
 \dontrun{
 animate_plotly(ggt)
 }

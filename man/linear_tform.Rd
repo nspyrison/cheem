@@ -28,5 +28,5 @@ observation.
 
 ## Visualize
 x <- 1:2000
-plot(x, linear_tform(x), col='blue')
+plot(x, sapply(x, linear_tform), col = 'blue')
 }
