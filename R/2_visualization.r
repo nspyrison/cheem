@@ -311,11 +311,11 @@ global_view <- function(
   .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
                           layer_name = u_nms[1L])
   .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
-  .map_to_data[, 1L] <- .map_to_data[, 1L] / 3L
+  .map_to_data[, 1L] <- .map_to_data[, 1L]
   .bas_attr <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
                           layer_name = u_nms[2L])
   .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
-  .map_to_attr[, 1L] <- .map_to_attr[, 1L] / 3L
+  .map_to_attr[, 1L] <- .map_to_attr[, 1L]
   
   ## Proto for main points
   pts_main <- list()

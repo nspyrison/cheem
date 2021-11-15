@@ -33,8 +33,8 @@ server <- function(input, output, session){
       comp_obs <- 8L
     }else if(dat == "ames housing 2018"){
       ret      <- ames2018_ls
-      prim_obs <- 1703L
-      comp_obs <- 1374L
+      prim_obs <- 128L
+      comp_obs <- 93
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
