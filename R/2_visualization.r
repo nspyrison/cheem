@@ -547,13 +547,14 @@ radial_cheem_tour <- function(
     if(sum(row_index) == 0L)
       stop("radial_cheem_tour: sum of row_index was 0.")
   decode_df <- cheem_ls$decode_df
+  .prim_obs <- primary_obs    # Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
+  .comp_obs <- comparison_obs # Don't coerce to logical index.
+  x <- NULL
   .n <- nrow(decode_df)
   if(is.null(inc_vars) == TRUE)
     inc_vars <- colnames(cheem_ls$attr_df)
   .col_idx <- colnames(decode_df) %in% inc_vars
   if(is.null(row_index)) row_index <- 1L:.n
-  .prim_obs <- primary_obs    # Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
-  .comp_obs <- comparison_obs # Don't coerce to logical index.
   
   ## Subset columns and scalce plot data
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>% as.data.frame()

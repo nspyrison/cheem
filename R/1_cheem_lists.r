@@ -267,7 +267,7 @@ cheem_ls <- function(
   d <- 2L
   basis_type <- match.arg(basis_type)
   is_classification <- is_discrete(y)
-  rownum <- V2 <- projection_nm <- x <- NULL
+  rownum <- V2 <- projection_nm <- NULL
   
   ## Global view -----
   .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")

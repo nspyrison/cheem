@@ -70,6 +70,10 @@
 #' ## Save for used with shiny app (expects .rds):
 #' if(F) ## Don't accidentally save.
 #'   saveRDS(out_ls, "./my_cheem_ls.rds")
-# "amesHousing2018_raw"
 "amesHousing2018"
+
+#' @rdname amesHousing2018
+"amesHousing2018_raw"
+
+#' @rdname amesHousing2018
 "amesHousing2018_thin"

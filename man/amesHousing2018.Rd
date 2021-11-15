@@ -3,9 +3,15 @@
 \docType{data}
 \name{amesHousing2018}
 \alias{amesHousing2018}
+\alias{amesHousing2018_raw}
+\alias{amesHousing2018_thin}
 \title{Ames housing data 2018}
 \format{
 A data frame with 2291 rows and 18 numeric variables, SalesPrice, the response variable, and 3 class variables
+
+An object of class \code{data.frame} with 2930 rows and 82 columns.
+
+An object of class \code{data.frame} with 2291 rows and 11 columns.
 }
 \source{
 {Kaggle, Ames Housing Dataset} \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
@@ -55,6 +61,10 @@ amesHousing2018_thin <- amesHousing2018[, .thin_col_idx]
 }
 \usage{
 amesHousing2018
+
+amesHousing2018_raw
+
+amesHousing2018_thin
 }
 \description{
 Cleaned house price data for Ames, Iowa, USA from 2018. Only complete

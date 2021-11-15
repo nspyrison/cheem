@@ -31,6 +31,7 @@ Suggests:
     randomForest,
     ggplot2,
     tourr,
+    scales,
     lqmm,
     mvtnorm,
     moments,
