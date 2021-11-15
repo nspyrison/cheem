@@ -1,10 +1,22 @@
 ## Dependencies ------
 {
   require(cheem)
-  dat  <- amesHousing2018_thin
+  if(F){
+    ?amesHousing2018
+    str(amesHousing2018)
+    hist(as.integer(amesHousing2018$Neighborhd))
+    table(amesHousing2018$Neighborhd)
+  }
+  
+  ## Subset to the largest neighborhood; North Ames
+  r_idx <- amesHousing2018$Neighborhd == "NAmes"
+  dat  <- amesHousing2018_thin[r_idx, ]
   X    <- dat[, 1:9]
   Y    <- log(dat$SalePrice)
-  clas <- dat$ZoneMS
+  ## class is now zone subclass
+  clas <- factor(
+    amesHousing2018$SubclassMS[r_idx],
+    levels = unique(amesHousing2018$SubclassMS[r_idx]))
 }
 
 rf_fit  <- default_rf(X, Y)
@@ -13,7 +25,7 @@ this_ls <- cheem_ls(X, Y,
                     model = rf_fit,
                     attr_df = shap_df)
 names(this_ls)
-
+global_view(this_ls)
 ## EXPORT OBJECTS ----
 if(interactive() == TRUE){
   setwd("~/R/cheem")
