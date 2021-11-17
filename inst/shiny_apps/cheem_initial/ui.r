@@ -31,7 +31,7 @@ toy_reg_ls  <- readRDS("./data/8preprocess_toy_regression.rds")
 expected_data_char <- c(
   "toy classification", "penguins",
   "toy regression", "fifa", "ames housing 2018",
-  #"diabetes (wide)", "diabetes (long)", 
+  #"diabetes (wide)", "diabetes (long)",
   "<Upload saved cheem_ls (.rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #### Top text description -----
@@ -80,33 +80,29 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   br(),
   
   #### Cheem tour ----
-  h3("Cheem tour"), 
+  h3("Cheem tour"),
   p("The data-space projected through normalized SHAP values of the primary observation."),
   checkboxGroupInput(
     "inc_vars", label = "Inclusion variables",
     choices = c("bdy", "age", "rct", "atk", "def", "acc", "mvm", "pwr", "gk"),
-    selected = c("atk", "def", "acc", "mvm", "pwr"),
-    inline = TRUE),
+    selected = c("atk", "def", "acc", "mvm", "pwr"), inline = TRUE),
   fluidRow(
     column(width = 3L,
-           selectInput("manip_var_nm",
-                       label = "Manipulation variable:",
-                       choices  = NULL)), #"<Set in updateInput()>")),
+           selectInput("manip_var_nm", label = "Manipulation variable:",
+                       choices  = NULL)),
     column(width = 3L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
                            c("Yes" = TRUE, "No" = FALSE))),
     column(width = 6L)
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Longer-dashed and dotted lines: location of primary & comparison observations respectively (previously '*'/'x')."),
-  
-  shiny::imageOutput("cheem_tour_gganimate",
-                     width = "100%", height = "720px") %>%
-    shinycssloaders::withSpinner(type = 8L),
-  # ## Plotly tour
-  # plotly::plotlyOutput(
-  #   "cheem_tour_plotly",
-  #   height = "600px", width = "1440px") %>%
+  # shiny::imageOutput("cheem_tour_gganimate",
+  #                    width = "100%", height = "720px") %>%
   #   shinycssloaders::withSpinner(type = 8L),
+  ## Plotly tour
+  plotly::plotlyOutput(
+    "cheem_tour_plotly", height = "600px", width = "960px") %>%
+    shinycssloaders::withSpinner(type = 8L),
   br(), br(), br(), br()
 ) ## Assign tab1_cheem
 

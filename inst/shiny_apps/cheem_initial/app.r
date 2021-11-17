@@ -184,12 +184,14 @@ server <- function(input, output, session){
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
       global_view(
         cheem_ls, .prim_obs, .comp_obs,
-        height_px = 480L, width_px = 960L))
+        height_px = 480L, width_px = 960L,
+        color = cheem_ls$decode_df$class,
+        shape = cheem_ls$decode_df$class))
   })
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
-  ## gganimate tour ----
+  ### gganimate tour ----
   output$cheem_tour_gganimate <- renderImage({
     bas        <- req(bas())
     cheem_ls   <- req(load_ls())
@@ -212,8 +214,8 @@ server <- function(input, output, session){
       prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,
       row_index = idx_rownum, inc_vars = inc_vars)
-
-    ## A temp file to save the output, will be removed later in renderImage
+    
+    ### A temp file to save the output, will be removed later in renderImage
     anim <- animate_gganimate(
       ggt,
       #height = 720L, #width = 1200L,
@@ -222,17 +224,15 @@ server <- function(input, output, session){
       render = gganimate::av_renderer())
     
     outfile <- tempfile(fileext = ".mp4")
-    gganimate::anim_save(
-      "outfile.mp4", 
-      anim)
-
+    gganimate::anim_save("outfile.mp4", anim)
+    
     ## Return a list containing the filename of the rendered image file.
     list(src = "outfile.mp4", contentType = "video/mp4")
   }, deleteFile = TRUE)
   outputOptions(output, "cheem_tour_gganimate", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)
   
-  ## Plotly tour -----
+  ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
     bas        <- req(bas())
     cheem_ls   <- req(load_ls())
@@ -256,7 +256,8 @@ server <- function(input, output, session){
       do_add_pcp_segments = add_pcp,
       row_index = idx_rownum, inc_vars = inc_vars)
     
-    spinifex::animate_plotly(ggt) ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
+    spinifex::animate_plotly(ggt, hoverinfo = "none")# %>% ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
+     # plotly::style(hoverinfo = "none")
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)

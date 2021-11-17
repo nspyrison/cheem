@@ -180,9 +180,9 @@ proto_basis1d_distribution <- function(
     .df_rect <- spinifex:::.bind_elements2df(.facet_var, .df_rect)
     .df_seg0 <- spinifex:::.bind_elements2df(.facet_var, .df_seg0)
   }
-  ## add protos
+  ## Add protos
   ret <- c(
-    ret, 
+    ret,
     ggplot2::geom_segment(
       ggplot2::aes(x = min(x), y = min(y), xend = max(x), yend = max(y)),
       .df_seg0, color = "grey80", linetype = 2L),
@@ -547,59 +547,39 @@ radial_cheem_tour <- function(
   ### Regression case -----
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
+    ## Double up data; observed y and residual
     .fixed_y <- c(spinifex::scale_sd(decode_df$y),
                   spinifex::scale_sd(decode_df$residual))
-    scale_col <- list() ## Let spinifex_theme default to it "Dark2"
-    ## Set reg_color/reg_shape if null
-    # if(length(unique(cheem_ls$decode_df$class)) > 1L){
-    #   ## Class defined
-    #   if(is.null(reg_color)) reg_color <- cheem_ls$decode_df$class %>% as.factor()
-    #   if(is.null(reg_shape)) reg_shape <- cheem_ls$decode_df$class %>% as.factor()
-    # }else{ 
-    #   ## Class not defined
-    #   if(is.null(reg_color)) reg_color <- cheem_ls$decode_df$residual
-    #   if(is.null(reg_shape)) reg_shape <- as.factor(FALSE)
-    #   scale_col <- ggplot2::scale_colour_gradient2(
-    #     low = scales::muted("blue"), mid = "grey80", high = scales::muted("red"))
-    # }
     .doub_prim_obs <- .doub_comp_obs <- NULL
     if(is.null(.prim_obs) == FALSE)
       .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
     if(is.null(.comp_obs) == FALSE)
       .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
+    
     ## Foreground:
     .dat_fore   <- rbind(.dat[row_index, ], .dat[row_index, ])
     .facet_fore <- factor(rep(c("observed y", "residual"), length.out = nrow(.dat_fore)))
     .idx_fore   <- c(row_index, row_index)
     .fix_y_fore <- .fixed_y[.idx_fore]
-    .df_hline <- data.frame(x = 0L, facet_var = "residual")
+    .df_hline <- data.frame(x = 0L, y = 0L, facet_var = "residual")
+    #browser()
     
-    if(FALSE){ ## Testing minimal example
-      ggt <-
-        spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
-        spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
-        spinifex::append_fixed_y(fixed_y = .fix_y_fore) +
-        spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.7, -.1)) +
-        ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
-        ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
-        spinifex::proto_point() +
-        proto_basis1d_distribution(cheem_ls$attr_df, position = "floor1d") +
-        spinifex::proto_basis1d("floor1d") +
-        spinifex::proto_highlight(row_index = .doub_comp_obs) +
-        spinifex::proto_highlight(row_index = .doub_prim_obs)
-      spinifex::animate_plotly(ggt)
-    }
-    # browser()
-    # debugonce(proto_point)
+    ##TODO: Note coloring on residuals will error
+    #### with proto_basis1d_distribution as it has group_by/class mapped to color (discrete).
+    # ## Regression aesthetics:
+    # reg_color <- factor(cheem_ls$decode_df$residual)
+    # reg_shape <- cheem_ls$decode_df$class
+    # color_scale <- ggplot2::scale_colour_gradient2(
+    #   low = scales::muted("blue"), mid = "grey80", high = scales::muted("red"))
+    
     ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
       spinifex::append_fixed_y(fixed_y = .fix_y_fore) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
-      ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)#legend.position = "off"
-                     ) +
-      # scale_col +
-      spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.7, .3)) +
+      ggplot2::theme(
+        axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
+      #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       spinifex::proto_point(
         aes_args = list(color = .class, shape = .class),
         #aes_args = list(color = reg_color, shape = reg_shape),
@@ -619,6 +599,7 @@ radial_cheem_tour <- function(
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = x), .df_hline) +
       spinifex::proto_origin()
+      
   }
   
   ## Return the static ggtour, animate in app
