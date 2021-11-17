@@ -184,12 +184,55 @@ server <- function(input, output, session){
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
       global_view(
         cheem_ls, .prim_obs, .comp_obs,
-        height_px = 480, width_px = 960L))
+        height_px = 480L, width_px = 960L))
   })
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
-  ## Plotly tour
+  ## gganimate tour ----
+  output$cheem_tour_gganimate <- renderImage({
+    bas        <- req(bas())
+    cheem_ls   <- req(load_ls())
+    prim_obs   <- req(primary_obs())
+    comp_obs   <- req(comparison_obs())
+    mv_nm      <- req(input$manip_var_nm)
+    add_pcp    <- req(input$do_add_pcp_segments)
+    inc_vars   <- req(input$inc_vars)
+    idx_rownum <- sel_rownums() ## NULL is no selection
+    
+    if(mv_nm %in% rownames(bas) == FALSE){
+      message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
+                     "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
+      return(NULL)
+    }
+    mv <- which(mv_nm %in% rownames(bas))
+    
+    ggt <- radial_cheem_tour(
+      cheem_ls, bas, mv,
+      prim_obs, comp_obs,
+      do_add_pcp_segments = add_pcp,
+      row_index = idx_rownum, inc_vars = inc_vars)
+
+    ## A temp file to save the output, will be removed later in renderImage
+    anim <- animate_gganimate(
+      ggt,
+      #height = 720L, #width = 1200L,
+      # units = "px", ## "px", "in", "cm", or "mm."
+      #res = 72L, ## resolution (dpi)
+      render = gganimate::av_renderer())
+    
+    outfile <- tempfile(fileext = ".mp4")
+    gganimate::anim_save(
+      "outfile.mp4", 
+      anim)
+
+    ## Return a list containing the filename of the rendered image file.
+    list(src = "outfile.mp4", contentType = "video/mp4")
+  }, deleteFile = TRUE)
+  outputOptions(output, "cheem_tour_gganimate", ## LAZY eval, do last
+                suspendWhenHidden = TRUE, priority = -9999L)
+  
+  ## Plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
     bas        <- req(bas())
     cheem_ls   <- req(load_ls())

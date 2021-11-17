@@ -98,10 +98,15 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   ),
   p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
   p("Longer-dashed and dotted lines: location of primary & comparison observations respectively (previously '*'/'x')."),
-  plotly::plotlyOutput(
-    "cheem_tour_plotly",
-    height = "600px", width = "1440px") %>%
+  
+  shiny::imageOutput("cheem_tour_gganimate",
+                     width = "100%", height = "720px") %>%
     shinycssloaders::withSpinner(type = 8L),
+  # ## Plotly tour
+  # plotly::plotlyOutput(
+  #   "cheem_tour_plotly",
+  #   height = "600px", width = "1440px") %>%
+  #   shinycssloaders::withSpinner(type = 8L),
   br(), br(), br(), br()
 ) ## Assign tab1_cheem
 
