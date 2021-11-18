@@ -2,7 +2,7 @@
 % Please edit documentation in R/2_visualization.r
 \name{basis_attr_df}
 \alias{basis_attr_df}
-\title{Extract and format the 1D local attribution basis}
+\title{Basis matrix, 1D, of the local attribution basis}
 \usage{
 basis_attr_df(attr_df, rownum = 1)
 }
@@ -16,7 +16,7 @@ such as a return from \code{attr_df_treeshap()}.}
 A matrix of the 1D basis.
 }
 \description{
-Internal function, Extract and format the 1D local attribution basis from
+Extract and format the 1D local attribution basis from
 the provided local explanation's attribution.
 }
 \examples{
@@ -27,8 +27,19 @@ X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
 clas <- sub$ZoneMS
 
-rf_fit  <- default_rf(X, Y)
+rf_fit <- default_rf(X, Y)
 ## Long runtime for full datasets:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 basis_attr_df(shap_df, rownum = 1)
 }
+\seealso{
+Other cheem utility: 
+\code{\link{as_logical_index}()},
+\code{\link{does_contain_nonnumeric}()},
+\code{\link{is_discrete}()},
+\code{\link{linear_tform}()},
+\code{\link{logistic_tform}()},
+\code{\link{problem_type}()},
+\code{\link{rnorm_from}()}
+}
+\concept{cheem utility}

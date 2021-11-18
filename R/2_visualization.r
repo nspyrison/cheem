@@ -1,15 +1,15 @@
 ## proto_* extensions ----
-
-#' Extract and format the 1D local attribution basis
+#' Basis matrix, 1D, of the local attribution basis
 #' 
-#' Internal function, Extract and format the 1D local attribution basis from 
+#' Extract and format the 1D local attribution basis from 
 #' the provided local explanation's attribution.
 #' 
 #' @param attr_df A data frame of local explanation attributions,
-#'  such as a return from `attr_df_treeshap()`.
+#' such as a return from `attr_df_treeshap()`.
 #' @param rownum The rownumber of the primary observation. Defaults to 1.
 #' @return A matrix of the 1D basis.
 #' @export
+#' @family cheem utility
 #' @examples
 #' library(cheem)
 #' 
@@ -18,7 +18,7 @@
 #' Y <- log(sub$SalePrice)
 #' clas <- sub$ZoneMS
 #' 
-#' rf_fit  <- default_rf(X, Y)
+#' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' basis_attr_df(shap_df, rownum = 1)
@@ -27,7 +27,7 @@ basis_attr_df <- function(
   rownum = 1
 ){
   ## Remove last column if layer_name
-  attr_df <- attr_df[rownum, ]
+  attr_df <- attr_df[rownum, ] ## as.vector
   ## Extract formatted basis
   LA_bas <- attr_df %>%
     as.numeric %>%
@@ -38,9 +38,9 @@ basis_attr_df <- function(
 
 #' Adds the distribution of the row local attributions to a ggtour
 #'
-#' Adds the distribution of orthonormalized row values of 
-#' the specified local explanation `attr_df`. Does not draw the basis itself; 
-#' use in conjunction with `proto_basis1d()`.
+#' A {spinifex} proto_*-like function, that adds the distribution of 
+#' orthonormalized row values of the specified local explanation `attr_df`. 
+#' Does not draw the basis bars; use in conjunction with `proto_basis1d()`.
 #'
 #' @param attr_df An data frame, the attributions of a local explanation, 
 #' such as a return from `attr_df_treeshap()`.
@@ -73,7 +73,7 @@ basis_attr_df <- function(
 #' Y <- log(sub$SalePrice)
 #' clas <- sub$ZoneMS
 #' 
-#' rf_fit  <- default_rf(X, Y)
+#' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
@@ -256,6 +256,7 @@ proto_basis1d_distribution <- function(
 #' @return `plotly` html widget of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
+#' @family cheem consumers
 #' @examples
 #' library(cheem)
 #' 
@@ -264,7 +265,7 @@ proto_basis1d_distribution <- function(
 #' Y <- log(sub$SalePrice)
 #' clas <- sub$MS.Zoning
 #' 
-#' rf_fit  <- default_rf(X, Y)
+#' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
@@ -439,6 +440,7 @@ global_view <- function(
 #' manipulating the contribution of a selected tour. Consumed by a 
 #' `spinifex::animate_*` function.
 #' @export
+#' @family cheem consumers
 #' @examples
 #' library(cheem)
 #' library(spinifex)
@@ -448,7 +450,7 @@ global_view <- function(
 #' clas <- penguins$species
 #' Y    <- as.integer(clas)
 #' 
-#' rf_fit  <- default_rf(X, Y)
+#' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
@@ -468,7 +470,8 @@ global_view <- function(
 #' Y <- log(sub$SalePrice)
 #' clas <- sub$ZoneMS
 #' 
-#' rf_fit  <- default_rf(X, Y)
+#' rf_fit <- default_rf(X, Y)
+#' ## Long runtime for full datasets:
 #' shap_df <- attr_df_treeshap(rf_fit, X)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
@@ -495,8 +498,8 @@ radial_cheem_tour <- function(
     if(sum(row_index) == 0L)
       stop("radial_cheem_tour: sum of row_index was 0.")
   decode_df <- cheem_ls$decode_df
-  .prim_obs <- primary_obs    # Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
-  .comp_obs <- comparison_obs # Don't coerce to logical index.
+  .prim_obs <- primary_obs    ## Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
+  .comp_obs <- comparison_obs ## Don't coerce to logical index
   x <- NULL
   .n <- nrow(decode_df)
   if(is.null(inc_vars) == TRUE)
@@ -506,7 +509,7 @@ radial_cheem_tour <- function(
   
   ## Subset columns and scalce plot data
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>% as.data.frame()
-  ggt <- spinifex::last_ggtour()
+  ggt  <- spinifex::last_ggtour()
   
   ## Change row_index from numeric to logical if needed and replicate
   row_index <- as_logical_index(row_index, nrow(decode_df))
@@ -561,7 +564,13 @@ radial_cheem_tour <- function(
     .facet_fore <- factor(rep(c("observed y", "residual"), length.out = nrow(.dat_fore)))
     .idx_fore   <- c(row_index, row_index)
     .fix_y_fore <- .fixed_y[.idx_fore]
-    .df_hline <- data.frame(x = 0L, y = 0L, facet_var = "residual")
+    .df_resid   <- data.frame(x = range(spinifex::last_ggtour()$df_data$x),
+                              y = range(decode_df$residual))
+    .df_hline   <- spinifex::map_relative(
+      data.frame(x = c(0L, .df_resid$x),
+                 y = c(0L, .df_resid$y),
+                 facet_var = "residual"),
+      "data", to = .df_resid)
     #browser()
     
     ##TODO: Note coloring on residuals will error
@@ -598,7 +607,8 @@ radial_cheem_tour <- function(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = x), .df_hline) +
-      spinifex::proto_origin()
+      spinifex::proto_origin() +
+      spinifex::proto_hline0()
       
   }
   

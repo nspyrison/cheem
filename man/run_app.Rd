@@ -21,6 +21,15 @@ traditional techniques for static projections of multivariate data sets.
 }
 \examples{
 \dontrun{
+## Runs the app
 run_app("cheem_initial")
+
+## Run with app code displayed
 run_app(app_nm = "cheem_initial", display.mode = "showcase")}
 }
+\seealso{
+Other cheem consumers: 
+\code{\link{global_view}()},
+\code{\link{radial_cheem_tour}()}
+}
+\concept{cheem consumers}

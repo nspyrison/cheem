@@ -13,6 +13,9 @@ coerce to a logical index.}
 \item{n}{Single numeric, the number of rows of the data use as a replicate
 return length.}
 }
+\value{
+A logical index of length \code{n}.
+}
 \description{
 Suggests a alpha opacity to plot with as a function of the number of
 observation.
@@ -21,3 +24,14 @@ observation.
 ## Coerce a numeric index to logical:
 as_logical_index(c(1, 4:10, 15), nrow(mtcars))
 }
+\seealso{
+Other cheem utility: 
+\code{\link{basis_attr_df}()},
+\code{\link{does_contain_nonnumeric}()},
+\code{\link{is_discrete}()},
+\code{\link{linear_tform}()},
+\code{\link{logistic_tform}()},
+\code{\link{problem_type}()},
+\code{\link{rnorm_from}()}
+}
+\concept{cheem utility}

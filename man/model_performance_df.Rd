@@ -2,7 +2,7 @@
 % Please edit documentation in R/1_cheem_lists.r
 \name{model_performance_df}
 \alias{model_performance_df}
-\title{Extract higher level model performance}
+\title{Extract higher level model performance statistics}
 \usage{
 model_performance_df(model)
 }
@@ -11,7 +11,7 @@ model_performance_df(model)
 model fit, or a return from \code{default_rf()}.}
 }
 \value{
-A dataframe of the local attributions.
+A data.frame of model performance statsitics.
 }
 \description{
 Internal function, used downstream in cheem_ls.

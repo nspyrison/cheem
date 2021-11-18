@@ -21,3 +21,14 @@ does_contain_nonnumeric(mtcars$mpg)
 does_contain_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
 does_contain_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in tooltip
 }
+\seealso{
+Other cheem utility: 
+\code{\link{as_logical_index}()},
+\code{\link{basis_attr_df}()},
+\code{\link{is_discrete}()},
+\code{\link{linear_tform}()},
+\code{\link{logistic_tform}()},
+\code{\link{problem_type}()},
+\code{\link{rnorm_from}()}
+}
+\concept{cheem utility}

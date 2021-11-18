@@ -256,8 +256,8 @@ server <- function(input, output, session){
       do_add_pcp_segments = add_pcp,
       row_index = idx_rownum, inc_vars = inc_vars)
     
-    spinifex::animate_plotly(ggt, hoverinfo = "none")# %>% ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
-     # plotly::style(hoverinfo = "none")
+    spinifex::animate_plotly(ggt, hoverinfo = "none") %>% ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
+    plotly::style(hoverinfo = "none")
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)

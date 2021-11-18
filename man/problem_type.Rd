@@ -2,7 +2,7 @@
 % Please edit documentation in R/0_util.r
 \name{problem_type}
 \alias{problem_type}
-\title{The type of model for a given Y variable.}
+\title{The type of model for a given Y variable}
 \usage{
 problem_type(y)
 }
@@ -24,3 +24,14 @@ problem_type(mtcars$mpg)
 problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 problem_type(letters)
 }
+\seealso{
+Other cheem utility: 
+\code{\link{as_logical_index}()},
+\code{\link{basis_attr_df}()},
+\code{\link{does_contain_nonnumeric}()},
+\code{\link{is_discrete}()},
+\code{\link{linear_tform}()},
+\code{\link{logistic_tform}()},
+\code{\link{rnorm_from}()}
+}
+\concept{cheem utility}

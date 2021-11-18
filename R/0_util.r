@@ -8,6 +8,7 @@
 #' @param x A vector to check the discreteness of.
 #' @return Logical, whether or not `x` is a discrete variable,
 #' @export
+#' @family cheem utility
 #' @examples
 #' is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
 #' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
@@ -17,7 +18,7 @@ is_discrete <- function(x){
     (length(unique(x)) < 25L & is.numeric(x))
 }
 
-#' The type of model for a given Y variable.
+#' The type of model for a given Y variable
 #' 
 #' Whether the Y is a "classification", "regression" or ill-defined problem.
 #' Returns a character: "classification", "regression", or an error for strange 
@@ -27,6 +28,7 @@ is_discrete <- function(x){
 #' @param y Response variable to be modeled
 #' @return Character in c("classification", "regression")
 #' @export
+#' @family cheem utility
 #' @examples
 #' problem_type(mtcars$mpg)
 #' problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
@@ -42,9 +44,11 @@ problem_type <- function(y){
 #' 
 #' Returns a logical, whether or not a vector contains any non-numeric 
 #' characters. Typically used to test if row names hold non-index information.
+#' 
 #' @param x A vector to be tested for existence of non-numeric characters.
 #' @return Character in c("classification", "regression")
 #' @export
+#' @family cheem utility
 #' @examples
 #' does_contain_nonnumeric(mtcars$mpg)
 #' does_contain_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
@@ -58,14 +62,15 @@ does_contain_nonnumeric <- function(x){
 #' Creates new observation of the data given its specific means and shapes.
 #' typically applied to a cluster subset of data. _ie_ draw from cluster 'a', 
 #' then assign to cluster 'b'.
-#' Returns a data frame with column names of the original data.
+#' 
 #' @param data A data.frame or matrix to sample from.
 #' @param n_obs Number of new observations to draw. Defaults to 1.
 #' @param var_coeff Variance coefficient, closer to 0 make points near the 
 #' median, above 1 makes more points further away from the median. 
 #' Defaults to 1.
-#' @return Character in c("classification", "regression")
+#' @return A data.frame with column names of the original data.
 #' @export
+#' @family cheem utility
 #' @examples
 #' sub <- mtcars[mtcars$cyl == 6, ]
 #' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
@@ -99,6 +104,7 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #' @param floor The lowest number returned. Defaults to 0.2.
 #' @return A scalar numeric, suggested value to set alpha opacity.
 #' @export
+#' @family cheem utility
 #' @examples
 #' ## Suggest an opacity to use in plotting:
 #' (my_alpha <- linear_tform(nrow(spinifex::penguins)))
@@ -126,6 +132,7 @@ linear_tform = function(
 #' @param floor The lowest number returned. Defaults to 0.3.
 #' @return A scalar numeric, suggested value to set alpha opacity.
 #' @export
+#' @family cheem utility
 #' @examples
 #' ## Suggest an opacity to use in plotting:
 #' (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
@@ -150,7 +157,9 @@ logistic_tform = function(
 #' coerce to a logical index.
 #' @param n Single numeric, the number of rows of the data use as a replicate
 #' return length.
+#' @return A logical index of length `n`.
 #' @export
+#' @family cheem utility
 #' @examples
 #' ## Coerce a numeric index to logical:
 #' as_logical_index(c(1, 4:10, 15), nrow(mtcars))

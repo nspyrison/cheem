@@ -17,6 +17,7 @@
 #' Setting this number larger causes smaller trees to be grown (and thus take less time).
 #' @return A randomForest model.
 #' @export
+#' @family cheem preprocessing
 #' @examples
 #' library(cheem)
 #' 
@@ -66,8 +67,9 @@ default_rf <- function(
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
 #' @param noisy Logical, if a tone should be played on completion. 
 #' Defaults to TRUE.
-#' @return A dataframe of the local attributions.
+#' @return A data.frame of the local attributions for each observation.
 #' @export
+#' @family cheem preprocessing
 #' @examples
 #' library(cheem)
 #' 
@@ -107,14 +109,13 @@ attr_df_treeshap <- function(
   return(ret)
 }
 
-#' Extract higher level model performance
+#' Extract higher level model performance statistics
 #' 
 #' Internal function, used downstream in cheem_ls.
 #' 
 #' @param model A non-linear model, originally a `randomForest::randomForest`
 #' model fit, or a return from `default_rf()`.
-#' @return A dataframe of the local attributions.
-#' @export
+#' @return A data.frame of model performance statsitics.
 #' @examples
 #' library(cheem)
 #' 
@@ -161,8 +162,8 @@ model_performance_df <- function(
 
 #' Create the plot data.frame for the global linked plotly display.
 #' 
-#' Internal function, the plot data.frame of 1 layer, consumed downstream in 
-#' cheem_ls.
+#' Internal function consumed in the cheem workflow. 
+#' Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
@@ -173,7 +174,6 @@ model_performance_df <- function(
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used. Defaults to the name of the last class of x.
 #' @return A data.frame, for the global linked plotly display.
-# #' @export
 #' @examples
 #' library(cheem)
 #' 
@@ -215,10 +215,10 @@ global_view_df_1layer <- function(
   return(ret)
 }
 
-#' Create the local attribution layer data.frame
+#' Preprocessing for use in shiny app
 #' 
-#' Internal function, the local attribution layer data.frame of 1 layer, 
-#' consumed 
+#' Performs the preprocessing steps needs to supply the plot functions
+#' `global_view()` and `radial_cheem_tour()` used in the shiny app.
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
@@ -236,8 +236,10 @@ global_view_df_1layer <- function(
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
 #' @param keep_model Logical, if the heavy model object should be kept.
 #' Defaults to FALSE.
-#' @return A data.frame, for the full local attribution matrix.
+#' @return A list of data.frames needed for the `shiny` application.
+#' @seealso [global_view()] [radial_cheem_tour()] [radial_cheem_tour()]
 #' @export
+#' @family cheem preprocessing
 #' @examples
 #' library(cheem)
 #' library(spinifex)
@@ -253,6 +255,7 @@ global_view_df_1layer <- function(
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
+#' names(this_ls)
 #' 
 #' ## Regression:
 #' sub <- amesHousing2018_thin[1:200, ]
@@ -266,10 +269,13 @@ global_view_df_1layer <- function(
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
+#' names(this_ls)
 #' 
 #' ## Save for used with shiny app (expects .rds):
-#' if(FALSE) ## Don't accidentally save.
+#' if(FALSE){ ## Don't accidentally save.
 #'   saveRDS(this_ls, "./my_cheem_ls.rds")
+#'   run_app() ## Select the saved .rds file from the Data dropdown.
+#' }
 cheem_ls <- function(
   x, y, class = NULL,
   model, attr_df,

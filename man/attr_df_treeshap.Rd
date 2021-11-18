@@ -28,7 +28,7 @@ attributions of.}
 Defaults to TRUE.}
 }
 \value{
-A dataframe of the local attributions.
+A data.frame of the local attributions for each observation.
 }
 \description{
 A data.frame of each observations treeSHAP variable attributions of a
@@ -51,3 +51,9 @@ this_ls <- cheem_ls(X, Y, class = clas,
                     attr_df = shap_df)
 global_view(this_ls)
 }
+\seealso{
+Other cheem preprocessing: 
+\code{\link{cheem_ls}()},
+\code{\link{default_rf}()}
+}
+\concept{cheem preprocessing}

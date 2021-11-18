@@ -21,3 +21,14 @@ is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
 is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 is_discrete(letters)    ## Characters and factors labeled discrete.
 }
+\seealso{
+Other cheem utility: 
+\code{\link{as_logical_index}()},
+\code{\link{basis_attr_df}()},
+\code{\link{does_contain_nonnumeric}()},
+\code{\link{linear_tform}()},
+\code{\link{logistic_tform}()},
+\code{\link{problem_type}()},
+\code{\link{rnorm_from}()}
+}
+\concept{cheem utility}

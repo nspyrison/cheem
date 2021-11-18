@@ -47,9 +47,9 @@ Defaults to NULL, all variables kept.}
 Defaults to NULL, all rows kept.}
 }
 \description{
-Adds the distribution of orthonormalized row values of
-the specified local explanation \code{attr_df}. Does not draw the basis itself;
-use in conjunction with \code{proto_basis1d()}.
+A {spinifex} proto_*-like function, that adds the distribution of
+orthonormalized row values of the specified local explanation \code{attr_df}.
+Does not draw the basis bars; use in conjunction with \code{proto_basis1d()}.
 }
 \examples{
 library(cheem)
@@ -60,7 +60,7 @@ X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
 clas <- sub$ZoneMS
 
-rf_fit  <- default_rf(X, Y)
+rf_fit <- default_rf(X, Y)
 ## Long runtime for full datasets:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 

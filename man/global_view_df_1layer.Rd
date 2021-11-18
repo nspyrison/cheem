@@ -30,8 +30,8 @@ attribution used. Defaults to the name of the last class of x.}
 A data.frame, for the global linked plotly display.
 }
 \description{
-Internal function, the plot data.frame of 1 layer, consumed downstream in
-cheem_ls.
+Internal function consumed in the cheem workflow.
+Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 }
 \examples{
 library(cheem)

@@ -30,3 +30,14 @@ observation.
 x <- 1:2000
 plot(x, sapply(x, linear_tform), col = 'blue')
 }
+\seealso{
+Other cheem utility: 
+\code{\link{as_logical_index}()},
+\code{\link{basis_attr_df}()},
+\code{\link{does_contain_nonnumeric}()},
+\code{\link{is_discrete}()},
+\code{\link{logistic_tform}()},
+\code{\link{problem_type}()},
+\code{\link{rnorm_from}()}
+}
+\concept{cheem utility}

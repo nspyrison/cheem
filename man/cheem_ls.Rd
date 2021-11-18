@@ -2,7 +2,7 @@
 % Please edit documentation in R/1_cheem_lists.r
 \name{cheem_ls}
 \alias{cheem_ls}
-\title{Create the local attribution layer data.frame}
+\title{Preprocessing for use in shiny app}
 \usage{
 cheem_ls(
   x,
@@ -43,11 +43,11 @@ attribution used. Defaults to the last class of the model.}
 Defaults to FALSE.}
 }
 \value{
-A data.frame, for the full local attribution matrix.
+A list of data.frames needed for the \code{shiny} application.
 }
 \description{
-Internal function, the local attribution layer data.frame of 1 layer,
-consumed
+Performs the preprocessing steps needs to supply the plot functions
+\code{global_view()} and \code{radial_cheem_tour()} used in the shiny app.
 }
 \examples{
 library(cheem)
@@ -64,6 +64,7 @@ shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
+names(this_ls)
 
 ## Regression:
 sub <- amesHousing2018_thin[1:200, ]
@@ -77,8 +78,19 @@ shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
+names(this_ls)
 
 ## Save for used with shiny app (expects .rds):
-if(FALSE) ## Don't accidentally save.
+if(FALSE){ ## Don't accidentally save.
   saveRDS(this_ls, "./my_cheem_ls.rds")
+  run_app() ## Select the saved .rds file from the Data dropdown.
 }
+}
+\seealso{
+\code{\link[=global_view]{global_view()}} \code{\link[=radial_cheem_tour]{radial_cheem_tour()}} \code{\link[=radial_cheem_tour]{radial_cheem_tour()}}
+
+Other cheem preprocessing: 
+\code{\link{attr_df_treeshap}()},
+\code{\link{default_rf}()}
+}
+\concept{cheem preprocessing}

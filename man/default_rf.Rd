@@ -51,3 +51,9 @@ this_ls <- cheem_ls(X, Y, class = clas,
                     attr_df = shap_df)
 global_view(this_ls)
 }
+\seealso{
+Other cheem preprocessing: 
+\code{\link{attr_df_treeshap}()},
+\code{\link{cheem_ls}()}
+}
+\concept{cheem preprocessing}

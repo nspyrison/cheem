@@ -52,7 +52,7 @@ X <- sub[, 1:10]
 Y <- log(sub$SalePrice)
 clas <- sub$MS.Zoning
 
-rf_fit  <- default_rf(X, Y)
+rf_fit <- default_rf(X, Y)
 ## Long runtime for full datasets:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
@@ -60,3 +60,9 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      attr_df = shap_df)
 global_view(this_ls)
 }
+\seealso{
+Other cheem consumers: 
+\code{\link{radial_cheem_tour}()},
+\code{\link{run_app}()}
+}
+\concept{cheem consumers}

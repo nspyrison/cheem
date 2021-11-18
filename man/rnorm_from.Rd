@@ -16,16 +16,26 @@ median, above 1 makes more points further away from the median.
 Defaults to 1.}
 }
 \value{
-Character in c("classification", "regression")
+A data frame with column names of the original data.
 }
 \description{
 Creates new observation of the data given its specific means and shapes.
 typically applied to a cluster subset of data. \emph{ie} draw from cluster 'a',
 then assign to cluster 'b'.
-Returns a data frame with column names of the original data.
 }
 \examples{
 sub <- mtcars[mtcars$cyl == 6, ]
 ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
 rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
 }
+\seealso{
+Other cheem utility: 
+\code{\link{as_logical_index}()},
+\code{\link{basis_attr_df}()},
+\code{\link{does_contain_nonnumeric}()},
+\code{\link{is_discrete}()},
+\code{\link{linear_tform}()},
+\code{\link{logistic_tform}()},
+\code{\link{problem_type}()}
+}
+\concept{cheem utility}

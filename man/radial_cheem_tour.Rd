@@ -64,7 +64,7 @@ X    <- penguins[, 1:4]
 clas <- penguins$species
 Y    <- as.integer(clas)
 
-rf_fit  <- default_rf(X, Y)
+rf_fit <- default_rf(X, Y)
 ## Long runtime for full datasets:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
@@ -84,7 +84,8 @@ X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
 clas <- sub$ZoneMS
 
-rf_fit  <- default_rf(X, Y)
+rf_fit <- default_rf(X, Y)
+## Long runtime for full datasets:
 shap_df <- attr_df_treeshap(rf_fit, X)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
@@ -96,3 +97,9 @@ ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 animate_gganimate(ggt, render = gganimate::av_renderer())
 }
 }
+\seealso{
+Other cheem consumers: 
+\code{\link{global_view}()},
+\code{\link{run_app}()}
+}
+\concept{cheem consumers}
