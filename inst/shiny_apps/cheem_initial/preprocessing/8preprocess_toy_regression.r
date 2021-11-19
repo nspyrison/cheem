@@ -9,9 +9,17 @@ X <- data.frame(x1 = runif(200, 0, 5),
                 x3 = runif(200, 0, 5),
                 x4 = runif(200, 0, 5),
                 x5 = runif(200, 0, 5))
-Y <- X$x1 + X$x2 + (X$x1 * X$x2) + .1 * X$x3 + .1 * X$x4 + 0 * X$x5
+Y <- X$x1 + X$x2 + (X$x1 * X$x2) + .1 * X$x3 + .1 * X$x4 + .1 * X$x5 + rnorm(200)
+
+
 
 rf_fit  <- default_rf(X, Y)
+pred <- predict(rf_fit)
+obs <- Y
+df <- data.frame(obs=obs, pred=pred, rn= 1:200)
+ggplot(df, aes(pred, obs, label= rn)) + geom_point()  #+ geom_smooth()
+ggplotly()
+  
 shap_df <- attr_df_treeshap(rf_fit, X)
 this_ls <- cheem_ls(X, Y,
                     model = rf_fit,

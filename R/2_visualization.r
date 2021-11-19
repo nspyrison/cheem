@@ -289,7 +289,7 @@ global_view <- function(
   ## Aesthetics
   .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
   ## setup shape and color
-  if(cheem_ls$type == "classification"){
+  if(is_classification){
     if(is.null(color)) color <- cheem_ls$decode_df$predicted_class %>% as.factor()
     if(is.null(shape)) shape <- cheem_ls$decode_df$predicted_class %>% as.factor()
   }else{
@@ -507,8 +507,8 @@ radial_cheem_tour <- function(
   .col_idx <- colnames(decode_df) %in% inc_vars
   if(is.null(row_index)) row_index <- 1L:.n
   
-  ## Subset columns and scalce plot data
-  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>% as.data.frame()
+  ## Subset columns and scale plot data
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_01() %>% as.data.frame()
   ggt  <- spinifex::last_ggtour()
   
   ## Change row_index from numeric to logical if needed and replicate
@@ -551,8 +551,8 @@ radial_cheem_tour <- function(
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
     ## Double up data; observed y and residual
-    .fixed_y <- c(spinifex::scale_sd(decode_df$y),
-                  spinifex::scale_sd(decode_df$residual))
+    .fixed_y <- c(spinifex::scale_01(decode_df$y),
+                  spinifex::scale_01(decode_df$residual))
     .doub_prim_obs <- .doub_comp_obs <- NULL
     if(is.null(.prim_obs) == FALSE)
       .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
@@ -560,18 +560,12 @@ radial_cheem_tour <- function(
       .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
     
     ## Foreground:
-    .dat_fore   <- rbind(.dat[row_index, ], .dat[row_index, ])
-    .facet_fore <- factor(rep(c("observed y", "residual"), length.out = nrow(.dat_fore)))
+    .dat_fore   <- rbind(.dat, .dat)
     .idx_fore   <- c(row_index, row_index)
-    .fix_y_fore <- .fixed_y[.idx_fore]
-    .df_resid   <- data.frame(x = range(spinifex::last_ggtour()$df_data$x),
-                              y = range(decode_df$residual))
-    .df_hline   <- spinifex::map_relative(
-      data.frame(x = c(0L, .df_resid$x),
-                 y = c(0L, .df_resid$y),
-                 facet_var = "residual"),
-      "data", to = .df_resid)
-    #browser()
+    .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat)))
+    .class_fore <- c(.class, .class)
+    # browser()
+    # debugonce(proto_highlight)
     
     ##TODO: Note coloring on residuals will error
     #### with proto_basis1d_distribution as it has group_by/class mapped to color (discrete).
@@ -580,17 +574,24 @@ radial_cheem_tour <- function(
     # reg_shape <- cheem_ls$decode_df$class
     # color_scale <- ggplot2::scale_colour_gradient2(
     #   low = scales::muted("blue"), mid = "grey80", high = scales::muted("red"))
+    if(F){ ## Peeling back to reprex
+      spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
+        spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
+        spinifex::append_fixed_y(fixed_y = .fixed_y) +
+        #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
+        spinifex::proto_point()
+    }
     
     ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
-      spinifex::append_fixed_y(fixed_y = .fix_y_fore) +
+      spinifex::append_fixed_y(fixed_y = .fixed_y) +
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
       ggplot2::theme(
         axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       spinifex::proto_point(
-        aes_args = list(color = .class, shape = .class),
+        aes_args = list(color = .class_fore, shape = .class_fore),
         #aes_args = list(color = reg_color, shape = reg_shape),
         identity_args = list(alpha = .alpha), row_index = .idx_fore) +
       proto_basis1d_distribution(
@@ -606,10 +607,23 @@ radial_cheem_tour <- function(
       spinifex::proto_highlight(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = x), .df_hline) +
       spinifex::proto_origin() +
       spinifex::proto_hline0()
-      
+    ## Now that last_ggtour()$df_data exists; make hline.
+  
+    # browser()
+    # .df_hline <- data.frame(x = c(0L, range(spinifex::last_ggtour()$df_data$x)),
+    #                         y = c(0L, range(decode_df$residual)),
+    #                         facet_var = "residual")
+    # idx_resid <- c(rep(FALSE, nrow(decode_df)), row_index)
+    # .df_hline <- spinifex::map_relative(
+    #     .df_hline,"data", 
+    #     to = spinifex::last_ggtour()$df_data[idx_resid,, drop = FALSE])[1L,, drop = FALSE]
+    #browser()
+    # .df <- data.frame(y = spinifex::scale_01(c(0L, decode_df$residual)), 
+    #                   facet_var = "residual")[1L,, drop = FALSE]
+    # ggt +
+    #   ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df)#, .df_hline)
   }
   
   ## Return the static ggtour, animate in app

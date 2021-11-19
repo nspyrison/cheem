@@ -200,7 +200,7 @@ global_view_df_1layer <- function(
   tooltip <- 1L:nrow(x) ## placeholder, decode_df makes a better tooltip.
   
   ## Projection
-  x_std <- spinifex::scale_sd(x)
+  x_std <- spinifex::scale_01(x)
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))

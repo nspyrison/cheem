@@ -16,7 +16,7 @@ median, above 1 makes more points further away from the median.
 Defaults to 1.}
 }
 \value{
-A data frame with column names of the original data.
+A data.frame with column names of the original data.
 }
 \description{
 Creates new observation of the data given its specific means and shapes.
