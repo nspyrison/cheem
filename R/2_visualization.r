@@ -246,7 +246,9 @@ proto_basis1d_distribution <- function(
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line.
 #' @param height_px The height in pixels of the returned `plotly` plot.
+#' Defaults to 480.
 #' @param width_px The width in pixels of the returned `plotly` plot.
+#' Defaults to 1440.
 #' @param color A vector to map to the point color.
 #' Classification case defaults to predicted class, regression case defaults to
 #' class if passed to cheem_ls(), else residual.
@@ -279,7 +281,7 @@ global_view <- function(
   color = NULL,
   shape = NULL, 
   height_px = 480L,
-  width_px = 960L
+  width_px = 1440L
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL

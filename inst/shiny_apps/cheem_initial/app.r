@@ -27,6 +27,10 @@ server <- function(input, output, session){
       ret      <- toy_reg_ls
       prim_obs <- 11L
       comp_obs <- 121L
+    }else if(dat == "toy regression trig"){
+      ret <- toy_reg_trig_ls
+      prim_obs <- 87L
+      comp_obs <- 102L
     }else if(dat == "fifa"){
       ret      <- fifa_ls
       prim_obs <- 1L
@@ -184,25 +188,11 @@ server <- function(input, output, session){
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
       global_view(
         cheem_ls, .prim_obs, .comp_obs,
-        height_px = 480L, width_px = 960L,
+        #height_px = 480L, width_px = 1440L,
         color = cheem_ls$decode_df$class,
         shape = cheem_ls$decode_df$class))
   })
   outputOptions(output, "global_view",
-                suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
-  
-  output$yhaty_view <- plotly::renderPlotly({
-    cheem_ls <- req(load_ls())
-    .prim_obs <- req(primary_obs())
-    .comp_obs <- req(comparison_obs())
-    yhaty_view(cheem_ls,
-               primary_obs = .prim_obs,
-               comparison_obs = .comp_obs,
-               color = cheem_ls$decode_df$class,
-               shape = cheem_ls$decode_df$class,
-               height_px = 480L, width_px = 480L)
-  })
-  outputOptions(output, "yhaty_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   ### gganimate tour ----

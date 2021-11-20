@@ -11,7 +11,7 @@ global_view(
   color = NULL,
   shape = NULL,
   height_px = 480L,
-  width_px = 960L
+  width_px = 1440L
 )
 }
 \arguments{
@@ -32,9 +32,11 @@ class if passed to cheem_ls(), else residual.}
 Classification case defaults to predicted class, regression case defaults to
 class.}
 
-\item{height_px}{The height in pixels of the returned \code{plotly} plot.}
+\item{height_px}{The height in pixels of the returned \code{plotly} plot.
+Defaults to 480.}
 
-\item{width_px}{The width in pixels of the returned \code{plotly} plot.}
+\item{width_px}{The width in pixels of the returned \code{plotly} plot.
+Defaults to 1440.}
 }
 \value{
 \code{plotly} html widget of the global view, first 2 components of the basis of
