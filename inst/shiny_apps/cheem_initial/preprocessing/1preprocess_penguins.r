@@ -1,6 +1,7 @@
 ## Dependencies ------
 {
   require(cheem)
+  s <- function(sec = .01) Sys.sleep(sec)
   
   ## Data preprocess ------
   ## Data setup, spinifex::penguins
@@ -15,19 +16,18 @@
   Y <- as.integer(raw$species)
 }
 
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X)
+rf_fit  <- default_rf(X, Y); s();
+shap_df <- attr_df_treeshap(rf_fit, X); s();
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)
 names(this_ls)
 
 ## EXPORT OBJECTS ----
-if(interactive() == TRUE){
-  setwd("~/R/cheem")
-  saveRDS(this_ls,
-          file = "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.rds")
-}
+setwd("~/R/cheem")
+saveRDS(this_ls,
+        file = "./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.rds")
+cat("Saved.\n")
 if(F) ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/1preprocess_penguins.rds")
 

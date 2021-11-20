@@ -323,7 +323,7 @@ cheem_ls <- function(
   .decode_df <- data.frame(lapply(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
   
-  ## Add tooltip ----
+  ## Add tooltip to global_view_df & decode_df ----
   tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip
   if(is.null(rownames(x)) == FALSE)
     ### Character rownames?
@@ -345,6 +345,22 @@ cheem_ls <- function(
   .glob_view$tooltip <- c(tooltip, tooltip)
   .decode_df$tooltip <- tooltip
   
+  ## Append yhaty to global_view_df -----
+  .vec_yjitter <- 0L ## default/regression case
+  .layer_nm <- "x:prediction, y:observed"
+  if(is_classification){
+    .vec_yjitter <- runif(nrow(x), -.3, .3)
+    .layer_nm <- "x:prediction, y:observed(+jitter)"
+  }
+  .yhaty_df <- data.frame(V1 = .decode_df$prediction,
+                          V2 = .decode_df$y + .vec_yjitter)
+  .yhaty_df <- spinifex::scale_01(.yhaty_df)
+  
+  .yhaty_df <- data.frame(
+    basis_type = NA, layer_name = "x:prediction, y:observed", rownum = 1L:nrow(x),
+    class = .decode_df$class, tooltip = tooltip, .yhaty_df)
+  .glob_view <- rbind(.glob_view, .yhaty_df)
+  
   ## Cleanup and return
   ret_ls <- list(
     type = problem_type(y),
@@ -360,7 +376,7 @@ cheem_ls <- function(
 }
 
 
-if(FALSE){ ## THERORETICAL DEV -----
+if(FALSE){ ## Extension ideas -----
   ## TAKEAWAY:
   #-CP and BD, each need DALEX::Explain;
   #-basically want to extract a model-less DALEX::explain before model is removed. 

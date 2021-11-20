@@ -63,7 +63,6 @@ global_view(this_ls)
 \seealso{
 Other cheem consumers: 
 \code{\link{radial_cheem_tour}()},
-\code{\link{run_app}()},
-\code{\link{yyhat_view}()}
+\code{\link{run_app}()}
 }
 \concept{cheem consumers}

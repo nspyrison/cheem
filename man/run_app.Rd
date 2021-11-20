@@ -30,7 +30,6 @@ run_app(app_nm = "cheem_initial", display.mode = "showcase")}
 \seealso{
 Other cheem consumers: 
 \code{\link{global_view}()},
-\code{\link{radial_cheem_tour}()},
-\code{\link{yyhat_view}()}
+\code{\link{radial_cheem_tour}()}
 }
 \concept{cheem consumers}

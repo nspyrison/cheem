@@ -79,7 +79,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
     ),
     column(4L,
            plotly::plotlyOutput(
-             "yyhat_view", width = "100%", height = "480px") %>%
+             "yhaty_view", width = "100%", height = "480px") %>%
              shinycssloaders::withSpinner(type = 8L)
     )
   ),

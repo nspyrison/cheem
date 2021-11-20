@@ -1,6 +1,7 @@
 ## Dependencies ------
 {
   require(cheem)
+  s <- function(sec = .01)Sys.sleep(sec)
   
   ## Setup ------
   .raw <- DALEX::fifa
@@ -55,8 +56,8 @@ Y <- log(.raw$wage_eur) ## _LOG_ wages in Euros, assumed 2020 valuation.
 if(F)
   hist(Y)
 
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X)
+rf_fit  <- default_rf(X, Y); s();
+shap_df <- attr_df_treeshap(rf_fit, X); s();
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)
@@ -78,11 +79,10 @@ names(this_ls)
 }
 
 ## EXPORT OBJECTS ----
-if(interactive()){
-  setwd("~/R/cheem")
-  saveRDS(this_ls,
-          file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
-}
+setwd("~/R/cheem")
+saveRDS(this_ls,
+        file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
+cat("Saved.")
 if(F) ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
 

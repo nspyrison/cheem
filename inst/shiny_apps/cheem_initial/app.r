@@ -191,18 +191,18 @@ server <- function(input, output, session){
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
-  output$yyhat_view <- plotly::renderPlotly({
+  output$yhaty_view <- plotly::renderPlotly({
     cheem_ls <- req(load_ls())
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
-    yyhat_view(cheem_ls,
+    yhaty_view(cheem_ls,
                primary_obs = .prim_obs,
                comparison_obs = .comp_obs,
                color = cheem_ls$decode_df$class,
                shape = cheem_ls$decode_df$class,
                height_px = 480L, width_px = 480L)
   })
-  outputOptions(output, "yyhat_view",
+  outputOptions(output, "yhaty_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
   ### gganimate tour ----
