@@ -71,9 +71,18 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   p("Selection: click & drag to select points, double click to remove the selection."),
   p("-- Selecting points will highight them in all facets and display detiled information below."),
   ## Set w/h with: ggplotly(p, height = 800, width = 800)
-  plotly::plotlyOutput(
-    "global_view", width = "100%", height = "480px") %>%
-    shinycssloaders::withSpinner(type = 8L),
+  fluidRow(
+    column(8L,
+           plotly::plotlyOutput(
+             "global_view", width = "100%", height = "480px") %>%
+             shinycssloaders::withSpinner(type = 8L)
+    ),
+    column(4L,
+           plotly::plotlyOutput(
+             "yyhat_view", width = "100%", height = "480px") %>%
+             shinycssloaders::withSpinner(type = 8L)
+    )
+  ),
   h4("Selected data:"),
   DT::DTOutput("selected_df")),
   tags$hr(style = "border-color: grey;"),
@@ -101,7 +110,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   #   shinycssloaders::withSpinner(type = 8L),
   ## Plotly tour
   plotly::plotlyOutput(
-    "cheem_tour_plotly", height = "600px", width = "960px") %>%
+    "cheem_tour_plotly", height = "600px", width = "1440px") %>%
     shinycssloaders::withSpinner(type = 8L),
   br(), br(), br(), br()
 ) ## Assign tab1_cheem

@@ -26,7 +26,7 @@ server <- function(input, output, session){
     }else if(dat == "toy regression"){
       ret      <- toy_reg_ls
       prim_obs <- 11L
-      comp_obs <- 116L
+      comp_obs <- 121L
     }else if(dat == "fifa"){
       ret      <- fifa_ls
       prim_obs <- 1L
@@ -34,7 +34,7 @@ server <- function(input, output, session){
     }else if(dat == "ames housing 2018"){
       ret      <- ames2018_ls
       prim_obs <- 128L
-      comp_obs <- 93
+      comp_obs <- 93L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
@@ -191,6 +191,20 @@ server <- function(input, output, session){
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
+  output$yyhat_view <- plotly::renderPlotly({
+    cheem_ls <- req(load_ls())
+    .prim_obs <- req(primary_obs())
+    .comp_obs <- req(comparison_obs())
+    yyhat_view(cheem_ls,
+               primary_obs = .prim_obs,
+               comparison_obs = .comp_obs,
+               color = cheem_ls$decode_df$class,
+               shape = cheem_ls$decode_df$class,
+               height_px = 480L, width_px = 480L)
+  })
+  outputOptions(output, "yyhat_view",
+                suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
+  
   ### gganimate tour ----
   output$cheem_tour_gganimate <- renderImage({
     bas        <- req(bas())
@@ -257,7 +271,8 @@ server <- function(input, output, session){
       row_index = idx_rownum, inc_vars = inc_vars)
     
     spinifex::animate_plotly(ggt) %>% ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
-      plotly::style(hoverinfo = "none")
+      plotly::style(hoverinfo = "none") %>%
+      plotly::animation_slider(active = 11L)
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)

@@ -100,6 +100,7 @@ animate_gganimate(ggt, render = gganimate::av_renderer())
 \seealso{
 Other cheem consumers: 
 \code{\link{global_view}()},
-\code{\link{run_app}()}
+\code{\link{run_app}()},
+\code{\link{yyhat_view}()}
 }
 \concept{cheem consumers}

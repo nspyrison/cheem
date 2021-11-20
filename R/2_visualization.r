@@ -236,7 +236,7 @@ proto_basis1d_distribution <- function(
 
 #' Linked `plotly` display, global view of data and attribution space.
 #' 
-#' Given an attribution layer list, create a linked `plotly`of the global data-
+#' from a cheem_ls() list, create a linked `plotly` of the global data-
 #' and attribution- spaces. Typically consumed directly by shiny app.
 #' 
 #' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
@@ -284,23 +284,24 @@ global_view <- function(
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
   ## Initialize
-  global_view_df <- cheem_ls$global_view_df 
+  global_view_df <- cheem_ls$global_view_df
+  decode_df      <- cheem_ls$decode_df
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
-  .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
+  .alpha <- logistic_tform(nrow(decode_df))
   ## setup shape and color
   if(is_classification){
-    if(is.null(color)) color <- cheem_ls$decode_df$predicted_class %>% as.factor()
-    if(is.null(shape)) shape <- cheem_ls$decode_df$predicted_class %>% as.factor()
+    if(is.null(color)) color <- decode_df$predicted_class %>% as.factor()
+    if(is.null(shape)) shape <- decode_df$predicted_class %>% as.factor()
   }else{
     ## Regression or unexpected type
-    if(length(unique(cheem_ls$decode_df$class)) > 1L){
+    if(length(unique(decode_df$class)) > 1L){
       ## Class defined
-      if(is.null(color)) color <- cheem_ls$decode_df$class %>% as.factor()
-      if(is.null(shape)) shape <- cheem_ls$decode_df$class %>% as.factor()
+      if(is.null(color)) color <- decode_df$class %>% as.factor()
+      if(is.null(shape)) shape <- decode_df$class %>% as.factor()
     }else{
       ## Class not defined
-      if(is.null(color)) color <- cheem_ls$decode_df$residual
+      if(is.null(color)) color <- decode_df$residual
       if(is.null(shape)) shape <- as.factor(FALSE)
     }
   }
@@ -343,7 +344,7 @@ global_view <- function(
   pts_highlight <- list()
   ## Red misclassified points, if present
   if(is_classification == TRUE){
-    .rn_misclass <- which(cheem_ls$decode_df$is_misclassified == TRUE)
+    .rn_misclass <- which(decode_df$is_misclassified == TRUE)
     .idx_misclas <- global_view_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0L){
       .df <- global_view_df[.idx_misclas, ]
@@ -408,6 +409,168 @@ global_view <- function(
   return(ggp)
 }
 
+
+#' Create a prediction vs observation `plotly`.
+#' 
+#' Given an the model from a cheem_ls() list,
+#' Creates a `plotly` plot of of the observation predictions by observations.
+#' Typically consumed directly by shiny app.
+#' 
+#' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
+#' @param primary_obs The rownumber of the primary observation. Its local
+#' attribution becomes the 1d projection basis, and the point it highlighted 
+#' as a dashed line.
+#' @param comparison_obs The rownumber of the comparison observation. Point
+#' is highlighted as a dotted line.
+#' @param height_px The height in pixels of the returned `plotly` plot.
+#' @param width_px The width in pixels of the returned `plotly` plot.
+#' @param color A vector to map to the point color.
+#' Classification case defaults to predicted class, regression case defaults to
+#' class if passed to cheem_ls(), else residual.
+#' @param shape A vector to map to the point shape.
+#' Classification case defaults to predicted class, regression case defaults to
+#' class.
+#' @return `plotly` html widget of the global view, first 2 components of the basis of
+#' the data- and attribution- spaces.
+#' @export
+#' @family cheem consumers
+#' @examples
+#' library(cheem)
+#' 
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:10]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$MS.Zoning
+#' 
+#' rf_fit <- default_rf(X, Y)
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
+#' yyhat_view(this_ls, 1, 2)
+yyhat_view <- function(
+  cheem_ls,
+  primary_obs = NULL,
+  comparison_obs = NULL,
+  color = NULL,
+  shape = NULL, 
+  height_px = 480L,
+  width_px = 480L
+){
+  ## Prevent global variable warnings:
+  x <- NULL
+  ## Initialize
+  decode_df <- cheem_ls$decode_df 
+  is_classification <- cheem_ls$type == "classification"
+  ## Aesthetics
+  .alpha <- logistic_tform(nrow(decode_df))
+  ## if classification, add jitter to vertical
+  #### (consistent across layers/geoms)
+  if(is_classification)
+    decode_df$y <- decode_df$y + runif(nrow(decode_df), -.3, .3)
+  ## setup shape and color
+  if(is_classification){
+    if(is.null(color)) color <- decode_df$predicted_class %>% as.factor()
+    if(is.null(shape)) shape <- decode_df$predicted_class %>% as.factor()
+  }else{
+    ## Regression or unexpected type
+    if(length(unique(decode_df$class)) > 1L){
+      ## Class defined
+      if(is.null(color)) color <- decode_df$class %>% as.factor()
+      if(is.null(shape)) shape <- decode_df$class %>% as.factor()
+    }else{
+      ## Class not defined
+      if(is.null(color)) color <- decode_df$residual
+      if(is.null(shape)) shape <- as.factor(FALSE)
+    }
+  }
+  
+  ## Proto for main points
+  pts_main <- list()
+  if(is_discrete(color) == TRUE){
+    ### Discrete color mapping
+    pts_main <- list(
+      suppressWarnings(ggplot2::geom_point(
+        ggplot2::aes(color = color, shape = shape, tooltip = tooltip), 
+        alpha = .alpha)),
+      ggplot2::scale_color_brewer(palette = "Dark2"))
+  }
+  if(is_discrete(color) == FALSE){
+    ### continuous color mapping
+    pts_main <- list(
+      suppressWarnings(ggplot2::geom_point(
+        ggplot2::aes(color = color, shape = shape, tooltip = tooltip), 
+        alpha = .alpha)),
+      ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
+                                      mid = "grey80",
+                                      high = scales::muted("red")))
+  }
+  
+  ## Proto for highlighted points
+  pts_highlight <- list()
+  ## Red misclassified points, if present
+  if(is_classification == TRUE){
+    .rn_misclass <- which(decode_df$is_misclassified == TRUE)
+    .idx_misclas <- decode_df$rownum %in% .rn_misclass
+    if(sum(.idx_misclas) > 0L){
+      .df <- decode_df[.idx_misclas, ]
+      pts_highlight <- c(
+        pts_highlight,
+        ggplot2::geom_point(
+          ggplot2::aes(prediction, y), .df,
+          color = "red", fill = NA, shape = 21L, size = 3L,
+          alpha = .alpha))
+    }
+  }
+  ## Highlight comparison obs, if passed
+  if(is.null(comparison_obs) == FALSE){
+    .idx_comp <- decode_df$rownum == comparison_obs
+    if(sum(.idx_comp) > 0L){
+      .df <- decode_df[.idx_comp, ]
+      pts_highlight <- c(
+        pts_highlight,
+        ## Highlight comparison obs
+        ggplot2::geom_point(
+          ggplot2::aes(prediction, y), .df,
+          size = 3L, shape = 4L, color = "black"))
+    }
+  }
+  ## Highlight shap obs, if passed
+  if(is.null(primary_obs) == FALSE){
+    .idx_shap <- decode_df$rownum == primary_obs
+    if(sum(.idx_shap) > 0L){
+      .df <- decode_df[.idx_shap, ]
+      pts_highlight <- c(
+        pts_highlight,
+        ggplot2::geom_point(ggplot2::aes(prediction, y), .df,
+                             size = 5L, shape = 8L, color = "black", 
+                             ))
+    }
+  }
+  
+  ## Visualize
+  gg <- ggplot2::ggplot(
+    data = plotly::highlight_key(decode_df, ~rownum),
+    mapping = ggplot2::aes(prediction, y)) +
+    pts_main +
+    pts_highlight +
+    ggplot2::coord_fixed() +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = "Prediction, y_hat", y = "Observed, y") +
+    ggplot2::theme(axis.text  = ggplot2::element_blank(),
+                   axis.ticks = ggplot2::element_blank(),
+                   legend.position = "off")
+  
+  ## Plotly options & box selection
+  ggp <- plotly::ggplotly(gg, tooltip = "tooltip", 
+                          height = height_px, width = width_px)
+  ggp <- plotly::config(ggp, displayModeBar = FALSE)                  ## Remove html buttons
+  ggp <- plotly::layout(ggp, dragmode = "select", showlegend = FALSE) ## Set drag left mouse
+  ggp <- plotly::event_register(ggp, "plotly_selected")               ## Reflect "selected", on release of the mouse button.
+  ggp <- plotly::highlight(ggp, on = "plotly_selected", off = "plotly_deselect")
+  return(ggp)
+}
 
 #' Cheem tour; 1D manual tour on the selected attribution
 #' 
