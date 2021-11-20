@@ -82,7 +82,7 @@ names(this_ls)
 setwd("~/R/cheem")
 saveRDS(this_ls,
         file = "./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
-cat("Saved.")
+cat("Saved.\n")
 if(F) ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/3preprocess_fifa.rds")
 

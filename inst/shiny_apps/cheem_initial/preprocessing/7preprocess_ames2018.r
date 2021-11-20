@@ -35,7 +35,7 @@ if(F){
 setwd("~/R/cheem")
 saveRDS(this_ls,
         file = "./inst/shiny_apps/cheem_initial/data/7preprocess_ames2018.rds")
-cat("Saved.")
+cat("Saved.\n")
 if(F){ ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/7preprocess_ames2018.rds")
   
