@@ -661,6 +661,7 @@ radial_cheem_tour <- function(
   if(is.null(row_index) == FALSE)
     if(sum(row_index) == 0L)
       stop("radial_cheem_tour: sum of row_index was 0.")
+
   decode_df <- cheem_ls$decode_df
   .prim_obs <- primary_obs    ## Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
   .comp_obs <- comparison_obs ## Don't coerce to logical index
@@ -728,11 +729,20 @@ radial_cheem_tour <- function(
     .idx_fore   <- c(row_index, row_index)
     .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat)))
     .class_fore <- c(.class, .class)
-    # browser()
-    # debugonce(proto_highlight)
+    
+    ## Scale a 0 line for residual facet
+    .df_hline <-
+      data.frame(x = FALSE,
+                 y = scale_01(c(0L, range(decode_df$residual))),
+                 facet_var = "residual")[1L,, drop = FALSE]
+    ## -- or map_relative method:
+    # idx_resid <- c(rep(FALSE, nrow(decode_df)), row_index)
+    # .df_hline <- spinifex::map_relative(
+    #     .df_hline,"data", 
+    #     to = spinifex::last_ggtour()$df_data[idx_resid,, drop = FALSE])[1L,, drop = FALSE]
     
     ##TODO: Note coloring on residuals will error
-    #### with proto_basis1d_distribution as it has group_by/class mapped to color (discrete).
+    #### as proto_basis1d_distribution as it has group_by/class mapped to color (discrete).
     # ## Regression aesthetics:
     # reg_color <- factor(cheem_ls$decode_df$residual)
     # reg_shape <- cheem_ls$decode_df$class
@@ -772,22 +782,9 @@ radial_cheem_tour <- function(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
       spinifex::proto_origin() +
-      spinifex::proto_hline0()
-    ## Now that last_ggtour()$df_data exists; make hline.
-  
-    # browser()
-    # .df_hline <- data.frame(x = c(0L, range(spinifex::last_ggtour()$df_data$x)),
-    #                         y = c(0L, range(decode_df$residual)),
-    #                         facet_var = "residual")
-    # idx_resid <- c(rep(FALSE, nrow(decode_df)), row_index)
-    # .df_hline <- spinifex::map_relative(
-    #     .df_hline,"data", 
-    #     to = spinifex::last_ggtour()$df_data[idx_resid,, drop = FALSE])[1L,, drop = FALSE]
-    #browser()
-    # .df <- data.frame(y = spinifex::scale_01(c(0L, decode_df$residual)), 
-    #                   facet_var = "residual")[1L,, drop = FALSE]
-    # ggt +
-    #   ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df)#, .df_hline)
+      ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline,
+                          color = "grey40")
+      #spinifex::proto_hline0() ## adds to both facets..
   }
   
   ## Return the static ggtour, animate in app

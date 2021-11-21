@@ -112,7 +112,7 @@ server <- function(input, output, session){
     ## Row NUMBER index of data selected in linked global view
     .d <- plotly::event_data("plotly_selected")
     if(is.null(.d)) return(NULL)
-    return(.d$key)
+    return(as.integer(.d$key))
   })
   
   ## Observers: updating inputs in the ui -----
@@ -261,8 +261,10 @@ server <- function(input, output, session){
       row_index = idx_rownum, inc_vars = inc_vars)
     
     spinifex::animate_plotly(ggt) %>% ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
-      plotly::style(hoverinfo = "none") %>%
-      plotly::animation_slider(active = 11L)
+      plotly::style(hoverinfo = "none")
+      #### the following ahsn't helped:
+      ## - starting at frame 11 doesn't help
+      ## - hiding gridlines again
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)

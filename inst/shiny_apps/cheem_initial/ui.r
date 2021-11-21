@@ -34,7 +34,7 @@ expected_data_char <- c(
   "toy regression", "toy regression trig", "fifa", "ames housing 2018",
   #"diabetes (wide)", "diabetes (long)",
   "<Upload saved cheem_ls (.rds only)>")
-tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
+tab1_cheem <- tabPanel(title = "Cheem", fluidPage(
   #### Top text description -----
   fluidRow(
     ## Choose data:
@@ -48,16 +48,16 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
                 multiple = FALSE, accept = c("text/rds", ".rds"))),
     h2("Preprocessing and data description"),
     htmlOutput("desc_rows"),
-    p("2) Extract the SHAP matrix, (the SHAP values at EACH observation), via {treeshap}"),
+    HTML("2) Extract the the full attribution matrix, variable attributions of <em>each</em> observation"),
     p("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly:"),
-    p("Global view, top) approximations of the data- and SHAP-spaces as their first two principal components. Idententify a primary and comparison point to interrogate"),
-    p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized SHAP values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as dashed line and dotted line).")
+    p("Global view, top) approximations of the data- and attribution-spaces as their first two principal components. Idententify a primary and comparison point to interrogate"),
+    p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as dashed line and dotted line).")
   ),
   tags$hr(style = "border-color: grey;"),
   br(),
   
   #### global_view ----
-  h3("Global view: PC1:2 approximations of data- and SHAP-spaces"),
+  h3("Global view: PC1:2 approximations of data- and attribution-spaces"),
   fluidRow(
     column(3L, numericInput( ## Updated by updateNumericInput
       "primary_obs", label = "Primary observation rownum, ('*', dashed line below):",
@@ -83,7 +83,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
   
   #### Cheem tour ----
   h3("Cheem tour"),
-  p("The data-space projected through normalized SHAP values of the primary observation."),
+  p("The data-space projected through normalized attribution of the primary observation."),
   checkboxGroupInput(
     "inc_vars", label = "Inclusion variables",
     choices = c("bdy", "age", "rct", "atk", "def", "acc", "mvm", "pwr", "gk"),
@@ -96,7 +96,7 @@ tab1_cheem <- tabPanel(title = "Data- and SHAP-space", fluidPage(
                            c("Yes" = TRUE, "No" = FALSE))),
     column(width = 6L)
   ),
-  p("Solid grey line: true zero, all X's = 0 projected through SHAP."),
+  p("Solid grey line/: true zero, all X's = 0 projected through the basis."),
   p("Longer-dashed and dotted lines: location of primary & comparison observations respectively ('*'/'x' in global view)."),
   # shiny::imageOutput("cheem_tour_gganimate",
   #                    width = "100%", height = "720px") %>%
@@ -120,7 +120,7 @@ tab_about <- tabPanel("About", fluidPage(
   HTML("Recently, <em>local explainations</em> approximate the linear variable importances at one particular point, typically an observation.
     Originally, the explanations were then plotted to illustrate those variables that contribute to moving that observation from the intercept to its prediction."),
   br(),
-  HTML("Our approach is to select a primary and comparison observation and use the SHAP value of primary observation to project the data. 
+  HTML("Our approach is to select a primary and comparison observation and use a local explanation's variable-attribution of the primary observation to project the data. 
     The explanation can then be interrogated by playing a <em>manual tour</em> by rotating the contribution of a selected variable.
     By altering the projection basis we can explore how sensitive variable importances are and thus interrogate how well supported that explanation is."),
   img(src = "cheem_workflow.png"),
