@@ -255,6 +255,8 @@ proto_basis1d_distribution <- function(
 #' @param shape A vector to map to the point shape.
 #' Classification case defaults to predicted class, regression case defaults to
 #' class.
+#' @param as_ggplot Logical, if TRUE returns the plots before being passed to
+#' `plotly` functions.
 #' @return `plotly` html widget of the global view, first 2 components of the basis of
 #' the data- and attribution- spaces.
 #' @export
@@ -281,7 +283,8 @@ global_view <- function(
   color = NULL,
   shape = NULL, 
   height_px = 480L,
-  width_px = 1440L
+  width_px = 1440L,
+  as_ggplot = FALSE
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
@@ -399,6 +402,7 @@ global_view <- function(
     ggplot2::theme(axis.text  = ggplot2::element_blank(),
                    axis.ticks = ggplot2::element_blank(),
                    legend.position = "off")
+  if(as_ggplot) return(gg)
   
   ## Plotly options & box selection
   ggp <- plotly::ggplotly(gg, tooltip = "tooltip", 
@@ -600,7 +604,7 @@ global_view <- function(
 # #' Defaults to class if passed to cheem_ls(), else residual.
 # #' @param reg_shape For regression cases, the shape of the points.
 # #' Defaults to class.
-#' @return `ggplot` of the cheem tour, animation frames of a radial tour
+#' @return `ggplot`/ggtour of the cheem tour, animation frames of a radial tour
 #' manipulating the contribution of a selected tour. Consumed by a 
 #' `spinifex::animate_*` function.
 #' @export
@@ -696,7 +700,7 @@ radial_cheem_tour <- function(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         row_index = row_index) +
       proto_basis1d_distribution(
-        cheem_ls$attr_df, group_by = .pred_clas, position = "top1d",
+        cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         shape = pcp_shape, inc_vars = inc_vars, row_index = row_index) +

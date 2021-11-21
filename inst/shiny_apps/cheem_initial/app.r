@@ -222,8 +222,8 @@ server <- function(input, output, session){
     ### A temp file to save the output, will be removed later in renderImage
     anim <- animate_gganimate(
       ggt,
-      #height = 720L, #width = 1200L,
-      # units = "px", ## "px", "in", "cm", or "mm."
+      height = 480L, width = 1440L,
+      #units = "px", ## "px", "in", "cm", or "mm."
       #res = 72L, ## resolution (dpi)
       render = gganimate::av_renderer())
     
@@ -260,11 +260,21 @@ server <- function(input, output, session){
       do_add_pcp_segments = add_pcp, angle = .15,
       row_index = idx_rownum, inc_vars = inc_vars)
     
-    spinifex::animate_plotly(ggt) %>% ## %>% plotly::toWebGL() ## maybe faster, maybe more issues.
+    .anim <- spinifex::animate_plotly(ggt) %>%##, width = 1440L, height = 480L
+      ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
       plotly::style(hoverinfo = "none")
-      #### the following ahsn't helped:
-      ## - starting at frame 11 doesn't help
-      ## - hiding gridlines again
+    #### the following hasn't helped:
+    ## - starting at frame 11 doesn't help
+    ## - hiding gridlines again
+    
+    ## Layout also set in animate_plotly
+    if(cheem_ls$type == "classification"){
+      .anim %>% plotly::layout(
+        xaxis = list(scaleratio = 4L))
+    }else{
+      .anim %>% plotly::layout(
+        xaxis = list(scaleratio = 1L))
+    }
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last
                 suspendWhenHidden = TRUE, priority = -9999L)

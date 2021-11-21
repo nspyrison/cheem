@@ -11,7 +11,8 @@ global_view(
   color = NULL,
   shape = NULL,
   height_px = 480L,
-  width_px = 1440L
+  width_px = 1440L,
+  as_ggplot = FALSE
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ Defaults to 480.}
 
 \item{width_px}{The width in pixels of the returned \code{plotly} plot.
 Defaults to 1440.}
+
+\item{as_ggplot}{Logical, if TRUE returns the plots before being passed to
+\code{plotly} functions.}
 }
 \value{
 \code{plotly} html widget of the global view, first 2 components of the basis of

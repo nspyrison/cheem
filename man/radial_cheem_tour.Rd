@@ -47,7 +47,7 @@ Defaults to TRUE; 1:n.}
 \item{inc_vars}{A vector of the names of the variables to include in the projection.}
 }
 \value{
-\code{ggplot} of the cheem tour, animation frames of a radial tour
+\code{ggplot}/ggtour of the cheem tour, animation frames of a radial tour
 manipulating the contribution of a selected tour. Consumed by a
 \verb{spinifex::animate_*} function.
 }

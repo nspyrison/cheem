@@ -34,7 +34,7 @@ expected_data_char <- c(
   "toy regression", "toy regression trig", "fifa", "ames housing 2018",
   #"diabetes (wide)", "diabetes (long)",
   "<Upload saved cheem_ls (.rds only)>")
-tab1_cheem <- tabPanel(title = "Cheem", fluidPage(
+tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----
   fluidRow(
     ## Choose data:
@@ -57,7 +57,8 @@ tab1_cheem <- tabPanel(title = "Cheem", fluidPage(
   br(),
   
   #### global_view ----
-  h3("Global view: PC1:2 approximations of data- and attribution-spaces"),
+  h3("Global view:"),
+  p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
   fluidRow(
     column(3L, numericInput( ## Updated by updateNumericInput
       "primary_obs", label = "Primary observation rownum, ('*', dashed line below):",
@@ -102,8 +103,8 @@ tab1_cheem <- tabPanel(title = "Cheem", fluidPage(
   #                    width = "100%", height = "720px") %>%
   #   shinycssloaders::withSpinner(type = 8L),
   ## Plotly tour
-  plotly::plotlyOutput(
-    "cheem_tour_plotly", height = "600px", width = "1440px") %>%
+  plotly::plotlyOutput( ##width = "1440px"
+    "cheem_tour_plotly", width = "100%", height = "600px") %>%
     shinycssloaders::withSpinner(type = 8L),
   br(), br(), br(), br()
 ) ## Assign tab1_cheem
