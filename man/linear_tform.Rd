@@ -37,6 +37,7 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{logistic_tform}()},
+\code{\link{manip_var_of_attr_df}()},
 \code{\link{problem_type}()},
 \code{\link{rnorm_from}()}
 }

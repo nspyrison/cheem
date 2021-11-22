@@ -37,8 +37,8 @@ server <- function(input, output, session){
       comp_obs <- 8L
     }else if(dat == "ames housing 2018"){
       ret      <- ames2018_ls
-      prim_obs <- 128L
-      comp_obs <- 93L
+      prim_obs <- 170L
+      comp_obs <- 171L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
@@ -211,7 +211,7 @@ server <- function(input, output, session){
                      "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
-    mv <- which(mv_nm %in% rownames(bas))
+    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
     
     ggt <- radial_cheem_tour(
       cheem_ls, bas, mv,
@@ -252,7 +252,7 @@ server <- function(input, output, session){
                      "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
-    mv <- which(mv_nm %in% rownames(bas))
+    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
     
     ggt <- radial_cheem_tour(
       cheem_ls, bas, mv,

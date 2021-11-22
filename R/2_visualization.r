@@ -1,4 +1,5 @@
-## proto_* extensions ----
+## Utilities -----
+
 #' Basis matrix, 1D, of the local attribution basis
 #' 
 #' Extract and format the 1D local attribution basis from 
@@ -27,14 +28,45 @@ basis_attr_df <- function(
   rownum = 1
 ){
   ## Remove last column if layer_name
-  attr_df <- attr_df[rownum, ] ## as.vector
+  .attr_df <- attr_df[rownum,, drop = FALSE] ## as.vector
   ## Extract formatted basis
-  LA_bas <- attr_df %>%
-    as.numeric %>%
-    matrix(ncol = 1L, dimnames = list(colnames(attr_df), class(attr_df)[1]))
+  LA_bas <- .attr_df %>% as.numeric() %>%
+    matrix(ncol = 1L, dimnames =
+             list(colnames(attr_df), class(attr_df)[length(class(attr_df))]))
   return(tourr::orthonormalise(LA_bas))
 }
 
+
+#' Find the manip var from a given attr_df
+#' 
+#' Find the number of the variable with the largest differnce between the 
+#' primary and comparison observations.
+#' 
+#' @param attr_df A data frame of local explanation attributions,
+#' such as a return from `attr_df_treeshap()`.
+#' @param rownum The rownumber of the primary observation. Defaults to 1.
+#' @return A single number of the variable with the largest difference 
+#' @export
+#' @family cheem utility
+#' @examples
+#' library(cheem)
+#' sub <- amesHousing2018_thin[1:200, ]
+#' X <- sub[, 1:9]
+#' Y <- log(sub$SalePrice)
+#' clas <- sub$ZoneMS
+#' 
+#' rf_fit <- default_rf(X, Y)
+#' ## Long runtime for full datasets:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
+manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
+  .bas      <- basis_attr_df(attr_df, rownum = primary_obs)
+  .expected <- basis_attr_df(attr_df, rownum = comparison_obs)
+  .diff     <- abs(.bas - .expected)
+  return(which(.diff == max(.diff)))
+}
+
+## proto_* extensions ----
 
 #' Adds the distribution of the row local attributions to a ggtour
 #'
@@ -326,18 +358,20 @@ global_view <- function(
   
   ## Proto for main points
   pts_main <- list()
+  if(is_classification == FALSE)
+    pts_main <- c(pts_main, ggplot2::geom_smooth(
+      data = subset(global_view_df, layer_name == "x:prediction, y:observed"),
+      method = "lm", formula = y ~ x))
   if(is_discrete(color) == TRUE){
     ### Discrete color mapping
-    pts_main <- list(
-      suppressWarnings(ggplot2::geom_point(
+    pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
         ggplot2::aes(color = color, shape = shape,
                      tooltip = tooltip), alpha = .alpha)),
       ggplot2::scale_color_brewer(palette = "Dark2"))
   }
-  if(is_discrete(global_view_df$color) == FALSE){
+  if(is_discrete(color) == FALSE){
     ### continuous color mapping
-    pts_main <- list(
-      suppressWarnings(ggplot2::geom_point(
+    pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
         ggplot2::aes(color = color, shape = shape,
                      tooltip = tooltip),  alpha = .alpha)),
       ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
@@ -353,11 +387,10 @@ global_view <- function(
     .idx_misclas <- global_view_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0L){
       .df <- global_view_df[.idx_misclas, ]
-      pts_highlight <- c(
-        pts_highlight,
-        ggplot2::geom_point(ggplot2::aes(V1, V2), .df,
-                            color = "red", fill = NA,
-                            shape = 21L, size = 3L, alpha = .alpha)
+      pts_highlight <- c(pts_highlight, ggplot2::geom_point(
+        ggplot2::aes(V1, V2), .df,
+        color = "red", fill = NA,
+        shape = 21L, size = 3L, alpha = .alpha)
       )
     }
   }
@@ -391,12 +424,13 @@ global_view <- function(
   gg <- ggplot2::ggplot(
     data = plotly::highlight_key(global_view_df, ~rownum),
     mapping = ggplot2::aes(V1, V2)) +
+  
     pts_main +
     pts_highlight +
     spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft") +
     spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft") +
     ggplot2::coord_fixed() +
-    ggplot2::facet_grid(cols = ggplot2::vars(layer_name), scales = "free") +
+    ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
     ggplot2::labs(x = "PC1", y = "PC2") +
     ggplot2::theme(axis.text  = ggplot2::element_blank(),
@@ -698,7 +732,7 @@ radial_cheem_tour <- function(
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
-        row_index = row_index) +
+        row_index = row_index, rug_shape = pcp_shape) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),

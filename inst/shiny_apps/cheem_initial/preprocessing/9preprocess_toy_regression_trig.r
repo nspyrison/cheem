@@ -5,12 +5,12 @@ s <- function(sec = .01)Sys.sleep(sec)
 
 #### A simplified version
 set.seed(20211105)
-X <- data.frame(x1 = runif(200, 0, 5),
-                x2 = runif(200, 0, 5),
-                x3 = runif(200, 0, 5),
-                x4 = runif(200, 0, 5),
-                x5 = runif(200, 0, 5))
-Y <- 5*sin(X$x1) + 5*cos(X$x2) + .1 * X$x3 + .1 * X$x4 + .1 * X$x5 + rnorm(200)
+X <- data.frame(x1 = runif(200, 0, 4 * pi),
+                x2 = runif(200, 0, 4 * pi),
+                x3 = runif(200, 0, 4 * pi),
+                x4 = runif(200, 0, 4 * pi),
+                x5 = runif(200, 0, 4 * pi))
+Y <- sin(X$x1) + sin(X$x2) + .1 * X$x3 + .1 * X$x4 + .1 * X$x5 + rnorm(200, sd = .05)
 
 rf_fit  <- default_rf(X, Y); s();
 shap_df <- attr_df_treeshap(rf_fit, X); s();

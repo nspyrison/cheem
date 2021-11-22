@@ -2,22 +2,13 @@
 {
   require(cheem)
   s <- function(sec = .01)Sys.sleep(sec)
-  if(F){
-    ?amesHousing2018
-    str(amesHousing2018)
-    hist(as.integer(amesHousing2018$Neighborhd))
-    table(amesHousing2018$Neighborhd)
-  }
-  
-  ## Subset to the largest neighborhood; North Ames
-  r_idx <- amesHousing2018$Neighborhd == "NAmes"
-  dat  <- amesHousing2018_thin[r_idx, ]
+  if(F)
+    str(amesHousing2018_NorthAmes)
+  dat  <- amesHousing2018_NorthAmes
   X    <- dat[, 1:9]
   Y    <- log(dat$SalePrice)
   ## class is now zone subclass
-  clas <- factor(
-    amesHousing2018$SubclassMS[r_idx],
-    levels = unique(amesHousing2018$SubclassMS[r_idx]))
+  clas <- amesHousing2018_NorthAmes$SubclassMS
 }
 
 rf_fit  <- default_rf(X, Y); s();

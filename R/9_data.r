@@ -47,9 +47,16 @@
 #' .thin_col_idx <- names(amesHousing2018) %in% c(
 #'   "LotArea", "OverallQual", "YearBuild",
 #'   "LivingArea", "Bathrms", "Bedrms", "TotRms",
-#'   "GarageYrBlt", "GarageArea", "SalePrice", "ZoneMS")
+#'   "GarageYrBlt", "GarageArea", "SalePrice", "SubclassMS")
 #' amesHousing2018_thin <- amesHousing2018[, .thin_col_idx]
-#' ## save(amesHousing2018_thin, file = "./data/amesHousing2018_thin.rda")
+#' 
+#' ## subset to north ames, and only 5 largest subclasses
+#' r_idx <- amesHousing2018$Neighborhd == "NAmes" &
+#'   amesHousing2018$SubclassMS %in% c("020", "050", "080", "090", "060")
+#' amesHousing2018_NorthAmes <- amesHousing2018_thin[r_idx, ]
+#' amesHousing2018_NorthAmes$SubclassMS <- factor(
+#'   amesHousing2018_NorthAmes$SubclassMS, levels = unique(amesHousing2018_NorthAmes$SubclassMS))
+#' ## save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
 #' ```
 #' @examples
 #' library(cheem)
@@ -77,4 +84,4 @@
 "amesHousing2018_raw"
 
 #' @rdname amesHousing2018
-"amesHousing2018_thin"
+"amesHousing2018_NorthAmes"

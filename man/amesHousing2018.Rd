@@ -4,14 +4,14 @@
 \name{amesHousing2018}
 \alias{amesHousing2018}
 \alias{amesHousing2018_raw}
-\alias{amesHousing2018_thin}
+\alias{amesHousing2018_NorthAmes}
 \title{Ames housing data 2018}
 \format{
 A data frame with 2291 rows and 18 numeric variables, SalesPrice, the response variable, and 3 class variables
 
 An object of class \code{data.frame} with 2930 rows and 82 columns.
 
-An object of class \code{data.frame} with 2291 rows and 11 columns.
+An object of class \code{data.frame} with 338 rows and 11 columns.
 }
 \source{
 {Kaggle, Ames Housing Dataset} \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
@@ -55,9 +55,16 @@ names(amesHousing2018) <- c(
 .thin_col_idx <- names(amesHousing2018) \%in\% c(
   "LotArea", "OverallQual", "YearBuild",
   "LivingArea", "Bathrms", "Bedrms", "TotRms",
-  "GarageYrBlt", "GarageArea", "SalePrice", "ZoneMS")
+  "GarageYrBlt", "GarageArea", "SalePrice", "SubclassMS")
 amesHousing2018_thin <- amesHousing2018[, .thin_col_idx]
-## save(amesHousing2018_thin, file = "./data/amesHousing2018_thin.rda")
+
+## subset to north ames, and only 5 largest subclasses
+r_idx <- amesHousing2018$Neighborhd == "NAmes" &
+  amesHousing2018$SubclassMS \%in\% c("020", "050", "080", "090", "060")
+amesHousing2018_NorthAmes <- amesHousing2018_thin[r_idx, ]
+amesHousing2018_NorthAmes$SubclassMS <- factor(
+  amesHousing2018_NorthAmes$SubclassMS, levels = unique(amesHousing2018_NorthAmes$SubclassMS))
+## save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
 }
 }
 \usage{
@@ -65,7 +72,7 @@ amesHousing2018
 
 amesHousing2018_raw
 
-amesHousing2018_thin
+amesHousing2018_NorthAmes
 }
 \description{
 Cleaned house price data for Ames, Iowa, USA from 2018. Only complete
