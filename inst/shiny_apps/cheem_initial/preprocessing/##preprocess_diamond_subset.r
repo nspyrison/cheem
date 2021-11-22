@@ -25,11 +25,9 @@ cheem_ls <- cheem_ls(
 names(cheem_ls)
 
 ## EXPORT OBJECTS ----
-if(interactive() == TRUE){
-  setwd("~/R/cheem")
-  save(cheem_ls,
-       file = "./inst/shiny_apps/cheem_initial/data/5preprocess_diamond_subset.RData")
-}
+setwd("~/R/cheem")
+save(cheem_ls,
+     file = "./inst/shiny_apps/cheem_initial/data/preprocess_diamond_subset.RData")
 if(F) ## Not run, load cheem_ls
-  load("./inst/shiny_apps/cheem_initial/data/5preprocess_diamond_subset.RData")
+  load("./inst/shiny_apps/cheem_initial/data/preprocess_diamond_subset.RData")
 

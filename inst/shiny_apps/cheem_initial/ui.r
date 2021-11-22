@@ -18,21 +18,22 @@ require(magrittr)
 options(show.error.locations = TRUE)
 
 ## Load prepared cheem_ls() returns
-penguins_ls <- readRDS("./data/1preprocess_penguins.rds")
-toy_ls      <- readRDS("./data/2preprocess_toy_classification.rds")
-fifa_ls     <- readRDS("./data/3preprocess_fifa.rds")
-ames2018_ls <- readRDS("./data/7preprocess_ames2018.rds")
-toy_reg_ls  <- readRDS("./data/8preprocess_toy_regression.rds")
-toy_reg_trig_ls <- readRDS("./data/9preprocess_toy_regression_trig.rds")
-# diabetes_wide_ls <- readRDS("./data/6preprocess_diabetes_wide.rds")
-# diabetes_long_ls <- readRDS("./data/6preprocess_diabetes_long.rds")
+penguins_ls     <- readRDS("./data/preprocess_penguins.rds")
+toy_class_ls    <- readRDS("./data/preprocess_toy_classification.rds")
+fifa_ls         <- readRDS("./data/preprocess_fifa.rds")
+ames2018_ls     <- readRDS("./data/preprocess_ames2018.rds")
+toy_reg_quad_ls <- readRDS("./data/preprocess_toy_quad_regression.rds")
+toy_reg_trig_ls <- readRDS("./data/preprocess_toy_trig_regression.rds")
+chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
+# diabetes_wide_ls <- readRDS("./data/preprocess_diabetes_wide.rds")
+# diabetes_long_ls <- readRDS("./data/preprocess_diabetes_long.rds")
 
 ## UI content ----
 ### tab1_cheem -----
 expected_data_char <- c(
-  "toy classification", "penguins",
-  "toy regression", "toy regression trig", "fifa", "ames housing 2018",
-  #"diabetes (wide)", "diabetes (long)",
+  "toy classification", "penguins classification", "chocolates classification",
+  "toy quad regression", "toy trig regression", "fifa regression", "ames housing 2018 regression",
+  #"diabetes (wide) classification", "diabetes (long) classification",
   "<Upload saved cheem_ls (.rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----

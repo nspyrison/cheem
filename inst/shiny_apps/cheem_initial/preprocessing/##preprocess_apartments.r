@@ -36,11 +36,9 @@ names(layer_ls)
 
 
 ## EXPORT OBJECTS ----
-if(interactive()){
-  setwd("~/R/cheem")
-  save(cheem_ls,
-       file = "./inst/shiny_apps/cheem_initial/data/4preprocess_apartments.RData")
-}
+setwd("~/R/cheem")
+save(cheem_ls,
+     file = "./inst/shiny_apps/cheem_initial/data/preprocess_apartments.RData")
 if(F) ## Not run, load cheem_ls
-  load("./inst/shiny_apps/cheem_initial/data/4preprocess_apartments.RData")
+  load("./inst/shiny_apps/cheem_initial/data/preprocess_apartments.RData")
 

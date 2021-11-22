@@ -16,26 +16,30 @@ server <- function(input, output, session){
       stop("data string not matched.")
     
     if(dat == "toy classification"){
-      ret      <- toy_ls
+      ret      <- toy_class_ls
       prim_obs <- 18L
       comp_obs <- 111L
-    }else if(dat == "penguins"){
+    }else if(dat == "penguins classification"){
       ret      <- penguins_ls
       prim_obs <- 15L
       comp_obs <- 282L
-    }else if(dat == "toy regression"){
-      ret      <- toy_reg_ls
+    }else if(dat == "chocolates classification"){
+      ret      <- chocolates_ls
+      prim_obs <- 22L
+      comp_obs <- 49L
+    }else if(dat == "toy quad regression"){
+      ret      <- toy_quad_reg_ls
       prim_obs <- 11L
       comp_obs <- 121L
-    }else if(dat == "toy regression trig"){
-      ret <- toy_reg_trig_ls
+    }else if(dat == "toy trig regression"){
+      ret      <- toy_trig_reg_ls
       prim_obs <- 87L
       comp_obs <- 102L
-    }else if(dat == "fifa"){
+    }else if(dat == "fifa regression"){
       ret      <- fifa_ls
       prim_obs <- 1L
       comp_obs <- 8L
-    }else if(dat == "ames housing 2018"){
+    }else if(dat == "ames housing 2018 regression"){
       ret      <- ames2018_ls
       prim_obs <- 170L
       comp_obs <- 171L
@@ -144,36 +148,58 @@ server <- function(input, output, session){
   output$desc_rows <- renderText({
     dat <- req(input$dat_char)
     
+    "toy classification", "penguins classification", "chocolates classification",
+    "toy quad regression", "toy trig regression", "fifa regression", "ames housing 2018 regression",
+    
     ## Load data:
     if(dat == "toy classification"){
       he <- h3("Simulated triangle vertices")
       l1 <- p("- 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
       l2 <- p("1) Create a random forest model classifying cluster level, given the continuous variables.")
-    }else if(dat == "penguins"){
+    }else if(dat == "penguins classification"){
       he <- h3("Palmer penguins")
       l1 <- p("- 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
       l2 <- p("1) Create a random forest model classifying species from the physical measurements.")
-    }else if(dat == "fifa"){
+    }else if(dat == "chocolates classification"){
+      he <- h3("Chocolates")
+      l1 <- p("- 88 observations of 10 nutrition measures as labeled. These chocolates labels as 'milk' or 'dark'")
+      l2 <- p("1) Create a random forest model classifying the type of chocolate from the nutrition label.")
+    }else if(dat == "toy quad regression"){
+      he <- h3("Toy quadratic regression")
+      l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 5]. y = x1 * x2 + x1 + x2 + (x3 + x4 + x5) / 10 + error")
+      l2 <- p("1) Create a random forest model regressing y.")
+    }else if(dat == "toy trig regression"){
+      he <- h3("Toy trig regression")
+      l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 5]. y = sin(x1) * sin(x2) (x3 + x4 + x5) / 10 + error")
+      l2 <- p("1) Create a random forest model regressing y.")      
+    }else if(dat == "fifa regression"){
       he <- h3("FIFA soccer players, 2020 season")
-      l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and wages [2020 Euros] (Regression Y)")
+      l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and log wages [2020 Euros] (Regression Y)")
       l2 <- p("1) Create a random forest model regressing continuous wages from the skill aggregates.")
-    }else if(dat == "apartments"){
-      he <- h3("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
-      l1 <- p("- 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
-      l2 <- p("1) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
-    }else if(dat == "diabetes (wide)"){
-      he <- h3("Pima Indians Diabetes (wide)")
-      l1 <- p("- 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-      l2 <- p("1) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
-    }else if(dat == "diabetes (long)"){
-      he <- h3("Pima Indians Diabetes (long)")
-      l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-      l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
+    }else if(dat == "ames housing 2018 regression"){
+      he <- h3("Ames housing 2018 (North Ames only)")
+      l1 <- p("- 338 observations of 9 house attributes. Point aesthetics on zoning subclass, (exogenous to the model).")
+      l2 <- p("1) Create a random forest model regression log hose price from the 9 housing variables.")
     }else { ## _ie_ user uploaded data
       he <- h3("User uploaded data")
       l1 <- NULL
       l2 <- p("1) Create a random forest model")
     }
+    # }else if(dat == "apartments"){
+    #   he <- h3("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
+    #   l1 <- p("- 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
+    #   l2 <- p("1) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
+    # }else if(dat == "diabetes (wide)"){
+    #   he <- h3("Pima Indians Diabetes (wide)")
+    #   l1 <- p("- 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+    #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
+    # }else if(dat == "diabetes (long)"){
+    #   he <- h3("Pima Indians Diabetes (long)")
+    #   l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
+    #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
+    
+    
+    
     ## Return
     HTML(paste(he, l1, l2))
   })

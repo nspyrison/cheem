@@ -82,14 +82,14 @@ shap_df <- attr_df_treeshap(rf_fit, X); s();
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)
-if(F)
-  names(this_ls)
+
+names(this_ls)
 
 ## EXPORT OBJECTS ----
 setwd("~/R/cheem")
 saveRDS(this_ls,
-        file = "./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.rds")
+        file = "./inst/shiny_apps/cheem_initial/data/preprocess_toy_classification.rds")
 cat("Saved.\n")
 if(F) ## Not run, load this_ls
-  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/2preprocess_toy_classification.rds")
+  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_toy_classification.rds")
 
