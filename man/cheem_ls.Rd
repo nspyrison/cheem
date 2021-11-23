@@ -67,10 +67,10 @@ this_ls <- cheem_ls(X, Y, class = clas,
 names(this_ls)
 
 ## Regression:
-sub <- amesHousing2018_thin[1:200, ]
-X <- sub[, 1:9]
-Y <- log(sub$SalePrice)
-clas <- sub$ZoneMS
+dat <- amesHousing2018_NorthAmes
+X <- dat[, 1:9]
+Y <- log(dat$SalePrice)
+clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets:

@@ -52,6 +52,8 @@ and attribution- spaces. Typically consumed directly by shiny app.
 }
 \examples{
 library(cheem)
+
+## Regression:
 dat <- amesHousing2018_NorthAmes
 X <- dat[, 1:9]
 Y <- log(dat$SalePrice)

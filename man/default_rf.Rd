@@ -38,10 +38,11 @@ hyperparameter defaults and consistent arguments with \code{cheem}.
 \examples{
 library(cheem)
 
-sub <- amesHousing2018_thin[1:200, ]
-X <- sub[, 1:9]
-Y <- log(sub$SalePrice)
-clas <- sub$ZoneMS
+## Regression:
+dat <- amesHousing2018_NorthAmes
+X <- dat[, 1:9]
+Y <- log(dat$SalePrice)
+clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets:

@@ -20,12 +20,12 @@ server <- function(input, output, session){
       comp_obs <- 119L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
-      prim_obs <- 330L
-      comp_obs <- 122L
+      prim_obs <- 124L
+      comp_obs <- 86L
     }else if(dat == "chocolates classification"){
       ret      <- chocolates_ls
       prim_obs <- 22L
-      comp_obs <- 49L
+      comp_obs <- 34L
     }else if(dat == "toy quad regression"){
       ret      <- toy_quad_reg_ls
       prim_obs <- 11L
@@ -41,7 +41,7 @@ server <- function(input, output, session){
     }else if(dat == "ames housing 2018 regression"){
       ret      <- ames2018_ls
       prim_obs <- 170L
-      comp_obs <- 171L
+      comp_obs <- 220L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
@@ -264,7 +264,7 @@ server <- function(input, output, session){
     ## Leading to a hard to explore plotly method error:
     # Error: object 'x' not found
     ## abandoning and defaulting to full selection.
-    idx_rownum <- NULL ## NULL is no selection; all points
+    idx_rownum <- rep(TRUE, nrow(cheem_ls$attr_df)) ## all points
     
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,

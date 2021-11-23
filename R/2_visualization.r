@@ -14,10 +14,11 @@
 #' @examples
 #' library(cheem)
 #' 
-#' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:9]
-#' Y <- log(sub$SalePrice)
-#' clas <- sub$ZoneMS
+#' ## Regression:
+#' dat <- amesHousing2018_NorthAmes
+#' X <- dat[, 1:9]
+#' Y <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
@@ -50,10 +51,12 @@ basis_attr_df <- function(
 #' @family cheem utility
 #' @examples
 #' library(cheem)
-#' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:9]
-#' Y <- log(sub$SalePrice)
-#' clas <- sub$ZoneMS
+#' 
+#' ## Regression:
+#' dat <- amesHousing2018_NorthAmes
+#' X <- dat[, 1:9]
+#' Y <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
@@ -100,10 +103,11 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' library(cheem)
 #' library(spinifex)
 #' 
-#' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:9]
-#' Y <- log(sub$SalePrice)
-#' clas <- sub$ZoneMS
+#' ## Regression:
+#' dat <- amesHousing2018_NorthAmes
+#' X <- dat[, 1:9]
+#' Y <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
@@ -295,6 +299,8 @@ proto_basis1d_distribution <- function(
 #' @family cheem consumers
 #' @examples
 #' library(cheem)
+#' 
+#' ## Regression:
 #' dat <- amesHousing2018_NorthAmes
 #' X <- dat[, 1:9]
 #' Y <- log(dat$SalePrice)
@@ -508,10 +514,10 @@ global_view <- function(
 #' }
 #' 
 #' ## Regression:
-#' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:9]
-#' Y <- log(sub$SalePrice)
-#' clas <- sub$ZoneMS
+#' dat <- amesHousing2018_NorthAmes
+#' X <- dat[, 1:9]
+#' Y <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
