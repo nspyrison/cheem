@@ -18,11 +18,11 @@ server <- function(input, output, session){
     if(dat == "toy classification"){
       ret      <- toy_class_ls
       prim_obs <- 18L
-      comp_obs <- 111L
+      comp_obs <- 119L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
-      prim_obs <- 15L
-      comp_obs <- 282L
+      prim_obs <- 330L
+      comp_obs <- 122L
     }else if(dat == "chocolates classification"){
       ret      <- chocolates_ls
       prim_obs <- 22L
@@ -64,15 +64,14 @@ server <- function(input, output, session){
     #   comp_obs <- 674L
     
     ### BY PRODUCT: UPDATE PRIM/COMP OBS
-    .n_max <- 1e6
     updateNumericInput(
       session, "primary_obs",
       label = "Primary observation rownum, ('*' point):",
-      min = 1L, max = .n_max, step = 1L, value = prim_obs)
+      min = 1L, max = 1e6L, step = 1L, value = prim_obs)
     updateNumericInput(
       session, "comparison_obs",
       label = "Comparison observation rownum, ('x' ponit):",
-      min = 1L, max = .n_max, step = 1L, value = comp_obs)
+      min = 1L, max = 1e6L, step = 1L, value = comp_obs)
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
     var_nms <- colnames(ret$attr_df)
@@ -91,12 +90,12 @@ server <- function(input, output, session){
   primary_obs <- reactive({
     req(input$primary_obs)
     input$primary_obs
-  })
+  }) %>% debounce(millis = 1000L)
   #primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
   comparison_obs <- reactive({
     req(input$comparison_obs)
     input$comparison_obs
-  })
+  }) %>% debounce(millis = 1000L)
   #comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
   
   ## Basis; the local explanation's attributon of the primary obs
@@ -109,7 +108,7 @@ server <- function(input, output, session){
       return()
     }
     
-    return(basis_attr_df(attr_df[, inc_vars], prim_obs))
+    return(basis_attr_df(attr_df[, inc_vars, drop = FALSE], prim_obs))
   })
   
   sel_rownums <- reactive({
@@ -123,33 +122,30 @@ server <- function(input, output, session){
   
   ## UPDATE MANIPULATION VARIABLE INPUT
   observeEvent({
-    bas()
     primary_obs()
+    comparison_obs()
+    input$inc_vars
   }, {
-    bas       <- req(bas())
-    opts      <- req(input$inc_vars)
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
+    opts      <- req(input$inc_vars)
     attr_df   <- req(load_ls())$attr_df
-    
+    if(all(opts %in% colnames(attr_df)) == FALSE){
+      message("Update manip_var_nm: not all input$inc_vars are in attr_df...")
+      return()
+    }
     ## Select var with largest difference between primary and comparison obs.
-    prim_bas <- attr_df[.prim_obs,, drop = FALSE]
-    comp_bas <- attr_df[.comp_obs,, drop = FALSE]
-    .diff <- abs(comp_bas - prim_bas)
-    sel <- opts[which(.diff == max(.diff))]
+    inc_attr_df <- attr_df[, opts, drop = FALSE]
+    mv <- manip_var_of_attr_df(inc_attr_df, .prim_obs, .comp_obs)
+    mv_nm <- colnames(inc_attr_df)[mv]
     
-    updateSelectInput(session, "manip_var_nm",
-                      label = "Manipulation variable:",
-                      choices  = opts,
-                      selected = sel)
+    updateSelectInput(session, "manip_var_nm", label = "Manipulation variable:",
+                      choices = opts, selected = mv_nm)
   }, priority = 150L)
   
   ## Outputs -----
   output$desc_rows <- renderText({
     dat <- req(input$dat_char)
-    
-    "toy classification", "penguins classification", "chocolates classification",
-    "toy quad regression", "toy trig regression", "fifa regression", "ames housing 2018 regression",
     
     ## Load data:
     if(dat == "toy classification"){
@@ -198,8 +194,6 @@ server <- function(input, output, session){
     #   l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
     #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
     
-    
-    
     ## Return
     HTML(paste(he, l1, l2))
   })
@@ -208,15 +202,14 @@ server <- function(input, output, session){
   
   ### GLOBAL VIEW PLOTLY
   output$global_view <- plotly::renderPlotly({
-    cheem_ls <- req(load_ls())
+    cheem_ls  <- req(load_ls())
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
-      global_view(
-        cheem_ls, .prim_obs, .comp_obs,
+      global_view( ## Let global view pick the color/shape
+        cheem_ls, .prim_obs, .comp_obs
         #height_px = 480L, width_px = 1440L,
-        color = cheem_ls$decode_df$class,
-        shape = cheem_ls$decode_df$class))
+      ))
   })
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
@@ -231,24 +224,21 @@ server <- function(input, output, session){
     add_pcp    <- req(input$do_add_pcp_segments)
     inc_vars   <- req(input$inc_vars)
     idx_rownum <- sel_rownums() ## NULL is no selection
-    
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
                      "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
-      return(NULL)
+      return()
     }
-    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
     
+    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
     ggt <- radial_cheem_tour(
-      cheem_ls, bas, mv,
-      prim_obs, comp_obs,
+      cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp,
       row_index = idx_rownum, inc_vars = inc_vars)
     
     ### A temp file to save the output, will be removed later in renderImage
     anim <- animate_gganimate(
-      ggt,
-      height = 480L, width = 1440L,
+      ggt, height = 480L, width = 1440L,
       #units = "px", ## "px", "in", "cm", or "mm."
       #res = 72L, ## resolution (dpi)
       render = gganimate::av_renderer())
@@ -271,7 +261,11 @@ server <- function(input, output, session){
     mv_nm      <- req(input$manip_var_nm)
     add_pcp    <- req(input$do_add_pcp_segments)
     inc_vars   <- req(input$inc_vars)
-    idx_rownum <- sel_rownums() ## NULL is no selection
+    #idx_rownum <- sel_rownums() ## NULL is no selection; all points
+    ## Leading to a hard to explore plotly method error:
+    # Error: object 'x' not found
+    ## abandoning and defaulting to full selection.
+    idx_rownum <- NULL ## NULL is no selection; all points
     
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
@@ -281,12 +275,14 @@ server <- function(input, output, session){
     mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
     
     ggt <- radial_cheem_tour(
-      cheem_ls, bas, mv,
-      prim_obs, comp_obs,
+      cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
       row_index = idx_rownum, inc_vars = inc_vars)
     
-    .anim <- spinifex::animate_plotly(ggt) %>%##, width = 1440L, height = 480L
+    .anim <- 
+      spinifex::animate_plotly(ggt, fps = 4L, width = 1440L, height = 480L) %>%
+      suppressWarnings() %>% 
+      ##suppressing: plotly: Warning: Specifying width/height in layout() is now deprecated.
       ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
       plotly::style(hoverinfo = "none")
     #### the following hasn't helped:
@@ -295,11 +291,9 @@ server <- function(input, output, session){
     
     ## Layout also set in animate_plotly
     if(cheem_ls$type == "classification"){
-      .anim %>% plotly::layout(
-        xaxis = list(scaleratio = 4L))
+      .anim %>% plotly::layout(xaxis = list(scaleratio = 4L))
     }else{
-      .anim %>% plotly::layout(
-        xaxis = list(scaleratio = 1L))
+      .anim %>% plotly::layout(xaxis = list(scaleratio = 1L))
     }
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   outputOptions(output, "cheem_tour_plotly", ## LAZY eval, do last

@@ -22,8 +22,8 @@ penguins_ls     <- readRDS("./data/preprocess_penguins.rds")
 toy_class_ls    <- readRDS("./data/preprocess_toy_classification.rds")
 fifa_ls         <- readRDS("./data/preprocess_fifa.rds")
 ames2018_ls     <- readRDS("./data/preprocess_ames2018.rds")
-toy_reg_quad_ls <- readRDS("./data/preprocess_toy_quad_regression.rds")
-toy_reg_trig_ls <- readRDS("./data/preprocess_toy_trig_regression.rds")
+toy_quad_reg_ls <- readRDS("./data/preprocess_toy_quad_regression.rds")
+toy_trig_reg_ls <- readRDS("./data/preprocess_toy_trig_regression.rds")
 chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
 # diabetes_wide_ls <- readRDS("./data/preprocess_diabetes_wide.rds")
 # diabetes_long_ls <- readRDS("./data/preprocess_diabetes_long.rds")
@@ -63,10 +63,10 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   fluidRow(
     column(3L, numericInput( ## Updated by updateNumericInput
       "primary_obs", label = "Primary observation rownum, ('*', dashed line below):",
-      min = 1L, max = 1L, step = 1L, value = 1L)),
+      value = NULL)),
     column(3L, numericInput( ## Updated by updateNumericInput
       "comparison_obs", label = "Comparison observation rownum, ('x', dotted line below):",
-      min = 1L, max = 8L, step = 1L, value = 8L)),
+      value = NULL)),
     column(6L)
   ),
   p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
@@ -87,9 +87,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   h3("Cheem tour"),
   p("The data-space projected through normalized attribution of the primary observation."),
   checkboxGroupInput(
-    "inc_vars", label = "Inclusion variables",
-    choices = c("bdy", "age", "rct", "atk", "def", "acc", "mvm", "pwr", "gk"),
-    selected = c("atk", "def", "acc", "mvm", "pwr"), inline = TRUE),
+    "inc_vars", label = "Inclusion variables:",
+    choices = NULL,
+    selected = NULL, inline = TRUE),
   fluidRow(
     column(width = 3L,
            selectInput("manip_var_nm", label = "Manipulation variable:",
@@ -98,8 +98,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
                            c("Yes" = TRUE, "No" = FALSE))),
     column(width = 6L)
   ),
-  p("Solid grey line/: true zero, all X's = 0 projected through the basis."),
-  p("Longer-dashed and dotted lines: location of primary & comparison observations respectively ('*'/'x' in global view)."),
+  p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
+  p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
+  #p("if tour is ")
   # shiny::imageOutput("cheem_tour_gganimate",
   #                    width = "100%", height = "720px") %>%
   #   shinycssloaders::withSpinner(type = 8L),
