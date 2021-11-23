@@ -295,11 +295,10 @@ proto_basis1d_distribution <- function(
 #' @family cheem consumers
 #' @examples
 #' library(cheem)
-#' 
-#' sub <- amesHousing2018_thin[1:200, ]
-#' X <- sub[, 1:10]
-#' Y <- log(sub$SalePrice)
-#' clas <- sub$MS.Zoning
+#' dat <- amesHousing2018_NorthAmes
+#' X <- dat[, 1:9]
+#' Y <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
@@ -359,9 +358,10 @@ global_view <- function(
   
   ## Proto for main points
   pts_main <- list()
+  .u_nms <- unique(global_view_df$layer_name)
   if(is_classification == FALSE)
     pts_main <- c(pts_main, ggplot2::geom_smooth(
-      data = subset(global_view_df, layer_name == "x:prediction, y:observed"),
+      data = subset(global_view_df, layer_name == .u_nms[length(.u_nms)]),
       method = "lm", formula = y ~ x))
   if(is_discrete(color) == TRUE){
     ### Discrete color mapping
@@ -422,6 +422,9 @@ global_view <- function(
   }
   
   ## Visualize
+  .spaces <- paste(rep(" ", 61L), collapse = "")
+  .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observered")
+  .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   gg <- ggplot2::ggplot(
     data = plotly::highlight_key(global_view_df, ~rownum),
     mapping = ggplot2::aes(V1, V2)) +
@@ -432,7 +435,7 @@ global_view <- function(
     ggplot2::coord_fixed() +
     ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
-    ggplot2::labs(x = "PC1", y = "PC2") +
+    ggplot2::labs(x = .x_axis_title, y = "") +
     ggplot2::theme(axis.text  = ggplot2::element_blank(),
                    axis.ticks = ggplot2::element_blank(),
                    legend.position = "off")

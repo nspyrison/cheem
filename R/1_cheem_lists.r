@@ -347,19 +347,21 @@ cheem_ls <- function(
   
   ## Append yhaty to global_view_df -----
   .vec_yjitter <- 0L ## default/regression case
-  .layer_nm <- "x:prediction, y:observed"
+  .layer_nm <- "model"
   if(is_classification){
     .vec_yjitter <- runif(nrow(x), -.3, .3)
-    .layer_nm <- "x:prediction, y:observed(+jitter)"
+    .layer_nm <- paste0(.layer_nm, " (w/ y jitter)")
   }
   .yhaty_df <- data.frame(V1 = .decode_df$prediction,
                           V2 = .decode_df$y + .vec_yjitter)
   .yhaty_df <- spinifex::scale_01(.yhaty_df)
-  
   .yhaty_df <- data.frame(
-    basis_type = NA, layer_name = "x:prediction, y:observed", rownum = 1L:nrow(x),
+    basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
     class = .decode_df$class, tooltip = tooltip, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
+  ## Make sure facet order is kept.
+  .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))
+  .glob_view$layer_name <- factor(.glob_view$layer_name, unique(.glob_view$layer_name))
   
   ## Cleanup and return
   ret_ls <- list(

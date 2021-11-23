@@ -3,7 +3,6 @@
   require(cheem)
   s <- function(sec = .01)Sys.sleep(sec)
   
-  
   ## Create the data & shap layer_ls -----
   #cr_simulation() ## see obj `sim_EEE_p4`
   chocolates <- readr::read_csv('https://iml.numbat.space/data/chocolates.csv')
