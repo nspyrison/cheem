@@ -4,6 +4,7 @@
 
 #1 Force reinstall spinifex and cheem from github -----
 #, so that shiny sees the hidden artifact
+print("first restart session to detach packages from session")
 if(F){
   # install.packages("spinifex", force = TRUE) ## v0.3.1 is live
   remotes::install_github(

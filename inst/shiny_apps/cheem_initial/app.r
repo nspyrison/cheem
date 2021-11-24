@@ -74,7 +74,8 @@ server <- function(input, output, session){
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
     var_nms <- colnames(ret$attr_df)
-    updateCheckboxGroupInput(session, "inc_var_nms", label = "Inclusion variables",
+    
+    updateCheckboxGroupInput(session, "inc_var_nms", label = "Variables to include:",
                              choices = var_nms, selected = var_nms, inline = TRUE)
     
     ## Return loaded cheem_ls
@@ -94,15 +95,15 @@ server <- function(input, output, session){
 
   ## Basis; the local explanation's attributon of the primary obs
   bas <- reactive({
-    attr_df  <- req(load_ls()$attr_df)
+    attr_df     <- req(load_ls()$attr_df)
     inc_var_nms <- req(input$inc_var_nms)
-    prim_obs <- req(primary_obs())
+    prim_obs    <- req(primary_obs())
     if(all(inc_var_nms %in% colnames(attr_df)) == FALSE){
       message("bas(): bas tried to react before inc_var_nms updated...")
       return()
     }
-    
-    return(basis_attr_df(attr_df[, inc_var_nms, drop = FALSE], prim_obs))
+    bas <- basis_attr_df(attr_df[, inc_var_nms, drop = FALSE], prim_obs)
+    return(tourr::orthonormalise(bas))
   })
   
   sel_rownums <- reactive({
@@ -121,11 +122,11 @@ server <- function(input, output, session){
     mv_nm       <- req(input$manip_var_nm)
     add_pcp     <- req(input$do_add_pcp_segments)
     inc_var_nms <- req(input$inc_var_nms)
-    #idx_rownum <- sel_rownums() ## NULL is no selection; all points
-    ## Leading to a hard to explore plotly method error:
+    #idx_rownum  <- sel_rownums() ## NULL is no selection; all points
+    idx_rownum  <- NULL ## all points
+    ## sel_rownums() is Leading to a hard to explore plotly method error:
     # Error: object 'x' not found
     ## abandoning and defaulting to full selection.
-    idx_rownum <- NULL ## all points
     
     if(mv_nm %in% rownames(bas) == FALSE){
       message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
@@ -133,14 +134,6 @@ server <- function(input, output, session){
       return(NULL)
     }
     mv <- which(rownames(bas) == mv_nm)
-    
-    # browser()
-    # debugonce(radial_cheem_tour)
-    ## issue seems to be with proto_point!? manual check through tour till:
-    # Warning: Removed 9950 rows containing missing values (geom_point).
-    #debugonce(proto_point)
-    ## issue is the aes_args set in radial_cheem_tour; shape = color = c(F, F, rep(NA, n_else))
-    ## issue must stem from .init4proto!?
     radial_cheem_tour(
       cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
@@ -167,7 +160,6 @@ server <- function(input, output, session){
     inc_attr_df <- attr_df[, opts, drop = FALSE]
     mv <- manip_var_of_attr_df(inc_attr_df, .prim_obs, .comp_obs)
     mv_nm <- colnames(inc_attr_df)[mv]
-    
     updateSelectInput(session, "manip_var_nm", label = "Manipulation variable:",
                       choices = opts, selected = mv_nm)
   }, priority = 150L)
