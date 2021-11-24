@@ -16,5 +16,5 @@ if(F){
 
 #2 Deploy app ----
 ?rsconnect::deployApp("")
-## ehh, whatever do it manually by opening app.r, 
-#### and top right button of the file panel.
+## ehh, whatever do it manually by opening app.r,
+#### and top right button (blue circle arrows) of the file panel.
