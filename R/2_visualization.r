@@ -97,7 +97,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' as a dashed line.
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line.
-#' @param inc_vars A character vector, the names of the variables to keep. 
+#' @param inc_var_nms A character vector, the names of the variables to keep. 
 #' Defaults to NULL, all variables kept.
 #' @param row_index A numeric or logical vector, the index of the rows to keep.
 #' Defaults to NULL, all rows kept.
@@ -143,7 +143,7 @@ proto_basis1d_distribution <- function(
   do_add_pcp_segments = TRUE,
   primary_obs = 1,
   comparison_obs = 2,
-  inc_vars = NULL,
+  inc_var_nms = NULL,
   row_index = NULL
 ){
   if(is.matrix(attr_df) & ncol(attr_df) < 3L)
@@ -166,8 +166,8 @@ proto_basis1d_distribution <- function(
     attr_df  <- attr_df[ row_index, ]
     group_by <- group_by[row_index]
   }
-  if(is.null(inc_vars) == FALSE)
-    attr_df <- attr_df[, colnames(attr_df) %in% inc_vars]
+  if(is.null(inc_var_nms) == FALSE)
+    attr_df <- attr_df[, colnames(attr_df) %in% inc_var_nms]
   .n <- nrow(attr_df)
   .p <- ncol(attr_df)
   
@@ -233,39 +233,39 @@ proto_basis1d_distribution <- function(
            
   
   #### Add PCP lines if needed. ----
+  ## Make the right table to inner join to.
+  .df_basis_distr2 <- dplyr::mutate(
+    .df_basis_distr, .keep = "none",
+    xend = x, yend = y, var_num = var_num - 1L, rownum = rownum)
+  ## Inner join to by var_name & rownum(lead1)
+  .df_pcp <- dplyr::inner_join(
+    .df_basis_distr, .df_basis_distr2,
+    by = c("var_num" = "var_num", "rownum" = "rownum"))
+  
   if(do_add_pcp_segments == TRUE){
-    ## Make the right table to inner join to.
-    .df_basis_distr2 <- dplyr::mutate(
-      .df_basis_distr, .keep = "none",
-      xend = x, yend = y, var_num = var_num - 1L, rownum = rownum)
-    ## Inner join to by var_name & rownum(lead1)
-    .df_pcp <- dplyr::inner_join(
-      .df_basis_distr, .df_basis_distr2,
-      by = c("var_num" = "var_num", "rownum" = "rownum"))
-    
     ## Background pcp lines
     pcp_lines <- list(
       suppressWarnings(ggplot2::geom_segment(
         ggplot2::aes(x = x, y = y, xend = xend, yend = yend,
                      tooltip = rownum, color = group_by),
         .df_pcp, size = .5, alpha = .alpha / 2L)))
-    ## Add comp_obs highlight
-    if(length(comparison_obs) > 0L)
-      pcp_lines <- c(
-        pcp_lines, suppressWarnings(ggplot2::geom_segment(
-          ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
-          .df_pcp[.df_pcp$rownum == comparison_obs, ],
-          color = "black", size = .8, alpha = .6, linetype = 3L)))
-    ## Add primary_obs highlight
-    if(sum(primary_obs) > 0L)
-      pcp_lines <- c(
-        pcp_lines, suppressWarnings(ggplot2::geom_segment(
-          ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
-          .df_pcp[.df_pcp$rownum == primary_obs, ],
-          color = "black", size = 1L, alpha = .8, linetype = 2L)))
     ## ret is the rug distribution atm
     ret <- c(ret, pcp_lines)
   }
+  
+  ### Regardless of the rest of pcp lines draw prim/comp
+  ## Add comp_obs highlight
+  if(length(comparison_obs) > 0L)
+    ret <- c(ret, list(suppressWarnings(ggplot2::geom_segment(
+      ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
+      .df_pcp[.df_pcp$rownum == comparison_obs,, drop = FALSE],
+      color = "black", size = .8, alpha = .6, linetype = 3L))))
+  ## Add primary_obs highlight
+  if(length(primary_obs) > 0L)
+    ret <- c(ret, list(suppressWarnings(ggplot2::geom_segment(
+      ggplot2::aes(x = x, y = y, xend = xend, yend = yend, tooltip = rownum),
+      .df_pcp[.df_pcp$rownum == primary_obs,, drop = FALSE],
+      color = "black", size = 1L, alpha = .8, linetype = 2L))))
   
   ## Return
   return(ret)
@@ -484,7 +484,7 @@ global_view <- function(
 #' @param angle The step size between interpolated frames, in radians.
 #' @param row_index Numeric index of selected observations. 
 #' Defaults to TRUE; 1:n.
-#' @param inc_vars A vector of the names of the variables to include in the projection.
+#' @param inc_var_nms A vector of the names of the variables to include in the projection.
 # #' @param reg_color For regression cases, the color of the points. 
 # #' Defaults to class if passed to cheem_ls(), else residual.
 # #' @param reg_shape For regression cases, the shape of the points.
@@ -541,7 +541,7 @@ radial_cheem_tour <- function(
   pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
   angle = .2,
   row_index = NULL,
-  inc_vars = NULL#,
+  inc_var_nms = NULL#,
   # reg_color = NULL,
   # reg_shape = NULL
 ){
@@ -556,11 +556,11 @@ radial_cheem_tour <- function(
   .comp_obs <- comparison_obs ## Don't coerce to logical index
   .n <- nrow(decode_df)
   ## column & row indexes
-  if(is.null(inc_vars))
-    inc_vars <- colnames(cheem_ls$attr_df)
-  .col_idx <- colnames(decode_df) %in% inc_vars
-  if(is.null(inc_vars) == FALSE)
-    .col_idx <- colnames(decode_df) %in% inc_vars
+  if(is.null(inc_var_nms))
+    inc_var_nms <- colnames(cheem_ls$attr_df)
+  .col_idx <- colnames(decode_df) %in% inc_var_nms
+  if(is.null(inc_var_nms) == FALSE)
+    .col_idx <- colnames(decode_df) %in% inc_var_nms
   if(is.null(row_index) == FALSE){
     ## Change row_index from numeric to logical if needed and replicate
     row_index <- as_logical_index(row_index, nrow(decode_df))
@@ -588,7 +588,7 @@ radial_cheem_tour <- function(
         cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
-        shape = pcp_shape, inc_vars = inc_vars, row_index = row_index) +
+        shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
       spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
@@ -655,7 +655,7 @@ radial_cheem_tour <- function(
         identity_args = list(alpha = .alpha),
         row_index = .idx_fore) +
       proto_basis1d_distribution(
-        cheem_ls$attr_df, position = "floor1d", shape = c(142L, 124L),
+        cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") +

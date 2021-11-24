@@ -14,7 +14,7 @@ radial_cheem_tour(
   pcp_shape = c(142, 124),
   angle = 0.2,
   row_index = NULL,
-  inc_vars = NULL
+  inc_var_nms = NULL
 )
 }
 \arguments{
@@ -44,7 +44,7 @@ line segments to the basis display.}
 \item{row_index}{Numeric index of selected observations.
 Defaults to TRUE; 1:n.}
 
-\item{inc_vars}{A vector of the names of the variables to include in the projection.}
+\item{inc_var_nms}{A vector of the names of the variables to include in the projection.}
 }
 \value{
 \code{ggplot}/ggtour of the cheem tour, animation frames of a radial tour

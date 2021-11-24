@@ -12,7 +12,7 @@ proto_basis1d_distribution(
   do_add_pcp_segments = TRUE,
   primary_obs = 1,
   comparison_obs = 2,
-  inc_vars = NULL,
+  inc_var_nms = NULL,
   row_index = NULL
 )
 }
@@ -40,7 +40,7 @@ as a dashed line.}
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
 
-\item{inc_vars}{A character vector, the names of the variables to keep.
+\item{inc_var_nms}{A character vector, the names of the variables to keep.
 Defaults to NULL, all variables kept.}
 
 \item{row_index}{A numeric or logical vector, the index of the rows to keep.

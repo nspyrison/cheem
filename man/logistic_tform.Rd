@@ -4,12 +4,12 @@
 \alias{logistic_tform}
 \title{Logistic function to help set alpha opacity}
 \usage{
-logistic_tform(n, mid_pt = 1000, k_attenuation = 5, ceiling = 1, floor = 0.3)
+logistic_tform(n, mid_pt = 600, k_attenuation = 5, ceiling = 1, floor = 0.3)
 }
 \arguments{
 \item{n}{Number of observations to plot.}
 
-\item{mid_pt}{Inflection point that the logistic curve. Defaults to 1000.}
+\item{mid_pt}{Inflection point that the logistic curve. Defaults to 600.}
 
 \item{k_attenuation}{The steepness of the transition, larger is a sharper
 transition. Quite sensitive and defaults to 5.}

@@ -74,7 +74,7 @@ server <- function(input, output, session){
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
     var_nms <- colnames(ret$attr_df)
-    updateCheckboxGroupInput(session, "inc_vars", label = "Inclusion variables",
+    updateCheckboxGroupInput(session, "inc_var_nms", label = "Inclusion variables",
                              choices = var_nms, selected = var_nms, inline = TRUE)
     
     ## Return loaded cheem_ls
@@ -95,14 +95,14 @@ server <- function(input, output, session){
   ## Basis; the local explanation's attributon of the primary obs
   bas <- reactive({
     attr_df  <- req(load_ls()$attr_df)
-    inc_vars <- req(input$inc_vars)
+    inc_var_nms <- req(input$inc_var_nms)
     prim_obs <- req(primary_obs())
-    if(all(inc_vars %in% colnames(attr_df)) == FALSE){
-      message("bas(): bas tried to react before inc_vars updated...")
+    if(all(inc_var_nms %in% colnames(attr_df)) == FALSE){
+      message("bas(): bas tried to react before inc_var_nms updated...")
       return()
     }
     
-    return(basis_attr_df(attr_df[, inc_vars, drop = FALSE], prim_obs))
+    return(basis_attr_df(attr_df[, inc_var_nms, drop = FALSE], prim_obs))
   })
   
   sel_rownums <- reactive({
@@ -112,14 +112,15 @@ server <- function(input, output, session){
     return(as.integer(.d$key))
   })
   
+  ### cheem_ggtour() -----
   cheem_ggtour <- reactive({
-    bas        <- req(bas())
-    cheem_ls   <- req(load_ls())
-    prim_obs   <- req(primary_obs())
-    comp_obs   <- req(comparison_obs())
-    mv_nm      <- req(input$manip_var_nm)
-    add_pcp    <- req(input$do_add_pcp_segments)
-    inc_vars   <- req(input$inc_vars)
+    bas         <- req(bas())
+    cheem_ls    <- req(load_ls())
+    prim_obs    <- req(primary_obs())
+    comp_obs    <- req(comparison_obs())
+    mv_nm       <- req(input$manip_var_nm)
+    add_pcp     <- req(input$do_add_pcp_segments)
+    inc_var_nms <- req(input$inc_var_nms)
     #idx_rownum <- sel_rownums() ## NULL is no selection; all points
     ## Leading to a hard to explore plotly method error:
     # Error: object 'x' not found
@@ -131,7 +132,7 @@ server <- function(input, output, session){
                      "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
-    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
+    mv <- which(rownames(bas) == mv_nm)
     
     # browser()
     # debugonce(radial_cheem_tour)
@@ -143,8 +144,8 @@ server <- function(input, output, session){
     radial_cheem_tour(
       cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
-      row_index = idx_rownum, inc_vars = inc_vars)
-  }) %>% debounce(1000L)
+      row_index = idx_rownum, inc_var_nms = inc_var_nms)
+  }) %>% debounce(500L)
   
   ## Observers: updating inputs in the ui -----
   
@@ -152,14 +153,14 @@ server <- function(input, output, session){
   observeEvent({
     primary_obs()
     comparison_obs()
-    input$inc_vars
+    input$inc_var_nms
   }, {
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
-    opts      <- req(input$inc_vars)
+    opts      <- req(input$inc_var_nms)
     attr_df   <- req(load_ls())$attr_df
     if(all(opts %in% colnames(attr_df)) == FALSE){
-      message("Update manip_var_nm: not all input$inc_vars are in attr_df...")
+      message("Update manip_var_nm: not all input$inc_var_nms are in attr_df...")
       return()
     }
     ## Select var with largest difference between primary and comparison obs.

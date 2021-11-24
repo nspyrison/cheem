@@ -87,7 +87,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   h3("Cheem tour"),
   p("The data space as projected through normalized attribution of the primary observation."),
   checkboxGroupInput(
-    "inc_vars", label = "Inclusion variables:",
+    "inc_var_nms", label = "Inclusion variables:",
     choices = NULL,
     selected = NULL, inline = TRUE),
   fluidRow(
