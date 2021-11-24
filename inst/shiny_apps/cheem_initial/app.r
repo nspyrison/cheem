@@ -69,7 +69,7 @@ server <- function(input, output, session){
       min = 1L, max = 1e6L, step = 1L, value = prim_obs)
     updateNumericInput(
       session, "comparison_obs",
-      label = "Comparison observation rownum, ('x' ponit):",
+      label = "Comparison observation rownum, ('x' point):",
       min = 1L, max = 1e6L, step = 1L, value = comp_obs)
     
     ## BY PRODUCT: UPDATE INCLUSION VARIABLES
@@ -80,23 +80,18 @@ server <- function(input, output, session){
     ## Return loaded cheem_ls
     return(ret)
   })
-  #load_ls_d <- load_ls %>%  debounce(millis = 100L)
- 
   
-  
-  ## PIMARY & COMPARISON OBS, & thier debounced versions
-  #### debounce; try to reduce multiple renders as a 3 digit number is typed
+  ## PIMARY & COMPARISON OBS
+  #### Debounce the plots on the inputs imo.
   primary_obs <- reactive({
     req(input$primary_obs)
     input$primary_obs
-  }) %>% debounce(millis = 1000L)
-  #primary_obs_d <- primary_obs %>% debounce(millis = 1000L)
+  })
   comparison_obs <- reactive({
     req(input$comparison_obs)
     input$comparison_obs
-  }) %>% debounce(millis = 1000L)
-  #comparison_obs_d <- comparison_obs %>% debounce(millis = 1000L)
-  
+  })
+
   ## Basis; the local explanation's attributon of the primary obs
   bas <- reactive({
     attr_df  <- req(load_ls()$attr_df)
@@ -116,6 +111,40 @@ server <- function(input, output, session){
     if(is.null(.d)) return(NULL)
     return(as.integer(.d$key))
   })
+  
+  cheem_ggtour <- reactive({
+    bas        <- req(bas())
+    cheem_ls   <- req(load_ls())
+    prim_obs   <- req(primary_obs())
+    comp_obs   <- req(comparison_obs())
+    mv_nm      <- req(input$manip_var_nm)
+    add_pcp    <- req(input$do_add_pcp_segments)
+    inc_vars   <- req(input$inc_vars)
+    #idx_rownum <- sel_rownums() ## NULL is no selection; all points
+    ## Leading to a hard to explore plotly method error:
+    # Error: object 'x' not found
+    ## abandoning and defaulting to full selection.
+    idx_rownum <- NULL ## all points
+    
+    if(mv_nm %in% rownames(bas) == FALSE){
+      message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
+                     "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
+      return(NULL)
+    }
+    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
+    
+    # browser()
+    # debugonce(radial_cheem_tour)
+    ## issue seems to be with proto_point!? manual check through tour till:
+    # Warning: Removed 9950 rows containing missing values (geom_point).
+    #debugonce(proto_point)
+    ## issue is the aes_args set in radial_cheem_tour; shape = color = c(F, F, rep(NA, n_else))
+    ## issue must stem from .init4proto!?
+    radial_cheem_tour(
+      cheem_ls, bas, mv, prim_obs, comp_obs,
+      do_add_pcp_segments = add_pcp, angle = .15,
+      row_index = idx_rownum, inc_vars = inc_vars)
+  }) %>% debounce(1000L)
   
   ## Observers: updating inputs in the ui -----
   
@@ -215,25 +244,7 @@ server <- function(input, output, session){
   
   ### gganimate tour ----
   output$cheem_tour_gganimate <- renderImage({
-    bas        <- req(bas())
-    cheem_ls   <- req(load_ls())
-    prim_obs   <- req(primary_obs())
-    comp_obs   <- req(comparison_obs())
-    mv_nm      <- req(input$manip_var_nm)
-    add_pcp    <- req(input$do_add_pcp_segments)
-    inc_vars   <- req(input$inc_vars)
-    idx_rownum <- sel_rownums() ## NULL is no selection
-    if(mv_nm %in% rownames(bas) == FALSE){
-      message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
-                     "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
-      return()
-    }
-    
-    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
-    ggt <- radial_cheem_tour(
-      cheem_ls, bas, mv, prim_obs, comp_obs,
-      do_add_pcp_segments = add_pcp,
-      row_index = idx_rownum, inc_vars = inc_vars)
+    ggt <- req(cheem_ggtour())
     
     ### A temp file to save the output, will be removed later in renderImage
     anim <- animate_gganimate(
@@ -253,37 +264,8 @@ server <- function(input, output, session){
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
-    bas        <- req(bas())
-    cheem_ls   <- req(load_ls())
-    prim_obs   <- req(primary_obs())
-    comp_obs   <- req(comparison_obs())
-    mv_nm      <- req(input$manip_var_nm)
-    add_pcp    <- req(input$do_add_pcp_segments)
-    inc_vars   <- req(input$inc_vars)
-    #idx_rownum <- sel_rownums() ## NULL is no selection; all points
-    ## Leading to a hard to explore plotly method error:
-    # Error: object 'x' not found
-    ## abandoning and defaulting to full selection.
-    idx_rownum <- rep(TRUE, nrow(cheem_ls$attr_df)) ## all points
-    
-    if(mv_nm %in% rownames(bas) == FALSE){
-      message(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
-                     "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
-      return(NULL)
-    }
-    mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
-    
-    # browser()
-    # debugonce(radial_cheem_tour)
-    ## issue seems to be with proto_point!? manual check through tour till:
-    # Warning: Removed 9950 rows containing missing values (geom_point).
-    #debugonce(proto_point)
-    ## issue is the aes_args set in radial_cheem_tour; shape = color = c(F, F, rep(NA, n_else))
-    ## issue must stem from .init4proto!?
-    ggt <- radial_cheem_tour(
-      cheem_ls, bas, mv, prim_obs, comp_obs,
-      do_add_pcp_segments = add_pcp, angle = .15,
-      row_index = idx_rownum, inc_vars = inc_vars)
+    ggt      <- req(cheem_ggtour())
+    cheem_ls <- req(load_ls())
     
     .anim <- 
       spinifex::animate_plotly(ggt, fps = 4L, width = 1440L, height = 480L) %>%

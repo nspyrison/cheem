@@ -42,17 +42,17 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
     selectInput(
       "dat_char", "Data:",
       choices = expected_data_char,
-      selected = "toy regression trig"), #"toy classification"),
+      selected = "toy quad regression"), #"toy classification"),
     conditionalPanel(
       "input.dat_char == '<upload preprocessed cheem_ls (.rds file)>'",
       fileInput("in_cheem_ls", "<preprocessed cheem_ls saved to .rds>",
                 multiple = FALSE, accept = c("text/rds", ".rds"))),
     h2("Preprocessing and data description"),
     htmlOutput("desc_rows"),
-    HTML("2) Extract the the full attribution matrix, variable attributions of <em>each</em> observation"),
+    HTML("2) Extract the full attribution matrix, variable attributions of <em>each</em> observation"),
     p("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly:"),
-    p("Global view, top) approximations of the data- and attribution-spaces as their first two principal components. Idententify a primary and comparison point to interrogate"),
-    p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as dashed line and dotted line).")
+    p("Global view, top) approximations of the data- and attribution-spaces as their first two principal components. Identify a primary and comparison point to interrogate"),
+    p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as a dashed line and dotted line).")
   ),
   tags$hr(style = "border-color: grey;"),
   br(),
@@ -85,7 +85,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   
   #### Cheem tour ----
   h3("Cheem tour"),
-  p("The data-space projected through normalized attribution of the primary observation."),
+  p("The data space as projected through normalized attribution of the primary observation."),
   checkboxGroupInput(
     "inc_vars", label = "Inclusion variables:",
     choices = NULL,
