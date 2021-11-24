@@ -7,7 +7,7 @@
 \alias{amesHousing2018_NorthAmes}
 \title{Ames housing data 2018}
 \format{
-A data frame with 2291 rows and 18 numeric variables, SalesPrice, the response variable, and 3 class variables
+A complete data.frame with 2291 rows and 18 numeric variables, SalesPrice, the response variable, and 3 class variables
 
 An object of class \code{data.frame} with 2930 rows and 82 columns.
 
@@ -78,13 +78,27 @@ amesHousing2018_NorthAmes
 Cleaned house price data for Ames, Iowa, USA from 2018. Only complete
 numeric observations remain.
 }
+\details{
+\describe{
+\item{amesHousing2018}{Complete data.frame, n = 2291, 18 numeric variable
+(including 2 temporal: MoSold, YrSold ), response variable SalePrice,
+3 class factors.}
+\item{amesHousing2018_NorthAmes}{A simplified subsample, just North Ames
+(largest neighborhood). Complete data.frame, n = 338, 9 numeric variables, response variable SalePrice,
+1 class factor SubclassMS, a zoning subclass.}
+\item{amesHousing2018_raw}{Original data from Kaggle before sparse rows
+(~700) and sparse columns (60) are removed, 2930 rows of 82
+variables. Included for transparency or extracting information from
+sparse rows/columns.}
+}
+}
 \examples{
 library(cheem)
 ## Regression:
-sub <- amesHousing2018_thin[1:200, ]
+sub <- amesHousing2018_NorthAmes[1:200, ]
 X <- sub[, 1:9]
 Y <- log(sub$SalePrice)
-clas <- sub$ZoneMS
+clas <- sub$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets:

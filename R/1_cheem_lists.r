@@ -117,7 +117,7 @@ attr_df_treeshap <- function(
 #' 
 #' @param model A non-linear model, originally a `randomForest::randomForest`
 #' model fit, or a return from `default_rf()`.
-#' @return A data.frame of model performance statsitics.
+#' @return A data.frame of model performance statistics.
 #' @examples
 #' library(cheem)
 #' 
@@ -128,7 +128,7 @@ attr_df_treeshap <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' model_performance_df(rf_fit)
+#' cheem:::model_performance_df(rf_fit)
 model_performance_df <- function(
   model
 ){
@@ -353,7 +353,7 @@ cheem_ls <- function(
   .vec_yjitter <- 0L ## default/regression case
   .layer_nm <- "model"
   if(is_classification){
-    .vec_yjitter <- runif(nrow(x), -.3, .3)
+    .vec_yjitter <- stats::runif(nrow(x), -.3, .3)
     .layer_nm <- paste0(.layer_nm, " (w/ y jitter)")
   }
   .yhaty_df <- data.frame(V1 = .decode_df$prediction,

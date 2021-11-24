@@ -273,6 +273,13 @@ server <- function(input, output, session){
     }
     mv <- manip_var_of_attr_df(cheem_ls$attr_df, prim_obs, comp_obs)
     
+    # browser()
+    # debugonce(radial_cheem_tour)
+    ## issue seems to be with proto_point!? manual check through tour till:
+    # Warning: Removed 9950 rows containing missing values (geom_point).
+    #debugonce(proto_point)
+    ## issue is the aes_args set in radial_cheem_tour; shape = color = c(F, F, rep(NA, n_else))
+    ## issue must stem from .init4proto!?
     ggt <- radial_cheem_tour(
       cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
@@ -302,7 +309,6 @@ server <- function(input, output, session){
   output$selected_df <- DT::renderDT({ ## Original data of selection
     idx_rownum <- sel_rownums() ## NULL is no selection
     if(is.null(idx_rownum)) return(NULL)
-    
     .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(
       .df, function(c) if(is.numeric(c)) round(c, 2L) else c))

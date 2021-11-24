@@ -11,7 +11,7 @@ model_performance_df(model)
 model fit, or a return from \code{default_rf()}.}
 }
 \value{
-A data.frame of model performance statsitics.
+A data.frame of model performance statistics.
 }
 \description{
 Internal function, used downstream in cheem_ls.
@@ -26,5 +26,5 @@ Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit <- default_rf(X, Y)
-model_performance_df(rf_fit)
+cheem:::model_performance_df(rf_fit)
 }

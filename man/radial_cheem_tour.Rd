@@ -76,7 +76,6 @@ ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
   primary_obs = 1, comparison_obs = 2)
 \dontrun{
 animate_gganimate(ggt, render = gganimate::av_renderer())
-}
 
 ## Regression:
 dat <- amesHousing2018_NorthAmes
@@ -86,14 +85,13 @@ clas <- dat$SubclassMS
 
 rf_fit <- default_rf(X, Y)
 ## Long runtime for full datasets:
-shap_df <- attr_df_treeshap(rf_fit, X)
+shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 
 bas <- basis_attr_df(shap_df, rownum = 1)
 ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-\dontrun{
 animate_gganimate(ggt, render = gganimate::av_renderer())
 }
 }

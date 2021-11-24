@@ -11,15 +11,15 @@
   c_clas <- sub$Type
   c_Y <- as.integer(c_clas)
   ## Regression:
-  sub <- amesHousing2018_thin[r_idx, ]
+  sub <- amesHousing2018_NorthAmes[r_idx, ]
   r_X <- sub[, 1:5]
-  r_clas <- sub$ZoneMS[r_idx]
+  r_clas <- sub$SubclassMS[r_idx]
   r_Y <- log(sub$SalePrice[r_idx])
 }
 
 ### default_rf -----
-c_rf <- default_rf(c_X, c_Y)
-r_rf <- default_rf(r_X, r_Y)
+c_rf <- default_rf(c_X, c_Y, verbose = FALSE)
+r_rf <- default_rf(r_X, r_Y, verbose = FALSE)
 
 test_that("default_rf", {
   expect_equal(class(c_rf), c("randomForest.formula", "randomForest"))
@@ -28,8 +28,8 @@ test_that("default_rf", {
 
 ### attr_df_treeshap ----
 ## doesn't work when rows are few:  Error in 1:nrow(tree) : argument of length 0
-c_attr_df <- attr_df_treeshap(c_rf, c_X, noisy = FALSE)
-r_attr_df <- attr_df_treeshap(r_rf, r_X, noisy = FALSE)
+c_attr_df <- attr_df_treeshap(c_rf, c_X, noisy = FALSE, verbose = FALSE)
+r_attr_df <- attr_df_treeshap(r_rf, r_X, noisy = FALSE, verbose = FALSE)
 
 test_that("attr_df_treeshap", {
   expect_equal(class(c_attr_df), c("data.frame", "treeshap"))
@@ -56,8 +56,8 @@ test_that(":::global_view_df_1layer", {
 
 
 ### cheem_ls -----
-c_gv1 <- cheem_ls(c_X, c_Y, c_clas, c_rf, c_attr_df)
-r_gv1 <- cheem_ls(r_X, r_Y, r_clas, r_rf, r_attr_df)
+c_gv1 <- cheem_ls(c_X, c_Y, c_clas, c_rf, c_attr_df, verbose = FALSE)
+r_gv1 <- cheem_ls(r_X, r_Y, r_clas, r_rf, r_attr_df, verbose = FALSE)
 
 test_that("cheem_ls", {
   expect_equal(class(c_gv1), "list")

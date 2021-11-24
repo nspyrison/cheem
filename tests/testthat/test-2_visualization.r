@@ -14,13 +14,13 @@
   c_attr <- attr_df_treeshap(c_rf, x = c_X, noisy = FALSE)
   c_chee <- cheem_ls(x = c_X, y = c_Y, class = c_clas, c_rf, c_attr)
   ## Regression:
-  sub    <- amesHousing2018_thin[r_idx, ]
+  sub    <- amesHousing2018_NorthAmes[r_idx, ]
   r_X    <- sub[, 1:5]
-  r_clas <- sub$ZoneMS[r_idx]
+  r_clas <- sub$SubclassMS[r_idx]
   r_Y    <- log(sub$SalePrice[r_idx])
-  r_rf   <- default_rf(r_X, r_Y)
-  r_attr <- attr_df_treeshap(r_rf, x = r_X, noisy = FALSE)
-  r_chee <- cheem_ls(x = r_X, y = r_Y, class = r_clas, r_rf, r_attr)
+  r_rf   <- default_rf(r_X, r_Y, verbose = FALSE)
+  r_attr <- attr_df_treeshap(r_rf, x = r_X, noisy = FALSE, verbose = FALSE)
+  r_chee <- cheem_ls(x = r_X, y = r_Y, class = r_clas, r_rf, r_attr, verbose = FALSE)
 }
 
 

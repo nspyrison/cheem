@@ -40,13 +40,17 @@ basis_attr_df <- function(
 
 #' Find the manip var from a given attr_df
 #' 
-#' Find the number of the variable with the largest differnce between the 
+#' Find the number of the variable with the largest difference between the 
 #' primary and comparison observations.
 #' 
 #' @param attr_df A data frame of local explanation attributions,
 #' such as a return from `attr_df_treeshap()`.
-#' @param rownum The rownumber of the primary observation. Defaults to 1.
-#' @return A single number of the variable with the largest difference 
+#' @param primary_obs The rownumber of the primary observation. Its local
+#' attribution becomes the 1d projection basis, and the point it highlighted 
+#' as a dashed line.
+#' @param comparison_obs The rownumber of the comparison observation. Point
+#' is highlighted as a dotted line.
+#' @return A single number of the variable with the largest difference. 
 #' @export
 #' @family cheem utility
 #' @examples
@@ -511,7 +515,6 @@ global_view <- function(
 #'   primary_obs = 1, comparison_obs = 2)
 #' \dontrun{
 #' animate_gganimate(ggt, render = gganimate::av_renderer())
-#' }
 #' 
 #' ## Regression:
 #' dat <- amesHousing2018_NorthAmes
@@ -521,14 +524,13 @@ global_view <- function(
 #' 
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets:
-#' shap_df <- attr_df_treeshap(rf_fit, X)
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
 #' bas <- basis_attr_df(shap_df, rownum = 1)
 #' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-#' \dontrun{
 #' animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
 radial_cheem_tour <- function(
@@ -546,26 +548,28 @@ radial_cheem_tour <- function(
   if(is.null(row_index) == FALSE)
     if(sum(row_index) == 0L)
       stop("radial_cheem_tour: sum of row_index was 0.")
-
+  
+  ## Initialize
+  x <- y <- NULL
   decode_df <- cheem_ls$decode_df
   .prim_obs <- primary_obs    ## Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
   .comp_obs <- comparison_obs ## Don't coerce to logical index
-  x <- NULL
   .n <- nrow(decode_df)
-  if(is.null(inc_vars) == TRUE)
+  ## column & row indexes
+  if(is.null(inc_vars))
     inc_vars <- colnames(cheem_ls$attr_df)
   .col_idx <- colnames(decode_df) %in% inc_vars
-  if(is.null(row_index)) row_index <- 1L:.n
-  
+  if(is.null(inc_vars) == FALSE)
+    .col_idx <- colnames(decode_df) %in% inc_vars
+  if(is.null(row_index) == FALSE){
+    ## Change row_index from numeric to logical if needed and replicate
+    row_index <- as_logical_index(row_index, nrow(decode_df))
+    row_index[c(.prim_obs, .comp_obs)] <- TRUE
+  }
   ## Subset columns and scale plot data
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_01() %>% as.data.frame()
-  ggt  <- spinifex::last_ggtour()
   
-  ## Change row_index from numeric to logical if needed and replicate
-  row_index <- as_logical_index(row_index, nrow(decode_df))
-  row_index[c(.prim_obs, .comp_obs)] <- TRUE
-  
-  ## Problem type: classification or regression?
+  ## Problem type & aesthetics: classification or regression?
   .prob_type <- cheem_ls$type ## Either "classification" or "regression"
   if(.prob_type == "classification")
     .pred_clas <- decode_df$predicted_class ## for classification color/shape
@@ -613,19 +617,15 @@ radial_cheem_tour <- function(
     .dat_fore   <- rbind(.dat, .dat)
     .idx_fore   <- c(row_index, row_index)
     .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat)))
-    .class_fore <- c(.class, .class)
+    .class_fore <- .class ## could be dummy factor(FALSE)
+    if(length(.class) > 1L)
+      .class_fore <- c(.class, .class)
     
     ## Scale a 0 line for residual facet
     .df_hline <-
       data.frame(x = FALSE,
-                 y = scale_01(c(0L, range(decode_df$residual))),
+                 y = spinifex::scale_01(c(0L, range(decode_df$residual))),
                  facet_var = "residual")[1L,, drop = FALSE]
-    ## -- or map_relative method:
-    # idx_resid <- c(rep(FALSE, nrow(decode_df)), row_index)
-    # .df_hline <- spinifex::map_relative(
-    #     .df_hline,"data", 
-    #     to = spinifex::last_ggtour()$df_data[idx_resid,, drop = FALSE])[1L,, drop = FALSE]
-    
     ##TODO: Note coloring on residuals will error
     #### as proto_basis1d_distribution as it has group_by/class mapped to color (discrete).
     # ## Regression aesthetics:
@@ -652,7 +652,8 @@ radial_cheem_tour <- function(
       spinifex::proto_point(
         aes_args = list(color = .class_fore, shape = .class_fore),
         #aes_args = list(color = reg_color, shape = reg_shape),
-        identity_args = list(alpha = .alpha), row_index = .idx_fore) +
+        identity_args = list(alpha = .alpha),
+        row_index = .idx_fore) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, position = "floor1d", shape = c(142L, 124L),
         do_add_pcp_segments = as.logical(do_add_pcp_segments),

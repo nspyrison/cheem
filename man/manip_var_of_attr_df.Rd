@@ -10,13 +10,18 @@ manip_var_of_attr_df(attr_df, primary_obs, comparison_obs)
 \item{attr_df}{A data frame of local explanation attributions,
 such as a return from \code{attr_df_treeshap()}.}
 
-\item{rownum}{The rownumber of the primary observation. Defaults to 1.}
+\item{primary_obs}{The rownumber of the primary observation. Its local
+attribution becomes the 1d projection basis, and the point it highlighted
+as a dashed line.}
+
+\item{comparison_obs}{The rownumber of the comparison observation. Point
+is highlighted as a dotted line.}
 }
 \value{
-A single number of the variable with the largest difference
+A single number of the variable with the largest difference.
 }
 \description{
-Find the number of the variable with the largest differnce between the
+Find the number of the variable with the largest difference between the
 primary and comparison observations.
 }
 \examples{
