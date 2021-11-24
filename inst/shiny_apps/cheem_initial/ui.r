@@ -44,8 +44,8 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
       choices = expected_data_char,
       selected = "toy quad regression"), #"toy classification"),
     conditionalPanel(
-      "input.dat_char == '<upload preprocessed cheem_ls (.rds file)>'",
-      fileInput("in_cheem_ls", "<preprocessed cheem_ls saved to .rds>",
+      "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
+      fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
                 multiple = FALSE, accept = c("text/rds", ".rds"))),
     h2("Preprocessing and data description"),
     htmlOutput("desc_rows"),
