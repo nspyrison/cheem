@@ -46,4 +46,4 @@ We started by looking at the model-agnostic local explanation _SHAP_ as applied 
 [Explanatory Model Analysis (ebook)](https://ema.drwhy.ai/shapley.html#SHAPRcode) \
 [DALEX CRAN page](https://CRAN.R-project.org/package=DALEX) \
 [spinifex CRAN page](https://cran.r-project.org/package=spinifex) \
-[treeshap GitHub page](https://github.com/ModelOriented/treeshap) \
+[treeshap GitHub page](https://github.com/ModelOriented/treeshap) 
