@@ -29,7 +29,7 @@ cheem::run_app()
 
 ### Original application
 
-We started by looking at the model-agnostic local explanation _SHAP_ as applied to random forests. We made this choice our of concern for runtime (`{treeshap}` uses an an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The [Cheem](https://tardis.fandom.com/wiki/Tree_of_Cheem) are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.
+We started by looking at the model-agnostic local explanation _SHAP_ as applied to random forests. We made this choice out of concern for runtime (`{treeshap}` uses an  alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The [Cheem](https://tardis.fandom.com/wiki/Tree_of_Cheem) are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.
 
 <!---
 ### Extensions
@@ -37,7 +37,7 @@ We started by looking at the model-agnostic local explanation _SHAP_ as applied 
 18 Sept, 2021, Generalizing the code-base will likely take the order of:
 
 1. Extend the scope of random forest models; from only {randomForest} to all RF models handled by {treeshap}.\
-2. Extend the scope of local explanations; from {treeshap} SHAP values to all local explanation handled by {DALEX}.\
+2. Extend the scope of local explanations; from {treeshap} SHAP values to all local explanations handled by {DALEX}.\
 --->
 
 
