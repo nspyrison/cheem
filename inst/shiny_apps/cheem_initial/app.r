@@ -262,13 +262,12 @@ server <- function(input, output, session){
     
     .anim <- 
       spinifex::animate_plotly(ggt, fps = 4L, width = 1440L, height = 480L) %>%
-      suppressWarnings() %>% 
-      ##suppressing: plotly: Warning: Specifying width/height in layout() is now deprecated.
-      ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
+      suppressWarnings() %>%
       plotly::style(hoverinfo = "none")
+    ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
     #### the following hasn't helped:
     ## - starting at frame 11 doesn't help
-    ## - hiding gridlines again
+    ## - hiding gridlines again doesn't remove them.
     
     ## Layout also set in animate_plotly
     if(cheem_ls$type == "classification"){

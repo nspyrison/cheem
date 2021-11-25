@@ -433,7 +433,7 @@ global_view <- function(
   
   ## Visualize
   .spaces <- paste(rep(" ", 61L), collapse = "")
-  .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observered")
+  .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   gg <- ggplot2::ggplot(
     data = plotly::highlight_key(global_view_df, ~rownum),
