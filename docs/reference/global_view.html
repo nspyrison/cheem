@@ -197,13 +197,13 @@ the data- and attribution- spaces.</p>
 <span class='va'>clas</span> <span class='op'>&lt;-</span> <span class='va'>dat</span><span class='op'>$</span><span class='va'>SubclassMS</span>
 
 <span class='va'>rf_fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='default_rf.html'>default_rf</a></span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; default_rf: 0.22 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
+</div><div class='output co'>#&gt; default_rf: 0.2 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
 <span class='va'>shap_df</span> <span class='op'>&lt;-</span> <span class='fu'><a href='attr_df_treeshap.html'>attr_df_treeshap</a></span><span class='op'>(</span><span class='va'>rf_fit</span>, <span class='va'>X</span>, noisy <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-25 16:40:36
-#&gt; attr_df_treeshap: 1.73 sec elapsed</div><div class='input'><span class='va'>this_ls</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cheem_ls.html'>cheem_ls</a></span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, class <span class='op'>=</span> <span class='va'>clas</span>,
+</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-25 17:08:53
+#&gt; attr_df_treeshap: 1.75 sec elapsed</div><div class='input'><span class='va'>this_ls</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cheem_ls.html'>cheem_ls</a></span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, class <span class='op'>=</span> <span class='va'>clas</span>,
                      model <span class='op'>=</span> <span class='va'>rf_fit</span>,
                      attr_df <span class='op'>=</span> <span class='va'>shap_df</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; cheem_ls: 0.16 sec elapsed</div><div class='input'><span class='fu'>global_view</span><span class='op'>(</span><span class='va'>this_ls</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; cheem_ls: 0.18 sec elapsed</div><div class='input'><span class='fu'>global_view</span><span class='op'>(</span><span class='va'>this_ls</span><span class='op'>)</span>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
