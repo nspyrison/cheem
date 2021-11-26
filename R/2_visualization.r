@@ -443,7 +443,7 @@ global_view <- function(
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   gg <- ggplot2::ggplot(
-    data = ,
+    data = global_view_df,
     mapping = ggplot2::aes(V1, V2)) +
     pts_main +
     pts_highlight +
@@ -460,6 +460,155 @@ global_view <- function(
   
   ## Plotly options & box selection
   ggp <- gg %>%
+    plotly::ggplotly(tooltip = "tooltip", 
+                     height = height_px, width = width_px) %>%
+    plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
+    plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
+    plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
+    plotly::highlight(on = "plotly_selected", off = "plotly_deselect")
+  return(ggp)
+}
+
+
+#' @rdname global_view
+#' @export
+global_view_subplots <- function(
+  cheem_ls,
+  primary_obs    = NULL,
+  comparison_obs = NULL,
+  height_px = 480L,
+  width_px  = 1440L
+){
+  ## Prevent global variable warnings:
+  V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
+  ## Initialize
+  global_view_df <- cheem_ls$global_view_df
+  decode_df      <- cheem_ls$decode_df
+  is_classification <- cheem_ls$type == "classification"
+  ## Aesthetics
+  .alpha <- logistic_tform(nrow(decode_df))
+  ## setup shape and color
+  if(is_classification){
+    color <- decode_df$predicted_class %>% as.factor()
+    shape <- decode_df$predicted_class %>% as.factor()
+  }else{
+    color <- shape <- factor(FALSE)
+  }
+  global_view_df$color <- color %>% rep_len(nrow(global_view_df))
+  global_view_df$shape <- shape %>% rep_len(nrow(global_view_df))
+  
+  ## Get the bases of the global view, map them
+  u_nms <- unique(global_view_df$layer_name)
+  .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
+                          layer_name = u_nms[1L])
+  .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
+  .map_to_data[, 1L] <- .map_to_data[, 1L]
+  .bas_attr <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
+                          layer_name = u_nms[2L])
+  .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
+  .map_to_attr[, 1L] <- .map_to_attr[, 1L]
+  
+  single_subplot <- function(subset_global_view_df){
+    ## Proto for main points
+    pts_main <- list()
+    .u_nms <- unique(subset_global_view_df$layer_name)
+    if(is_classification == FALSE)
+      pts_main <- c(pts_main, ggplot2::geom_smooth(
+        data = subset(subset_global_view_df, layer_name == .u_nms[length(.u_nms)]),
+        method = "lm", formula = y ~ x, se = FALSE))
+    if(is_discrete(color) == TRUE){
+      ### Discrete color mapping
+      pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
+        ggplot2::aes(color = color, shape = shape,
+                     tooltip = tooltip), alpha = .alpha)),
+        ggplot2::scale_color_brewer(palette = "Dark2"))
+    }
+    if(is_discrete(color) == FALSE){
+      ### continuous color mapping
+      pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
+        ggplot2::aes(color = color, shape = shape,
+                     tooltip = tooltip),  alpha = .alpha)),
+        ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
+                                        mid = "grey80",
+                                        high = scales::muted("red")))
+    }
+    
+    ## Proto for highlighted points
+    pts_highlight <- list()
+    ## Red misclassified points, if present
+    if(is_classification == TRUE){
+      .rn_misclass <- which(decode_df$is_misclassified == TRUE)
+      .idx_misclas <- global_view_df$rownum %in% .rn_misclass
+      if(sum(.idx_misclas) > 0L){
+        .df <- global_view_df[.idx_misclas, ]
+        pts_highlight <- c(pts_highlight, ggplot2::geom_point(
+          ggplot2::aes(V1, V2), .df,
+          color = "red", fill = NA,
+          shape = 21L, size = 3L, alpha = .alpha)
+        )
+      }
+    }
+    ## Highlight comparison obs, if passed
+    if(is.null(comparison_obs) == FALSE){
+      .idx_comp <- subset_global_view_df$rownum == comparison_obs
+      if(sum(.idx_comp) > 0L){
+        .df <- subset_global_view_df[.idx_comp, ]
+        pts_highlight <- c(
+          pts_highlight,
+          ## Highlight comparison obs
+          ggplot2::geom_point(ggplot2::aes(V1, V2),
+                              .df, size = 3L, shape = 4L, color = "black")
+        )
+      }
+    }
+    ## Highlight shap obs, if passed
+    if(is.null(primary_obs) == FALSE){
+      .idx_shap <- subset_global_view_df$rownum == primary_obs
+      if(sum(.idx_shap) > 0L){
+        .df <- subset_global_view_df[.idx_shap, ]
+        pts_highlight <- c(
+          pts_highlight,
+          ggplot2::geom_point(ggplot2::aes(V1, V2),
+                              .df, size = 5L, shape = 8L, color = "black")
+        )
+      }
+    }
+    
+    ## ggplot
+    ggplot2::ggplot(
+      data = subset_global_view_df,
+      mapping = ggplot2::aes(V1, V2)) +
+      pts_main +
+      pts_highlight +
+      ggplot2::coord_fixed() +
+      ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
+      ggplot2::theme_bw() +
+      ggplot2::labs(x = "", y = "") +
+      ggplot2::theme(axis.text  = ggplot2::element_blank(),
+                     axis.ticks = ggplot2::element_blank(),
+                     legend.position = "off")
+  }
+  
+  ## Individual ggplots
+  g1 <- single_subplot(subset(global_view_df, layer_name == u_nms[1L])) +
+    spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft")
+  g2 <- single_subplot(subset(global_view_df, layer_name == u_nms[2L])) +
+    spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft")
+  g3 <- single_subplot(subset(global_view_df, layer_name == u_nms[3L]))
+  ## Individual plotly plots with axes titles
+  p1 <- ggplotly(g1) %>% 
+    layout(xaxis = list(title = paste0(u_nms[1L], 'PC1')), 
+           yaxis = list(title = paste0(u_nms[1L], 'PC2')))
+  p2 <- ggplotly(g2) %>% 
+    layout(xaxis = list(title = paste0(u_nms[2L], 'PC1')), 
+           yaxis = list(title = paste0(u_nms[2L], 'PC2')))
+  p3 <- ggplotly(g3) %>% 
+    layout(xaxis = list(title = 'predicted'), 
+           yaxis = list(title = 'observed'))
+  sp <- subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0.1)
+
+  ## Plotly options & box selection
+  ggp <- sp %>%
     plotly::ggplotly(tooltip = "tooltip", 
                      height = height_px, width = width_px) %>%
     plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
@@ -681,6 +830,140 @@ radial_cheem_tour <- function(
       #spinifex::proto_hline0() ## adds to both facets..
   }
   
+  ## Return the static ggtour, animate in app
+  return(ggt)
+}
+
+#' @rdname radial_cheem_tour
+#' @export
+radial_cheem_tour_subplots <- function(
+  cheem_ls, basis, manip_var,
+  primary_obs = NULL,
+  comparison_obs = NULL,
+  do_add_pcp_segments = TRUE,
+  pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
+  angle = .2,
+  row_index = NULL,
+  inc_var_nms = NULL
+){
+  if(is.null(row_index) == FALSE)
+    if(sum(row_index) == 0L)
+      stop("radial_cheem_tour: sum of row_index was 0.")
+  
+  ## Initialize
+  x <- y <- NULL
+  decode_df <- cheem_ls$decode_df
+  .prim_obs <- primary_obs    ## Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
+  .comp_obs <- comparison_obs ## Don't coerce to logical index
+  .n <- nrow(decode_df)
+  ## column & row indexes
+  if(is.null(inc_var_nms))
+    inc_var_nms <- colnames(cheem_ls$attr_df)
+  .col_idx <- colnames(decode_df) %in% inc_var_nms
+  if(is.null(inc_var_nms) == FALSE)
+    .col_idx <- colnames(decode_df) %in% inc_var_nms
+  if(is.null(row_index) == FALSE){
+    ## Change row_index from numeric to logical if needed and replicate
+    row_index <- as_logical_index(row_index, nrow(decode_df))
+    row_index[c(.prim_obs, .comp_obs)] <- TRUE
+  }
+  ## Subset columns and scale plot data
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_01() %>% as.data.frame()
+  
+  ## Problem type & aesthetics: classification or regression?
+  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
+  if(.prob_type == "classification")
+    .pred_clas <- decode_df$predicted_class ## for classification color/shape
+  .class <- factor(FALSE) #decode_df$class ## for regression color/shape ##factor(FALSE)
+  .alpha <- logistic_tform(nrow(decode_df))
+  ## Manual (radial) tour 1d
+  .mt_path <- spinifex::manual_tour(basis, manip_var)
+  
+  ### Classification case -----
+  if(.prob_type == "classification"){
+    ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
+      spinifex::proto_density(
+        aes_args = list(color = .pred_clas, fill = .pred_clas),
+        row_index = row_index, rug_shape = pcp_shape) +
+      proto_basis1d_distribution(
+        cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
+        do_add_pcp_segments = as.logical(do_add_pcp_segments),
+        primary_obs = .prim_obs, comparison_obs = .comp_obs,
+        shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
+      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
+      spinifex::proto_origin1d() +
+      ## Highlight comparison obs, if passed
+      spinifex::proto_highlight1d(
+        row_index = .comp_obs, mark_initial = FALSE,
+        identity_args = list(linetype = 3L, alpha = 0.8, color = "black")) +
+      ## Highlight shap obs
+      spinifex::proto_highlight1d(
+        row_index = .prim_obs, mark_initial = FALSE,
+        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
+  }
+  
+  ### Regression case -----
+  ## Doubling data to facet on obs and residual.
+  if(.prob_type == "regression"){
+    ## Double up data; observed y and residual
+    .fixed_y <- c(spinifex::scale_01(decode_df$y),
+                  spinifex::scale_01(decode_df$residual))
+    .doub_prim_obs <- .doub_comp_obs <- NULL
+    if(is.null(.prim_obs) == FALSE)
+      .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
+    if(is.null(.comp_obs) == FALSE)
+      .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
+    
+    ## Foreground:
+    .dat_fore   <- rbind(.dat, .dat)
+    .idx_fore   <- c(row_index, row_index)
+    .facet_fore <- factor(rep(c("observed y", "residual"), each = nrow(.dat)))
+    .class_fore <- .class ## could be dummy factor(FALSE)
+    if(length(.class) > 1L)
+      .class_fore <- c(.class, .class)
+    
+    ## Scale a 0 line for residual facet
+    .df_hline <-
+      data.frame(x = FALSE,
+                 y = spinifex::scale_01(c(0L, range(decode_df$residual))),
+                 facet_var = "residual")[1L,, drop = FALSE]
+    
+    ##TODO: continue dev here on single_subplot
+    single_subplot <- function(data){
+      ggt <- spinifex::ggtour(.mt_path, data, angle = angle) +
+        spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
+        spinifex::append_fixed_y(fixed_y = .fixed_y) +
+        # Plotly can't handle text rotation in geom_text/annotate.
+        ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
+        ggplot2::theme(
+          axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
+        #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
+        spinifex::proto_point(
+          aes_args = list(color = .class_fore, shape = .class_fore),
+          #aes_args = list(color = reg_color, shape = reg_shape),
+          identity_args = list(alpha = .alpha),
+          row_index = .idx_fore) +
+        proto_basis1d_distribution(
+          cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
+          do_add_pcp_segments = as.logical(do_add_pcp_segments),
+          primary_obs = .prim_obs, comparison_obs = .comp_obs) +
+        spinifex::proto_basis1d(position = "floor1d", manip_col = "black") +
+        ## Highlight comparison obs
+        spinifex::proto_highlight(
+          row_index = .doub_comp_obs,
+          identity_args = list(size = 3L, shape = 4L, alpha = 0.6, color = "black")) +
+        ## Highlight primary obs
+        spinifex::proto_highlight(
+          row_index = .doub_prim_obs,
+          identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
+        spinifex::proto_origin() +
+        ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline,
+                            color = "grey40")
+      #spinifex::proto_hline0() ## adds to both facets..
+    }
+    
+  }
+
   ## Return the static ggtour, animate in app
   return(ggt)
 }

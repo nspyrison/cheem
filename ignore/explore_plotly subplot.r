@@ -1,10 +1,10 @@
 library(plotly)
-## TAKEAWAYS:
+## TAKEAWAYS: ----
 #- can use subplot with highlight_key
 #- can use gganmiate on a highlight_key'd ggplot
 #- can have different axis titles with subplots
 
-
+### dev use case -----
 economics_long <- tibble::tibble(economics_long, id=1:nrow(economics_long))
 hk <- plotly::highlight_key(economics_long, ~id)
 gg1 <- ggplot(hk, aes(date, value)) + 
@@ -20,9 +20,8 @@ gg2 <- ggplot(hk, aes(factor(1), value)) +
   #facet_wrap(~variable, scales = "free_y", ncol = 1) + 
   theme(axis.text = element_blank(), axis.ticks = element_blank())
 ggp2 <-   ggplotly(gg2) %>% 
-  layout(xaxis = list(title = 'X1 title', showgrid = FALSE), yaxis = list(title = 'Y1 title', showgrid = FALSE))
+  layout(xaxis = list(title = 'X2 title', showgrid = FALSE), yaxis = list(title = 'Y2 title', showgrid = FALSE))
 (sp <- subplot(ggp1, ggp2, shareY = FALSE, titleX = TRUE))
-
 
 sp %>% 
   plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse

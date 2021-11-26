@@ -19,5 +19,7 @@ this_ls <- cheem_ls(X, Y, class = clas,
 (mbm1 <- microbenchmark::microbenchmark(
   times = 10, 
   global_view_orig = global_view(this_ls),
-  global_view_orig.print = print(global_view(this_ls))
+  global_view_orig.print = print(global_view(this_ls)),
+  global_view_subplots_orig = global_view_subplots(this_ls),
+  global_view_subplots_orig.print = print(global_view_subplots(this_ls))
 ))

@@ -2,6 +2,7 @@
 % Please edit documentation in R/2_visualization.r
 \name{global_view}
 \alias{global_view}
+\alias{global_view_subplots}
 \title{Linked \code{plotly} display, global view of data and attribution space.}
 \usage{
 global_view(
@@ -11,6 +12,14 @@ global_view(
   height_px = 480L,
   width_px = 1440L,
   as_ggplot = FALSE
+)
+
+global_view_subplots(
+  cheem_ls,
+  primary_obs = NULL,
+  comparison_obs = NULL,
+  height_px = 480L,
+  width_px = 1440L
 )
 }
 \arguments{
@@ -56,7 +65,6 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 global_view(this_ls)
-
 
 ## Experimental case mapping residuals to color or class to shape.
 global_view(this_ls,

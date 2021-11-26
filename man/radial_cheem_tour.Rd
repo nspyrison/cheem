@@ -2,9 +2,23 @@
 % Please edit documentation in R/2_visualization.r
 \name{radial_cheem_tour}
 \alias{radial_cheem_tour}
+\alias{radial_cheem_tour_subplots}
 \title{Cheem tour; 1D manual tour on the selected attribution}
 \usage{
 radial_cheem_tour(
+  cheem_ls,
+  basis,
+  manip_var,
+  primary_obs = NULL,
+  comparison_obs = NULL,
+  do_add_pcp_segments = TRUE,
+  pcp_shape = c(142, 124),
+  angle = 0.2,
+  row_index = NULL,
+  inc_var_nms = NULL
+)
+
+radial_cheem_tour_subplots(
   cheem_ls,
   basis,
   manip_var,
