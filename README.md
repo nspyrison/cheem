@@ -1,4 +1,4 @@
-# {cheem}, R package
+# __cheem__
 
 Interactively explore data- and local explanation- spaces side-by-side. Further interrogate observation explanations with a radial tour.
 
