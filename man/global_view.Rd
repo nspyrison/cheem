@@ -8,8 +8,6 @@ global_view(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
-  color = NULL,
-  shape = NULL,
   height_px = 480L,
   width_px = 1440L,
   as_ggplot = FALSE
@@ -24,14 +22,6 @@ as a dashed line.}
 
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
-
-\item{color}{A vector to map to the point color.
-Classification case defaults to predicted class, regression case defaults to
-class if passed to cheem_ls(), else residual.}
-
-\item{shape}{A vector to map to the point shape.
-Classification case defaults to predicted class, regression case defaults to
-class.}
 
 \item{height_px}{The height in pixels of the returned \code{plotly} plot.
 Defaults to 480.}
@@ -66,6 +56,12 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 global_view(this_ls)
+
+
+## Experimental case mapping residuals to color or class to shape.
+global_view(this_ls,
+            color = this_ls$decode_df$residual,
+            shape = this_ls$decode_df$class)
 }
 \seealso{
 Other cheem consumers: 

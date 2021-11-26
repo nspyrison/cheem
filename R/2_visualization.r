@@ -289,12 +289,12 @@ proto_basis1d_distribution <- function(
 #' Defaults to 480.
 #' @param width_px The width in pixels of the returned `plotly` plot.
 #' Defaults to 1440.
-#' @param color A vector to map to the point color.
-#' Classification case defaults to predicted class, regression case defaults to
-#' class if passed to cheem_ls(), else residual.
-#' @param shape A vector to map to the point shape.
-#' Classification case defaults to predicted class, regression case defaults to
-#' class.
+# #' @param color A vector to map to the point color.
+# #' Classification case defaults to predicted class, regression case defaults to
+# #' class if passed to cheem_ls(), else residual.
+# #' @param shape A vector to map to the point shape.
+# #' Classification case defaults to predicted class, regression case defaults to
+# #' class.
 #' @param as_ggplot Logical, if TRUE returns the plots before being passed to
 #' `plotly` functions.
 #' @return `plotly` html widget of the global view, first 2 components of the basis of
@@ -317,14 +317,20 @@ proto_basis1d_distribution <- function(
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' global_view(this_ls)
+#' 
+#' 
+#' ## Experimental case mapping residuals to color or class to shape.
+#' global_view(this_ls,
+#'             color = this_ls$decode_df$residual,
+#'             shape = this_ls$decode_df$class)
 global_view <- function(
   cheem_ls,
-  primary_obs = NULL,
+  primary_obs    = NULL,
   comparison_obs = NULL,
-  color = NULL,
-  shape = NULL, 
+  # color = NULL,
+  # shape = NULL, 
   height_px = 480L,
-  width_px = 1440L,
+  width_px  = 1440L,
   as_ggplot = FALSE
 ){
   ## Prevent global variable warnings:
