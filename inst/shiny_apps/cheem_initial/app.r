@@ -187,7 +187,7 @@ server <- function(input, output, session){
       l2 <- p("1) Create a random forest model regressing y.")
     }else if(dat == "toy trig regression"){
       he <- h3("Toy trig regression")
-      l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 5]. y = sin(x1) * sin(x2) (x3 + x4 + x5) / 10 + error")
+      l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 4*pi]|[0, 1]. y = sin(x1) + sin(x2) + (x3 + x4 + x5) / 10 + error")
       l2 <- p("1) Create a random forest model regressing y.")      
     }else if(dat == "fifa regression"){
       he <- h3("FIFA soccer players, 2020 season")
