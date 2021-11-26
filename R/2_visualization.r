@@ -318,7 +318,6 @@ proto_basis1d_distribution <- function(
 #'                      attr_df = shap_df)
 #' global_view(this_ls)
 #' 
-#' 
 #' ## Experimental case mapping residuals to color or class to shape.
 #' global_view(this_ls,
 #'             color = this_ls$decode_df$residual,
@@ -343,8 +342,10 @@ global_view <- function(
   .alpha <- logistic_tform(nrow(decode_df))
   ## setup shape and color
   if(is_classification){
-    if(is.null(color)) color <- decode_df$predicted_class %>% as.factor()
-    if(is.null(shape)) shape <- decode_df$predicted_class %>% as.factor()
+    #if(is.null(color)) 
+    color <- decode_df$predicted_class %>% as.factor()
+    #if(is.null(shape)) 
+    shape <- decode_df$predicted_class %>% as.factor()
   }else{
     color <- shape <- factor(FALSE)
     # ## Regression or unexpected type
@@ -378,7 +379,7 @@ global_view <- function(
   if(is_classification == FALSE)
     pts_main <- c(pts_main, ggplot2::geom_smooth(
       data = subset(global_view_df, layer_name == .u_nms[length(.u_nms)]),
-      method = "lm", formula = y ~ x))
+      method = "lm", formula = y ~ x, se = FALSE))
   if(is_discrete(color) == TRUE){
     ### Discrete color mapping
     pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
@@ -442,7 +443,7 @@ global_view <- function(
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   gg <- ggplot2::ggplot(
-    data = plotly::highlight_key(global_view_df, ~rownum),
+    data = ,
     mapping = ggplot2::aes(V1, V2)) +
     pts_main +
     pts_highlight +
@@ -458,12 +459,13 @@ global_view <- function(
   if(as_ggplot) return(gg)
   
   ## Plotly options & box selection
-  ggp <- plotly::ggplotly(gg, tooltip = "tooltip", 
-                          height = height_px, width = width_px)
-  ggp <- plotly::config(ggp, displayModeBar = FALSE)                  ## Remove html buttons
-  ggp <- plotly::layout(ggp, dragmode = "select", showlegend = FALSE) ## Set drag left mouse
-  ggp <- plotly::event_register(ggp, "plotly_selected")               ## Reflect "selected", on release of the mouse button.
-  ggp <- plotly::highlight(ggp, on = "plotly_selected", off = "plotly_deselect")
+  ggp <- gg %>%
+    plotly::ggplotly(tooltip = "tooltip", 
+                     height = height_px, width = width_px) %>%
+    plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
+    plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
+    plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
+    plotly::highlight(on = "plotly_selected", off = "plotly_deselect")
   return(ggp)
 }
 

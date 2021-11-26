@@ -204,13 +204,13 @@ Defaults to FALSE.</p></td>
 <span class='va'>Y</span>    <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span><span class='op'>(</span><span class='va'>clas</span><span class='op'>)</span>
 
 <span class='va'>rf_fit</span>  <span class='op'>&lt;-</span> <span class='fu'><a href='default_rf.html'>default_rf</a></span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; default_rf: 0.22 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
+</div><div class='output co'>#&gt; default_rf: 0.2 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
 <span class='va'>shap_df</span> <span class='op'>&lt;-</span> <span class='fu'><a href='attr_df_treeshap.html'>attr_df_treeshap</a></span><span class='op'>(</span><span class='va'>rf_fit</span>, <span class='va'>X</span>, noisy <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-26 15:07:12
-#&gt; attr_df_treeshap: 1.05 sec elapsed</div><div class='input'><span class='va'>this_ls</span> <span class='op'>&lt;-</span> <span class='fu'>cheem_ls</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, class <span class='op'>=</span> <span class='va'>clas</span>,
+</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-26 18:27:40
+#&gt; attr_df_treeshap: 0.91 sec elapsed</div><div class='input'><span class='va'>this_ls</span> <span class='op'>&lt;-</span> <span class='fu'>cheem_ls</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, class <span class='op'>=</span> <span class='va'>clas</span>,
                      model <span class='op'>=</span> <span class='va'>rf_fit</span>,
                      attr_df <span class='op'>=</span> <span class='va'>shap_df</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; cheem_ls: 0.23 sec elapsed</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>this_ls</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; cheem_ls: 0.15 sec elapsed</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>this_ls</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] "type"                 "model_performance_df" "attr_df"             
 #&gt; [4] "global_view_df"       "global_view_basis_ls" "decode_df"           </div><div class='input'>
 <span class='co'>## Regression:</span>
@@ -220,13 +220,13 @@ Defaults to FALSE.</p></td>
 <span class='va'>clas</span> <span class='op'>&lt;-</span> <span class='va'>dat</span><span class='op'>$</span><span class='va'>SubclassMS</span>
 
 <span class='va'>rf_fit</span>  <span class='op'>&lt;-</span> <span class='fu'><a href='default_rf.html'>default_rf</a></span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; default_rf: 0.25 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
+</div><div class='output co'>#&gt; default_rf: 0.22 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
 <span class='va'>shap_df</span> <span class='op'>&lt;-</span> <span class='fu'><a href='attr_df_treeshap.html'>attr_df_treeshap</a></span><span class='op'>(</span><span class='va'>rf_fit</span>, <span class='va'>X</span>, noisy <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-26 15:07:14
-#&gt; attr_df_treeshap: 1.87 sec elapsed</div><div class='input'><span class='va'>this_ls</span> <span class='op'>&lt;-</span> <span class='fu'>cheem_ls</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, class <span class='op'>=</span> <span class='va'>clas</span>,
+</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-26 18:27:41
+#&gt; attr_df_treeshap: 1.69 sec elapsed</div><div class='input'><span class='va'>this_ls</span> <span class='op'>&lt;-</span> <span class='fu'>cheem_ls</span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span>, class <span class='op'>=</span> <span class='va'>clas</span>,
                      model <span class='op'>=</span> <span class='va'>rf_fit</span>,
                      attr_df <span class='op'>=</span> <span class='va'>shap_df</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; cheem_ls: 0.19 sec elapsed</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>this_ls</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; cheem_ls: 0.17 sec elapsed</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>this_ls</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] "type"                 "model_performance_df" "attr_df"             
 #&gt; [4] "global_view_df"       "global_view_basis_ls" "decode_df"           </div><div class='input'>
 <span class='co'>## Save for used with shiny app (expects .rds):</span>

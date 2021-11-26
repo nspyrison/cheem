@@ -29,7 +29,7 @@ cheem::run_app()
 
 The global view show data-, attribution-spaces, and model fit side-by-side with linked brushing and hover tooltip.
 
-![](ignore/global_view_toy_class.PNG)
+![](https://github.com/nspyrison/cheem/blob/main/ignore/global_view_toy_class.PNG?raw=true)
 
 Through exploration of the global view, identify a primary and comparison observation to compare. For the classification task, typically a misclassified point is selected against a near-by correctly classified one. In regression we can compare a point with an extreme residual with a nearby point that is more accurately predicted.
 
@@ -38,7 +38,7 @@ Through exploration of the global view, identify a primary and comparison observ
 
 The attribution of the primary observation become the 1D basis for the tour. The variable with the largest difference between the primary and comparison point's bases is selected as the manipulation variable. That is the variable whose contribution change drives the change in the projection basis.
 
-![](ignore/radial_cheem_tour_toy_class.gif)
+![](https://github.com/nspyrison/cheem/blob/main/ignore/radial_cheem_tour_toy_class.gif?raw=true)
 
 By doing this we are testing the local explanation. By testing the variable sensitivity to the structure identified in the local explanation we can better evaluate how good of an explanation it is; how sensitive it's prediction is to a change in the variable contributions.
 

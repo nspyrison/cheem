@@ -260,10 +260,11 @@ server <- function(input, output, session){
     ggt      <- req(cheem_ggtour())
     cheem_ls <- req(load_ls())
     
-    .anim <- 
-      spinifex::animate_plotly(ggt, fps = 4L, width = 1440L, height = 480L) %>%
-      suppressWarnings() %>%
-      plotly::style(hoverinfo = "none")
+    .anim <- ggt %>% 
+      spinifex::animate_plotly(fps = 4L, width = 1440L, height = 480L) %>%
+      plotly::style(hoverinfo = "none") %>% 
+      suppressWarnings()
+
     ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
     #### the following hasn't helped:
     ## - starting at frame 11 doesn't help
