@@ -162,8 +162,8 @@ such as a return from <code><a href='attr_df_treeshap.html'>attr_df_treeshap()</
 <span class='va'>rf_fit</span> <span class='op'>&lt;-</span> <span class='fu'><a href='default_rf.html'>default_rf</a></span><span class='op'>(</span><span class='va'>X</span>, <span class='va'>Y</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; default_rf: 0.22 sec elapsed</div><div class='input'><span class='co'>## Long runtime for full datasets:</span>
 <span class='va'>shap_df</span> <span class='op'>&lt;-</span> <span class='fu'><a href='attr_df_treeshap.html'>attr_df_treeshap</a></span><span class='op'>(</span><span class='va'>rf_fit</span>, <span class='va'>X</span>, noisy <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-25 17:15:11
-#&gt; attr_df_treeshap: 1.92 sec elapsed</div><div class='input'><span class='fu'>basis_attr_df</span><span class='op'>(</span><span class='va'>shap_df</span>, rownum <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Started attr_df_treeshap() at: 2021-11-26 13:45:06
+#&gt; attr_df_treeshap: 1.85 sec elapsed</div><div class='input'><span class='fu'>basis_attr_df</span><span class='op'>(</span><span class='va'>shap_df</span>, rownum <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                treeshap
 #&gt; LotArea      0.73311216
 #&gt; OverallQual  0.30201361
