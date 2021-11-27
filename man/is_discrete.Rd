@@ -10,7 +10,7 @@ is_discrete(x)
 \item{x}{A vector to check the discreteness of.}
 }
 \value{
-Logical, whether or not \code{x} is a discrete variable,
+Logical, whether or not \code{x} is a discrete variable.
 }
 \description{
 Whether or not a vector is a discrete variable, returns a logical.
@@ -25,7 +25,9 @@ is_discrete(letters)    ## Characters and factors labeled discrete.
 Other cheem utility: 
 \code{\link{as_logical_index}()},
 \code{\link{basis_attr_df}()},
+\code{\link{color_scale_of}()},
 \code{\link{does_contain_nonnumeric}()},
+\code{\link{is_diverging}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

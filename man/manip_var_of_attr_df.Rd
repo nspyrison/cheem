@@ -42,8 +42,10 @@ manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 Other cheem utility: 
 \code{\link{as_logical_index}()},
 \code{\link{basis_attr_df}()},
+\code{\link{color_scale_of}()},
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
+\code{\link{is_diverging}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{problem_type}()},

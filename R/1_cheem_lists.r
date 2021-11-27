@@ -201,7 +201,10 @@ global_view_df_1layer <- function(
   d <- 2L ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
-  tooltip <- 1L:nrow(x) ## placeholder, decode_df makes a better tooltip.
+
+  ## Leverage (within space)
+  m <- as.matrix(x)
+  leverage <- diag(m %*% (t(m) %*% m)^-1 %*% t(m))
   
   ## Projection
   x_std <- spinifex::scale_01(x)
@@ -212,9 +215,9 @@ global_view_df_1layer <- function(
   proj <- spinifex::scale_01(proj)
   
   ## Column bind wide
-  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, tooltip, proj)
+  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, leverage, proj)
   colnames(ret) <- c("basis_type", "layer_name", "rownum",
-                     "class", "tooltip", paste0("V", 1L:d))
+                     "class", "leverage", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
   return(ret)
 }
@@ -274,6 +277,7 @@ global_view_df_1layer <- function(
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' names(this_ls)
+#' global_view(this_ls)
 #' 
 #' ## Save for used with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
@@ -307,18 +311,25 @@ cheem_ls <- function(
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
+  ## calculate correlation of attr_proj 
+  m <- as.matrix(x)
+  attr_proj.y_cor <- NULL
+  .m <- sapply(1L:nrow(attr_df), function(i)
+    attr_proj.y_cor[i] <<- stats::cor(m %*% basis_attr_df(attr_df, i), y)
+  )
   .decode_left <- data.frame(
     rownum = 1L:nrow(x), class = class, y,
     prediction = stats::predict(model))
   .decode_right <- data.frame(
-    residual = y - stats::predict(model), x) ##, attr_df) ## duplicate col names and long.
+    residual = y - stats::predict(model), attr_proj.y_cor, x)
+  ##, attr_df) ## duplicate col names and too long.
+  ## If classification: append pred class/is_misclass
   if(is_classification){
     .pred_clas <- factor(
       levels(class)[round(stats::predict(model))], levels = levels(class))
     .is_misclass <- .pred_clas!= class
-    .decode_middle <- data.frame(
-      predicted_class = .pred_clas,
-      is_misclassified = .is_misclass)
+    .decode_middle <- data.frame(predicted_class = .pred_clas,
+                                 is_misclassified = .is_misclass)
     .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
   }else{
     .decode_df <- cbind(.decode_left, .decode_right)
@@ -326,6 +337,21 @@ cheem_ls <- function(
   ## Round numeric columns for readability.
   .decode_df <- data.frame(lapply(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
+  
+  ## rbind yhaty to global_view_df -----
+  .vec_yjitter <- 0L ## default/regression case
+  .layer_nm <- "model"
+  if(is_classification){
+    .vec_yjitter <- stats::runif(nrow(x), -.3, .3)
+    .layer_nm <- paste0(.layer_nm, " (w/ y jitter)")
+  }
+  .yhaty_df <- data.frame(V1 = .decode_df$prediction,
+                          V2 = .decode_df$y + .vec_yjitter)
+  .yhaty_df <- spinifex::scale_01(.yhaty_df)
+  .yhaty_df <- data.frame(
+    basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
+    class = .decode_df$class, leverage = NA, .yhaty_df)
+  .glob_view <- rbind(.glob_view, .yhaty_df)
   
   ## Add tooltip to global_view_df & decode_df ----
   tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip
@@ -346,24 +372,12 @@ cheem_ls <- function(
     tooltip <- paste0(
       tooltip, "\nresidual: ", .decode_df$residual)
   }
-  .glob_view$tooltip <- c(tooltip, tooltip)
+  ## Append possible color variable & tooltip
+  .glob_view$attr_proj.y_cor <- rep(attr_proj.y_cor, 3L)
+  .glob_view$residual        <- rep(.decode_df$residual, 3L)
+  .glob_view$tooltip         <- rep(tooltip, 3L)
   .decode_df$tooltip <- tooltip
-  
-  ## Append yhaty to global_view_df -----
-  .vec_yjitter <- 0L ## default/regression case
-  .layer_nm <- "model"
-  if(is_classification){
-    .vec_yjitter <- stats::runif(nrow(x), -.3, .3)
-    .layer_nm <- paste0(.layer_nm, " (w/ y jitter)")
-  }
-  .yhaty_df <- data.frame(V1 = .decode_df$prediction,
-                          V2 = .decode_df$y + .vec_yjitter)
-  .yhaty_df <- spinifex::scale_01(.yhaty_df)
-  .yhaty_df <- data.frame(
-    basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
-    class = .decode_df$class, tooltip = tooltip, .yhaty_df)
-  .glob_view <- rbind(.glob_view, .yhaty_df)
-  ## Make sure facet order is kept.
+  ## Ensure facet order is kept.
   .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))
   .glob_view$layer_name <- factor(.glob_view$layer_name, unique(.glob_view$layer_name))
   

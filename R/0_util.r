@@ -6,7 +6,7 @@
 #' Typically used on the Y variable of a model.
 #' 
 #' @param x A vector to check the discreteness of.
-#' @return Logical, whether or not `x` is a discrete variable,
+#' @return Logical, whether or not `x` is a discrete variable.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -16,6 +16,81 @@
 is_discrete <- function(x){
   is.factor(x) || is.character(x) || is.logical(x) ||
     (length(unique(x)) < 25L & is.numeric(x))
+}
+
+#' Check if a vector diverges a value
+#' 
+#' Whether or not a vector is a diverges a value, returns a logical.
+#' Used to help default a scale_color for ggplot2.
+#' 
+#' @param x A vector to check the divergence of.
+#' @param value A single number checking divergence from. Defaults to 0.
+#' @return Logical, whether or not `x` is a diverges the `value`.
+#' @export
+#' @family cheem utility
+#' @examples
+#' is_diverging(-10:10)
+#' is_diverging(-10:-5)
+#' is_diverging(mtcars$mpg, 25)
+#' is_diverging(mtcars$mpg, 40)
+is_diverging <- function(x, value = 0){
+  max(x) > value & min(x) < value
+}
+
+#' Suggest a color and fill scale.
+#' 
+#' Whether or not a vector is a diverges a value, returns a logical.
+#' Used to help default a scale_color for ggplot2.
+#' 
+#' @param x A vector to to scale the color to.
+#' @param value A single number checking divergence from. Defaults to 0.
+#' @param ... Optional other arguments passed to ggplot2::continuous_scale 
+#' or ggplot2::discrete_scale.
+#' @return A list containing a scale_color, and scale_fill; 
+#' the suggested color/fill scale for a ggplot. 
+#' @export
+#' @aliases colour_scale_of
+#' @family cheem utility
+#' @examples
+#' library(ggplot2)
+#' g <- ggplot(mtcars, aes(disp, mpg))
+#' 
+#' ## Discrete
+#' g + geom_point(aes(color = factor(vs))) +
+#'   color_scale_of(mtcars$vs) 
+#' ## Sequential increasing
+#' g + geom_point(aes(color = mpg)) +
+#'   color_scale_of(mtcars$mpg)
+#' ## Dummy sequential decr
+#' g + geom_point(aes(color = -1 *mpg)) +
+#'   color_scale_of(-1 * mtcars$mpg)
+#' ## Dummy diverging
+#' g + geom_point(aes(color = mpg - median(mpg))) +
+#'   color_scale_of(mtcars$mpg - median(mtcars$mpg))
+color_scale_of <- function(x, value = 0, ...){
+  b <- "blue3" #scales::muted("blue")
+  g <- "grey80"
+  r <- "red3" #scales::muted("red")
+  if(is_discrete(x)){
+    ret <- list(ggplot2::scale_color_brewer(palette = "Dark2", ...),
+                ggplot2::scale_fill_brewer( palette = "Dark2", ...))
+  }else if(is_diverging(x, value)){
+    ## Diverging
+    ret <- list(
+      ggplot2::scale_color_gradient2(low = b, mid = g, high = r, ...),
+      ggplot2::scale_fill_gradient2( low = b, mid = g, high = r, ...))
+  }else if(all(x >= value)){
+    ## Sequential above value
+    ret <-  ret <- list(
+      ggplot2::scale_color_gradient(low = g, high = r, ...),
+      ggplot2::scale_fill_gradient( low = g, high = r, ...))
+  }else{
+    ## Sequential below value
+    ret <- list(
+      ggplot2::scale_color_gradient(low = b, high = g, ...),
+      ggplot2::scale_fill_gradient( low = b, high = g, ...))
+  }
+  ret
 }
 
 #' The type of model for a given Y variable

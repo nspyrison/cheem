@@ -79,6 +79,7 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 names(this_ls)
+global_view(this_ls)
 
 ## Save for used with shiny app (expects .rds):
 if(FALSE){ ## Don't accidentally save.

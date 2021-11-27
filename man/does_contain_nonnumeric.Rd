@@ -25,7 +25,9 @@ does_contain_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in t
 Other cheem utility: 
 \code{\link{as_logical_index}()},
 \code{\link{basis_attr_df}()},
+\code{\link{color_scale_of}()},
 \code{\link{is_discrete}()},
+\code{\link{is_diverging}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},
