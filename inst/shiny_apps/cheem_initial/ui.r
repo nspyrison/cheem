@@ -49,10 +49,10 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
                 multiple = FALSE, accept = c("text/rds", ".rds"))),
     h2("Preprocessing and data description"),
     htmlOutput("desc_rows"),
-    HTML("2) Extract the full attribution matrix, variable attributions of <em>each</em> observation"),
-    p("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly:"),
-    p("Global view, top) approximations of the data- and attribution-spaces as their first two principal components. Identify a primary and comparison point to interrogate"),
-    p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as a dashed line and dotted line).")
+    # HTML("2) Extract the full attribution matrix, variable attributions of <em>each</em> observation"),
+    # p("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly:"),
+    # p("Global view, top) approximations of the data- and attribution-spaces as their first two principal components. Identify a primary and comparison point to interrogate"),
+    # p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as a dashed line and dotted line).")
   ),
   tags$hr(style = "border-color: grey;"),
   br(),
@@ -67,12 +67,15 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
     column(3L, numericInput( ## Updated by updateNumericInput
       "comparison_obs", label = "Comparison observation rownum, ('x', dotted line below):",
       value = NULL)),
-    column(6L)
+    column(3L, selectInput(
+      "glob_view_col", "point color of the global view",
+      choices = c("default", "cbrt_leverage", "attr_proj.y_cor", "residual"))),
+    column(3L)
   ),
-  p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
-  p("Red circle around the point indicates a misclassified point."),
-  p("Selection: click & drag to select points, double click to remove the selection."),
-  p("-- Selecting points will highlight them in all facets and display detailed information below."),
+  # p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
+  # p("Red circle around the point indicates a misclassified point."),
+  # p("Selection: click & drag to select points, double click to remove the selection."),
+  # p("-- Selecting points will highlight them in all facets and display detailed information below."),
   ## Container display dim
   ## Set plot dim with: ggplotly(p, height, width)
   plotly::plotlyOutput(
@@ -85,7 +88,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   
   #### Cheem tour ----
   h3("Cheem tour"),
-  p("The data space as projected through normalized attribution of the primary observation."),
+  p("The data space projected through normalized attribution of the primary observation."),
   checkboxGroupInput(
     "inc_var_nms", label = "Variables to include:",
     choices = NULL,
@@ -98,13 +101,13 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
                            c("Yes" = TRUE, "No" = FALSE))),
     column(width = 6L)
   ),
-  p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
-  p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
-  #p("if tour is ")
+  # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
+  # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
+  ## gganimate tour
   # shiny::imageOutput("cheem_tour_gganimate",
   #                    width = "100%", height = "720px") %>%
   #   shinycssloaders::withSpinner(type = 8L),
-  ## Plotly tour
+  ## plotly tour
   plotly::plotlyOutput( ##width = "auto", height = "720px"
     "cheem_tour_plotly", width = "1800px", height = "860px") %>%
     shinycssloaders::withSpinner(type = 8L),

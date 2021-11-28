@@ -79,9 +79,8 @@ names(this_ls)
 }
 
 ## EXPORT OBJECTS ----
-setwd("~/R/cheem")
 saveRDS(this_ls,
-        file = "./inst/shiny_apps/cheem_initial/data/preprocess_fifa.rds")
+        file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_fifa.rds")
 cat("Saved.\n")
 if(F) ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_fifa.rds")

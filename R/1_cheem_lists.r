@@ -202,9 +202,10 @@ global_view_df_1layer <- function(
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
 
-  ## Leverage (within space)
+  ## cbrt_leverage (within space)
   m <- as.matrix(x)
-  leverage <- diag(m %*% (t(m) %*% m)^-1 %*% t(m))
+  leverage <- diag(m %*% (t(m) %*% m)^-1L %*% t(m))
+  cbrt_lev <- sign(leverage) * abs(leverage)^(1L / 3L)
   
   ## Projection
   x_std <- spinifex::scale_01(x)
@@ -215,9 +216,9 @@ global_view_df_1layer <- function(
   proj <- spinifex::scale_01(proj)
   
   ## Column bind wide
-  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, leverage, proj)
+  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, cbrt_lev, proj)
   colnames(ret) <- c("basis_type", "layer_name", "rownum",
-                     "class", "leverage", paste0("V", 1L:d))
+                     "class", "cbrt_leverage", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
   return(ret)
 }
@@ -350,7 +351,7 @@ cheem_ls <- function(
   .yhaty_df <- spinifex::scale_01(.yhaty_df)
   .yhaty_df <- data.frame(
     basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
-    class = .decode_df$class, leverage = NA, .yhaty_df)
+    class = .decode_df$class, cbrt_leverage = NA, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
   ## Add tooltip to global_view_df & decode_df ----
@@ -373,9 +374,13 @@ cheem_ls <- function(
       tooltip, "\nresidual: ", .decode_df$residual)
   }
   ## Append possible color variable & tooltip
-  .glob_view$attr_proj.y_cor <- rep(attr_proj.y_cor, 3L)
-  .glob_view$residual        <- rep(.decode_df$residual, 3L)
-  .glob_view$tooltip         <- rep(tooltip, 3L)
+  .N <- nrow(.glob_view)
+  .glob_view$attr_proj.y_cor   <- rep_len(attr_proj.y_cor, .N)
+  .glob_view$residual          <- rep_len(.decode_df$residual, .N)
+  if(is_classification)
+    .glob_view$predicted_class <- rep_len(.pred_clas, .N)
+  .glob_view$class             <- rep_len(.decode_df$residual, .N)
+  .glob_view$tooltip           <- rep_len(tooltip, .N)
   .decode_df$tooltip <- tooltip
   ## Ensure facet order is kept.
   .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))

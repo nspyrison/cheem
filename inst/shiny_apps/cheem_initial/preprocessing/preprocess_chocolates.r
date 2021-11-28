@@ -4,8 +4,12 @@
   s <- function(sec = .01)Sys.sleep(sec)
   
   ## Create the data & shap layer_ls -----
-  #cr_simulation() ## see obj `sim_EEE_p4`
-  chocolates <- readr::read_csv('https://iml.numbat.space/data/chocolates.csv')
+  if(F){
+    chocolates <- readr::read_csv('https://iml.numbat.space/data/chocolates.csv')
+    saveRDS(chocolates,
+            file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/chocolates_raw.rds")
+  }
+  chocolates <- readRDS("~/R/cheem/inst/shiny_apps/cheem_initial/data/chocolates_raw.rds")
   clas <- factor(chocolates$Type, levels = rev(unique(chocolates$Type)))
   lvls <- levels(clas)
   X <- chocolates[, 5:14] %>% as.data.frame() ## X's not scaled.
@@ -24,9 +28,8 @@
 }
 
 ## EXPORT OBJECTS ----
-setwd("~/R/cheem")
 saveRDS(this_ls,
-        file = "./inst/shiny_apps/cheem_initial/data/preprocess_chocolates.rds")
+        file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_chocolates.rds")
 cat("Saved.\n")
 if(F) ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_chocolates.rds")

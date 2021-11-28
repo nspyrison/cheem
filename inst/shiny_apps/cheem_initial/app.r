@@ -226,11 +226,12 @@ server <- function(input, output, session){
     cheem_ls  <- req(load_ls())
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
+    .col      <- req(input$glob_view_col)
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
       global_view( ## Let global view pick the color/shape
-        cheem_ls, .prim_obs, .comp_obs
+        cheem_ls, .prim_obs, .comp_obs,
         #height_px = 480L, width_px = 1440L,
-      ))
+        color = .col))
   })
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation

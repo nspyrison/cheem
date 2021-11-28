@@ -13,7 +13,8 @@
 #' is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
 #' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' is_discrete(letters)    ## Characters and factors labeled discrete.
-is_discrete <- function(x){
+is_discrete <- function(x, na.rm){
+  x <- x[is.na(x) == FALSE] ## Remove NAs
   is.factor(x) || is.character(x) || is.logical(x) ||
     (length(unique(x)) < 25L & is.numeric(x))
 }
@@ -34,6 +35,7 @@ is_discrete <- function(x){
 #' is_diverging(mtcars$mpg, 25)
 #' is_diverging(mtcars$mpg, 40)
 is_diverging <- function(x, value = 0){
+  x <- x[is.na(x) == FALSE] ## Remove NAs
   max(x) > value & min(x) < value
 }
 
@@ -68,6 +70,7 @@ is_diverging <- function(x, value = 0){
 #' g + geom_point(aes(color = mpg - median(mpg))) +
 #'   color_scale_of(mtcars$mpg - median(mtcars$mpg))
 color_scale_of <- function(x, value = 0, ...){
+  x <- x[is.na(x) == FALSE] ## Remove NAs
   b <- "blue3" #scales::muted("blue")
   g <- "grey80"
   r <- "red3" #scales::muted("red")

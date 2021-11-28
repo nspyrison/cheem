@@ -30,9 +30,8 @@ if(F)
   global_view(this_ls)
 
 ## EXPORT OBJECTS ----
-setwd("~/R/cheem")
 saveRDS(this_ls,
-        file = "./inst/shiny_apps/cheem_initial/data/preprocess_toy_trig_regression.rds")
+        file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_toy_trig_regression.rds")
 cat("Saved.\n")
 if(F) ## Not run, load cheem_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_toy_trig_regression.rds")

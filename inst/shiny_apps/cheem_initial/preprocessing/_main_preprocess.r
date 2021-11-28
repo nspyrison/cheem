@@ -13,3 +13,13 @@ source(paste0(fp, "preprocess_toy_trig_regression.r"))
 source(paste0(fp, "preprocess_chocolates.r"))
 if(F)
   rm("this_ls")
+
+if(F){
+  file.edit(paste0(fp, "preprocess_penguins.r"))
+  file.edit(paste0(fp, "preprocess_toy_classification.r"))
+  file.edit(paste0(fp, "preprocess_fifa.r"))
+  file.edit(paste0(fp, "preprocess_ames2018.r"))
+  file.edit(paste0(fp, "preprocess_toy_quad_regression.r"))
+  file.edit(paste0(fp, "preprocess_toy_trig_regression.r"))
+  file.edit(paste0(fp, "preprocess_chocolates.r"))
+}

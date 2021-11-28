@@ -9,8 +9,7 @@ global_view(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
-  color = NULL,
-  shape = NULL,
+  color = c("default", "residual", "leverage", "attr_proj.y_cor"),
   height_px = 480L,
   width_px = 1440L,
   as_ggplot = FALSE
@@ -34,13 +33,10 @@ as a dashed line.}
 \item{comparison_obs}{The rownumber of the comparison observation. Point
 is highlighted as a dotted line.}
 
-\item{color}{A vector to map to the point color.
-Classification case defaults to predicted class, regression case defaults to
-class if passed to cheem_ls(), else residual.}
-
-\item{shape}{A vector to map to the point shape.
-Classification case defaults to predicted class, regression case defaults to
-class.}
+\item{color}{The name of the column in cheem_ls$global_view_df to map to
+color. Expects c("default", "residual", "leverage", "attr_proj.y_cor").
+Defaults to "default"; predicted_class for classification, dummy class
+for regression.}
 
 \item{height_px}{The height in pixels of the returned \code{plotly} plot.
 Defaults to 480.}
