@@ -4,7 +4,7 @@
 \alias{is_discrete}
 \title{Check if a vector is discrete}
 \usage{
-is_discrete(x)
+is_discrete(x, na.rm)
 }
 \arguments{
 \item{x}{A vector to check the discreteness of.}

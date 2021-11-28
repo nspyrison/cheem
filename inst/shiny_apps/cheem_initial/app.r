@@ -1,6 +1,4 @@
-# Penguin classification -----
-## ./apps/cheem_classification/app.r
-#' 
+### ./inst/shiny_apps/cheem_initial/app.r ###
 #' @author Nicholas Spyrison
 #' Aug 2021
 source("ui.r", local = TRUE, encoding = "utf-8")
@@ -34,6 +32,10 @@ server <- function(input, output, session){
       ret      <- toy_trig_reg_ls
       prim_obs <- 87L
       comp_obs <- 102L
+    }else if(dat == "toy mixture regression"){
+      ret      <- toy_mix_reg_ls
+      prim_obs <- 23L
+      comp_obs <- 130L
     }else if(dat == "fifa regression"){
       ret      <- fifa_ls
       prim_obs <- 1L
@@ -170,48 +172,52 @@ server <- function(input, output, session){
     
     ## Load data:
     if(dat == "toy classification"){
-      he <- h3("Simulated triangle vertices")
+      he <- h4("Simulated triangle vertices")
       l1 <- p("- 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
       l2 <- p("1) Create a random forest model classifying cluster level, given the continuous variables.")
     }else if(dat == "penguins classification"){
-      he <- h3("Palmer penguins")
+      he <- h4("Palmer penguins")
       l1 <- p("- 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
       l2 <- p("1) Create a random forest model classifying species from the physical measurements.")
     }else if(dat == "chocolates classification"){
-      he <- h3("Chocolates")
+      he <- h4("Chocolates")
       l1 <- p("- 88 observations of 10 nutrition measures as labeled. These chocolates labels as 'milk' or 'dark'")
       l2 <- p("1) Create a random forest model classifying the type of chocolate from the nutrition label.")
     }else if(dat == "toy quad regression"){
-      he <- h3("Toy quadratic regression")
+      he <- h4("Toy quadratic regression")
       l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 5]. y = x1 * x2 + x1 + x2 + (x3 + x4 + x5) / 10 + error")
-      l2 <- p("1) Create a random forest model regressing y.")
+      l2 <- NULL
     }else if(dat == "toy trig regression"){
-      he <- h3("Toy trig regression")
+      he <- h4("Toy trig regression")
       l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 4*pi]|[0, 1]. y = sin(x1) + sin(x2) + (x3 + x4 + x5) / 10 + error")
-      l2 <- p("1) Create a random forest model regressing y.")      
+      l2 <- NULL
+    }else if(dat == "toy mixture regression"){
+      he <- h4("Toy trig regression")
+      l1 <- p("- Simulated data, 200 observations, a mixture of toy trig and toy quad, Y_i ~ max(trig_i, quad_i), with about 50% of obs from each.")
+      l2 <- NULL
     }else if(dat == "fifa regression"){
-      he <- h3("FIFA soccer players, 2020 season")
+      he <- h4("FIFA soccer players, 2020 season")
       l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and log wages [2020 Euros] (Regression Y)")
       l2 <- p("1) Create a random forest model regressing continuous wages from the skill aggregates.")
     }else if(dat == "ames housing 2018 regression"){
-      he <- h3("Ames housing 2018 (North Ames only)")
+      he <- h4("Ames housing 2018 (North Ames only)")
       l1 <- p("- 338 observations of 9 house attributes. Point aesthetics on zoning subclass, (exogenous to the model).")
       l2 <- p("1) Create a random forest model regression log hose price from the 9 housing variables.")
     }else { ## _ie_ user uploaded data
-      he <- h3("User uploaded data")
+      he <- h4("User uploaded data")
       l1 <- NULL
       l2 <- p("1) Create a random forest model")
     }
     # }else if(dat == "apartments"){
-    #   he <- h3("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
+    #   he <- h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
     #   l1 <- p("- 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
     #   l2 <- p("1) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
     # }else if(dat == "diabetes (wide)"){
-    #   he <- h3("Pima Indians Diabetes (wide)")
+    #   he <- h4("Pima Indians Diabetes (wide)")
     #   l1 <- p("- 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
     #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
     # }else if(dat == "diabetes (long)"){
-    #   he <- h3("Pima Indians Diabetes (long)")
+    #   he <- h4("Pima Indians Diabetes (long)")
     #   l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
     #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
     
@@ -263,7 +269,8 @@ server <- function(input, output, session){
     
     .anim <- ggt %>% 
       spinifex::animate_plotly(fps = 4L, width = 1440L, height = 480L) %>%
-      plotly::style(hoverinfo = "none") %>% 
+      plotly::layout(showlegend = FALSE) %>% 
+      plotly::style(hoverinfo = "none") %>%
       suppressWarnings()
 
     ## %>% plotly::toWebGL() ## maybe faster, may have more issues.

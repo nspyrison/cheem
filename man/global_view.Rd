@@ -9,7 +9,7 @@ global_view(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
-  color = c("default", "residual", "leverage", "attr_proj.y_cor"),
+  color = c("default", "residual", "cbrt_leverage", "attr_proj.y_cor"),
   height_px = 480L,
   width_px = 1440L,
   as_ggplot = FALSE
@@ -34,7 +34,7 @@ as a dashed line.}
 is highlighted as a dotted line.}
 
 \item{color}{The name of the column in cheem_ls$global_view_df to map to
-color. Expects c("default", "residual", "leverage", "attr_proj.y_cor").
+color. Expects c("default", "residual", "cbrt_leverage", "attr_proj.y_cor").
 Defaults to "default"; predicted_class for classification, dummy class
 for regression.}
 
@@ -72,10 +72,10 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      attr_df = shap_df)
 global_view(this_ls)
 
-## Experimental case mapping residuals to color or class to shape.
-global_view(this_ls,
-            color = this_ls$decode_df$residual,
-            shape = this_ls$decode_df$class)
+## Experimental color mappings
+global_view(this_ls, color = "residual")
+global_view(this_ls, color = "cbrt_leverage") 
+global_view(this_ls, color = "attr_proj.y_cor")
 }
 \seealso{
 Other cheem consumers: 

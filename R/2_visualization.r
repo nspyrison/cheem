@@ -354,10 +354,13 @@ global_view <- function(
     }else .color <- global_view_df[, color]
     shape <- rep_len(factor(FALSE), nrow(global_view_df))
   }
+  .spaces <- paste(rep(" ", 61L), collapse = "")
+  .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
+  .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   .col_scale <- color_scale_of(.color)
   
   ## Get the bases of the global view, map them
-  u_nms <- unique(global_view_df$layer_name)
+  u_nms     <- unique(global_view_df$layer_name)
   .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
                           layer_name = u_nms[1L])
   .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
@@ -406,9 +409,6 @@ global_view <- function(
   }
   
   ## Visualize
-  .spaces <- paste(rep(" ", 61L), collapse = "")
-  .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
-  .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   gg <- global_view_df %>% plotly::highlight_key(~rownum) %>%
     ggplot2::ggplot(ggplot2::aes(V1, V2)) +
     pts_main +
@@ -417,7 +417,8 @@ global_view <- function(
     ggplot2::coord_fixed() +
     ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
-    ggplot2::labs(x = .x_axis_title, y = "") +
+    ggplot2::labs(x = .x_axis_title, y = "",
+                  color = substitute(color), fill  = substitute(color)) +
     ggplot2::theme(axis.text  = ggplot2::element_blank(),
                    axis.ticks = ggplot2::element_blank(),
                    legend.position = "off")
@@ -768,6 +769,7 @@ radial_cheem_tour <- function(
       # Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
       ggplot2::theme(
+        legend.position = "off",
         axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       spinifex::proto_point(
@@ -788,7 +790,7 @@ radial_cheem_tour <- function(
       spinifex::proto_highlight(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
-      spinifex::proto_origin() +
+      #spinifex::proto_origin() +
       ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline,
                           color = "grey40")
       #spinifex::proto_hline0() ## adds to both facets..

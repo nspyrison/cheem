@@ -24,7 +24,9 @@ fifa_ls         <- readRDS("./data/preprocess_fifa.rds")
 ames2018_ls     <- readRDS("./data/preprocess_ames2018.rds")
 toy_quad_reg_ls <- readRDS("./data/preprocess_toy_quad_regression.rds")
 toy_trig_reg_ls <- readRDS("./data/preprocess_toy_trig_regression.rds")
+toy_mix_reg_ls  <- readRDS("./data/preprocess_toy_mixture_regression.rds")
 chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
+
 # diabetes_wide_ls <- readRDS("./data/preprocess_diabetes_wide.rds")
 # diabetes_long_ls <- readRDS("./data/preprocess_diabetes_long.rds")
 
@@ -32,22 +34,26 @@ chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
 ### tab1_cheem -----
 expected_data_char <- c(
   "toy classification", "penguins classification", "chocolates classification",
-  "toy quad regression", "toy trig regression", "fifa regression", "ames housing 2018 regression",
+  "toy quad regression", "toy trig regression", "toy mixture regression", "fifa regression", "ames housing 2018 regression",
   #"diabetes (wide) classification", "diabetes (long) classification",
   "<Upload saved cheem_ls (.rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----
   fluidRow(
     ## Choose data:
-    selectInput(
-      "dat_char", "Data:",
-      choices = expected_data_char,
-      selected = "toy quad regression"), #"toy classification"),
-    conditionalPanel(
-      "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
-      fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
-                multiple = FALSE, accept = c("text/rds", ".rds"))),
-    h2("Preprocessing and data description"),
+    #h4("Preprocessing and data description"),
+    fluidRow(
+      column(6L, selectInput(
+        "dat_char", "Data:",
+        choices = expected_data_char,
+        selected = "toy quad regression")
+      ),
+      column(6L,
+             conditionalPanel(
+               "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
+               fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
+                         multiple = FALSE, accept = c("text/rds", ".rds"))))
+    ),
     htmlOutput("desc_rows"),
     # HTML("2) Extract the full attribution matrix, variable attributions of <em>each</em> observation"),
     # p("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly:"),
@@ -55,11 +61,10 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
     # p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as a dashed line and dotted line).")
   ),
   tags$hr(style = "border-color: grey;"),
-  br(),
   
   #### global_view ----
-  h3("Global view:"),
-  p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
+  h4("Global view:"),
+  #p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
   fluidRow(
     column(3L, numericInput( ## Updated by updateNumericInput
       "primary_obs", label = "Primary observation rownum, ('*', dashed line below):",
@@ -68,7 +73,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
       "comparison_obs", label = "Comparison observation rownum, ('x', dotted line below):",
       value = NULL)),
     column(3L, selectInput(
-      "glob_view_col", "point color of the global view",
+      "glob_view_col", "Global view point color",
       choices = c("default", "cbrt_leverage", "attr_proj.y_cor", "residual"))),
     column(3L)
   ),
@@ -81,25 +86,23 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   plotly::plotlyOutput(
     "global_view", width = "100%", height = "480px") %>%
     shinycssloaders::withSpinner(type = 8L),
-  h4("Selected data:"),
+  h5("Selected data:"),
   DT::DTOutput("selected_df")),
   tags$hr(style = "border-color: grey;"),
-  br(),
   
   #### Cheem tour ----
-  h3("Cheem tour"),
-  p("The data space projected through normalized attribution of the primary observation."),
-  checkboxGroupInput(
-    "inc_var_nms", label = "Variables to include:",
-    choices = NULL,
-    selected = NULL, inline = TRUE),
+  h4("Cheem tour"),
+  #p("The data space projected through normalized attribution of the primary observation."),
   fluidRow(
     column(width = 3L,
            selectInput("manip_var_nm", label = "Manipulation variable:",
                        choices  = NULL)),
     column(width = 3L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
                            c("Yes" = TRUE, "No" = FALSE))),
-    column(width = 6L)
+    column(width = 6L, checkboxGroupInput(
+      "inc_var_nms", label = "Variables to include:",
+      choices = NULL,
+      selected = NULL, inline = TRUE))
   ),
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
@@ -111,7 +114,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   plotly::plotlyOutput( ##width = "auto", height = "720px"
     "cheem_tour_plotly", width = "1800px", height = "860px") %>%
     shinycssloaders::withSpinner(type = 8L),
-  br(), br(), br(), br()
+  br(), br(), br()
 ) ## Assign tab1_cheem
 
 ### tab_about -----
@@ -134,7 +137,7 @@ tab_about <- tabPanel("About", fluidPage(
   p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'http://ema.drwhy.ai/', 'http://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(blue overlay) purposed application in terms of workflow and model specificity.'),
   p(''),
-  h3("Namesake"),
+  h4("Namesake"),
   p("The Trees of Cheem, are a fictional race of tree-based humanoids in the Dr. Who universe. The initial application applies tree SHAP (a local explain of tree-based models via {treeshap}), and explanations from {DALEX}, a reference to Dr. Who lore."),
   img(src = "cheem_namesake.png")
 )) ## Assign tabZ_about

@@ -79,19 +79,16 @@ color_scale_of <- function(x, value = 0, ...){
                 ggplot2::scale_fill_brewer( palette = "Dark2", ...))
   }else if(is_diverging(x, value)){
     ## Diverging
-    ret <- list(
-      ggplot2::scale_color_gradient2(low = b, mid = g, high = r, ...),
-      ggplot2::scale_fill_gradient2( low = b, mid = g, high = r, ...))
+    ret <- list(ggplot2::scale_color_gradient2(low = b, mid = g, high = r, ...),
+                ggplot2::scale_fill_gradient2( low = b, mid = g, high = r, ...))
   }else if(all(x >= value)){
     ## Sequential above value
-    ret <-  ret <- list(
-      ggplot2::scale_color_gradient(low = g, high = r, ...),
-      ggplot2::scale_fill_gradient( low = g, high = r, ...))
+    ret <-  ret <- list(ggplot2::scale_color_gradient(low = g, high = r, ...),
+                        ggplot2::scale_fill_gradient( low = g, high = r, ...))
   }else{
     ## Sequential below value
-    ret <- list(
-      ggplot2::scale_color_gradient(low = b, high = g, ...),
-      ggplot2::scale_fill_gradient( low = b, high = g, ...))
+    ret <- list(ggplot2::scale_color_gradient(low = b, high = g, ...),
+                ggplot2::scale_fill_gradient( low = b, high = g, ...))
   }
   ret
 }
@@ -253,3 +250,4 @@ as_logical_index <- function(index, n){
 
   return(index)
 }
+
