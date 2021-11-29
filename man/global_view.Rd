@@ -76,6 +76,9 @@ global_view(this_ls)
 global_view(this_ls, color = "residual")
 global_view(this_ls, color = "cbrt_leverage") 
 global_view(this_ls, color = "attr_proj.y_cor")
+
+## Experimental global view with plotly::subplots:
+global_view_subplots(this_ls)
 }
 \seealso{
 Other cheem consumers: 

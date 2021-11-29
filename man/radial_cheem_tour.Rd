@@ -89,7 +89,9 @@ bas <- basis_attr_df(shap_df, rownum = 1)
 ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
   primary_obs = 1, comparison_obs = 2)
 \dontrun{
-animate_gganimate(ggt, render = gganimate::av_renderer())
+animate_plotly(ggt)
+if(FALSE) ## or animate with gganimate
+  animate_gganimate(ggt, render = gganimate::av_renderer())
 
 ## Regression:
 dat <- amesHousing2018_NorthAmes
@@ -106,8 +108,16 @@ this_ls <- cheem_ls(X, Y, class = clas,
 
 bas <- basis_attr_df(shap_df, rownum = 1)
 ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-animate_gganimate(ggt, render = gganimate::av_renderer())
+
+animate_plotly(ggt)
+if(FALSE) ## or animate with gganimate
+  animate_gganimate(ggt, render = gganimate::av_renderer())
 }
+
+## Experimental radial cheem tour with plotly::subplots:
+bas <- basis_attr_df(shap_df, rownum = 1)
+ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+animate_plotly(ggt)
 }
 \seealso{
 Other cheem consumers: 
