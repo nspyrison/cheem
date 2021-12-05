@@ -25,8 +25,8 @@ is_discrete <- function(x, na.rm){
 #' Used to help default a scale_color for ggplot2.
 #' 
 #' @param x A vector to check the divergence of.
-#' @param value A single number checking divergence from. Defaults to 0.
-#' @return Logical, whether or not `x` is a diverges the `value`.
+#' @param mid_pt A single number checking divergence from. Defaults to 0.
+#' @return Logical, whether or not `x` is a diverges `mid_pt`.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -34,9 +34,9 @@ is_discrete <- function(x, na.rm){
 #' is_diverging(-10:-5)
 #' is_diverging(mtcars$mpg, 25)
 #' is_diverging(mtcars$mpg, 40)
-is_diverging <- function(x, value = 0){
+is_diverging <- function(x, mid_pt = 0){
   x <- x[is.na(x) == FALSE] ## Remove NAs
-  max(x) > value & min(x) < value
+  max(x) > mid_pt & min(x) < mid_pt
 }
 
 #' Suggest a color and fill scale.
@@ -45,7 +45,11 @@ is_diverging <- function(x, value = 0){
 #' Used to help default a scale_color for ggplot2.
 #' 
 #' @param x A vector to to scale the color to.
-#' @param value A single number checking divergence from. Defaults to 0.
+#' @param mid_pt A single number checking divergence from. Defaults to 0.
+#' @param range A vector of min max values for the scale. 
+#' Useful for setting an absolute range, such as (-1, 1) for attribution/y 
+#' correlation of each point. Points outside of limits show as default grey.
+#' Defaults to NULL; the range of x.
 #' @param ... Optional other arguments passed to ggplot2::continuous_scale 
 #' or ggplot2::discrete_scale.
 #' @return A list containing a scale_color, and scale_fill; 
@@ -54,6 +58,7 @@ is_diverging <- function(x, value = 0){
 #' @aliases colour_scale_of
 #' @family cheem utility
 #' @examples
+#' library(cheem)
 #' library(ggplot2)
 #' g <- ggplot(mtcars, aes(disp, mpg))
 #' 
@@ -69,7 +74,10 @@ is_diverging <- function(x, value = 0){
 #' ## Dummy diverging
 #' g + geom_point(aes(color = mpg - median(mpg))) +
 #'   color_scale_of(mtcars$mpg - median(mtcars$mpg))
-color_scale_of <- function(x, value = 0, ...){
+#' ## Dummy limits
+#' g + geom_point(aes(color = mpg - median(mpg))) +
+#'   color_scale_of(mtcars$mpg - median(mtcars$mpg), limits = c(-5, 5))
+color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
   x <- x[is.na(x) == FALSE] ## Remove NAs
   b <- "blue3" #scales::muted("blue")
   g <- "grey80"
@@ -77,18 +85,23 @@ color_scale_of <- function(x, value = 0, ...){
   if(is_discrete(x)){
     ret <- list(ggplot2::scale_color_brewer(palette = "Dark2", ...),
                 ggplot2::scale_fill_brewer( palette = "Dark2", ...))
-  }else if(is_diverging(x, value)){
+  }else if(is_diverging(x, mid_pt)){
     ## Diverging
-    ret <- list(ggplot2::scale_color_gradient2(low = b, mid = g, high = r, ...),
-                ggplot2::scale_fill_gradient2( low = b, mid = g, high = r, ...))
-  }else if(all(x >= value)){
-    ## Sequential above value
-    ret <-  ret <- list(ggplot2::scale_color_gradient(low = g, high = r, ...),
-                        ggplot2::scale_fill_gradient( low = g, high = r, ...))
+    ret <- list(
+      ggplot2::scale_color_gradient2(
+        low = b, mid = g, high = r, limits = limits, ...),
+      ggplot2::scale_fill_gradient2( 
+        low = b, mid = g, high = r, limits = limits, ...))
+  }else if(all(x >= mid_pt)){
+    ## Sequential above mid_pt
+    ret <-  ret <- list(
+      ggplot2::scale_color_gradient(low = g, high = r, limits = limits, ...),
+      ggplot2::scale_fill_gradient( low = g, high = r, limits = limits, ...))
   }else{
-    ## Sequential below value
-    ret <- list(ggplot2::scale_color_gradient(low = b, high = g, ...),
-                ggplot2::scale_fill_gradient( low = b, high = g, ...))
+    ## Sequential below mid_pt
+    ret <- list(
+      ggplot2::scale_color_gradient(low = b, high = g, limits = limits, ...),
+      ggplot2::scale_fill_gradient( low = b, high = g, limits = limits, ...))
   }
   ret
 }

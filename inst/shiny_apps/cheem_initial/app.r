@@ -14,8 +14,8 @@ server <- function(input, output, session){
     
     if(dat == "toy classification"){
       ret      <- toy_class_ls
-      prim_obs <- 18L
-      comp_obs <- 119L
+      prim_obs <- 36L
+      comp_obs <- 23L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
       prim_obs <- 124L

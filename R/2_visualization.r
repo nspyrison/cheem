@@ -290,7 +290,7 @@ proto_basis1d_distribution <- function(
 #' @param width_px The width in pixels of the returned `plotly` plot.
 #' Defaults to 1440.
 #' @param color The name of the column in cheem_ls$global_view_df to map to 
-#' color. Expects c("default", "residual", "cbrt_leverage", "attr_proj.y_cor").
+#' color. Expects c("default", "residual", "log_maha.data", "cor_attr_proj.y").
 #' Defaults to "default"; predicted_class for classification, dummy class 
 #' for regression.
 # #' @param shape A vector to map to the point shape.
@@ -319,15 +319,15 @@ proto_basis1d_distribution <- function(
 #'                      attr_df = shap_df)
 #' global_view(this_ls)
 #' 
-#' ## Experimental color mappings
+#' ## Different color mappings, especially for regression
 #' global_view(this_ls, color = "residual")
-#' global_view(this_ls, color = "cbrt_leverage") 
-#' global_view(this_ls, color = "attr_proj.y_cor")
+#' global_view(this_ls, color = "log_maha.data") 
+#' global_view(this_ls, color = "cor_attr_proj.y")
 global_view <- function(
   cheem_ls,
   primary_obs    = NULL,
   comparison_obs = NULL,
-  color = c("default", "residual", "cbrt_leverage", "attr_proj.y_cor"),
+  color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
   #shape = NULL, 
   height_px = 480L,
   width_px  = 1440L,
@@ -357,7 +357,9 @@ global_view <- function(
   .spaces <- paste(rep(" ", 61L), collapse = "")
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
-  .col_scale <- color_scale_of(.color)
+  .lim <- NULL ## Defaults to range(x) for non-discrete. 
+  if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L)
+  .col_scale <- color_scale_of(.color, limits = .lim)
   
   ## Get the bases of the global view, map them
   u_nms     <- unique(global_view_df$layer_name)
@@ -436,7 +438,7 @@ global_view <- function(
 
 
 #' @rdname global_view
-#' @export
+# #' @export
 #' @examples 
 #' 
 #' ## Experimental global view with plotly::subplots:
@@ -812,7 +814,7 @@ radial_cheem_tour <- function(
 }
 
 #' @rdname radial_cheem_tour
-#' @export
+# #' @export
 #' @examples
 #' 
 #' ## Experimental radial cheem tour with plotly::subplots:

@@ -4,15 +4,15 @@
 \alias{is_diverging}
 \title{Check if a vector diverges a value}
 \usage{
-is_diverging(x, value = 0)
+is_diverging(x, mid_pt = 0)
 }
 \arguments{
 \item{x}{A vector to check the divergence of.}
 
-\item{value}{A single number checking divergence from. Defaults to 0.}
+\item{mid_pt}{A single number checking divergence from. Defaults to 0.}
 }
 \value{
-Logical, whether or not \code{x} is a diverges the \code{value}.
+Logical, whether or not \code{x} is a diverges \code{mid_pt}.
 }
 \description{
 Whether or not a vector is a diverges a value, returns a logical.

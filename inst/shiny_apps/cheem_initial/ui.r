@@ -74,7 +74,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
       value = NULL)),
     column(3L, selectInput(
       "glob_view_col", "Global view point color",
-      choices = c("default", "cbrt_leverage", "attr_proj.y_cor", "residual"))),
+      choices = c("default", "log_maha.data", "cor_attr_proj.y", "residual"))),
     column(3L)
   ),
   # p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),

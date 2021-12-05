@@ -201,11 +201,6 @@ global_view_df_1layer <- function(
   d <- 2L ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
-
-  ## cbrt_leverage (within space)
-  m <- as.matrix(x)
-  leverage <- diag(m %*% (t(m) %*% m)^-1L %*% t(m))
-  cbrt_lev <- sign(leverage) * abs(leverage)^(1L / 3L)
   
   ## Projection
   x_std <- spinifex::scale_01(x)
@@ -216,9 +211,9 @@ global_view_df_1layer <- function(
   proj <- spinifex::scale_01(proj)
   
   ## Column bind wide
-  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, cbrt_lev, proj)
+  ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, proj)
   colnames(ret) <- c("basis_type", "layer_name", "rownum",
-                     "class", "cbrt_leverage", paste0("V", 1L:d))
+                     "class", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
   return(ret)
 }
@@ -300,46 +295,45 @@ cheem_ls <- function(
   is_classification <- is_discrete(y)
   rownum <- V2 <- projection_nm <- NULL
   
-  ## Global view -----
+  ## blobal_view_df -----
   .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")
   .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, 
                                       class(attr_df)[length(class(attr_df))])
   .glob_view <- rbind(.glob_dat, .glob_attr)
-  ## list of global view bases
-  .dat_bas  <- attributes(.glob_dat)[length(attributes(.glob_dat))]
+  ## List of the bases
+  .dat_bas  <- attributes(.glob_dat )[length(attributes(.glob_dat ))]
   .attr_bas <- attributes(.glob_attr)[length(attributes(.glob_attr))]
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
+  ## log maha distance of data sapce
+  log_maha.data <- stats::mahalanobis(x, colMeans(x), cov(x))
+  ## Calculate correlation of attr_proj
+  m <- as.matrix(x)
+  cor_attr_proj.y <- NULL
+  .m <- sapply(1L:nrow(attr_df), function(i)
+    cor_attr_proj.y[i] <<- stats::cor(m %*% basis_attr_df(attr_df, i), y)
+  )
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
-  ## calculate correlation of attr_proj 
-  m <- as.matrix(x)
-  attr_proj.y_cor <- NULL
-  .m <- sapply(1L:nrow(attr_df), function(i)
-    attr_proj.y_cor[i] <<- stats::cor(m %*% basis_attr_df(attr_df, i), y)
-  )
   .decode_left <- data.frame(
     rownum = 1L:nrow(x), class = class, y,
     prediction = stats::predict(model))
   .decode_right <- data.frame(
-    residual = y - stats::predict(model), attr_proj.y_cor, x)
-  ##, attr_df) ## duplicate col names and too long.
+    residual = y - stats::predict(model), cor_attr_proj.y, x)
   ## If classification: append pred class/is_misclass
   if(is_classification){
     .pred_clas <- factor(
       levels(class)[round(stats::predict(model))], levels = levels(class))
     .is_misclass <- .pred_clas!= class
-    .decode_middle <- data.frame(predicted_class = .pred_clas,
+    .decode_middle <- data.frame(predicted_class  = .pred_clas,
                                  is_misclassified = .is_misclass)
     .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
-  }else{
-    .decode_df <- cbind(.decode_left, .decode_right)
-  }
-  ## Round numeric columns for readability.
+  }else .decode_df <- cbind(.decode_left, .decode_right)
+  ## Round numeric columns for display
   .decode_df <- data.frame(lapply(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
-  
-  ## rbind yhaty to global_view_df -----
+
+  ## rbind yhaty to global_view_df ----
   .vec_yjitter <- 0L ## default/regression case
   .layer_nm <- "model"
   if(is_classification){
@@ -351,36 +345,34 @@ cheem_ls <- function(
   .yhaty_df <- spinifex::scale_01(.yhaty_df)
   .yhaty_df <- data.frame(
     basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
-    class = .decode_df$class, cbrt_leverage = NA, .yhaty_df)
+    class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
-  ## Add tooltip to global_view_df & decode_df ----
+  ## Add tooltips ----
   tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip
   if(is.null(rownames(x)) == FALSE)
     ### Character rownames?
     if(does_contain_nonnumeric(rownames(x)) == TRUE)
       tooltip <- paste0(tooltip, ", ", rownames(x))
   if(is_classification){
-    ### Classification extension
+    ### Classification tooltip
     tooltip[.is_misclass] <- paste0(
       tooltip[.is_misclass],
       "\nMisclassified! predicted: ", .pred_clas[.is_misclass],
       ", observed: ", class[.is_misclass])
     tooltip[!.is_misclass] <- paste0(
       tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])
-  }else{
-    ### Regression extension
-    tooltip <- paste0(
-      tooltip, "\nresidual: ", .decode_df$residual)
-  }
-  ## Append possible color variable & tooltip
+  }else tooltip <- paste0(tooltip, "\nresidual: ", .decode_df$residual)
+  
+  ## Append model info to global_view
   .N <- nrow(.glob_view)
-  .glob_view$attr_proj.y_cor   <- rep_len(attr_proj.y_cor, .N)
+  .glob_view$log_maha.data     <- rep_len(log_maha.data,       .N)
+  .glob_view$cor_attr_proj.y   <- rep_len(cor_attr_proj.y,     .N)
   .glob_view$residual          <- rep_len(.decode_df$residual, .N)
   if(is_classification)
-    .glob_view$predicted_class <- rep_len(.pred_clas, .N)
+    .glob_view$predicted_class <- rep_len(.pred_clas,          .N)
   .glob_view$class             <- rep_len(.decode_df$residual, .N)
-  .glob_view$tooltip           <- rep_len(tooltip, .N)
+  .glob_view$tooltip           <- rep_len(tooltip,             .N)
   .decode_df$tooltip <- tooltip
   ## Ensure facet order is kept.
   .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))
@@ -397,7 +389,7 @@ cheem_ls <- function(
   .m <- gc()
   if(keep_model) ret_ls <- c(ret_ls, model = model)
   if(verbose) tictoc::toc()
-  return(ret_ls)
+  ret_ls
 }
 
 

@@ -5,15 +5,20 @@
 \alias{colour_scale_of}
 \title{Suggest a color and fill scale.}
 \usage{
-color_scale_of(x, value = 0, ...)
+color_scale_of(x, mid_pt = 0, limits = NULL, ...)
 }
 \arguments{
 \item{x}{A vector to to scale the color to.}
 
-\item{value}{A single number checking divergence from. Defaults to 0.}
+\item{mid_pt}{A single number checking divergence from. Defaults to 0.}
 
 \item{...}{Optional other arguments passed to ggplot2::continuous_scale
 or ggplot2::discrete_scale.}
+
+\item{range}{A vector of min max values for the scale.
+Useful for setting an absolute range, such as (-1, 1) for attribution/y
+correlation of each point. Points outside of limits show as default grey.
+Defaults to NULL; the range of x.}
 }
 \value{
 A list containing a scale_color, and scale_fill;
@@ -24,6 +29,7 @@ Whether or not a vector is a diverges a value, returns a logical.
 Used to help default a scale_color for ggplot2.
 }
 \examples{
+library(cheem)
 library(ggplot2)
 g <- ggplot(mtcars, aes(disp, mpg))
 
@@ -39,6 +45,9 @@ g + geom_point(aes(color = -1 *mpg)) +
 ## Dummy diverging
 g + geom_point(aes(color = mpg - median(mpg))) +
   color_scale_of(mtcars$mpg - median(mtcars$mpg))
+## Dummy limits
+g + geom_point(aes(color = mpg - median(mpg))) +
+  color_scale_of(mtcars$mpg - median(mtcars$mpg), limits = c(-5, 5))
 }
 \seealso{
 Other cheem utility: 
