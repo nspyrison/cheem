@@ -178,7 +178,7 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
   ret <- mvtnorm::rmvnorm(n = n_obs,
                           mean = .mns,
                           sigma =  var_coeff * .cov)
-  return(as.data.frame(ret))
+  as.data.frame(ret)
 }
 
 #' Linear function to help set alpha opacity
@@ -260,7 +260,6 @@ as_logical_index <- function(index, n){
     index <- rep_f
   }
   if(identical(index, TRUE)) index <- rep(TRUE, n)
-
-  return(index)
+  index
 }
 

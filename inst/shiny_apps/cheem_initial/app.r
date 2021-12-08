@@ -32,7 +32,7 @@ server <- function(input, output, session){
       ret      <- toy_trig_reg_ls
       prim_obs <- 87L
       comp_obs <- 102L
-    }else if(dat == "toy mixture regression"){
+    }else if(dat == "toy mixture model regression"){
       ret      <- toy_mix_reg_ls
       prim_obs <- 23L
       comp_obs <- 130L
@@ -51,20 +51,8 @@ server <- function(input, output, session){
       prim_obs <- 1L
       comp_obs <- 2L
     }
-    # }else if(dat == "apartments"){
-    #   ret            <- apartments_ls
-    #   prim_obs <- 485L
-    #   comp_obs <- 487L
-    # }else if(dat == "diabetes (wide)"){
-    #   ret            <- diabetes_wide_ls
-    #   prim_obs <- 123L
-    #   comp_obs <- 237L
-    # }else if(dat == "diabetes (long)"){
-    #   ret      <- diabetes_long_ls
-    #   prim_obs <- 479L
-    #   comp_obs <- 674L
     
-    ### BY PRODUCT: UPDATE PRIM/COMP OBS
+    ## SIDE EFFECT: Update prim/comp_obs
     updateNumericInput(
       session, "primary_obs",
       label = "Primary observation rownum, ('*' point):",
@@ -73,19 +61,16 @@ server <- function(input, output, session){
       session, "comparison_obs",
       label = "Comparison observation rownum, ('x' point):",
       min = 1L, max = 1e6L, step = 1L, value = comp_obs)
-    
-    ## BY PRODUCT: UPDATE INCLUSION VARIABLES
+    ## SIDE EFFECT: Update inclusion variable names
     var_nms <- colnames(ret$attr_df)
-    
     updateCheckboxGroupInput(session, "inc_var_nms", label = "Variables to include:",
                              choices = var_nms, selected = var_nms, inline = TRUE)
     
     ## Return loaded cheem_ls
-    return(ret)
+    ret
   })
   
   ## PIMARY & COMPARISON OBS
-  #### Debounce the plots on the inputs imo.
   primary_obs <- reactive({
     req(input$primary_obs)
     input$primary_obs
@@ -95,30 +80,31 @@ server <- function(input, output, session){
     input$comparison_obs
   })
 
-  ## Basis; the local explanation's attributon of the primary obs
+  ## Basis; the local explanation's attribution of the primary obs
   bas <- reactive({
-    attr_df     <- req(load_ls()$attr_df)
+    isolate(attr_df <- req(load_ls()$attr_df))
+    ## isolated, not eager to eval twice, as prim_obs also updated as 
+    #### prim/comp_obs also update as side effects of load_ls()
     inc_var_nms <- req(input$inc_var_nms)
     prim_obs    <- req(primary_obs())
     if(all(inc_var_nms %in% colnames(attr_df)) == FALSE){
       message("bas(): bas tried to react before inc_var_nms updated...")
       return()
     }
-    bas <- basis_attr_df(attr_df[, inc_var_nms, drop = FALSE], prim_obs)
-    return(tourr::orthonormalise(bas))
+    basis_attr_df(attr_df[, inc_var_nms, drop = FALSE], prim_obs)
   })
   
   sel_rownums <- reactive({
     ## Row NUMBER index of data selected in linked global view
     .d <- plotly::event_data("plotly_selected")
     if(is.null(.d)) return(NULL)
-    return(as.integer(.d$key))
+    as.integer(.d$key)
   })
   
   ### cheem_ggtour() -----
   cheem_ggtour <- reactive({
+    cheem_ls <- req(load_ls())
     bas         <- req(bas())
-    cheem_ls    <- req(load_ls())
     prim_obs    <- req(primary_obs())
     comp_obs    <- req(comparison_obs())
     mv_nm       <- req(input$manip_var_nm)
@@ -140,8 +126,13 @@ server <- function(input, output, session){
       cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
       row_index = idx_rownum, inc_var_nms = inc_var_nms)
-  }) %>% debounce(500L)
-  
+  }) %>%
+    ## Leaving load_ls out; only load when all are ready
+    bindCache(bas(), primary_obs(), comparison_obs(),
+              input$manip_var_nm, input$do_add_pcp_segments) %>%
+    bindEvent(bas(), primary_obs(), comparison_obs(),
+              input$manip_var_nm, input$do_add_pcp_segments) %>%
+    debounce(millis = 500L)
   ## Observers: updating inputs in the ui -----
   
   ## UPDATE MANIPULATION VARIABLE INPUT
@@ -150,10 +141,11 @@ server <- function(input, output, session){
     comparison_obs()
     input$inc_var_nms
   }, {
+    attr_df   <- req(load_ls())$attr_df
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
     opts      <- req(input$inc_var_nms)
-    attr_df   <- req(load_ls())$attr_df
+    
     if(all(opts %in% colnames(attr_df)) == FALSE){
       message("Update manip_var_nm: not all input$inc_var_nms are in attr_df...")
       return()
@@ -171,55 +163,44 @@ server <- function(input, output, session){
     dat <- req(input$dat_char)
     
     ## Load data:
+    he <- l1 <- l2 <- NULL
     if(dat == "toy classification"){
       he <- h4("Simulated triangle vertices")
       l1 <- p("- 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
-      l2 <- p("1) Create a random forest model classifying cluster level, given the continuous variables.")
+      # l2 <- p("- Fit a random forest model classifying cluster level and extract .")
     }else if(dat == "penguins classification"){
       he <- h4("Palmer penguins")
       l1 <- p("- 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
-      l2 <- p("1) Create a random forest model classifying species from the physical measurements.")
+      # l2 <- p("- Fit a random forest model classifying species from the physical measurements.")
     }else if(dat == "chocolates classification"){
       he <- h4("Chocolates")
       l1 <- p("- 88 observations of 10 nutrition measures as labeled. These chocolates labels as 'milk' or 'dark'")
-      l2 <- p("1) Create a random forest model classifying the type of chocolate from the nutrition label.")
+      # l2 <- p("- Fit a random forest model classifying the type of chocolate from the nutrition label.")
     }else if(dat == "toy quad regression"){
       he <- h4("Toy quadratic regression")
       l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 5]. y = x1 * x2 + x1 + x2 + (x3 + x4 + x5) / 10 + error")
-      l2 <- NULL
     }else if(dat == "toy trig regression"){
       he <- h4("Toy trig regression")
       l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 4*pi]|[0, 1]. y = sin(x1) + sin(x2) + (x3 + x4 + x5) / 10 + error")
-      l2 <- NULL
-    }else if(dat == "toy mixture regression"){
-      he <- h4("Toy trig regression")
-      l1 <- p("- Simulated data, 200 observations, a mixture of toy trig and toy quad, Y_i ~ max(trig_i, quad_i), with about 50% of obs from each.")
-      l2 <- NULL
+    }else if(dat == "toy mixture model regression"){
+      he <- h4("Toy mixture model regression")
+      l1 <- p("- Simulated data, 240 observations, 5 unifrom variable in [0, 5], y = {first third: x1^2 + (x2 + x3 + x4 +x5) / 10, second third: x2^2 + (x1 + x3 + x4 +x5) / 10, third third: x3^2 + (x1 + x2 + x4 +x5) / 10} + error.")
     }else if(dat == "fifa regression"){
       he <- h4("FIFA soccer players, 2020 season")
       l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and log wages [2020 Euros] (Regression Y)")
-      l2 <- p("1) Create a random forest model regressing continuous wages from the skill aggregates.")
+      # l2 <- p("- Fit a random forest model regressing continuous wages from the skill aggregates.")
     }else if(dat == "ames housing 2018 regression"){
       he <- h4("Ames housing 2018 (North Ames only)")
       l1 <- p("- 338 observations of 9 house attributes. Point aesthetics on zoning subclass, (exogenous to the model).")
-      l2 <- p("1) Create a random forest model regression log hose price from the 9 housing variables.")
+      # l2 <- p("- Fit a random forest model regression log hose price from the 9 housing variables.")
     }else { ## _ie_ user uploaded data
       he <- h4("User uploaded data")
-      l1 <- NULL
-      l2 <- p("1) Create a random forest model")
+      .cheem_ls <- req(load_ls())
+      .dim <- dim(.cheem_ls$attr_df)
+      ## Use dim and type attr to describe data
+      l1 <- p(paste0("- ", .dim[1L], " observations of ", .dim[2L], " variables."))
+      # l2 <- p("- Fit a ", .cheem_ls$type, " random forest model ")
     }
-    # }else if(dat == "apartments"){
-    #   he <- h4("DALEX::apartments, sinthetic 'anscombe quartet-like' data of appartment prices")
-    #   l1 <- p("- 1000 appartment observations, of 4 explanatory variables, 1 class, Y is price per square meter.")
-    #   l2 <- p("1) Create a random forest model regressing appartment price (/sq_m) the 4 X and the district's rank of price variation.")
-    # }else if(dat == "diabetes (wide)"){
-    #   he <- h4("Pima Indians Diabetes (wide)")
-    #   l1 <- p("- 392 observations, of *8* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-    #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the *8* X variables.")
-    # }else if(dat == "diabetes (long)"){
-    #   he <- h4("Pima Indians Diabetes (long)")
-    #   l1 <- p("- *724* observations, of *6* explanatory variables, 1 class/Y; presence/abence of diabetes.")
-    #   l2 <- p("1) Create a random forest model regressing the existence of diabetes from the 6 X variables.")
     
     ## Return
     HTML(paste(he, l1, l2))
@@ -228,17 +209,19 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
   
   ### GLOBAL VIEW PLOTLY
-  output$global_view <- plotly::renderPlotly({
-    cheem_ls  <- req(load_ls())
+  glob_view <- reactive({
+    cheem_ls  <- req(load_ls()) 
     .prim_obs <- req(primary_obs())
     .comp_obs <- req(comparison_obs())
     .col      <- req(input$glob_view_col)
+    
     suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
       global_view( ## Let global view pick the color/shape
         cheem_ls, .prim_obs, .comp_obs,
         #height_px = 480L, width_px = 1440L,
         color = .col))
-  })
+  }) %>% debounce(millis = 200L)
+  output$global_view <- plotly::renderPlotly(glob_view())
   outputOptions(output, "global_view",
                 suspendWhenHidden = FALSE, priority = -200L) ## Eager evaluation
   
@@ -264,12 +247,12 @@ server <- function(input, output, session){
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
-    ggt      <- req(cheem_ggtour())
     cheem_ls <- req(load_ls())
+    ggt <- req(cheem_ggtour())
     
-    .anim <- ggt %>% 
+    .anim <- ggt %>%
       spinifex::animate_plotly(fps = 4L, width = 1440L, height = 480L) %>%
-      plotly::layout(showlegend = FALSE) %>% 
+      plotly::layout(showlegend = FALSE) %>%
       plotly::style(hoverinfo = "none") %>%
       suppressWarnings()
 
@@ -295,7 +278,7 @@ server <- function(input, output, session){
     .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(
       .df, function(c) if(is.numeric(c)) round(c, 2L) else c))
-    return(DT::datatable(.df_r[idx_rownum,, drop = FALSE], rownames = FALSE))
+    DT::datatable(.df_r[idx_rownum,, drop = FALSE], rownames = FALSE)
   })
   outputOptions(output, "selected_df",
                 suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation

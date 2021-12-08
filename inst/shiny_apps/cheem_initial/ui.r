@@ -34,7 +34,7 @@ chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
 ### tab1_cheem -----
 expected_data_char <- c(
   "toy classification", "penguins classification", "chocolates classification",
-  "toy quad regression", "toy trig regression", "toy mixture regression", "fifa regression", "ames housing 2018 regression",
+  "toy quad regression", "toy trig regression", "toy mixture model regression", "fifa regression", "ames housing 2018 regression",
   #"diabetes (wide) classification", "diabetes (long) classification",
   "<Upload saved cheem_ls (.rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
@@ -43,16 +43,16 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
     ## Choose data:
     #h4("Preprocessing and data description"),
     fluidRow(
-      column(6L, selectInput(
+      column(3L, selectInput(
         "dat_char", "Data:",
         choices = expected_data_char,
         selected = "toy quad regression")
       ),
-      column(6L,
-             conditionalPanel(
-               "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
-               fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
-                         multiple = FALSE, accept = c("text/rds", ".rds"))))
+      
+      column(9L,  conditionalPanel(
+        "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
+        fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
+                  multiple = FALSE, accept = c("text/rds", ".rds"))))
     ),
     htmlOutput("desc_rows"),
     # HTML("2) Extract the full attribution matrix, variable attributions of <em>each</em> observation"),
@@ -101,8 +101,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
                            c("Yes" = TRUE, "No" = FALSE))),
     column(width = 6L, checkboxGroupInput(
       "inc_var_nms", label = "Variables to include:",
-      choices = NULL,
-      selected = NULL, inline = TRUE))
+      choices  = NULL, selected = NULL, inline = TRUE))
   ),
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
@@ -111,9 +110,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #                    width = "100%", height = "720px") %>%
   #   shinycssloaders::withSpinner(type = 8L),
   ## plotly tour
-  plotly::plotlyOutput( ##width = "auto", height = "720px"
-    "cheem_tour_plotly", width = "1800px", height = "860px") %>%
-    shinycssloaders::withSpinner(type = 8L),
+   plotly::plotlyOutput( ##width = "auto", height = "720px"
+     "cheem_tour_plotly", width = "1800px", height = "860px") %>%
+     shinycssloaders::withSpinner(type = 8L),
   br(), br(), br()
 ) ## Assign tab1_cheem
 

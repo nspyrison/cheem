@@ -46,10 +46,9 @@ default_rf <- function(
       y~., data = data.frame(y, x),
       mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree)
   )
-  
   .m <- gc()
   if(verbose) tictoc::toc()
-  return(.mod)
+  .mod
 }
 
 
@@ -108,7 +107,7 @@ attr_df_treeshap <- function(
   class(ret) <- c("data.frame", "treeshap")
   if(verbose) tictoc::toc()
   if(noisy) beepr::beep(1L)
-  return(ret)
+  ret
 }
 
 #' Extract higher level model performance statistics
@@ -150,7 +149,7 @@ model_performance_df <- function(
   # .mae  <- mean(abs(.e))
   # .mad  <- .mae / length(y)
   # .ROC <- ROCR::
-  return(data.frame(
+  data.frame(
     row.names = NULL,
     model_type = class(model)[length(class(model))],
     sse  = .sse,
@@ -158,9 +157,7 @@ model_performance_df <- function(
     rmse = .rmse,
     rse  = .rse,
     r2   = .r2,
-    r2_adj = .r2_adj
-    #,auc = .auc
-  ))
+    r2_adj = .r2_adj)
 }
 
 #' Create the plot data.frame for the global linked plotly display.
@@ -215,7 +212,7 @@ global_view_df_1layer <- function(
   colnames(ret) <- c("basis_type", "layer_name", "rownum",
                      "class", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
-  return(ret)
+  ret
 }
 
 #' Preprocessing for use in shiny app
@@ -413,11 +410,9 @@ if(FALSE){ ## Extension ideas -----
   cp_profiles_plots <- function(explainer, new_obs, var_nms){
     .pred_prof <- DALEX::predict_profile(explainer = explainer,
                                          new_observation = new_obs)
-
-    return(
+  
     plot(.pred_prof, variables = var_nms) +
       ggtitle::ggtitle("Ceteris-paribus profile", "")# +
     # + ggplot2::ylim(min(y), max(y))
-    )
   }
 }

@@ -34,7 +34,7 @@ basis_attr_df <- function(
   LA_bas <- .attr_df %>% as.numeric() %>%
     matrix(ncol = 1L, dimnames =
              list(colnames(attr_df), class(attr_df)[length(class(attr_df))]))
-  return(tourr::orthonormalise(LA_bas))
+  tourr::orthonormalise(LA_bas)
 }
 
 
@@ -70,7 +70,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
   .bas      <- basis_attr_df(attr_df, rownum = primary_obs)
   .expected <- basis_attr_df(attr_df, rownum = comparison_obs)
   .diff     <- abs(.bas - .expected)
-  return(which(.diff == max(.diff)))
+  which(.diff == max(.diff)) ## number
 }
 
 ## proto_* extensions ----
@@ -268,7 +268,7 @@ proto_basis1d_distribution <- function(
       color = "black", size = 1L, alpha = .8, linetype = 2L))))
   
   ## Return
-  return(ret)
+ ret
 }
 
 
@@ -343,6 +343,8 @@ global_view <- function(
   .alpha <- logistic_tform(nrow(decode_df))
   ## setup shape and color
   color <- match.arg(color)
+  if(color %in% c("default", colnames(global_view_df)) == FALSE)
+    stop(paste0("global_view: `color` column ", color, " not in the cheem_ls. Try to reprocess that dataset."))
   if(is_classification){
     if(color == "default") color <- "predicted_class"
     .color <- global_view_df[, color]
@@ -427,13 +429,12 @@ global_view <- function(
   if(as_ggplot) return(gg)
   
   ## Plotly options & box selection
-  ggp <- gg %>%
+  gg %>%
     plotly::ggplotly(tooltip = "tooltip", height = height_px, width = width_px) %>%
     plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
     plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
     plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
     plotly::highlight(on = "plotly_selected", off = "plotly_deselect")
-  return(ggp)
 }
 
 
@@ -453,8 +454,8 @@ global_view_subplots <- function(
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
   ## Initialize
-  global_view_df <- cheem_ls$global_view_df
-  decode_df      <- cheem_ls$decode_df
+  global_view_df    <- cheem_ls$global_view_df
+  decode_df         <- cheem_ls$decode_df
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(decode_df))
@@ -581,14 +582,13 @@ global_view_subplots <- function(
   #plotly::subplot(g1, g2, g3, titleY = TRUE, titleX = TRUE, margin = 0.1)
   
   ## Plotly options & box selection
-  ggp <- sp %>%
+  sp %>%
     plotly::ggplotly(tooltip = "tooltip", 
                      height = height_px, width = width_px) %>%
     plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
     plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
     plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
     plotly::highlight(on = "plotly_selected", off = "plotly_deselect")
-  return(ggp)
 }
 
 
@@ -734,6 +734,7 @@ radial_cheem_tour <- function(
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
+    return(ggt)
   }
   
   ### Regression case -----
@@ -810,7 +811,7 @@ radial_cheem_tour <- function(
   }
   
   ## Return the static ggtour, animate in app
-  return(ggt)
+  ggt
 }
 
 #' @rdname radial_cheem_tour
@@ -885,6 +886,7 @@ radial_cheem_tour_subplots <- function(
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
+    return(ggt)
   }
   
   ### Regression case -----
@@ -943,6 +945,6 @@ radial_cheem_tour_subplots <- function(
   }
   
   ## Return the static ggtour, animate in app
-  return(ggt)
+  ggt
 }
 
