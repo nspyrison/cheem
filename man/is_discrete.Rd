@@ -4,10 +4,13 @@
 \alias{is_discrete}
 \title{Check if a vector is discrete}
 \usage{
-is_discrete(x, na.rm)
+is_discrete(x, na.rm = TRUE)
 }
 \arguments{
 \item{x}{A vector to check the discreteness of.}
+
+\item{na.rm}{Whether or not to remove NA values before testing discretness.
+Defaults to TRUE.}
 }
 \value{
 Logical, whether or not \code{x} is a discrete variable.

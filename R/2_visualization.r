@@ -443,7 +443,7 @@ global_view <- function(
 #' @examples 
 #' 
 #' ## Experimental global view with plotly::subplots:
-#' global_view_subplots(this_ls)
+#' cheem:::global_view_subplots(this_ls)
 global_view_subplots <- function(
   cheem_ls,
   primary_obs    = NULL,
@@ -820,7 +820,7 @@ radial_cheem_tour <- function(
 #' 
 #' ## Experimental radial cheem tour with plotly::subplots:
 #' bas <- basis_attr_df(shap_df, rownum = 1)
-#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+#' ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 #' animate_plotly(ggt)
 radial_cheem_tour_subplots <- function(
   cheem_ls, basis, manip_var,

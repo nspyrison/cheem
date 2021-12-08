@@ -78,7 +78,7 @@ global_view(this_ls, color = "log_maha.data")
 global_view(this_ls, color = "cor_attr_proj.y")
 
 ## Experimental global view with plotly::subplots:
-global_view_subplots(this_ls)
+cheem:::global_view_subplots(this_ls)
 }
 \seealso{
 Other cheem consumers: 

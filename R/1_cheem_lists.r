@@ -302,7 +302,7 @@ cheem_ls <- function(
   .attr_bas <- attributes(.glob_attr)[length(attributes(.glob_attr))]
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
   ## log maha distance of data sapce
-  log_maha.data <- stats::mahalanobis(x, colMeans(x), cov(x))
+  log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
   ## Calculate correlation of attr_proj
   m <- as.matrix(x)
   cor_attr_proj.y <- NULL

@@ -12,13 +12,13 @@ color_scale_of(x, mid_pt = 0, limits = NULL, ...)
 
 \item{mid_pt}{A single number checking divergence from. Defaults to 0.}
 
-\item{...}{Optional other arguments passed to ggplot2::continuous_scale
-or ggplot2::discrete_scale.}
-
-\item{range}{A vector of min max values for the scale.
+\item{limits}{A vector of the min and max values for the scale.
 Useful for setting an absolute range, such as (-1, 1) for attribution/y
 correlation of each point. Points outside of limits show as default grey.
 Defaults to NULL; the range of x.}
+
+\item{...}{Optional other arguments passed to ggplot2::continuous_scale
+or ggplot2::discrete_scale.}
 }
 \value{
 A list containing a scale_color, and scale_fill;

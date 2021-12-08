@@ -116,7 +116,7 @@ if(FALSE) ## or animate with gganimate
 
 ## Experimental radial cheem tour with plotly::subplots:
 bas <- basis_attr_df(shap_df, rownum = 1)
-ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 animate_plotly(ggt)
 }
 \seealso{

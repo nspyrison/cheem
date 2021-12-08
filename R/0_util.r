@@ -6,6 +6,8 @@
 #' Typically used on the Y variable of a model.
 #' 
 #' @param x A vector to check the discreteness of.
+#' @param na.rm Whether or not to remove NA values before testing discretness.
+#' Defaults to TRUE.
 #' @return Logical, whether or not `x` is a discrete variable.
 #' @export
 #' @family cheem utility
@@ -13,7 +15,7 @@
 #' is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
 #' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' is_discrete(letters)    ## Characters and factors labeled discrete.
-is_discrete <- function(x, na.rm){
+is_discrete <- function(x, na.rm = TRUE){
   x <- x[is.na(x) == FALSE] ## Remove NAs
   is.factor(x) || is.character(x) || is.logical(x) ||
     (length(unique(x)) < 25L & is.numeric(x))
@@ -46,7 +48,7 @@ is_diverging <- function(x, mid_pt = 0){
 #' 
 #' @param x A vector to to scale the color to.
 #' @param mid_pt A single number checking divergence from. Defaults to 0.
-#' @param range A vector of min max values for the scale. 
+#' @param limits A vector of the min and max values for the scale. 
 #' Useful for setting an absolute range, such as (-1, 1) for attribution/y 
 #' correlation of each point. Points outside of limits show as default grey.
 #' Defaults to NULL; the range of x.
