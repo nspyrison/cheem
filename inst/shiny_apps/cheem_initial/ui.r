@@ -43,10 +43,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
     ## Choose data:
     #h4("Preprocessing and data description"),
     fluidRow(
-      column(3L, selectInput(
-        "dat_char", "Data:",
-        choices = expected_data_char,
-        selected = "toy quad regression")
+      column(3L, selectInput("dat_char", "Data:",
+                             choices  = expected_data_char,
+                             selected = "penguins classification")
       ),
       
       column(9L,  conditionalPanel(
@@ -98,7 +97,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
            selectInput("manip_var_nm", label = "Manipulation variable:",
                        choices  = NULL)),
     column(width = 3L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
-                           c("Yes" = TRUE, "No" = FALSE))),
+                           c("yes" = TRUE, "no" = FALSE))),
     column(width = 6L, checkboxGroupInput(
       "inc_var_nms", label = "Variables to include:",
       choices  = NULL, selected = NULL, inline = TRUE))
@@ -112,8 +111,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   ## plotly tour
    plotly::plotlyOutput( ##width = "auto", height = "720px"
      "cheem_tour_plotly", width = "1800px", height = "860px") %>%
-     shinycssloaders::withSpinner(type = 8L),
-  br(), br(), br()
+     shinycssloaders::withSpinner(type = 8L)
 ) ## Assign tab1_cheem
 
 ### tab_about -----

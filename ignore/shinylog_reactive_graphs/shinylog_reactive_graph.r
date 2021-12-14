@@ -1,3 +1,4 @@
+# reactlog -----
 library(reactlog)
 # tell shiny to log all reactivity
 reactlog::reactlog_enable()
@@ -9,3 +10,14 @@ cheem::run_app()
 
 # once app has closed, display reactlog from shiny
 shiny::reactlogShow()
+
+reactlog::reactlog_disable()
+
+
+
+# profvis -----
+library(profvis)
+
+profvis({
+  cheem::run_app()
+})
