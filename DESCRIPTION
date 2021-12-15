@@ -41,6 +41,7 @@ Suggests:
     knitr,
     testthat (>= 3.0.0),
     spelling
+Additional_repositories: https://nspyrison.github.io/drat
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
