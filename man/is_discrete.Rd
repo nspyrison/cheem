@@ -9,7 +9,7 @@ is_discrete(x, na.rm = TRUE)
 \arguments{
 \item{x}{A vector to check the discreteness of.}
 
-\item{na.rm}{Whether or not to remove NA values before testing discretness.
+\item{na.rm}{Whether or not to remove NA values before testing discreteness.
 Defaults to TRUE.}
 }
 \value{
@@ -20,7 +20,7 @@ Whether or not a vector is a discrete variable, returns a logical.
 Typically used on the Y variable of a model.
 }
 \examples{
-is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
+is_discrete(mtcars$mpg) ## Numeric column, with more than 25 unique values.
 is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 is_discrete(letters)    ## Characters and factors labeled discrete.
 }

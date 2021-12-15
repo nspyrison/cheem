@@ -11,17 +11,19 @@ _Local explanations_ are an approximation of instance(observation) level variabl
 ## Getting started
 
 ```
-## Github dependancies:
-remotes::install_github('ModelOriented/treeshap')
-remotes::install_github("nspyrison/spinifex")
+## Download the package
+install.packages("cheem", dependencies = TRUE)
+## Restart the R session so the IDE has the correct directory structure
+restartSession()
+## Load cheem into session
+library("cheem")
+## Try the app
+run_app()
 
-## Install cheem development version & its CRAN dependancies.
-remotes::install_github("nspyrison/cheem", dependencies = TRUE)
-## Run the {cheem} app including 3 preprocessed datasets
-cheem::run_app()
-
-## Preprocess your own dataset:
-## Follow along with the cheem_ls() exampes:
+# Processing your data
+## Install treeshap from github, to use as a local explainer
+remotes::install_github('ModelOriented/treeshap') ## Local 
+## Follow the examples in cheem_ls()
 ?cheem_ls
 ```
 

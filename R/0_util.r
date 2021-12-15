@@ -6,13 +6,13 @@
 #' Typically used on the Y variable of a model.
 #' 
 #' @param x A vector to check the discreteness of.
-#' @param na.rm Whether or not to remove NA values before testing discretness.
+#' @param na.rm Whether or not to remove NA values before testing discreteness.
 #' Defaults to TRUE.
 #' @return Logical, whether or not `x` is a discrete variable.
 #' @export
 #' @family cheem utility
 #' @examples
-#' is_discrete(mtcars$mpg) ## Numeric column, too many levels for discretness
+#' is_discrete(mtcars$mpg) ## Numeric column, with more than 25 unique values.
 #' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' is_discrete(letters)    ## Characters and factors labeled discrete.
 is_discrete <- function(x, na.rm = TRUE){
@@ -55,7 +55,7 @@ is_diverging <- function(x, mid_pt = 0){
 #' @param ... Optional other arguments passed to ggplot2::continuous_scale 
 #' or ggplot2::discrete_scale.
 #' @return A list containing a scale_color, and scale_fill; 
-#' the suggested color/fill scale for a ggplot. 
+#' the suggested color/fill scale for a ggplot.
 #' @export
 #' @aliases colour_scale_of
 #' @family cheem utility
@@ -263,5 +263,17 @@ as_logical_index <- function(index, n){
   }
   if(identical(index, TRUE)) index <- rep(TRUE, n)
   index
+}
+
+
+#' Development message
+#' 
+#' Send a message if the 4th chunk of the package version is 9000.
+#' @param text A character string to message() if package version is _9000.
+devMessage <- function(text){
+  version4 <-  utils::packageVersion(pkg = "cheem")[1L, 4L]
+  if(is.na(version4) == FALSE)
+    if(version4 == 9000L)
+      message(paste0("devMessage: ", text))
 }
 

@@ -53,7 +53,7 @@ mt_path <- manual_tour(bas, manip_var = mv)
 ggt <- ggtour(mt_path, dat, angle = .3) +
   facet_wrap_tour(facet_var = clas, ncol = 2, nrow = 2) +
   proto_density(aes_args = list(color = clas, fill = clas, shape = clas),
-                rug_shape = NULL) +
+                rug_shape = 3) +
   proto_basis1d("floor1d") +
   proto_origin1d()
 
@@ -86,7 +86,6 @@ ggt <- ggtour(mt_path, dat, angle = .3) +
 
 message("order of frame cor is an issue; if we remove facet does that help?")
 animate_plotly(ggt)
-animate_plotly2(ggt)
 animate_gganimate(ggt, render = gganimate::ffmpeg_renderer())
 
 ### append y, and frame_cor -----
@@ -100,64 +99,5 @@ ggt <- ggtour(mt_path, dat, angle = .3) +
   
 
 animate_plotly(ggt)
-animate_plotly2(ggt)
 animate_gganimate(ggt, render = gganimate::ffmpeg_renderer())
 
-
-## Changes redraw to false.
-animate_plotly2 <- function(
-  ggtour,
-  fps = 8,
-  ... ## Passed to plotly::layout().
-){
-  ## Frame asymmetry issue: https://github.com/ropensci/plotly/issues/1696
-  #### Adding many protos is liable to break plotly animations, see above url.
-  ## Assumptions
-  if(length(ggtour$layers) == 0L) stop("No layers found, did you forget to add a proto_*?")
-  n_frames <- length(unique(last_ggtour()$df_basis$frame))
-  ## 1 Frame only:
-  if(n_frames == 1L){
-    warning("ggtour df_basis only has 1 frame, applying just plotly::ggplotly instead.")
-    anim <- plotly::ggplotly(p = ggtour, tooltip = "tooltip") %>%
-      ## Remove button bar and zoom box
-      plotly::config(displayModeBar = FALSE) %>%
-      ## Remove legends and axis lines
-      plotly::layout(showlegend = FALSE, dragmode = FALSE,
-                     #, fixedrange = TRUE ## This is a curse, do not use.
-                     yaxis = list(showgrid = FALSE, showline = FALSE),
-                     xaxis = list(showgrid = FALSE, showline = FALSE,
-                                  scaleanchor = "y", scalaratio = 1L),
-                     ...)
-  }else{
-    ## More than 1 frame:
-    
-    ## Block plotly.js warning: lack of support for horizontal legend;
-    #### https://github.com/plotly/plotly.js/issues/53
-    anim <- suppressWarnings(
-      plotly::ggplotly(p = ggtour, tooltip = "tooltip") %>%
-        plotly::animation_opts(frame = 1L / fps * 1000L,
-                               transition = 0L, redraw = FALSE) %>%
-        plotly::animation_slider(
-          active = 0L, ## 0 indexed first frame
-          currentvalue = list(prefix = "Frame: ", font = list(color = "black"))
-        ) %>%
-        ## Remove button bar and zoom box
-        plotly::config(displayModeBar = FALSE,
-                       modeBarButtonsToRemove = c("zoomIn2d", "zoomOut2d"))) %>%
-      ## Remove legends and axis lines
-      plotly::layout(showlegend = FALSE, dragmode = FALSE,
-                     #, fixedrange = TRUE ## This is a curse, do not use.
-                     yaxis = list(showgrid = FALSE, showline = FALSE),
-                     xaxis = list(showgrid = FALSE, showline = FALSE,
-                                  scaleanchor = "y", scalaratio = 1L),
-                     ...)
-  }
-  
-  ## Clean up
-  .set_last_ggtour(NULL) ## Clears last tour
-  ## This should prevent some errors from not running ggtour() right before animating it.
-  .m <- gc() ## Mute garbage collection
-  
-  return(anim)
-}
-  
