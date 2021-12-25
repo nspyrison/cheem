@@ -80,7 +80,7 @@ server <- function(input, output, session){
     inc_var_nms <- req(input$inc_var_nms)
     prim_obs    <- req(input$primary_obs)
     if(all(inc_var_nms %in% colnames(attr_df)) == FALSE){
-      devMessage("bas(): bas tried to react before inc_var_nms updated...")
+      cheem:::devMessage("bas(): bas tried to react before inc_var_nms updated...")
       return()
     }
     basis_attr_df(attr_df[, inc_var_nms, drop = FALSE], prim_obs)
@@ -111,8 +111,9 @@ server <- function(input, output, session){
     ## abandoning and defaulting to full selection.
     
     if(mv_nm %in% rownames(bas) == FALSE){
-      devMessage(paste0("output$cheem_tour: input$manip_var_nm = '", mv_nm,
-                     "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
+      cheem:::devMessage(paste0(
+        "output$cheem_tour: input$manip_var_nm = '", mv_nm,
+        "' wasn't in the basis. Shiny tried to update cheem_tour before manip_var_nm..."))
       return(NULL)
     }
     mv <- which(rownames(bas) == mv_nm)
@@ -205,7 +206,7 @@ server <- function(input, output, session){
     .inc_nms  <- req(input$inc_var_nms)
     
     if(all(.inc_nms %in% colnames(attr_df)) == FALSE){
-      devMessage("Update manip_var_nm: not all input$inc_var_nms are in attr_df...")
+      cheem:::devMessage("Update manip_var_nm: not all input$inc_var_nms are in attr_df...")
       return(NULL)
     }
     ## Select var with largest difference between primary and comparison obs.
@@ -274,7 +275,7 @@ server <- function(input, output, session){
     .col      <- req(input$glob_view_col)
     
     if(all(rownames(req(bas())) %in% colnames(cheem_ls$attr_df)) == FALSE){
-      devMessage("glob_view(): bas tried to react before inc_var_nms updated...")
+      cheem:::devMessage("glob_view(): bas tried to react before inc_var_nms updated...")
       return(NULL)
     }
     

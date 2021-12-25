@@ -15,7 +15,8 @@ require(spinifex)
 require(plotly)
 require(gganimate) ## Not in use atm
 require(magrittr)
-options(show.error.locations = TRUE)
+#options(show.error.locations = TRUE) #, error = browser)
+
 
 ## Load prepared cheem_ls() returns
 penguins_ls     <- readRDS("./data/preprocess_penguins.rds")

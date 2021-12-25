@@ -269,11 +269,22 @@ as_logical_index <- function(index, n){
 #' Development message
 #' 
 #' Send a message if the 4th chunk of the package version is 9000.
-#' @param text A character string to message() if package version is _9000.
+#' @param text A character string to message() if package version is 9000.
 devMessage <- function(text){
   version4 <-  utils::packageVersion(pkg = "cheem")[1L, 4L]
   if(is.na(version4) == FALSE)
     if(version4 == 9000L)
       message(paste0("devMessage: ", text))
+}
+
+#' Evaluate if development
+#' 
+#' Evaluate the epression if the 4th chunk of the package version is 9000.
+#' @param text A character string to message() if package version is 9000.
+ifDev <- function(expr){
+  version4 <- utils::packageVersion(pkg = "cheem")[1L, 4L]
+  if(is.na(version4) == FALSE)
+    if(version4 == 9000L)
+      eval(expr)
 }
 
