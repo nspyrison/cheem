@@ -26,6 +26,8 @@ Suggests a alpha opacity to plot with as a function of the number of
 observation.
 }
 \examples{
+library(cheem)
+
 ## Suggest an opacity to use in plotting:
 (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
 
@@ -41,6 +43,7 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
+\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{manip_var_of_attr_df}()},
 \code{\link{problem_type}()},

@@ -62,7 +62,7 @@ Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
 bas_p <- basis_attr_df(shap_df, rownum = 1)

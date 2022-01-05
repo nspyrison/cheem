@@ -12,6 +12,8 @@
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' is_discrete(mtcars$mpg) ## Numeric column, with more than 25 unique values.
 #' is_discrete(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' is_discrete(letters)    ## Characters and factors labeled discrete.
@@ -32,6 +34,8 @@ is_discrete <- function(x, na.rm = TRUE){
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' is_diverging(-10:10)
 #' is_diverging(-10:-5)
 #' is_diverging(mtcars$mpg, 25)
@@ -120,6 +124,8 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' problem_type(mtcars$mpg)
 #' problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' problem_type(letters)
@@ -140,6 +146,8 @@ problem_type <- function(y){
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' does_contain_nonnumeric(mtcars$mpg)
 #' does_contain_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
 #' does_contain_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in tooltip
@@ -162,6 +170,8 @@ does_contain_nonnumeric <- function(x){
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' sub <- mtcars[mtcars$cyl == 6, ]
 #' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
 #' rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
@@ -196,6 +206,8 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' ## Suggest an opacity to use in plotting:
 #' (my_alpha <- linear_tform(nrow(spinifex::penguins)))
 #'
@@ -224,6 +236,8 @@ linear_tform = function(
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' ## Suggest an opacity to use in plotting:
 #' (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
 #'
@@ -251,6 +265,8 @@ logistic_tform = function(
 #' @export
 #' @family cheem utility
 #' @examples
+#' library(cheem)
+#' 
 #' ## Coerce a numeric index to logical:
 #' as_logical_index(c(1, 4:10, 15), nrow(mtcars))
 as_logical_index <- function(index, n){
@@ -280,7 +296,7 @@ devMessage <- function(text){
 #' Evaluate if development
 #' 
 #' Evaluate the epression if the 4th chunk of the package version is 9000.
-#' @param text A character string to message() if package version is 9000.
+#' @param expr A character string to message() if package version is 9000.
 ifDev <- function(expr){
   version4 <- utils::packageVersion(pkg = "cheem")[1L, 4L]
   if(is.na(version4) == FALSE)

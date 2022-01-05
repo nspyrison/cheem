@@ -1,19 +1,17 @@
-##TODO: !! This whole file wants to be rebased for 1) generalized models and 
-# 2) local explanations (language is already generalized)
-##TODO: Some functions lacking examples.
+# Model fits (treeshap & DALEX) -----
 
 #' Random forest model via randomForest
 #' 
-#' A wrapper function for `randomForest::randomForest()` with more modest 
-#' hyperparameter defaults and consistent arguments with `cheem`.
+#' A wrapper function for `randomForest::randomForest` with more modest 
+#' hyperparameter defaults and arguments consistent with `cheem`.
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
-#' @param hp_ntree Hyper parameter, the number of trees to grow.
-#' @param hp_mtry Hyper parameter, the number variables randomly sampled at 
+#' @param hp_ntree Hyperparameter, the number of trees to grow.
+#' @param hp_mtry Hyperparameter, the number variables randomly sampled at 
 #' each split.
-#' @param hp_nodesize Hyperparameter, Minimum size of terminal nodes. 
+#' @param hp_nodesize Hyperparameter, the minimum size of terminal nodes. 
 #' Setting this number larger causes smaller trees to be grown (and thus take less time).
 #' @return A randomForest model.
 #' @export
@@ -28,14 +26,14 @@
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
 #' global_view(this_ls)
 default_rf <- function(
-  x, y, verbose = TRUE,
+  x, y, verbose = getOption("verbose"),
   hp_ntree = 125,
   hp_mtry = ifelse(is_discrete(y), sqrt(ncol(x)), ncol(x) / 3),
   hp_nodesize = max(ifelse(is_discrete(y), 1, 5), nrow(x) / 500)
@@ -43,8 +41,7 @@ default_rf <- function(
   if(verbose) tictoc::tic("default_rf")
   suppressWarnings(## suppresses: The response has five or fewer unique values.  Are you sure?
     .mod <- randomForest::randomForest(
-      y~., data = data.frame(y, x),
-      mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree)
+      x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree)
   )
   .m <- gc()
   if(verbose) tictoc::toc()
@@ -52,16 +49,142 @@ default_rf <- function(
 }
 
 
+## Condition handling model types ----
+
+#' Check model type
+#' 
+#' Check whether or not the model is a 
+#' certain model. Checks if a model is made with: 
+#' \code{\link[randomForest:randomForest]{randomForest::randomForest}},
+#' \code{\link[ranger:ranger]{ranger::ranger}},
+#' \code{\link[gbm:gbm]{gbm::gbm}},
+#' \code{\link[xgboost:xgb.train]{xgboost::xgb.train}},
+#' \code{\link[catboost:catboost.train]{catboost::catboost.train}}, or
+#' \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm}}.
+#' 
+#' @param model A model object to check the class/origin.
+#' @return A logical, whether or not the model is of a certain class.
+#' @export
+#' @family cheem utility
+#' @examples
+#' library(cheem)
+#' 
+#' ## Regression:
+#' dat <- amesHousing2018_NorthAmes
+#' X <- dat[, 1:9]
+#' Y <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
+#' 
+#' # treeshap handles various tree-based models:
+#' 
+#' ## randomForest
+#' fit <- randomForest::randomForest(X, Y, ntree = 10)
+#' is_randomForest(fit)
+#' 
+#' ## ranger
+#' fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 10)
+#' is_ranger(fit)
+#' 
+#' ## gbm
+#' fit <- gbm::gbm(Y ~ ., data = data.frame(X, Y), n.trees = 10)
+#' is_gbm(fit)
+#' 
+#' ## xgboost
+#' fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
+#'                         params = list(objective = "reg:squarederror"))
+#' is_xgboost(fit)
+#' 
+#' ## catboost R examples error.
+#' 
+#' ## lightgbm
+#' lgbm_params <- list(objective = "regression", num_leaves = 10L)
+#' fit <- lightgbm::lightgbm(as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+#' is_lightgbm(fit)
+#' 
+#' 
+#' # Continue cheem workflow from any of these models:
+#' 
+#' ## Long runtime for full datasets or complex models:
+#' shap_df <- attr_df_treeshap(fit, X, verbose = TRUE, noisy = FALSE)
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                     model = fit,
+#'                     attr_df = shap_df)
+#' global_view(this_ls)
+is_randomForest <- function(model){
+  "randomForest" %in% class(model)
+}
+##' @rdname is_randomForest
+##' @export
+is_ranger <- function(model){
+  "ranger" %in% class(model)
+}
+##' @rdname is_randomForest
+##' @export
+is_gbm <- function(model){
+  "gbm" %in% class(model)
+}
+##' @rdname is_randomForest
+##' @export
+is_xgboost <- function(model){
+  "xgb.Booster" %in% class(model)
+}
+##' @rdname is_randomForest
+##' @export
+is_lightgbm <- function(model){
+  "lgb.Booster" %in% class(model)
+}
+##' @rdname is_randomForest
+##' @export
+is_catboost <- function(model){
+  "catboost.Model" %in% class(model)
+}
+#' #' Check is the model is supported by treeshap.
+#' #' 
+#' #' 
+#' #' @param model A model to check the treeshap support of.
+#' is_treeshap_supported <- function(model){
+#'   any(is_randomForest(model), is_ranger(model), is_gmb(model),
+#'     is_xgboost(model), is_catboost(model), is_lightgbm(model))
+#' }
+
+
+#' Unifies models into a standard format
+#' 
+#' Unifies models supported by treeshap into a standard format.
+unify_tree_model <- function(
+  model, x
+){
+  if(is_randomForest(model)){
+    ret <- treeshap::randomForest.unify(model, x)
+  }else if(is_ranger(model)){
+    ret <- treeshap::ranger.unify(model, x)
+  }else if(is_gbm(model)){
+    ret <- treeshap::gbm.unify(model, x)
+  }else if(is_xgboost(model)){
+    ret <- treeshap::xgboost.unify(model, x)
+  }else if(is_catboost(model)){
+    ret <- treeshap::catboost.unify(model, x)
+  }else if(is_lightgbm(model)){
+    ret <- treeshap::lightgbm.unify(model, x)
+  }else
+    stop("Wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
+  ret
+}
+
+
+# treeshap -----
+
 #' Extract the full treeSHAP data.frame of a randomForest model
 #' 
 #' A data.frame of each observations treeSHAP variable attributions of a
 #' randomForest model. 
 #' A wrapper for `treeshap::randomForest.unify` and `treeshap::treeshap`.
 #' 
-#' @param randomForest_model The return of fitted randomForest::randomForest 
-#' model.
+#' @param tree_based_model A tree based model supported by `treeshap`: 
+#' a model from `randomForest::randomForest`, `ranger::ranger`, `gbm::gbm`, 
+#' `xgboost::xgb.train`, `catboost::catboost.train`, `lightgbm::lightgbm`.
 #' @param x The explanatory data (without response) to extract the local 
-#' attributions of.
+#' attributions from.
 #' @param keep_heavy Logical, if the heavy items "interactions",
 #'  "unified_model", and "observations" should be kept. Defaults to FALSE.
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
@@ -80,25 +203,25 @@ default_rf <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
 #' global_view(this_ls)
 attr_df_treeshap <- function(
-  randomForest_model,
+  tree_based_model,
   x,
   keep_heavy = FALSE,
-  verbose = TRUE,
-  noisy = TRUE
-){
+  verbose    = getOption("verbose"),
+  noisy      = getOption("verbose")
+){ 
   if(verbose){
-    writeLines(paste0("Started attr_df_treeshap() at: ", Sys.time()))
+    writeLines(paste0("Started attr_df_treeshap at: ", Sys.time()))
     tictoc::tic("attr_df_treeshap")
   }
-  .rfu <- treeshap::randomForest.unify(randomForest_model, x)
-  ret  <- treeshap::treeshap(.rfu, x = x)
+  .unified_mod <- unify_tree_model(tree_based_model, x)
+  ret <- treeshap::treeshap(.unified_mod, x = x)
   if(keep_heavy == FALSE)
     ret <- ret[[1L]]
   ## Keeping only 1; reduces ~99% of the obj size, keep shap values.
@@ -109,6 +232,8 @@ attr_df_treeshap <- function(
   if(noisy) beepr::beep(1L)
   ret
 }
+
+# cheem workflow -----
 
 #' Extract higher level model performance statistics
 #' 
@@ -184,7 +309,7 @@ model_performance_df <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
@@ -250,7 +375,7 @@ global_view_df_1layer <- function(
 #' Y    <- as.integer(clas)
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
@@ -264,7 +389,7 @@ global_view_df_1layer <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
@@ -282,7 +407,7 @@ cheem_ls <- function(
   model, attr_df,
   basis_type = c("pca", "olda"), ## class req for olda
   layer_name = class(model)[length(class(model))],
-  verbose = TRUE,
+  verbose    = getOption("verbose"),
   keep_model = FALSE
 ){
   ## Initialize -----
@@ -292,14 +417,14 @@ cheem_ls <- function(
   is_classification <- is_discrete(y)
   rownum <- V2 <- projection_nm <- NULL
   
-  ## blobal_view_df -----
+  ## global_view_df -----
   .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")
-  .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, 
-                                      class(attr_df)[length(class(attr_df))])
+  .cl <-  tail(class(attr_df), 1L)
+  .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, .cl)
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
-  .dat_bas  <- attributes(.glob_dat )[length(attributes(.glob_dat ))]
-  .attr_bas <- attributes(.glob_attr)[length(attributes(.glob_attr))]
+  .dat_bas  <- tail(attributes(.glob_dat ), 1L)
+  .attr_bas <- tail(attributes(.glob_attr), 1L)
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
   ## log maha distance of data sapce
   log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))

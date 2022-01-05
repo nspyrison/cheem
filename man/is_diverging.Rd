@@ -19,6 +19,8 @@ Whether or not a vector is a diverges a value, returns a logical.
 Used to help default a scale_color for ggplot2.
 }
 \examples{
+library(cheem)
+
 is_diverging(-10:10)
 is_diverging(-10:-5)
 is_diverging(mtcars$mpg, 25)
@@ -31,6 +33,7 @@ Other cheem utility:
 \code{\link{color_scale_of}()},
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
+\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

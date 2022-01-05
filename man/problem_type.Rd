@@ -20,6 +20,8 @@ for \code{DALEX::explain(type)} as it also expects "classification" or
 "regression".
 }
 \examples{
+library(cheem)
+
 problem_type(mtcars$mpg)
 problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 problem_type(letters)
@@ -32,6 +34,7 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
+\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

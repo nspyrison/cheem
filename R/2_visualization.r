@@ -21,7 +21,7 @@
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' basis_attr_df(shap_df, rownum = 1)
 basis_attr_df <- function(
@@ -63,7 +63,7 @@ basis_attr_df <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
@@ -114,7 +114,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
 #' bas_p <- basis_attr_df(shap_df, rownum = 1)
@@ -312,7 +312,7 @@ proto_basis1d_distribution <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
@@ -328,7 +328,7 @@ global_view <- function(
   primary_obs    = NULL,
   comparison_obs = NULL,
   color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  #shape = NULL, 
+  #shape = NULL,
   height_px = 480L,
   width_px  = 1440L,
   as_ggplot = FALSE
@@ -348,13 +348,13 @@ global_view <- function(
   if(is_classification){
     if(color == "default") color <- "predicted_class"
     .color <- global_view_df[, color]
-    shape <- global_view_df[, "predicted_class"]
+    .shape <- global_view_df[, "predicted_class"]
   }else{
     ## Regression
     if(color == "default"){
       .color <- rep_len(factor(FALSE), nrow(global_view_df))
     }else .color <- global_view_df[, color]
-    shape <- rep_len(factor(FALSE), nrow(global_view_df))
+    .shape <- rep_len(factor(FALSE), nrow(global_view_df))
   }
   .spaces <- paste(rep(" ", 61L), collapse = "")
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
@@ -384,7 +384,7 @@ global_view <- function(
       method = "lm", formula = y ~ x, se = FALSE))
   ## Add main points
   pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
-    ggplot2::aes(color = .color, shape = shape, tooltip = tooltip),
+    ggplot2::aes(color = .color, shape = .shape, tooltip = tooltip),
     alpha = .alpha)), .col_scale)
   ## If classification circle misclassified points
   if(is_classification == TRUE){
@@ -634,7 +634,7 @@ global_view_subplots <- function(
 #' Y    <- as.integer(clas)
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' #' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
@@ -655,7 +655,7 @@ global_view_subplots <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets:
+#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,

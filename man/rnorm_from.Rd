@@ -24,6 +24,8 @@ typically applied to a cluster subset of data. \emph{ie} draw from cluster 'a',
 then assign to cluster 'b'.
 }
 \examples{
+library(cheem)
+
 sub <- mtcars[mtcars$cyl == 6, ]
 ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
 rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
@@ -36,6 +38,7 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
+\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

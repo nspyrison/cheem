@@ -12,7 +12,7 @@ cheem_ls(
   attr_df,
   basis_type = c("pca", "olda"),
   layer_name = class(model)[length(class(model))],
-  verbose = TRUE,
+  verbose = getOption("verbose"),
   keep_model = FALSE
 )
 }
@@ -59,7 +59,7 @@ clas <- penguins$species
 Y    <- as.integer(clas)
 
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
@@ -73,7 +73,7 @@ Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,

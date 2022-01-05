@@ -5,19 +5,20 @@
 \title{Extract the full treeSHAP data.frame of a randomForest model}
 \usage{
 attr_df_treeshap(
-  randomForest_model,
+  tree_based_model,
   x,
   keep_heavy = FALSE,
-  verbose = TRUE,
-  noisy = TRUE
+  verbose = getOption("verbose"),
+  noisy = getOption("verbose")
 )
 }
 \arguments{
-\item{randomForest_model}{The return of fitted randomForest::randomForest
-model.}
+\item{tree_based_model}{A tree based model supported by \code{treeshap}:
+a model from \code{randomForest::randomForest}, \code{ranger::ranger}, \code{gbm::gbm},
+\code{xgboost::xgb.train}, \code{catboost::catboost.train}, \code{lightgbm::lightgbm}.}
 
 \item{x}{The explanatory data (without response) to extract the local
-attributions of.}
+attributions from.}
 
 \item{keep_heavy}{Logical, if the heavy items "interactions",
 "unified_model", and "observations" should be kept. Defaults to FALSE.}
@@ -45,7 +46,7 @@ Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,

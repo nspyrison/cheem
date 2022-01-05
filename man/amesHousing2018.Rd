@@ -101,7 +101,7 @@ Y <- log(sub$SalePrice)
 clas <- sub$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,

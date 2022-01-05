@@ -17,6 +17,8 @@ Returns a logical, whether or not a vector contains any non-numeric
 characters. Typically used to test if row names hold non-index information.
 }
 \examples{
+library(cheem)
+
 does_contain_nonnumeric(mtcars$mpg)
 does_contain_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
 does_contain_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in tooltip
@@ -28,6 +30,7 @@ Other cheem utility:
 \code{\link{color_scale_of}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
+\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

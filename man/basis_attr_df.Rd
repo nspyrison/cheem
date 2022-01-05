@@ -29,7 +29,7 @@ Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 basis_attr_df(shap_df, rownum = 1)
 }
@@ -40,6 +40,7 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
+\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

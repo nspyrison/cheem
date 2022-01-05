@@ -7,7 +7,7 @@
 default_rf(
   x,
   y,
-  verbose = TRUE,
+  verbose = getOption("verbose"),
   hp_ntree = 125,
   hp_mtry = ifelse(is_discrete(y), sqrt(ncol(x)), ncol(x)/3),
   hp_nodesize = max(ifelse(is_discrete(y), 1, 5), nrow(x)/500)
@@ -20,20 +20,20 @@ default_rf(
 
 \item{verbose}{Logical, if runtime should be printed. Defaults to TRUE.}
 
-\item{hp_ntree}{Hyper parameter, the number of trees to grow.}
+\item{hp_ntree}{Hyperparameter, the number of trees to grow.}
 
-\item{hp_mtry}{Hyper parameter, the number variables randomly sampled at
+\item{hp_mtry}{Hyperparameter, the number variables randomly sampled at
 each split.}
 
-\item{hp_nodesize}{Hyperparameter, Minimum size of terminal nodes.
+\item{hp_nodesize}{Hyperparameter, the minimum size of terminal nodes.
 Setting this number larger causes smaller trees to be grown (and thus take less time).}
 }
 \value{
 A randomForest model.
 }
 \description{
-A wrapper function for \code{randomForest::randomForest()} with more modest
-hyperparameter defaults and consistent arguments with \code{cheem}.
+A wrapper function for \code{randomForest::randomForest} with more modest
+hyperparameter defaults and arguments consistent with \code{cheem}.
 }
 \examples{
 library(cheem)
@@ -45,7 +45,7 @@ Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets:
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
