@@ -13,7 +13,7 @@ X <- data.frame(x1 = runif(200, 0, 5),
 Y <- X$x1 + X$x2 + (X$x1 * X$x2) + .1 * X$x3 + .1 * X$x4 + .1 * X$x5 + rnorm(200)
 
 rf_fit  <- default_rf(X, Y); s();
-shap_df <- attr_df_treeshap(rf_fit, X); s();
+shap_df <- attr_df_treeshap(rf_fit, X, verbose = TRUE); s();
 this_ls <- cheem_ls(X, Y,
                     model = rf_fit,
                     attr_df = shap_df)

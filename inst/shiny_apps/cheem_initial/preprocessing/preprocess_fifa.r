@@ -57,7 +57,7 @@ if(F)
   hist(Y)
 
 rf_fit  <- default_rf(X, Y); s();
-shap_df <- attr_df_treeshap(rf_fit, X); s();
+shap_df <- attr_df_treeshap(rf_fit, X verbose = TRUE); s();
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)

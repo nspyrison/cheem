@@ -310,30 +310,33 @@ server <- function(input, output, session){
     ## Return a list containing the filename of the rendered image file.
     list(src = "outfile.mp4", contentType = "video/mp4")
   }, deleteFile = TRUE)
-  ## NO EAGER EVAL, want last
+  ## NO EAGER EVAL, desired to run last
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
     cheem_ls <- req(load_ls())
     ggt <- req(cheem_ggtour())
     
+    if(cheem_ls$type == "classification"){
+      .sratio <- 2L
+      .h <- 820L
+    }else{ ## Regression
+      .sratio <- 1L
+      .h <- 480L
+    }
     .anim <- ggt %>%
-      spinifex::animate_plotly(fps = 4L, width = 1440L, height = 480L) %>%
+      spinifex::animate_plotly(fps = 4L, width = 1440L, height = .h) %>%
       plotly::layout(showlegend = FALSE) %>%
       plotly::style(hoverinfo = "none") %>%
       suppressWarnings()
-
+    
     ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
     #### the following hasn't helped:
     ## - starting at frame 11 doesn't help
     ## - hiding gridlines again doesn't remove them.
     
-    ## Layout also set in animate_plotly
-    if(cheem_ls$type == "classification"){
-      .anim %>% plotly::layout(xaxis = list(scaleratio = 4L))
-    }else{
-      .anim %>% plotly::layout(xaxis = list(scaleratio = 1L))
-    }
+    ## Layout, aspect ratio
+    .anim %>% plotly::layout(xaxis = list(scaleratio = .sratio))
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   ## NO EAGER EVAL, want last
   

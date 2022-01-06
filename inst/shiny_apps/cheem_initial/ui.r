@@ -94,14 +94,15 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   h4("Cheem tour"),
   #p("The data space projected through normalized attribution of the primary observation."),
   fluidRow(
+    column(width = 3L, checkboxGroupInput(
+      "inc_var_nms", label = "Variables to include:",
+      choices  = NULL, selected = NULL, inline = TRUE)),
     column(width = 3L,
            selectInput("manip_var_nm", label = "Manipulation variable:",
                        choices  = NULL)),
     column(width = 3L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
                            c("yes" = TRUE, "no" = FALSE))),
-    column(width = 6L, checkboxGroupInput(
-      "inc_var_nms", label = "Variables to include:",
-      choices  = NULL, selected = NULL, inline = TRUE))
+    column(3L)
   ),
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
@@ -111,7 +112,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #   shinycssloaders::withSpinner(type = 8L),
   ## plotly tour
    plotly::plotlyOutput( ##width = "auto", height = "720px"
-     "cheem_tour_plotly", width = "1800px", height = "860px") %>%
+     "cheem_tour_plotly", width = "1480px", height = "1000px") %>%
      shinycssloaders::withSpinner(type = 8L)
 ) ## Assign tab1_cheem
 

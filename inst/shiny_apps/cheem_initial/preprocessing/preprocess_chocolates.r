@@ -13,6 +13,7 @@
   clas <- factor(chocolates$Type, levels = rev(unique(chocolates$Type)))
   lvls <- levels(clas)
   X <- chocolates[, 5:14] %>% as.data.frame() ## X's not scaled.
+  colnames(X) <- gsub("\\_.*", "", colnames(X))
   nm_imc <- paste(chocolates$Name, chocolates$MFR, chocolates$Country, sep = ", ")
   r_idx <- which(nm_imc == "85% Cocoa Dark French Chocolate, Thorntons, UK")[2L]
   nm_imc[r_idx] <- paste0(nm_imc[r_idx], " (2nd)")
@@ -21,8 +22,8 @@
   
   rf_fit  <- default_rf(X, Y)
   ## Long runtime for full datasets:
-  shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-  this_ls <- cheem_ls(## cheem_ls total: 3.51 sec elapsed
+  shap_df <- attr_df_treeshap(rf_fit, X, verbose = TRUE, noisy = FALSE)
+  this_ls <- cheem_ls(
     x = X, y = Y, class = clas,
     model = rf_fit, attr_df = shap_df)
 }
