@@ -416,8 +416,10 @@ global_view <- function(
   gg <- global_view_df %>% plotly::highlight_key(~rownum) %>%
     ggplot2::ggplot(ggplot2::aes(V1, V2)) +
     pts_main +
-    spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft") +
-    spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft") +
+    spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft",
+                         line_size = .5, text_size = 4L) +
+    spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft",
+                         line_size = .5, text_size = 4L) +
     ggplot2::coord_fixed() +
     ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
