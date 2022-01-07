@@ -10,8 +10,8 @@ global_view(
   primary_obs = NULL,
   comparison_obs = NULL,
   color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  height_px = 480L,
-  width_px = 1440L,
+  height_px = 480,
+  width_px = 1440,
   as_ggplot = FALSE
 )
 

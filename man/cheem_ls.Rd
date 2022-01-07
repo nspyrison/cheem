@@ -11,7 +11,7 @@ cheem_ls(
   model,
   attr_df,
   basis_type = c("pca", "olda"),
-  layer_name = class(model)[length(class(model))],
+  layer_name = tail(class(model))[1],
   verbose = getOption("verbose"),
   keep_model = FALSE
 )

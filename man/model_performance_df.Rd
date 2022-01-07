@@ -4,11 +4,15 @@
 \alias{model_performance_df}
 \title{Extract higher level model performance statistics}
 \usage{
-model_performance_df(model)
+model_performance_df(model, x = NULL, y = NULL)
 }
 \arguments{
 \item{model}{A non-linear model, originally a \code{randomForest::randomForest}
 model fit, or a return from \code{default_rf()}.}
+
+\item{x}{Data to predict, required by ranger models.}
+
+\item{y}{Observed response, required by ranger models.}
 }
 \value{
 A data.frame of model performance statistics.

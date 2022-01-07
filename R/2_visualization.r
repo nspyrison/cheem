@@ -327,17 +327,17 @@ global_view <- function(
   cheem_ls,
   primary_obs    = NULL,
   comparison_obs = NULL,
-  color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  #shape = NULL,
-  height_px = 480L,
-  width_px  = 1440L,
-  as_ggplot = FALSE
+  color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
+  #shape         = NULL,
+  height_px      = 480,
+  width_px       = 1440,
+  as_ggplot      = FALSE
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
   ## Initialize
-  global_view_df <- cheem_ls$global_view_df
-  decode_df      <- cheem_ls$decode_df
+  global_view_df    <- cheem_ls$global_view_df
+  decode_df         <- cheem_ls$decode_df
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(decode_df))
@@ -356,22 +356,23 @@ global_view <- function(
     }else .color <- global_view_df[, color]
     .shape <- rep_len(factor(FALSE), nrow(global_view_df))
   }
-  .spaces <- paste(rep(" ", 61L), collapse = "")
+  .spaces       <- paste(rep(" ", 61L), collapse = "")
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
-  .lim <- NULL ## Defaults to range(x) for non-discrete. 
-  if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L)
-  .col_scale <- color_scale_of(.color, limits = .lim)
+  if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
+  .col_scale    <- color_scale_of(.color, limits = .lim)
   
   ## Get the bases of the global view, map them
-  u_nms     <- unique(global_view_df$layer_name)
-  .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
-                          layer_name = u_nms[1L])
-  .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
+  .u_nms             <- unique(global_view_df$layer_name)
+  .bas_data          <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
+                                   layer_name = .u_nms[1L])
+  .map_to_data       <- global_view_df[global_view_df$layer_name == .u_nms[1L],
+                                       c("V1", "V2")]
   .map_to_data[, 1L] <- .map_to_data[, 1L]
-  .bas_attr <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
-                          layer_name = u_nms[2L])
-  .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
+  .bas_attr          <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
+                                   layer_name = .u_nms[2L])
+  .map_to_attr       <- global_view_df[global_view_df$layer_name == .u_nms[2L],
+                                       c("V1", "V2")]
   .map_to_attr[, 1L] <- .map_to_attr[, 1L]
   
   ## Proto for main points
@@ -424,9 +425,9 @@ global_view <- function(
     ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
     ggplot2::labs(x = .x_axis_title, y = "",
-                  color = substitute(color), fill  = substitute(color)) +
-    ggplot2::theme(axis.text  = ggplot2::element_blank(),
-                   axis.ticks = ggplot2::element_blank(),
+                  color = substitute(color), fill = substitute(color)) +
+    ggplot2::theme(axis.text       = ggplot2::element_blank(),
+                   axis.ticks      = ggplot2::element_blank(),
                    legend.position = "off")
   if(as_ggplot) return(gg)
   

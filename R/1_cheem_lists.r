@@ -78,31 +78,31 @@ default_rf <- function(
 #' # treeshap handles various tree-based models:
 #' 
 #' ## randomForest
-#' fit <- randomForest::randomForest(X, Y, ntree = 10)
+#' fit <- randomForest::randomForest(X, Y, ntree = 25)
 #' is_randomForest(fit)
 #' 
 #' ## ranger
-#' fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 10)
+#' fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
 #' is_ranger(fit)
 #' 
 #' ## gbm
-#' fit <- gbm::gbm(Y ~ ., data = data.frame(X, Y), n.trees = 10)
+#' fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 #' is_gbm(fit)
 #' 
 #' ## xgboost
-#' fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
+#' fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 25,
 #'                         params = list(objective = "reg:squarederror"))
 #' is_xgboost(fit)
 #' 
 #' ## catboost R examples error.
 #' 
 #' ## lightgbm
-#' lgbm_params <- list(objective = "regression", num_leaves = 10L)
+#' lgbm_params <- list(objective = "regression", num_leaves = 25)
 #' fit <- lightgbm::lightgbm(as.matrix(X), Y, params = lgbm_params, nrounds = 2)
 #' is_lightgbm(fit)
 #' 
 #' 
-#' # Continue cheem workflow from any of these models:
+#' # Continue cheem workflow with tree-based models:
 #' 
 #' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(fit, X, verbose = TRUE, noisy = FALSE)
@@ -180,7 +180,7 @@ unify_tree_model <- function(
 #' randomForest model. 
 #' A wrapper for `treeshap::randomForest.unify` and `treeshap::treeshap`.
 #' 
-#' @param tree_based_model A tree based model supported by `treeshap`: 
+#' @param model A tree based model supported by `treeshap`: 
 #' a model from `randomForest::randomForest`, `ranger::ranger`, `gbm::gbm`, 
 #' `xgboost::xgb.train`, `catboost::catboost.train`, `lightgbm::lightgbm`.
 #' @param x The explanatory data (without response) to extract the local 
@@ -210,7 +210,7 @@ unify_tree_model <- function(
 #'                     attr_df = shap_df)
 #' global_view(this_ls)
 attr_df_treeshap <- function(
-  tree_based_model,
+  model,
   x,
   keep_heavy = FALSE,
   verbose    = getOption("verbose"),
@@ -220,7 +220,11 @@ attr_df_treeshap <- function(
     writeLines(paste0("Started attr_df_treeshap at: ", Sys.time()))
     tictoc::tic("attr_df_treeshap")
   }
-  .unified_mod <- unify_tree_model(tree_based_model, x)
+  ## suppress: Using 25 trees... \n
+  suppressMessages(.pred <- stats::predict(model, data = x))
+  if(any(is.na(.pred)))
+    stop("attr_df_treeshap: model had NA values in its predictions; does the model have enough trees/leaves?")
+  .unified_mod <- unify_tree_model(model, x)
   ret <- treeshap::treeshap(.unified_mod, x = x)
   if(keep_heavy == FALSE)
     ret <- ret[[1L]]
@@ -241,6 +245,8 @@ attr_df_treeshap <- function(
 #' 
 #' @param model A non-linear model, originally a `randomForest::randomForest`
 #' model fit, or a return from `default_rf()`.
+#' @param x Data to predict, required by ranger models.
+#' @param y Observed response, required by ranger models.
 #' @return A data.frame of model performance statistics.
 #' @examples
 #' library(cheem)
@@ -254,35 +260,39 @@ attr_df_treeshap <- function(
 #' rf_fit <- default_rf(X, Y)
 #' cheem:::model_performance_df(rf_fit)
 model_performance_df <- function(
-  model
+  model, x = NULL, y = NULL
 ){
   #### Following the functions in {Metrics}
   # liable to differ from the performance of the model object (due to adj values?)
   # but at least consistent format and measures.
-  y       <- model$y
-  .pred   <- stats::predict(model)
-  .e      <- y - .pred ## Residual
+  .y <- y
+  if(is.null(.y)) .y <- model$y
+  ## suppress: Using 25 trees... \n
+  suppressMessages(.pred <- stats::predict(model, data = x))
+  ## ranger doens't have $y and prediction is a list rather than vector
+  if(is.list(.pred)) .pred <- .pred$predictions
+  .e      <- .y - .pred ## Residual
   .se     <- .e^2L
   .sse    <- sum(.se)
   .mse    <- mean(.se)
   .rmse   <- sqrt(.mse)
-  .rse    <- .sse / sum((y - mean(y))^2L)
+  .rse    <- .sse / sum((.y - mean(.y))^2L)
   .r2     <- 1L - .rse
-  .r2_adj <- 1L -(.mse / stats::var(y))
+  .r2_adj <- 1L - (.mse / stats::var(.y))
   ## We could be at this all day...
   # .auc    <- Metrics::auc(y, .pred)
   # .mae  <- mean(abs(.e))
   # .mad  <- .mae / length(y)
   # .ROC <- ROCR::
   data.frame(
-    row.names = NULL,
+    row.names  = NULL,
     model_type = class(model)[length(class(model))],
-    sse  = .sse,
-    mse  = .mse,
-    rmse = .rmse,
-    rse  = .rse,
-    r2   = .r2,
-    r2_adj = .r2_adj)
+    sse        = .sse,
+    mse        = .mse,
+    rmse       = .rmse,
+    rse        = .rse,
+    r2         = .r2,
+    r2_adj     = .r2_adj)
 }
 
 #' Create the plot data.frame for the global linked plotly display.
@@ -406,7 +416,7 @@ cheem_ls <- function(
   x, y, class = NULL,
   model, attr_df,
   basis_type = c("pca", "olda"), ## class req for olda
-  layer_name = class(model)[length(class(model))],
+  layer_name = tail(class(model))[1],
   verbose    = getOption("verbose"),
   keep_model = FALSE
 ){
@@ -419,15 +429,15 @@ cheem_ls <- function(
   
   ## global_view_df -----
   .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")
-  .cl <-  tail(class(attr_df), 1L)
+  .cl        <- tail(class(attr_df), 1L)
   .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, .cl)
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
-  .dat_bas  <- tail(attributes(.glob_dat ), 1L)
-  .attr_bas <- tail(attributes(.glob_attr), 1L)
+  .dat_bas   <- tail(attributes(.glob_dat ), 1L)
+  .attr_bas  <- tail(attributes(.glob_attr), 1L)
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
   ## log maha distance of data sapce
-  log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
+  log_maha.data  <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
   ## Calculate correlation of attr_proj
   m <- as.matrix(x)
   cor_attr_proj.y <- NULL
@@ -437,18 +447,20 @@ cheem_ls <- function(
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
+  ## suppress: Using 25 trees... \n
+  suppressMessages(.pred <- stats::predict(model, data = x))
+  ## ranger.prediction is a list rather than vector
+  if(is.list(.pred)) .pred <- .pred$predictions
   .decode_left <- data.frame(
-    rownum = 1L:nrow(x), class = class, y,
-    prediction = stats::predict(model))
-  .decode_right <- data.frame(
-    residual = y - stats::predict(model), cor_attr_proj.y, x)
+    rownum = 1L:nrow(x), class = class, y, prediction = .pred)
+  .decode_right <- data.frame(residual = y - .pred, cor_attr_proj.y, x)
   ## If classification: append pred class/is_misclass
   if(is_classification){
     .pred_clas <- factor(
-      levels(class)[round(stats::predict(model))], levels = levels(class))
+      levels(class)[round(.pred)], levels = levels(class))
     .is_misclass <- .pred_clas!= class
-    .decode_middle <- data.frame(predicted_class  = .pred_clas,
-                                 is_misclassified = .is_misclass)
+    .decode_middle <- data.frame(
+      predicted_class  = .pred_clas, is_misclassified = .is_misclass)
     .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
   }else .decode_df <- cbind(.decode_left, .decode_right)
   ## Round numeric columns for display
@@ -462,19 +474,18 @@ cheem_ls <- function(
     .vec_yjitter <- stats::runif(nrow(x), -.3, .3)
     .layer_nm <- paste0(.layer_nm, " (w/ y jitter)")
   }
-  .yhaty_df <- data.frame(V1 = .decode_df$prediction,
-                          V2 = .decode_df$y + .vec_yjitter)
-  .yhaty_df <- spinifex::scale_01(.yhaty_df)
-  .yhaty_df <- data.frame(
-    basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
-    class = .decode_df$class, .yhaty_df)
+  .yhaty_df  <- data.frame(V1 = .decode_df$prediction,
+                           V2 = .decode_df$y + .vec_yjitter)
+  .yhaty_df  <- spinifex::scale_01(.yhaty_df)
+  .yhaty_df  <- data.frame(basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
+                           class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
   ## Add tooltips ----
   tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip
   if(is.null(rownames(x)) == FALSE)
     ### Character rownames?
-    if(does_contain_nonnumeric(rownames(x)) == TRUE)
+    if(does_contain_nonnumeric(rownames(x)))
       tooltip <- paste0(tooltip, ", ", rownames(x))
   if(is_classification){
     ### Classification tooltip
@@ -503,7 +514,7 @@ cheem_ls <- function(
   ## Cleanup and return
   ret_ls <- list(
     type = problem_type(y),
-    model_performance_df = model_performance_df(model),
+    model_performance_df = model_performance_df(model, x, y),
     attr_df = attr_df,
     global_view_df = .glob_view,
     global_view_basis_ls = .glob_basis_ls,

@@ -4,65 +4,71 @@
   library("testthat")
   library("spinifex")
   
-  r_idx <- 1L:100L
+  r_idx  <- 1L:100L
   ## Classification:
-  sub <- wine[r_idx, ]
-  c_X <- sub[, 2:5]
+  sub    <- wine[r_idx, ]
+  c_X    <- sub[, 2:5]
   c_clas <- sub$Type
-  c_Y <- as.integer(c_clas)
+  c_Y    <- as.integer(c_clas)
   ## Regression:
-  sub <- amesHousing2018_NorthAmes[r_idx, ]
-  r_X <- sub[, 1:5]
+  sub    <- amesHousing2018_NorthAmes[r_idx, ]
+  r_X    <- sub[, 1:5]
   r_clas <- sub$SubclassMS[r_idx]
-  r_Y <- log(sub$SalePrice[r_idx])
+  r_Y    <- log(sub$SalePrice[r_idx])
 }
-
-
-### default_rf -----
-c_rf <- default_rf(c_X, c_Y, verbose = FALSE)
-r_rf <- default_rf(r_X, r_Y, verbose = FALSE)
-
-test_that("default_rf", {
-  expect_equal(class(c_rf), c("randomForest.formula", "randomForest"))
-  expect_equal(class(r_rf), c("randomForest.formula", "randomForest"))
-})
 
 
 ### treeshap supported models -----
 ## Create, unify, and apply through global view for each of:
 
 #### randomForest -----
-fit <- randomForest::randomForest(r_X, r_Y, ntree = 10)
-r_attr_df <- attr_df_treeshap(fit, r_X, noisy = FALSE, verbose = FALSE)
-this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = fit, attr_df = r_attr_df)
-global_view(this_ls)
+r_fit     <- randomForest::randomForest(r_X, r_Y, ntree = 25)
+r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
+r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
+r_gv      <- global_view(r_this_ls)
+c_fit     <- randomForest::randomForest(c_X, c_Y, ntree = 25) ## Warning expected
+c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
+c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
+c_gv      <- global_view(c_this_ls)
+test_that("randomForest thru global_view", {
+  expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+  expect_equal(class(r_gv), c("plotly", "htmlwidget"))
+})
 
 #### ranger -----
-fit <- ranger::ranger(r_Y ~ ., data.frame(r_X, r_Y), num.trees = 10)
-r_attr_df <- attr_df_treeshap(fit, r_X, noisy = FALSE, verbose = FALSE)
-this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = fit, attr_df = r_attr_df)
-## issue with ranger:
-# Error in predict.ranger(model) : 
-#   Error: Argument 'data' is required for non-quantile prediction.
-##global_view(this_ls)
+r_fit     <- ranger::ranger(r_Y ~ ., data.frame(r_X, r_Y), num.trees = 25)
+r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
+r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
+r_gv      <- global_view(r_this_ls)
+c_fit     <- ranger::ranger(c_Y ~ ., data.frame(c_X, c_Y), num.trees = 25)
+c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
+c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
+c_gv      <- global_view(c_this_ls)
+test_that("ranger thru global_view", {
+  expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+  expect_equal(class(r_gv), c("plotly", "htmlwidget"))
+})
+
 
 #### gbm -----
-fit <- gbm::gbm(r_Y ~ ., data = data.frame(r_X, r_Y), n.trees = 10)
-r_attr_df <- attr_df_treeshap(fit, r_X, noisy = FALSE, verbose = FALSE)
-this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = fit, attr_df = r_attr_df)
-## error for gbm:
-# warning: eig_sym(): given matrix is not symmetric
-# 
-# error: Col::tail(): size out of bounds
-# Error in dt_pca(X, myndim, mycor) : Col::tail(): size out of bounds
-## global_view(this_ls)
-
+r_fit     <- gbm::gbm(r_Y ~ ., "gaussian", data.frame(r_X, r_Y), n.trees = 25)
+r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
+r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
+r_gv      <- global_view(r_this_ls)
+c_fit     <- gbm::gbm(c_Y ~ ., "tdist", data.frame(c_X, c_Y), n.trees = 25)
+c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
+c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
+c_gv      <- global_view(c_this_ls)
+test_that("gbm thru global_view", {
+  expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+  expect_equal(class(r_gv), c("plotly", "htmlwidget"))
+})
 
 #### xgboost -----
-fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
-                        params = list(objective = "reg:squarederror"))
+fit       <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
+                              params = list(objective = "reg:squarederror"))
 r_attr_df <- attr_df_treeshap(fit, data.frame(r_X, r_Y), noisy = FALSE, verbose = FALSE)
-this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = fit, attr_df = r_attr_df)
+this_ls   <- cheem_ls(r_X, r_Y, class = r_clas, model = fit, attr_df = r_attr_df)
 ## error for xgboost:
 # warning: eig_sym(): given matrix is not symmetric
 # 
@@ -77,6 +83,15 @@ r_attr_df <- attr_df_treeshap(fit, r_X, noisy = FALSE, verbose = FALSE)
 
 #### NO catboost ----
 
+
+### default_rf -----
+c_rf <- default_rf(c_X, c_Y, verbose = FALSE)
+r_rf <- default_rf(r_X, r_Y, verbose = FALSE)
+
+test_that("default_rf", {
+  expect_equal(class(c_rf), c("randomForest.formula", "randomForest"))
+  expect_equal(class(r_rf), c("randomForest.formula", "randomForest"))
+})
 
 ### attr_df_treeshap ----
 ## doesn't work when rows are few:  Error in 1:nrow(tree) : argument of length 0

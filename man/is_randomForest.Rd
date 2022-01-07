@@ -49,31 +49,31 @@ clas <- dat$SubclassMS
 # treeshap handles various tree-based models:
 
 ## randomForest
-fit <- randomForest::randomForest(X, Y, ntree = 10)
+fit <- randomForest::randomForest(X, Y, ntree = 25)
 is_randomForest(fit)
 
 ## ranger
-fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 10)
+fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
 is_ranger(fit)
 
 ## gbm
-fit <- gbm::gbm(Y ~ ., data = data.frame(X, Y), n.trees = 10)
+fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 is_gbm(fit)
 
 ## xgboost
-fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
+fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 25,
                         params = list(objective = "reg:squarederror"))
 is_xgboost(fit)
 
 ## catboost R examples error.
 
 ## lightgbm
-lgbm_params <- list(objective = "regression", num_leaves = 10L)
+lgbm_params <- list(objective = "regression", num_leaves = 25)
 fit <- lightgbm::lightgbm(as.matrix(X), Y, params = lgbm_params, nrounds = 2)
 is_lightgbm(fit)
 
 
-# Continue cheem workflow from any of these models:
+# Continue cheem workflow with tree-based models:
 
 ## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(fit, X, verbose = TRUE, noisy = FALSE)

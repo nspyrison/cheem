@@ -5,7 +5,7 @@
 \title{Extract the full treeSHAP data.frame of a randomForest model}
 \usage{
 attr_df_treeshap(
-  tree_based_model,
+  model,
   x,
   keep_heavy = FALSE,
   verbose = getOption("verbose"),
@@ -13,7 +13,7 @@ attr_df_treeshap(
 )
 }
 \arguments{
-\item{tree_based_model}{A tree based model supported by \code{treeshap}:
+\item{model}{A tree based model supported by \code{treeshap}:
 a model from \code{randomForest::randomForest}, \code{ranger::ranger}, \code{gbm::gbm},
 \code{xgboost::xgb.train}, \code{catboost::catboost.train}, \code{lightgbm::lightgbm}.}
 
