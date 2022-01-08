@@ -705,7 +705,7 @@ radial_cheem_tour <- function(
     row_index[c(.prim_obs, .comp_obs)] <- TRUE
   }
   ## Subset columns and scale plot data
-  .dat <- decode_df[, .col_idx] %>% spinifex::scale_01() %>% as.data.frame()
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>% as.data.frame()
   
   ## Problem type & aesthetics: classification or regression?
   .prob_type <- cheem_ls$type ## Either "classification" or "regression"
@@ -744,8 +744,8 @@ radial_cheem_tour <- function(
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
     ## Double up data; observed y and residual
-    .fixed_y <- c(spinifex::scale_01(decode_df$y),
-                  spinifex::scale_01(decode_df$residual))
+    .fixed_y <- c(spinifex::scale_sd(decode_df$y),
+                  spinifex::scale_sd(decode_df$residual))
     .doub_prim_obs <- .doub_comp_obs <- NULL
     if(is.null(.prim_obs) == FALSE)
       .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
@@ -759,39 +759,22 @@ radial_cheem_tour <- function(
     .class_fore <- .class ## could be dummy factor(FALSE)
     if(length(.class) > 1L)
       .class_fore <- c(.class, .class)
-    
     ## Scale a 0 line for residual facet
-    .df_hline <-
-      data.frame(x = FALSE,
-                 y = spinifex::scale_01(c(0L, range(decode_df$residual))),
-                 facet_var = "residual")[1L,, drop = FALSE]
-    ##TODO: Note coloring on residuals will error
-    #### as proto_basis1d_distribution as it has group_by/class mapped to color (discrete).
-    # ## Regression aesthetics:
-    # reg_color <- factor(cheem_ls$decode_df$residual)
-    # reg_shape <- cheem_ls$decode_df$class
-    # color_scale <- ggplot2::scale_colour_gradient2(
-    #   low = scales::muted("blue"), mid = "grey80", high = scales::muted("red"))
-    if(F){ ## Peeling back to reprex
-      spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
-        spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
-        spinifex::append_fixed_y(fixed_y = .fixed_y) +
-        #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
-        spinifex::proto_point()
-    }
-    
+    .df_hline <- data.frame(x = FALSE, y = 0L, facet_var = "residual")
+    ## Note coloring on residuals will error
+
     ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle) +
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
       spinifex::append_fixed_y(fixed_y = .fixed_y) +
-      # Plotly can't handle text rotation in geom_text/annotate.
+      ## Plotly can't handle text rotation in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
       ggplot2::theme(
         legend.position = "off",
         axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
+      ## exasperates issues with plotly & geom presence issue.
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       spinifex::proto_point(
         aes_args = list(color = .class_fore, shape = .class_fore),
-        #aes_args = list(color = reg_color, shape = reg_shape),
         identity_args = list(alpha = .alpha),
         row_index = .idx_fore) +
       proto_basis1d_distribution(
@@ -807,10 +790,8 @@ radial_cheem_tour <- function(
       spinifex::proto_highlight(
         row_index = .doub_prim_obs,
         identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black")) +
-      #spinifex::proto_origin() +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline,
-                          color = "grey40")
-      #spinifex::proto_hline0() ## adds to both facets..
+      ## use manual geom_hline as proto_hline0 is on all facets.
+      ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline, color = "grey40")
   }
   
   ## Return the static ggtour, animate in app
@@ -857,7 +838,7 @@ radial_cheem_tour_subplots <- function(
     row_index[c(.prim_obs, .comp_obs)] <- TRUE
   }
   ## Subset columns and scale plot data
-  .dat <- decode_df[, .col_idx] %>% spinifex::scale_01() %>% as.data.frame()
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>% as.data.frame()
   
   ## Problem type & aesthetics: classification or regression?
   .prob_type <- cheem_ls$type ## Either "classification" or "regression"
@@ -896,10 +877,7 @@ radial_cheem_tour_subplots <- function(
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
     ## Scale a 0 line for residual facet
-    .df_hline <- data.frame(x = FALSE,
-                            y = spinifex::scale_01(c(0L, range(decode_df$residual))),
-                            facet_var = "residual")[1L,, drop = FALSE]
-    ##TODO: continue dev here on single_subplot
+    .df_hline <- data.frame(x = FALSE, y = 0, facet_var = "residual")
     single_subplot <- function(data = .dat, fixed_y, facet_lvl){
       spinifex::ggtour(.mt_path, data, angle = angle) +
         spinifex::facet_wrap_tour(facet_var = facet_lvl, nrow = 1L) +
@@ -930,8 +908,8 @@ radial_cheem_tour_subplots <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .lp
-    g2 <- single_subplot(.dat, spinifex::scale_01(decode_df$y), factor("observed y")) + .lp
-    g3 <- single_subplot(.dat, spinifex::scale_01(decode_df$residual), factor("residual")) +
+    g2 <- single_subplot(.dat, spinifex::scale_sd(decode_df$y), factor("observed y")) + .lp
+    g3 <- single_subplot(.dat, spinifex::scale_sd(decode_df$residual), factor("residual")) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline, color = "grey40") + .lp
     ## Individual plotly plots with axes titles
     p1 <- plotly::ggplotly(g1) %>%

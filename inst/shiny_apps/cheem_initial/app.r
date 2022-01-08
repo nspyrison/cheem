@@ -14,36 +14,36 @@ server <- function(input, output, session){
     
     if(dat == "toy classification"){
       ret      <- toy_class_ls
-      prim_obs <- 36L
-      comp_obs <- 23L
+      # prim_obs <- 36L
+      # comp_obs <- 23L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
-      prim_obs <- 124L
-      comp_obs <- 86L
+      # prim_obs <- 18L  ## Example in milestone pres is 18, 111
+      # comp_obs <- 111L
     }else if(dat == "chocolates classification"){
       ret      <- chocolates_ls
-      prim_obs <- 22L
-      comp_obs <- 34L
+      # prim_obs <- 22L
+      # comp_obs <- 34L
     }else if(dat == "toy quad regression"){
       ret      <- toy_quad_reg_ls
-      prim_obs <- 11L
-      comp_obs <- 121L
+      # prim_obs <- 11L
+      # comp_obs <- 121L
     }else if(dat == "toy trig regression"){
       ret      <- toy_trig_reg_ls
-      prim_obs <- 87L
-      comp_obs <- 102L
+      # prim_obs <- 87L
+      # comp_obs <- 102L
     }else if(dat == "toy mixture model regression"){
       ret      <- toy_mix_reg_ls
-      prim_obs <- 23L
-      comp_obs <- 130L
+      # prim_obs <- 23L
+      # comp_obs <- 130L
     }else if(dat == "fifa regression"){
       ret      <- fifa_ls
-      prim_obs <- 1L
-      comp_obs <- 8L
+      # prim_obs <- 1L
+      # comp_obs <- 8L
     }else if(dat == "ames housing 2018 regression"){
       ret      <- ames2018_ls
-      prim_obs <- 170L
-      comp_obs <- 220L
+      # prim_obs <- 170L
+      # comp_obs <- 220L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
@@ -136,35 +136,27 @@ server <- function(input, output, session){
   observeEvent(req(input$dat_char), {
     dat <- req(input$dat_char)
     if(dat == "toy classification"){
-      ret      <- toy_class_ls
       prim_obs <- 36L
       comp_obs <- 23L
     }else if(dat == "penguins classification"){
-      ret      <- penguins_ls
-      prim_obs <- 124L
-      comp_obs <- 86L
+      prim_obs <- 124L  ## Last presentation was is 124, 86
+      comp_obs <- 76L
     }else if(dat == "chocolates classification"){
-      ret      <- chocolates_ls
       prim_obs <- 22L
       comp_obs <- 34L
     }else if(dat == "toy quad regression"){
-      ret      <- toy_quad_reg_ls
       prim_obs <- 11L
       comp_obs <- 121L
     }else if(dat == "toy trig regression"){
-      ret      <- toy_trig_reg_ls
       prim_obs <- 87L
       comp_obs <- 102L
     }else if(dat == "toy mixture model regression"){
-      ret      <- toy_mix_reg_ls
       prim_obs <- 23L
       comp_obs <- 130L
     }else if(dat == "fifa regression"){
-      ret      <- fifa_ls
       prim_obs <- 1L
       comp_obs <- 8L
     }else if(dat == "ames housing 2018 regression"){
-      ret      <- ames2018_ls
       prim_obs <- 170L
       comp_obs <- 220L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
@@ -184,7 +176,6 @@ server <- function(input, output, session){
       label = "Comparison observation rownum, ('x' point):",
       min = 1L, max = 1e6L, step = 1L, value = comp_obs)
     ## SIDE EFFECT: Update inclusion variable names
-    
   })
   
   ### update inc_var_nms -----

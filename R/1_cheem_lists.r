@@ -335,17 +335,15 @@ global_view_df_1layer <- function(
   if(is.null(class)) class <- as.factor(FALSE)
   
   ## Projection
-  x_std <- spinifex::scale_01(x)
+  x_std <- spinifex::scale_sd(x)
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
-  proj <- x_std %*% basis %>% as.data.frame()
-  proj <- spinifex::scale_01(proj)
+  proj  <- x_std %*% basis
   
   ## Column bind wide
   ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, proj)
-  colnames(ret) <- c("basis_type", "layer_name", "rownum",
-                     "class", paste0("V", 1L:d))
+  colnames(ret) <- c("basis_type", "layer_name", "rownum", "class", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
   ret
 }
@@ -433,11 +431,11 @@ cheem_ls <- function(
   .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, .cl)
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
-  .dat_bas   <- tail(attributes(.glob_dat ), 1L)
+  .dat_bas   <- tail(attributes(.glob_dat),  1L)
   .attr_bas  <- tail(attributes(.glob_attr), 1L)
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
   ## log maha distance of data sapce
-  log_maha.data  <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
+  log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
   ## Calculate correlation of attr_proj
   m <- as.matrix(x)
   cor_attr_proj.y <- NULL
@@ -467,18 +465,18 @@ cheem_ls <- function(
   .decode_df <- data.frame(lapply(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
 
-  ## rbind yhaty to global_view_df ----
-  .vec_yjitter <- 0L ## default/regression case
-  .layer_nm <- "model"
   if(is_classification){
     .vec_yjitter <- stats::runif(nrow(x), -.3, .3)
-    .layer_nm <- paste0(.layer_nm, " (w/ y jitter)")
+    .layer_nm    <- "model (w/ y jitter)"
+  }else{ ## Regression
+    .vec_yjitter <- 0L
+    .layer_nm    <- "model"
   }
-  .yhaty_df  <- data.frame(V1 = .decode_df$prediction,
-                           V2 = .decode_df$y + .vec_yjitter)
-  .yhaty_df  <- spinifex::scale_01(.yhaty_df)
-  .yhaty_df  <- data.frame(basis_type = NA, layer_name = .layer_nm, rownum = 1L:nrow(x),
-                           class = .decode_df$class, .yhaty_df)
+  ## rbind yhaty to global_view_df ----
+  .yhaty_df <- data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
+    spinifex::scale_01()
+  .yhaty_df  <- data.frame(basis_type = NA, layer_name = .layer_nm,
+                           rownum = 1L:nrow(x), class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
   ## Add tooltips ----
@@ -506,7 +504,7 @@ cheem_ls <- function(
     .glob_view$predicted_class <- rep_len(.pred_clas,          .N)
   .glob_view$class             <- rep_len(.decode_df$residual, .N)
   .glob_view$tooltip           <- rep_len(tooltip,             .N)
-  .decode_df$tooltip <- tooltip
+  .decode_df$tooltip           <- tooltip
   ## Ensure facet order is kept.
   .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))
   .glob_view$layer_name <- factor(.glob_view$layer_name, unique(.glob_view$layer_name))

@@ -65,9 +65,9 @@ test_that("gbm thru global_view", {
 })
 
 #### xgboost -----
-fit       <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
+r_fit     <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 10,
                               params = list(objective = "reg:squarederror"))
-r_attr_df <- attr_df_treeshap(fit, data.frame(r_X, r_Y), noisy = FALSE, verbose = FALSE)
+r_attr_df <- attr_df_treeshap(r_fit, data.frame(r_X, r_Y), noisy = FALSE, verbose = FALSE)
 this_ls   <- cheem_ls(r_X, r_Y, class = r_clas, model = fit, attr_df = r_attr_df)
 ## error for xgboost:
 # warning: eig_sym(): given matrix is not symmetric

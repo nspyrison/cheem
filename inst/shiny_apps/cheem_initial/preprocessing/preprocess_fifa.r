@@ -56,11 +56,11 @@ Y <- log(.raw$wage_eur) ## _LOG_ wages in Euros, assumed 2020 valuation.
 if(F)
   hist(Y)
 
-rf_fit  <- default_rf(X, Y); s();
-shap_df <- attr_df_treeshap(rf_fit, X verbose = TRUE); s();
+rf_fit  <- default_rf(X, Y, verbose = TRUE); s();
+shap_df <- attr_df_treeshap(rf_fit, X, verbose = TRUE); s();
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
-                    attr_df = shap_df)
+                    attr_df = shap_df, verbose = TRUE)
 names(this_ls)
 
 ## Thin data, after model/layer_ls ----
@@ -79,8 +79,7 @@ names(this_ls)
 }
 
 ## EXPORT OBJECTS ----
-saveRDS(this_ls,
-        file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_fifa.rds")
+saveRDS(this_ls, file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_fifa.rds")
 cat("Saved.\n")
 if(F) ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_fifa.rds")
