@@ -310,9 +310,9 @@ server <- function(input, output, session){
     
     if(cheem_ls$type == "classification"){
       .sratio <- 2L
-      .h <- 820L
+      .h <- 720L
     }else{ ## Regression
-      .sratio <- 1L
+      .sratio <- .2
       .h <- 480L
     }
     .anim <- ggt %>%
@@ -327,13 +327,13 @@ server <- function(input, output, session){
     ## - hiding gridlines again doesn't remove them.
     
     ## Layout, aspect ratio
-    .anim %>% plotly::layout(xaxis = list(scaleratio = .sratio))
+    .anim %>% plotly::layout(xaxis = list(scaleanchor = "y", scaleratio = .sratio))
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   ## NO EAGER EVAL, want last
   
   ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
-    idx_rownum <- sel_rownums() ## NULL is no selection
+    idx_rownum <- unique(sel_rownums()) ## NULL is no selection
     if(is.null(idx_rownum)) return(NULL)
     .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(

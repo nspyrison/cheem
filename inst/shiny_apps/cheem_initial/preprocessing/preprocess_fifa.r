@@ -52,7 +52,8 @@
 ## Starting with 42 variables, we remove `nationality`, and some potential Y vars,
 #### and aggregate into 9 aggregate 'aspect' dimensions based on var correlation 
 X <- dat ## 9 aspects of the X's
-Y <- log(.raw$wage_eur) ## _LOG_ wages in Euros, assumed 2020 valuation.
+Y <- .raw$wage_eur ## wages in Euros, assumed 2020 valuation.
+## removing log, model and explanation should be scale invariant
 if(F)
   hist(Y)
 

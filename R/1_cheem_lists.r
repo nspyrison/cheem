@@ -335,11 +335,11 @@ global_view_df_1layer <- function(
   if(is.null(class)) class <- as.factor(FALSE)
   
   ## Projection
-  x_std <- spinifex::scale_sd(x)
+  x_std <- x %>% spinifex::scale_01()
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
-  proj  <- x_std %*% basis
+  proj  <- x_std %*% basis %>% scale_01() ## Output mapped to 01 for global view
   
   ## Column bind wide
   ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, proj)
@@ -475,8 +475,8 @@ cheem_ls <- function(
   ## rbind yhaty to global_view_df ----
   .yhaty_df <- data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
     spinifex::scale_01()
-  .yhaty_df  <- data.frame(basis_type = NA, layer_name = .layer_nm,
-                           rownum = 1L:nrow(x), class = .decode_df$class, .yhaty_df)
+  .yhaty_df <- data.frame(basis_type = NA, layer_name = .layer_nm,
+                          rownum = 1L:nrow(x), class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
   ## Add tooltips ----

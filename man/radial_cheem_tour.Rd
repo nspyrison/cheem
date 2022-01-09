@@ -2,7 +2,6 @@
 % Please edit documentation in R/2_visualization.r
 \name{radial_cheem_tour}
 \alias{radial_cheem_tour}
-\alias{radial_cheem_tour_subplots}
 \title{Cheem tour; 1D manual tour on the selected attribution}
 \usage{
 radial_cheem_tour(
@@ -15,20 +14,8 @@ radial_cheem_tour(
   pcp_shape = c(142, 124),
   angle = 0.2,
   row_index = NULL,
-  inc_var_nms = NULL
-)
-
-radial_cheem_tour_subplots(
-  cheem_ls,
-  basis,
-  manip_var,
-  primary_obs = NULL,
-  comparison_obs = NULL,
-  do_add_pcp_segments = TRUE,
-  pcp_shape = c(142, 124),
-  angle = 0.2,
-  row_index = NULL,
-  inc_var_nms = NULL
+  inc_var_nms = NULL,
+  do_scale_in_frame = TRUE
 )
 }
 \arguments{
@@ -58,7 +45,12 @@ line segments to the basis display.}
 \item{row_index}{Numeric index of selected observations.
 Defaults to TRUE; 1:n.}
 
-\item{inc_var_nms}{A vector of the names of the variables to include in the projection.}
+\item{inc_var_nms}{A vector of the names of the variables to include in the
+projection.}
+
+\item{do_scale_in_frame}{Whether or not to scale by standard deviations away
+from the mean within each frame or not.
+Defaults to TRUE, helping to keep the animation centered.}
 }
 \value{
 \code{ggplot}/ggtour of the cheem tour, animation frames of a radial tour
@@ -78,8 +70,8 @@ X    <- penguins[, 1:4]
 clas <- penguins$species
 Y    <- as.integer(clas)
 
-rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
+rf_fit  <- default_rf(X, Y)
+## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
@@ -94,12 +86,12 @@ if(FALSE) ## or animate with gganimate
   animate_gganimate(ggt, render = gganimate::av_renderer())
 
 ## Regression:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
-rf_fit <- default_rf(X, Y)
+rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
@@ -113,11 +105,6 @@ animate_plotly(ggt)
 if(FALSE) ## or animate with gganimate
   animate_gganimate(ggt, render = gganimate::av_renderer())
 }
-
-## Experimental radial cheem tour with plotly::subplots:
-bas <- basis_attr_df(shap_df, rownum = 1)
-ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
-animate_plotly(ggt)
 }
 \seealso{
 Other cheem consumers: 

@@ -111,8 +111,8 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #                    width = "100%", height = "720px") %>%
   #   shinycssloaders::withSpinner(type = 8L),
   ## plotly tour
-   plotly::plotlyOutput( ##width = "auto", height = "720px"
-     "cheem_tour_plotly", width = "1480px", height = "1000px") %>%
+   plotly::plotlyOutput( ##dim of iframe not, content, width = "auto", height = "720px"
+     "cheem_tour_plotly", width = "1440px", height = "720px") %>%
      shinycssloaders::withSpinner(type = 8L)
 ) ## Assign tab1_cheem
 

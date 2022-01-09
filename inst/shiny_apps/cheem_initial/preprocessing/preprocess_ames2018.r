@@ -8,9 +8,8 @@
   X    <- dat[, 1:9]
   colnames(X) <- c("LtA", "Qlt", "YrB", "LvA", "Bth", "Bdr", "Rms", "GYB", "GrA")
 
-  Y    <- log(dat$SalePrice)
-  ## class is now zone subclass
-  clas <- amesHousing2018_NorthAmes$SubclassMS
+  Y    <- dat$SalePrice ## removing log, model and explanation should be scale invariant
+  clas <- amesHousing2018_NorthAmes$SubclassMS ## class is a zone subclass
 }
 
 rf_fit  <- default_rf(X, Y); s();
@@ -25,13 +24,9 @@ if(F){
 
 
 ## EXPORT OBJECTS ----
-saveRDS(this_ls,
-        file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_ames2018.rds")
+saveRDS(this_ls, file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_ames2018.rds")
 cat("Saved.\n")
 if(F){ ## Not run, load this_ls
   this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_ames2018.rds")
-  
   lapply(this_ls, object.size)
-  
-  
 }
