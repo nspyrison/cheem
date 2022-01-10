@@ -269,11 +269,8 @@ server <- function(input, output, session){
       return(NULL)
     }
     
-    suppressWarnings( ## suppress "Coordinate system already present..." from 2x draw_basis
-      global_view( ## Let global view pick the color/shape
-        cheem_ls, .prim_obs, .comp_obs,
-        #height_px = 480L, width_px = 1440L,
-        color = .col))
+    global_view(cheem_ls, .prim_obs, .comp_obs,
+                height_px = 540L, width_px = 1440L,color = .col)
   }) %>%
     bindCache(load_ls(), input$primary_obs, input$comparison_obs,
               input$glob_view_col) %>%
@@ -291,19 +288,18 @@ server <- function(input, output, session){
     .anim <- ggt %>%
       spinifex::animate_plotly(fps = 4L) %>%
       plotly::layout(showlegend = FALSE) %>%
-      plotly::style(hoverinfo = "none") %>%
-      suppressWarnings()
-    
+      plotly::style(hoverinfo = "none")
     ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
     #### the following hasn't helped:
     ## - starting at frame 11 doesn't help
     ## - hiding gridlines again doesn't remove them.
     .anim
-  }) ## Lazy eval, heavy work, let the other stuff calculate first.
-  ## NO EAGER EVAL, want last
+  })
+  ## Lazy eval, heavy work, let the other stuff calculate first.
+  ## NO EAGER EVAL, desired last
   
   ### DT table of selected data
-  output$selected_df <- DT::renderDT({ ## Original data of selection
+  output$selected_df <- DT::renderDT({  ## Original data of selection
     idx_rownum <- unique(sel_rownums()) ## NULL is no selection
     if(is.null(idx_rownum)) return(NULL)
     .df <- req(load_ls())$decode_df

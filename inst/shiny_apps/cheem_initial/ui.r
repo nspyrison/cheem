@@ -84,7 +84,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   ## Container display dim
   ## Set plot dim with: ggplotly(p, height, width)
   plotly::plotlyOutput(
-    "global_view", width = "100%", height = "480px") %>%
+    "global_view", width = "100%", height = "544px") %>%
     shinycssloaders::withSpinner(type = 8L),
   h5("Selected data:"),
   DT::DTOutput("selected_df")),
@@ -108,8 +108,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
   ## plotly tour
    plotly::plotlyOutput( ##some times this behaives like iframe and others like object itself. 
-     "cheem_tour_plotly", width = "1400px", height = "520px") %>%
-     shinycssloaders::withSpinner(type = 8L)
+     "cheem_tour_plotly", width = "1440px", height = "620px") %>%
+     shinycssloaders::withSpinner(type = 8L),
+  br()
 ) ## Assign tab1_cheem
 
 ### tab_about -----
@@ -134,7 +135,8 @@ tab_about <- tabPanel("About", fluidPage(
   p(''),
   h4("Namesake"),
   p("The Trees of Cheem, are a fictional race of tree-based humanoids in the Dr. Who universe. The initial application applies tree SHAP (a local explain of tree-based models via {treeshap}), and explanations from {DALEX}, a reference to Dr. Who lore."),
-  img(src = "cheem_namesake.png")
+  img(src = "cheem_namesake.png"),
+  br(), br(), br(), br()
 )) ## Assign tabZ_about
 
 ## Combined ui object ----
