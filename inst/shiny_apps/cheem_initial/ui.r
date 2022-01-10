@@ -106,13 +106,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   ),
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
-  ## gganimate tour
-  # shiny::imageOutput("cheem_tour_gganimate",
-  #                    width = "100%", height = "720px") %>%
-  #   shinycssloaders::withSpinner(type = 8L),
   ## plotly tour
-   plotly::plotlyOutput( ##dim of iframe not, content, width = "auto", height = "720px"
-     "cheem_tour_plotly", width = "1440px", height = "720px") %>%
+   plotly::plotlyOutput( ##some times this behaives like iframe and others like object itself. 
+     "cheem_tour_plotly", width = "1400px", height = "520px") %>%
      shinycssloaders::withSpinner(type = 8L)
 ) ## Assign tab1_cheem
 

@@ -117,7 +117,7 @@ server <- function(input, output, session){
       return(NULL)
     }
     mv <- which(rownames(bas) == mv_nm)
-    radial_cheem_tour(
+    cheem:::radial_cheem_tour_subplots(
       cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
       row_index = idx_rownum, inc_var_nms = inc_var_nms)
@@ -126,8 +126,7 @@ server <- function(input, output, session){
     bindCache(bas(), input$primary_obs, input$comparison_obs,
               input$manip_var_nm, input$do_add_pcp_segments) %>%
     bindEvent(bas(), input$primary_obs, input$comparison_obs,
-              input$manip_var_nm, input$do_add_pcp_segments) %>%
-    debounce(millis = 500L)
+              input$manip_var_nm, input$do_add_pcp_segments) #%>% debounce(millis = 500L)
   
   
   ## Observe/event -----
@@ -284,39 +283,13 @@ server <- function(input, output, session){
   output$global_view <- plotly::renderPlotly(glob_view())
   ## NO EAGER EVAL, want last
   
-  ### gganimate tour ----
-  output$cheem_tour_gganimate <- renderImage({
-    ggt <- req(cheem_ggtour())
-    
-    ### A temp file to save the output, will be removed later in renderImage
-    anim <- animate_gganimate(
-      ggt, height = 480L, width = 1440L,
-      #units = "px", ## "px", "in", "cm", or "mm."
-      #res = 72L, ## resolution (dpi)
-      render = gganimate::av_renderer())
-    
-    outfile <- tempfile(fileext = ".mp4")
-    gganimate::anim_save("outfile.mp4", anim)
-    
-    ## Return a list containing the filename of the rendered image file.
-    list(src = "outfile.mp4", contentType = "video/mp4")
-  }, deleteFile = TRUE)
-  ## NO EAGER EVAL, desired to run last
-  
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
     cheem_ls <- req(load_ls())
     ggt <- req(cheem_ggtour())
     
-    if(cheem_ls$type == "classification"){
-      .sratio <- 2L
-      .h <- 720L
-    }else{ ## Regression
-      .sratio <- .2
-      .h <- 480L
-    }
     .anim <- ggt %>%
-      spinifex::animate_plotly(fps = 4L, width = 1440L, height = .h) %>%
+      spinifex::animate_plotly(fps = 4L) %>%
       plotly::layout(showlegend = FALSE) %>%
       plotly::style(hoverinfo = "none") %>%
       suppressWarnings()
@@ -325,9 +298,7 @@ server <- function(input, output, session){
     #### the following hasn't helped:
     ## - starting at frame 11 doesn't help
     ## - hiding gridlines again doesn't remove them.
-    
-    ## Layout, aspect ratio
-    .anim %>% plotly::layout(xaxis = list(scaleanchor = "y", scaleratio = .sratio))
+    .anim
   }) ## Lazy eval, heavy work, let the other stuff calculate first.
   ## NO EAGER EVAL, want last
   

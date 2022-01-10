@@ -339,7 +339,7 @@ global_view_df_1layer <- function(
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
-  proj  <- x_std %*% basis %>% scale_01() ## Output mapped to 01 for global view
+  proj  <- x_std %*% basis %>% spinifex::scale_01() ## Output mapped to 01 for global view
   
   ## Column bind wide
   ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, proj)

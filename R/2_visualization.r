@@ -433,7 +433,7 @@ global_view <- function(
 }
 
 
-# #' @rdname global_view
+#' @rdname global_view
 #' @examples 
 #' 
 #' ## Experimental global view with plotly::subplots:
@@ -472,7 +472,7 @@ global_view_subplots <- function(
                           layer_name = u_nms[2L])
   .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
   
-  single_subplot <- function(subset_global_view_df){
+  single_facet <- function(subset_global_view_df){
     ## Proto for main points
     pts_main <- list()
     .u_nms <- unique(subset_global_view_df$layer_name)
@@ -554,11 +554,11 @@ global_view_subplots <- function(
   }
   
   ## Individual ggplots
-  g1 <- single_subplot(subset(global_view_df, layer_name == u_nms[1L])) +
+  g1 <- single_facet(subset(global_view_df, layer_name == u_nms[1L])) +
     spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft")
-  g2 <- single_subplot(subset(global_view_df, layer_name == u_nms[2L])) +
+  g2 <- single_facet(subset(global_view_df, layer_name == u_nms[2L])) +
     spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft")
-  g3 <- single_subplot(subset(global_view_df, layer_name == u_nms[3L]))
+  g3 <- single_facet(subset(global_view_df, layer_name == u_nms[3L]))
   ## Individual plotly plots with axes titles
   p1 <- plotly::ggplotly(g1) %>%
     plotly::layout(xaxis = list(title = paste0(u_nms[1L], 'PC1')), 
@@ -569,9 +569,9 @@ global_view_subplots <- function(
   p3 <- plotly::ggplotly(g3) %>% 
     plotly::layout(xaxis = list(title = 'predicted'), 
                    yaxis = list(title = 'observed'))
-  sp <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0.1)
-  ## direct on ggplots isnt better.
-  #plotly::subplot(g1, g2, g3, titleY = TRUE, titleX = TRUE, margin = 0.1)
+  sp <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L)
+  ## direct on ggplots isn't better.
+  #plotly::subplot(g1, g2, g3, titleY = TRUE, titleX = TRUE, margin = 0L)
   
   ## Plotly options & box selection
   sp %>%
@@ -638,7 +638,7 @@ global_view_subplots <- function(
 #' \dontrun{
 #' animate_plotly(ggt)
 #' if(FALSE) ## or animate with gganimate
-#'   animate_gganimate(ggt, render = gganimate::av_renderer())
+#'   animate_gganimate(ggt) #, render = gganimate::av_renderer())
 #' 
 #' ## Regression:
 #' dat  <- amesHousing2018_NorthAmes
@@ -669,7 +669,7 @@ radial_cheem_tour <- function(
   angle               = .2,
   row_index           = NULL,
   inc_var_nms         = NULL,
-  do_scale_in_frame   = TRUE
+  do_center_frame     = TRUE
 ){
   if(is.null(row_index) == FALSE)
     if(sum(row_index) == 0L)
@@ -704,7 +704,8 @@ radial_cheem_tour <- function(
   
   ### Classification case -----
   if(.prob_type == "classification"){
-    ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
+    ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle,
+                            do_center_frame = do_center_frame) +
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         row_index = row_index, rug_shape = pcp_shape) +
@@ -730,9 +731,6 @@ radial_cheem_tour <- function(
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
     ## Double up data; observed y and residual
-    .fixed_y <- c(
-      decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01(),
-      decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01())
     .doub_prim_obs <- .doub_comp_obs <- NULL
     if(is.null(.prim_obs) == FALSE)
       .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
@@ -746,14 +744,15 @@ radial_cheem_tour <- function(
     .class_fore <- .class ## could be dummy factor(FALSE)
     if(length(.class) > 1L)
       .class_fore <- c(.class, .class)
-    ## Scale a 0 line for residual facet
-    .df_hline <- data.frame(x = FALSE, y = mean(decode_df$residual), facet_var = "residual")
-    
-    ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle, 
-                            do_scale_in_frame = do_scale_in_frame) +
+    .y        <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
+    .resid    <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
+    .fixed_y  <- c(.y, .resid)
+    .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "residual")
+    ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle,
+                            do_center_frame = do_center_frame) +
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
       spinifex::append_fixed_y(fixed_y = .fixed_y) +
-      ## Plotly doesn't offer text rotation in geom_text/annotate.
+      ## Plotly doesn't rotate text in geom_text/annotate.
       ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
       ggplot2::theme(
         legend.position = "off",
@@ -785,22 +784,24 @@ radial_cheem_tour <- function(
   ggt
 }
 
-# #' @rdname radial_cheem_tour
+#' @rdname radial_cheem_tour
 #' @examples
 #' 
+#' # continuing from setup in radial_cheem_tour examples
 #' ## Experimental radial cheem tour with plotly::subplots:
 #' bas <- basis_attr_df(shap_df, rownum = 1)
 #' ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 #' animate_plotly(ggt)
 radial_cheem_tour_subplots <- function(
   cheem_ls, basis, manip_var,
-  primary_obs = NULL,
-  comparison_obs = NULL,
+  primary_obs         = NULL,
+  comparison_obs      = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape = c(142, 124), ## '|' plotly and gganimate respectively
-  angle = .2,
-  row_index = NULL,
-  inc_var_nms = NULL
+  pcp_shape           = c(142, 124), ## '|' plotly and gganimate respectively
+  angle               = .2,
+  row_index           = NULL,
+  inc_var_nms         = NULL,
+  do_center_frame     = TRUE
 ){
   if(is.null(row_index) == FALSE)
     if(sum(row_index) == 0L)
@@ -823,7 +824,7 @@ radial_cheem_tour_subplots <- function(
     row_index[c(.prim_obs, .comp_obs)] <- TRUE
   }
   ## Subset columns and scale plot data
-  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>% 
+  .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>%
     spinifex::scale_01() %>% as.data.frame()
   
   ## Problem type & aesthetics: classification or regression?
@@ -832,21 +833,28 @@ radial_cheem_tour_subplots <- function(
     .pred_clas <- decode_df$predicted_class ## for classification color/shape
   .class <- factor(FALSE) #decode_df$class ## for regression color/shape ##factor(FALSE)
   .alpha <- logistic_tform(nrow(decode_df))
+  ## plotly complaines about removed legend when this is in function
+  .t <- ggplot2::theme(
+    legend.position  = "off", 
+    legend.direction = "vertical") ## plotly complains about horizontal...
   ## Manual (radial) tour 1d
   .mt_path <- spinifex::manual_tour(basis, manip_var)
   
   ### Classification case -----
   if(.prob_type == "classification"){
-    ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle) +
-      spinifex::proto_density(
-        aes_args = list(color = .pred_clas, fill = .pred_clas),
-        row_index = row_index, rug_shape = pcp_shape) +
+    ggt_bas <- spinifex::ggtour(.mt_path, .dat, angle = angle,
+                                do_center_frame = do_center_frame) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
-      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
+      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") + .t
+    ggt_dat1d <- spinifex::ggtour(.mt_path, .dat, angle = angle,
+                            do_center_frame = do_center_frame) +
+      spinifex::proto_density(
+        aes_args = list(color = .pred_clas, fill = .pred_clas),
+        row_index = row_index, rug_shape = pcp_shape) +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs, if passed
       spinifex::proto_highlight1d(
@@ -856,24 +864,32 @@ radial_cheem_tour_subplots <- function(
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
-    return(ggt)
+    ## Plotly
+    p_bas   <- plotly::ggplotly(ggt_bas)
+    p_dat1d <- plotly::ggplotly(ggt_dat1d) %>%
+      plotly::layout(xaxis = list(title = "attribution projection",
+                                  scaleratio = 2L))
+    ## Return a plotly object, animate_plotly can pass animation options to these.
+    ggp <- plotly::subplot(p_bas, p_dat1d, titleY = TRUE, titleX = TRUE,
+                           widths = c(.33, .66), margin = 0L) %>%
+      plotly::layout(showlegend = FALSE)
+    ## Return a plotly, pass animation options with animate_plotly()
+    return(ggp)
   }
   
   ### Regression case -----
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
-    ## Scale a 0 line for residual facet
-    .df_hline <- data.frame(x = FALSE, y = mean(decode_df$residual), facet_var = "residual")
-    single_subplot <- function(data = .dat, fixed_y, facet_lvl){
-      spinifex::ggtour(.mt_path, data, angle = angle) +
-        spinifex::facet_wrap_tour(facet_var = facet_lvl, nrow = 1L) +
+    single_facet <- function(data = .dat, fixed_y, facet_lvl){
+      spinifex::ggtour(.mt_path, data, angle = angle,
+                       do_center_frame = do_center_frame) +
+        ## Subplots, no faceting
+        #spinifex::facet_wrap_tour(facet_var = facet_lvl, nrow = 1L) +
         spinifex::append_fixed_y(fixed_y = fixed_y) +
         # Plotly can't handle text rotation in geom_text/annotate.
-        ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
-        spinifex::proto_point(
-          aes_args = list(color = .class, shape = .class),
-          identity_args = list(alpha = .alpha),
-          row_index = row_index) +
+        spinifex::proto_point(aes_args = list(color = .class, shape = .class),
+                              identity_args = list(alpha = .alpha),
+                              row_index = row_index) +
         ## Highlight comparison obs
         spinifex::proto_highlight(
           row_index = .comp_obs,
@@ -884,35 +900,32 @@ radial_cheem_tour_subplots <- function(
           identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"))
     }
     ## basis, obs y, and residual respectively:
-    .lp <- ggplot2::theme(legend.position = "off", 
-                          legend.direction = "vertical") ## plotly complains about horizontal...
-    g1 <- spinifex::ggtour(.mt_path, data = .dat, angle = angle) +
-      spinifex::facet_wrap_tour(facet_var = factor("_basis_"), nrow = 1L) +
+    g1 <- spinifex::ggtour(.mt_path, data = .dat, angle = angle,
+                           do_center_frame = do_center_frame) +
+      ## subplots no faceting
+      #spinifex::facet_wrap_tour(facet_var = factor("_basis_"), nrow = 1L) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs) +
-      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .lp
+      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
     .y     <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
-    g2 <- single_subplot(.dat, .y,     factor("observed y")) + .lp
-    g3 <- single_subplot(.dat, .resid, factor("residual")) + .lp +
+    .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "residual")
+    g2 <- single_facet(.dat, .y,     factor("observed y")) + .t
+    g3 <- single_facet(.dat, .resid, factor("residual"))   + .t +
       ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline, color = "grey40")
-    ## Individual plotly plots with axes titles
-    p1 <- plotly::ggplotly(g1) %>%
-      plotly::layout(xaxis = list(title = "basis contributions"),
-                     yaxis = list(title = ""))
+    ## Individual ggplotly with axes titles
+    p1 <- plotly::ggplotly(g1)
     p2 <- plotly::ggplotly(g2) %>%
-      plotly::layout(xaxis = list(title = "attr projection"),
+      plotly::layout(xaxis = list(title = "attribution projection"),
                      yaxis = list(title = "observed y"))
     p3 <- plotly::ggplotly(g3) %>%
-      plotly::layout(xaxis = list(title = "attr projection"),
+      plotly::layout(xaxis = list(title = "attribution projection"),
                      yaxis = list(title = "residual"))
-    ggt <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0.05) %>%
+    ## Return a plotly, pass animation options with animate_plotly()
+    plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L) %>%
       plotly::layout(showlegend = FALSE)
   }
-  
-  ## Return the static ggtour, animate in app
-  ggt
 }
 

@@ -2,6 +2,7 @@
 % Please edit documentation in R/2_visualization.r
 \name{radial_cheem_tour}
 \alias{radial_cheem_tour}
+\alias{radial_cheem_tour_subplots}
 \title{Cheem tour; 1D manual tour on the selected attribution}
 \usage{
 radial_cheem_tour(
@@ -15,7 +16,21 @@ radial_cheem_tour(
   angle = 0.2,
   row_index = NULL,
   inc_var_nms = NULL,
-  do_scale_in_frame = TRUE
+  do_center_frame = TRUE
+)
+
+radial_cheem_tour_subplots(
+  cheem_ls,
+  basis,
+  manip_var,
+  primary_obs = NULL,
+  comparison_obs = NULL,
+  do_add_pcp_segments = TRUE,
+  pcp_shape = c(142, 124),
+  angle = 0.2,
+  row_index = NULL,
+  inc_var_nms = NULL,
+  do_center_frame = TRUE
 )
 }
 \arguments{
@@ -83,7 +98,7 @@ ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
 \dontrun{
 animate_plotly(ggt)
 if(FALSE) ## or animate with gganimate
-  animate_gganimate(ggt, render = gganimate::av_renderer())
+  animate_gganimate(ggt) #, render = gganimate::av_renderer())
 
 ## Regression:
 dat  <- amesHousing2018_NorthAmes
@@ -105,6 +120,12 @@ animate_plotly(ggt)
 if(FALSE) ## or animate with gganimate
   animate_gganimate(ggt, render = gganimate::av_renderer())
 }
+
+# continuing from setup in radial_cheem_tour examples
+## Experimental radial cheem tour with plotly::subplots:
+bas <- basis_attr_df(shap_df, rownum = 1)
+ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+animate_plotly(ggt)
 }
 \seealso{
 Other cheem consumers: 
