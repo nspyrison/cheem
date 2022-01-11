@@ -91,7 +91,7 @@
 #' 
 #' ## Save for used with shiny app (expects .rds):
 #' if(FALSE) ## Don't accidentally save.
-#'   saveRDS(out_ls, "./my_cheem_ls.rds")
+#'   saveRDS(this_ls, "./my_cheem_ls.rds")
 "amesHousing2018"
 
 #' @rdname amesHousing2018
@@ -99,3 +99,66 @@
 
 #' @rdname amesHousing2018
 "amesHousing2018_NorthAmes"
+
+
+## Chocolates -----
+#' Chocolates dataset
+#' 
+#' The chocolates data was compiled by students in a Introduction to Machine 
+#' Learning class (circa 2020) of Prof Cook, by collecting nutrition 
+#' information on the chocolates as listed on their internet sites. 
+#' All numbers were normalized to be equivalent to a 100g serving. 
+#' Units of measurement are listed in the variable name.
+#' 
+#' @format  A complete data.frame with 88 observations and 10 numeric variables,
+#' name of the chocolate, manufacturer, country, and type of the chocolate.
+#' \itemize{
+#'   \item Name, the name of the chocolate
+#'   \item MFR, chocolate manufacturer
+#'   \item Country, the country the manufacturer is incorperated.
+#'   \item Type, the type of chocolate according to the website, either 'Dark' 
+#'   or 'Milk"
+#'   \item Calories, the number of calories per 100 grams
+#'   \item CalFat, calories from fat per 100 grams
+#'   \item TotFat_g, grams of total fat per 100 grams
+#'   \item SatFat_g, grams of saturated fat per 100 grams
+#'   \item Chol_mg, milligrams of cholesterol per 100 grams
+#'   \item Na_mg, milligrams of sodium (salt) per 100 grams
+#'   \item Carbs_g, grams of carbohydrates per 100 grams
+#'   \item Fiber_g, grams of fiber per 100 grams
+#'   \item Sugars_g, grams of sugar per 100 grams
+#'   \item Protein_g, grams of sugar per 100 grams
+#' }
+#' @source {Monash University, Introduction to Machine Learning course} \url{https://iml.numbat.space/}
+#' Replicating this dataset:
+#' ```
+#' if(FALSE) ## Don't accidentally open the URL.
+#'   browseURL("https://iml.numbat.space/")
+#' ## Accessed Jan 2022
+#' chocolates <- readr::read_csv("https://iml.numbat.space/data/chocolates.csv")
+#' chocolates <- data.frame(chocolates)
+#' chocolates[, 2] <- factor(chocolates[, 2])
+#' chocolates[, 3] <- factor(chocolates[, 3])
+#' chocolates[, 4] <- factor(chocolates[, 4])
+#' ## save(chocolates, file = "./data/chocolates.rda")
+#' ```
+#' @examples
+#' library(cheem)
+#' ## Classification:
+#' X <- chocolates[, 5:14]
+#' Y <- as.integer(chocolates$Type)
+#' clas <- chocolates$Type
+#' 
+#' rf_fit  <- default_rf(X, Y)
+#' ## Long runtime for full datasets or complex models:
+#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' this_ls <- cheem_ls(X, Y, class = clas,
+#'                      model = rf_fit,
+#'                      attr_df = shap_df)
+#' 
+#' global_view(this_ls)
+#' 
+#' ## Save for used with shiny app (expects .rds):
+#' if(FALSE) ## Don't accidentally save.
+#'   saveRDS(this_ls, "./my_cheem_ls.rds")
+"chocolates"

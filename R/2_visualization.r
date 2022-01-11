@@ -434,9 +434,9 @@ global_view <- function(
 
 
 #' @rdname global_view
-#' @examples 
+#' @examples
 #' 
-#' ## Experimental global view with plotly::subplots:
+#' ## Experimental global view made from plotly::subplots rather than facets:
 #' cheem:::global_view_subplots(this_ls)
 global_view_subplots <- function(
   cheem_ls,
@@ -741,9 +741,9 @@ radial_cheem_tour <- function(
     .dat_fore   <- rbind(.dat, .dat)
     .idx_fore   <- c(row_index, row_index)
     .facet_fore <- factor(rep(c("observed y", "residual"), each = 2L * .n))
-    .class_fore <- .class ## could be dummy factor(FALSE)
-    if(length(.class) > 1L)
+    if(length(.class) > 1L){
       .class_fore <- c(.class, .class)
+    } else .class_fore <- .class ## could be dummy factor(FALSE)
     .y        <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid    <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .fixed_y  <- c(.y, .resid)
@@ -788,8 +788,9 @@ radial_cheem_tour <- function(
 #' @rdname radial_cheem_tour
 #' @examples
 #' 
+#' 
 #' # continuing from setup in radial_cheem_tour examples
-#' ## Experimental radial cheem tour with plotly::subplots:
+#' ## Experimental radial tour made from plotly::subplots rather than facets
 #' bas <- basis_attr_df(shap_df, rownum = 1)
 #' ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 #' animate_plotly(ggt)
