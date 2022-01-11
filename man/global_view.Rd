@@ -77,7 +77,7 @@ global_view(this_ls, color = "residual")
 global_view(this_ls, color = "log_maha.data") 
 global_view(this_ls, color = "cor_attr_proj.y")
 
-## Experimental global view with plotly::subplots:
+## Experimental global view made from plotly::subplots rather than facets:
 cheem:::global_view_subplots(this_ls)
 }
 \seealso{

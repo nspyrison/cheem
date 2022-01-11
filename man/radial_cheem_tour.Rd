@@ -121,8 +121,9 @@ if(FALSE) ## or animate with gganimate
   animate_gganimate(ggt, render = gganimate::av_renderer())
 }
 
+
 # continuing from setup in radial_cheem_tour examples
-## Experimental radial cheem tour with plotly::subplots:
+## Experimental radial tour made from plotly::subplots rather than facets
 bas <- basis_attr_df(shap_df, rownum = 1)
 ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 animate_plotly(ggt)
