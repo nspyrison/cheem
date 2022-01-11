@@ -753,7 +753,7 @@ radial_cheem_tour <- function(
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
       spinifex::append_fixed_y(fixed_y = .fixed_y) +
       ## Plotly doesn't rotate text in geom_text/annotate.
-      ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
+      #ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
       ggplot2::theme(
         legend.position = "off",
         axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
@@ -766,7 +766,8 @@ radial_cheem_tour <- function(
       proto_basis1d_distribution(
         cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
-        primary_obs = .prim_obs, comparison_obs = .comp_obs) +
+        primary_obs = .prim_obs, comparison_obs = .comp_obs,
+        inc_var_nms = inc_var_nms, row_index = row_index) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") +
       ## Highlight comparison obs
       spinifex::proto_highlight(
@@ -845,11 +846,11 @@ radial_cheem_tour_subplots <- function(
     ggt_bas <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                                 do_center_frame = do_center_frame) +
       proto_basis1d_distribution(
-        cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
+        cheem_ls$attr_df, group_by = .pred_clas, position = "floor1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
-      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") + .t
+      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
     ggt_dat1d <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                             do_center_frame = do_center_frame) +
       spinifex::proto_density(
@@ -907,7 +908,8 @@ radial_cheem_tour_subplots <- function(
       proto_basis1d_distribution(
         cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
-        primary_obs = .prim_obs, comparison_obs = .comp_obs) +
+        primary_obs = .prim_obs, comparison_obs = .comp_obs,
+        inc_var_nms = inc_var_nms, row_index = row_index) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
     .y     <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()

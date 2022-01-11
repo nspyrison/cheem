@@ -18,8 +18,8 @@ server <- function(input, output, session){
       # comp_obs <- 23L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
-      # prim_obs <- 18L  ## Example in milestone pres is 18, 111
-      # comp_obs <- 111L
+      # prim_obs <- 124L  ## Last presentation was is 124, 86
+      # comp_obs <- 76L
     }else if(dat == "chocolates classification"){
       ret      <- chocolates_ls
       # prim_obs <- 22L
@@ -42,7 +42,7 @@ server <- function(input, output, session){
       # comp_obs <- 8L
     }else if(dat == "ames housing 2018 regression"){
       ret      <- ames2018_ls
-      # prim_obs <- 170L
+      # prim_obs <- 311L
       # comp_obs <- 220L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
@@ -156,7 +156,7 @@ server <- function(input, output, session){
       prim_obs <- 1L
       comp_obs <- 8L
     }else if(dat == "ames housing 2018 regression"){
-      prim_obs <- 170L
+      prim_obs <- 311L
       comp_obs <- 220L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
@@ -194,15 +194,16 @@ server <- function(input, output, session){
     .prim_obs <- req(input$primary_obs)
     .comp_obs <- req(input$comparison_obs)
     .inc_nms  <- req(input$inc_var_nms)
-    
     if(all(.inc_nms %in% colnames(attr_df)) == FALSE){
       cheem:::devMessage("Update manip_var_nm: not all input$inc_var_nms are in attr_df...")
       return(NULL)
     }
-    ## Select var with largest difference between primary and comparison obs.
-    inc_attr_df <- attr_df[, .inc_nms, drop = FALSE]
-    mv <- manip_var_of_attr_df(inc_attr_df, .prim_obs, .comp_obs)
-    mv_nm <- colnames(inc_attr_df)[mv]
+    
+    inc_attr_df <- attr_df[, .inc_nms]
+    bas         <- basis_attr_df(inc_attr_df, .prim_obs) %>%
+      tourr::orthonormalise()
+    mv          <- manip_var_of(bas)
+    mv_nm       <- colnames(inc_attr_df)[mv]
     updateSelectInput(session, "manip_var_nm", label = "Manipulation variable:",
                       choices = .inc_nms, selected = mv_nm)
   }, priority = 150L)

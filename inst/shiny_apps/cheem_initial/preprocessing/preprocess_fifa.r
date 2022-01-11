@@ -26,7 +26,7 @@
   dat <- .dat_less_ys %>%
     dplyr::mutate(
       .keep = "none",
-      bdy = (weight_kg+(height_cm/100L)^2L)/2L, ## bmi wasn't working well after 01 scaling.
+      BMI = (weight_kg+(height_cm/100L)^2L)/2L,
       age = age,
       react = movement_reactions,
       off = (attacking_finishing+skill_long_passing+attacking_volleys+
@@ -39,8 +39,8 @@
                mentality_vision+mentality_composure+movement_agility+
                mentality_penalties+skill_fk_accuracy+power_stamina+movement_reactions)/10L,
       pwr = (power_strength+power_jumping)/2L,
-      gk = (goalkeeping_diving+goalkeeping_positioning+goalkeeping_reflexes+
-              goalkeeping_handling+goalkeeping_kicking)/5L
+      gk  = (goalkeeping_diving+goalkeeping_positioning+goalkeeping_reflexes+
+               goalkeeping_handling+goalkeeping_kicking)/5L
     )
   ## Class for the position of the player, either a "fielder" or "goalkeeper"
   position <- clas <- dplyr::case_when(
