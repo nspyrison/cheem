@@ -327,7 +327,6 @@ global_view <- function(
   primary_obs    = NULL,
   comparison_obs = NULL,
   color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  #shape         = NULL,
   height_px      = 480,
   width_px       = 1440,
   as_ggplot      = FALSE
@@ -340,7 +339,7 @@ global_view <- function(
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(decode_df))
-  ## setup shape and color
+  ## Setup shape and color
   color <- match.arg(color)
   if(color %in% c("default", colnames(global_view_df)) == FALSE)
     stop(paste0("global_view: `color` column ", color, " not in the cheem_ls. Try to reprocess that dataset."))
@@ -355,11 +354,13 @@ global_view <- function(
     }else .color <- global_view_df[, color]
     .shape <- rep_len(factor(FALSE), nrow(global_view_df))
   }
+  if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
+  .col_scale    <- color_scale_of(.color, limits = .lim)
+  
+  ## Work around for differnt X axis titles.
   .spaces       <- paste(rep(" ", 61L), collapse = "")
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
-  if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
-  .col_scale    <- color_scale_of(.color, limits = .lim)
   
   ## Get the bases of the global view, map them
   .u_nms    <- unique(global_view_df$layer_name)
@@ -434,16 +435,19 @@ global_view <- function(
 
 
 #' @rdname global_view
+#' @export
 #' @examples
 #' 
-#' ## Experimental global view made from plotly::subplots rather than facets:
-#' cheem:::global_view_subplots(this_ls)
+#' 
+#' ## Experimental global view made from plotly::subplots rather than facets
+#' global_view_subplots(this_ls)
 global_view_subplots <- function(
   cheem_ls,
   primary_obs    = NULL,
   comparison_obs = NULL,
-  height_px = 480L,
-  width_px  = 1440L
+  color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
+  height_px      = 480L,
+  width_px       = 1440L
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
@@ -453,44 +457,53 @@ global_view_subplots <- function(
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(decode_df))
-  ## setup shape and color
+  ## Setup shape and color
+  color <- match.arg(color)
+  if(color %in% c("default", colnames(global_view_df)) == FALSE)
+    stop(paste0("global_view: `color` column ", color, " not in the cheem_ls. Try to reprocess the dataset."))
   if(is_classification){
-    color <- decode_df$predicted_class %>% as.factor()
-    shape <- decode_df$predicted_class %>% as.factor()
+    if(color == "default") color <- "predicted_class"
+    .color <- global_view_df[, color]
+    .shape <- global_view_df[, "predicted_class"]
   }else{
-    color <- shape <- factor(FALSE)
+    ## Regression
+    if(color == "default"){
+      .color <- rep_len(factor(FALSE), nrow(global_view_df))
+    }else .color <- global_view_df[, color]
+    .shape <- rep_len(factor(FALSE), nrow(global_view_df))
   }
-  global_view_df$color <- color %>% rep_len(nrow(global_view_df))
-  global_view_df$shape <- shape %>% rep_len(nrow(global_view_df))
+  if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
+  .col_scale    <- color_scale_of(.color, limits = .lim)
   
   ## Get the bases of the global view, map them
-  u_nms <- unique(global_view_df$layer_name)
-  .bas_data <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
-                          layer_name = u_nms[1L])
+  u_nms        <- unique(global_view_df$layer_name)
+  .bas_data    <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
+                             layer_name = u_nms[1L])
   .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
-  .bas_attr <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
-                          layer_name = u_nms[2L])
+  .bas_attr    <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
+                             layer_name = u_nms[2L])
   .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
   
   single_facet <- function(subset_global_view_df){
     ## Proto for main points
-    pts_main <- list()
-    .u_nms <- unique(subset_global_view_df$layer_name)
-    if(is_classification == FALSE)
+    pts_main <- list(.col_scale)
+    .u_nms   <- unique(subset_global_view_df$layer_name)
+    if(is_classification == FALSE &
+       all(subset_global_view_df$layer_name == u_nms[3L]))
       pts_main <- c(pts_main, ggplot2::geom_smooth(
         data = subset(subset_global_view_df, layer_name == .u_nms[length(.u_nms)]),
         method = "lm", formula = y ~ x, se = FALSE))
-    if(is_discrete(color) == TRUE){
+    if(is_discrete(.color) == TRUE){
       ### Discrete color mapping
       pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = color, shape = shape,
+        ggplot2::aes(color = .color, shape = .shape,
                      tooltip = tooltip), alpha = .alpha)),
         ggplot2::scale_color_brewer(palette = "Dark2"))
     }
     if(is_discrete(color) == FALSE){
       ### continuous color mapping
       pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = color, shape = shape,
+        ggplot2::aes(color = .color, shape = .shape,
                      tooltip = tooltip),  alpha = .alpha)),
         ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
                                         mid = "grey80",
@@ -545,7 +558,6 @@ global_view_subplots <- function(
       pts_main +
       pts_highlight +
       ggplot2::coord_fixed() +
-      ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
       ggplot2::theme_bw() +
       ggplot2::labs(x = "", y = "") +
       ggplot2::theme(axis.text  = ggplot2::element_blank(),
@@ -561,14 +573,14 @@ global_view_subplots <- function(
   g3 <- single_facet(subset(global_view_df, layer_name == u_nms[3L]))
   ## Individual plotly plots with axes titles
   p1 <- plotly::ggplotly(g1) %>%
-    plotly::layout(xaxis = list(title = paste0(u_nms[1L], 'PC1')), 
-                   yaxis = list(title = paste0(u_nms[1L], 'PC2')))
+    plotly::layout(xaxis = list(title = paste0(u_nms[1L], " PC1")), 
+                   yaxis = list(title = paste0(u_nms[1L], " PC2")))
   p2 <- plotly::ggplotly(g2) %>% 
-    plotly::layout(xaxis = list(title = paste0(u_nms[2L], 'PC1')), 
-                   yaxis = list(title = paste0(u_nms[2L], 'PC2')))
+    plotly::layout(xaxis = list(title = paste0(u_nms[2L], " PC1")), 
+                   yaxis = list(title = paste0(u_nms[2L], " PC2")))
   p3 <- plotly::ggplotly(g3) %>% 
-    plotly::layout(xaxis = list(title = 'predicted'), 
-                   yaxis = list(title = 'observed'))
+    plotly::layout(xaxis = list(title = "predicted"), 
+                   yaxis = list(title = "observed"))
   sp <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L)
   ## direct on ggplots isn't better.
   #plotly::subplot(g1, g2, g3, titleY = TRUE, titleX = TRUE, margin = 0L)
@@ -692,31 +704,33 @@ radial_cheem_tour <- function(
   ## Subset columns and scale plot data
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>%
     spinifex::scale_01() %>% as.data.frame()
-  
-  ## Problem type & aesthetics: classification or regression?
-  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
-  if(.prob_type == "classification")
-    .pred_clas <- decode_df$predicted_class ## for classification color/shape
-  .class <- factor(FALSE) #decode_df$class ## for regression color/shape ##factor(FALSE)
-  .alpha <- logistic_tform(.n)
   ## Manual (radial) tour 1d
   .mt_path <- spinifex::manual_tour(basis, manip_var)
   
+  ## Problem type & aesthetics
+  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
+  .alpha <- logistic_tform(.n)
+  
   ### Classification case -----
   if(.prob_type == "classification"){
+    .pred_clas <- decode_df$predicted_class
+    ## ggtour
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                             do_center_frame = do_center_frame) +
+      ## Density
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         row_index = row_index, rug_shape = pcp_shape) +
+      ## PCP on Basis, 1D
       proto_basis1d_distribution(
         cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
+      ## Basis 1D
       spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
       spinifex::proto_origin1d() +
-      ## Highlight comparison obs, if passed
+      ## Highlight comparison obs
       spinifex::proto_highlight1d(
         row_index = .comp_obs, mark_initial = FALSE,
         identity_args = list(linetype = 3L, alpha = 0.8, color = "black")) +
@@ -730,6 +744,8 @@ radial_cheem_tour <- function(
   ### Regression case -----
   ## Doubling data to facet on obs and residual.
   if(.prob_type == "regression"){
+    .class <- factor(FALSE) #decode_df$class|predicted_class
+    
     ## Double up data; observed y and residual
     .doub_prim_obs <- .doub_comp_obs <- NULL
     if(is.null(.prim_obs) == FALSE) .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
@@ -745,17 +761,19 @@ radial_cheem_tour <- function(
     .resid    <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .fixed_y  <- c(.y, .resid)
     .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "residual")
+    
+    ## ggtour
     ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle,
                             do_center_frame = do_center_frame) +
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
       spinifex::append_fixed_y(fixed_y = .fixed_y) +
       ## Plotly doesn't rotate text in geom_text/annotate.
-      #ggplot2::labs(x = "Attribution projection", y = "observed y | residual") +
       ggplot2::theme(
         legend.position = "off",
         axis.title.y = ggplot2::element_text(angle = 90L, vjust = 0.5)) +
       ## Exasperates issues with plotly & geom presence issue.
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
+      ## Points; 1D proj & fixed y
       spinifex::proto_point(
         aes_args = list(color = .class_fore, shape = .class_fore),
         identity_args = list(alpha = .alpha), row_index = .idx_fore) +
@@ -781,13 +799,12 @@ radial_cheem_tour <- function(
 }
 
 #' @rdname radial_cheem_tour
+#' @export
 #' @examples
 #' 
 #' 
-#' # continuing from setup in radial_cheem_tour examples
 #' ## Experimental radial tour made from plotly::subplots rather than facets
-#' bas <- basis_attr_df(shap_df, rownum = 1)
-#' ggt <- cheem:::radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 #' animate_plotly(ggt)
 radial_cheem_tour_subplots <- function(
   cheem_ls, basis, manip_var,
@@ -813,8 +830,6 @@ radial_cheem_tour_subplots <- function(
   if(is.null(inc_var_nms))
     inc_var_nms <- colnames(cheem_ls$attr_df)
   .col_idx <- colnames(decode_df) %in% inc_var_nms
-  if(is.null(inc_var_nms) == FALSE)
-    .col_idx <- colnames(decode_df) %in% inc_var_nms
   if(is.null(row_index) == FALSE){
     ## Change row_index from numeric to logical if needed and replicate
     row_index <- as_logical_index(row_index, nrow(decode_df))
@@ -823,22 +838,21 @@ radial_cheem_tour_subplots <- function(
   ## Subset columns and scale plot data
   .dat <- decode_df[, .col_idx] %>% spinifex::scale_sd() %>%
     spinifex::scale_01() %>% as.data.frame()
-  
-  ## Problem type & aesthetics: classification or regression?
-  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
-  if(.prob_type == "classification")
-    .pred_clas <- decode_df$predicted_class ## for classification color/shape
-  .class <- factor(FALSE) #decode_df$class ## for regression color/shape ##factor(FALSE)
-  .alpha <- logistic_tform(nrow(decode_df))
-  ## plotly complaines about removed legend when this is in function
-  .t <- ggplot2::theme(
-    legend.position  = "off", 
-    legend.direction = "vertical") ## plotly complains about horizontal...
   ## Manual (radial) tour 1d
   .mt_path <- spinifex::manual_tour(basis, manip_var)
   
+  ## Problem type & aesthetics
+  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
+  .alpha <- logistic_tform(nrow(decode_df))
+  ## plotly complains about removed legend when this is inside single_facet.
+  .t <- ggplot2::theme(
+    legend.position  = "off", 
+    legend.direction = "vertical") ## plotly complains about horizontal...
+  
   ### Classification case -----
   if(.prob_type == "classification"){
+    .pred_clas <- decode_df$predicted_class ## for classification color/shape
+    ## Left facet, 1D Basis (1/3)
     ggt_bas <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                                 do_center_frame = do_center_frame) +
       proto_basis1d_distribution(
@@ -847,6 +861,7 @@ radial_cheem_tour_subplots <- function(
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
+    ## Right facet, 1D density (2/3)
     ggt_dat1d <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                             do_center_frame = do_center_frame) +
       spinifex::proto_density(
@@ -863,9 +878,7 @@ radial_cheem_tour_subplots <- function(
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
     ## Plotly
     p_bas   <- plotly::ggplotly(ggt_bas)
-    p_dat1d <- plotly::ggplotly(ggt_dat1d) %>%
-      plotly::layout(xaxis = list(title = "attribution projection",
-                                  scaleratio = 2L))
+    p_dat1d <- plotly::ggplotly(ggt_dat1d)
     ## Return a plotly object, animate_plotly can pass animation options to these.
     ggp <- plotly::subplot(p_bas, p_dat1d, titleY = TRUE, titleX = TRUE,
                            widths = c(.33, .66), margin = 0L) %>%
@@ -880,8 +893,6 @@ radial_cheem_tour_subplots <- function(
     single_facet <- function(data = .dat, fixed_y, facet_lvl){
       spinifex::ggtour(.mt_path, data, angle = angle,
                        do_center_frame = do_center_frame) +
-        ## Subplots, no faceting
-        #spinifex::facet_wrap_tour(facet_var = facet_lvl, nrow = 1L) +
         spinifex::append_fixed_y(fixed_y = fixed_y) +
         # Plotly can't handle text rotation in geom_text/annotate.
         spinifex::proto_point(aes_args = list(color = .class, shape = .class),
@@ -896,17 +907,16 @@ radial_cheem_tour_subplots <- function(
           row_index = .prim_obs,
           identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"))
     }
-    ## basis, obs y, and residual respectively:
+    ## Basis 1D, left
     g1 <- spinifex::ggtour(.mt_path, data = .dat, angle = angle,
                            do_center_frame = do_center_frame) +
-      ## subplots no faceting
-      #spinifex::facet_wrap_tour(facet_var = factor("_basis_"), nrow = 1L) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         inc_var_nms = inc_var_nms, row_index = row_index) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
+    ## Obs y, and residual, (middle and right)
     .y     <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "residual")
@@ -916,11 +926,9 @@ radial_cheem_tour_subplots <- function(
     ## Individual ggplotly with axes titles
     p1 <- plotly::ggplotly(g1)
     p2 <- plotly::ggplotly(g2) %>%
-      plotly::layout(xaxis = list(title = "attribution projection"),
-                     yaxis = list(title = "observed y"))
+      plotly::layout(yaxis = list(title = "observed y"))
     p3 <- plotly::ggplotly(g3) %>%
-      plotly::layout(xaxis = list(title = "attribution projection"),
-                     yaxis = list(title = "residual"))
+      plotly::layout(yaxis = list(title = "residual"))
     ## Return a plotly, pass animation options with animate_plotly()
     plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L) %>%
       plotly::layout(showlegend = FALSE)

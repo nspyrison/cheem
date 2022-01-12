@@ -19,6 +19,7 @@ global_view_subplots(
   cheem_ls,
   primary_obs = NULL,
   comparison_obs = NULL,
+  color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
   height_px = 480L,
   width_px = 1440L
 )
@@ -77,8 +78,9 @@ global_view(this_ls, color = "residual")
 global_view(this_ls, color = "log_maha.data") 
 global_view(this_ls, color = "cor_attr_proj.y")
 
-## Experimental global view made from plotly::subplots rather than facets:
-cheem:::global_view_subplots(this_ls)
+
+## Experimental global view made from plotly::subplots rather than facets
+global_view_subplots(this_ls)
 }
 \seealso{
 Other cheem consumers: 

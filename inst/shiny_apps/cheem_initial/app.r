@@ -18,12 +18,12 @@ server <- function(input, output, session){
       # comp_obs <- 23L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
-      # prim_obs <- 124L  ## Last presentation was is 124, 86
-      # comp_obs <- 76L
+      # prim_obs <- 243L ## Presubmission seminar looked at 124, 86
+      # comp_obs <- 169L
     }else if(dat == "chocolates classification"){
       ret      <- chocolates_ls
       # prim_obs <- 22L
-      # comp_obs <- 34L
+      # comp_obs <- 7L
     }else if(dat == "toy quad regression"){
       ret      <- toy_quad_reg_ls
       # prim_obs <- 11L
@@ -117,7 +117,7 @@ server <- function(input, output, session){
       return(NULL)
     }
     mv <- which(rownames(bas) == mv_nm)
-    cheem:::radial_cheem_tour_subplots(
+    radial_cheem_tour_subplots(
       cheem_ls, bas, mv, prim_obs, comp_obs,
       do_add_pcp_segments = add_pcp, angle = .15,
       row_index = idx_rownum, inc_var_nms = inc_var_nms)
@@ -138,11 +138,11 @@ server <- function(input, output, session){
       prim_obs <- 36L
       comp_obs <- 23L
     }else if(dat == "penguins classification"){
-      prim_obs <- 124L  ## Last presentation was is 124, 86
-      comp_obs <- 76L
+      prim_obs <- 243L ## Presubmission seminar looked at 124, 86
+      comp_obs <- 169L
     }else if(dat == "chocolates classification"){
       prim_obs <- 22L
-      comp_obs <- 34L
+      comp_obs <- 7L
     }else if(dat == "toy quad regression"){
       prim_obs <- 11L
       comp_obs <- 121L
@@ -156,8 +156,8 @@ server <- function(input, output, session){
       prim_obs <- 1L
       comp_obs <- 8L
     }else if(dat == "ames housing 2018 regression"){
-      prim_obs <- 311L
-      comp_obs <- 220L
+      prim_obs <- 74L
+      comp_obs <- 192L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
@@ -277,8 +277,8 @@ server <- function(input, output, session){
       return(NULL)
     }
     
-    global_view(cheem_ls, .prim_obs, .comp_obs,
-                height_px = 540L, width_px = 1440L,color = .col)
+    global_view(cheem_ls, .prim_obs, .comp_obs, color = .col,
+                height_px = 540L, width_px = 1440L)
   }) %>%
     bindCache(load_ls(), input$primary_obs, input$comparison_obs,
               input$glob_view_col) %>%
