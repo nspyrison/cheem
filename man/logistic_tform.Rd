@@ -29,7 +29,7 @@ observation.
 library(cheem)
 
 ## Suggest an opacity to use in plotting:
-(my_alpha <- logistic_tform(nrow(spinifex::penguins)))
+(my_alpha <- logistic_tform(nrow(spinifex::penguins_na.rm)))
 
 ## Visualize
 x <- 1:2000

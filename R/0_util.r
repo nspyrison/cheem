@@ -209,7 +209,7 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #' library(cheem)
 #' 
 #' ## Suggest an opacity to use in plotting:
-#' (my_alpha <- linear_tform(nrow(spinifex::penguins)))
+#' (my_alpha <- linear_tform(nrow(spinifex::penguins_na.rm)))
 #'
 #' ## Visualize
 #' x <- 1:2000
@@ -239,7 +239,7 @@ linear_tform = function(
 #' library(cheem)
 #' 
 #' ## Suggest an opacity to use in plotting:
-#' (my_alpha <- logistic_tform(nrow(spinifex::penguins)))
+#' (my_alpha <- logistic_tform(nrow(spinifex::penguins_na.rm)))
 #'
 #' ## Visualize
 #' x <- 1:2000
@@ -274,7 +274,7 @@ as_logical_index <- function(index, n){
     stop("as_logical_index: `index` was logical, but not of length `n`.")
   if(is.numeric(index) == TRUE){
     rep_f <- rep(FALSE, n)
-    rep_f[index] <- TRUE
+    rep_f[unique(index)] <- TRUE
     index <- rep_f
   }
   if(identical(index, TRUE)) index <- rep(TRUE, n)

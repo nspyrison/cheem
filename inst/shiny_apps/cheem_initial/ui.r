@@ -41,24 +41,17 @@ expected_data_char <- c(
 tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----
   fluidRow(
-    ## Choose data:
-    #h4("Preprocessing and data description"),
     fluidRow(
       column(3L, selectInput("dat_char", "Data:",
                              choices  = expected_data_char,
-                             selected = "penguins classification")
-      ),
-      
+                             selected = "penguins classification")),
       column(9L,  conditionalPanel(
         "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
         fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
                   multiple = FALSE, accept = c("text/rds", ".rds"))))
     ),
     htmlOutput("desc_rows"),
-    # HTML("2) Extract the full attribution matrix, variable attributions of <em>each</em> observation"),
-    # p("Load above preprocessed objects into shiny app & perform EDA with ggplot2/plotly:"),
-    # p("Global view, top) approximations of the data- and attribution-spaces as their first two principal components. Identify a primary and comparison point to interrogate"),
-    # p("Cheem tour, bottom) 1d radial tour, starting basis is the normalized attribution values of the primary point. Positions of the primary and comparison points are highlighted (classification: shown as a dashed line and dotted line).")
+    p("- fit a modest randomForest model, ")
   ),
   tags$hr(style = "border-color: grey;"),
   
@@ -66,25 +59,18 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   h4("Global view:"),
   #p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
   fluidRow(
-    column(3L, numericInput( ## Updated by updateNumericInput
-      "primary_obs", label = "Primary observation rownum, ('*', dashed line below):",
-      value = NULL)),
-    column(3L, numericInput( ## Updated by updateNumericInput
-      "comparison_obs", label = "Comparison observation rownum, ('x', dotted line below):",
-      value = NULL)),
+    column(3L, numericInput(
+      "primary_obs", "Primary observation rownum, ('*', dashed line below):", NULL)),
+    column(3L, numericInput(
+      "comparison_obs", "Comparison observation rownum, ('x', dotted line below):", NULL)),
     column(3L, selectInput(
       "glob_view_col", "Global view point color",
-      choices = c("default", "log_maha.data", "cor_attr_proj.y", "residual"))),
+      c("default", "log_maha.data", "cor_attr_proj.y", "residual"))),
     column(3L)
   ),
-  # p("Color and shape are mapped to the predicted species of the penguin. This was also the target variable of the RF model."),
-  # p("Red circle around the point indicates a misclassified point."),
-  # p("Selection: click & drag to select points, double click to remove the selection."),
-  # p("-- Selecting points will highlight them in all facets and display detailed information below."),
   ## Container display dim
-  ## Set plot dim with: ggplotly(p, height, width)
-  plotly::plotlyOutput(
-    "global_view", width = "100%", height = "544px") %>%
+  ## Also see plot dim in: ggplotly(p, height, width)
+  plotly::plotlyOutput("global_view", width = "100%", height = "544px") %>%
     shinycssloaders::withSpinner(type = 8L),
   h5("Selected data:"),
   DT::DTOutput("selected_df")),
@@ -92,24 +78,24 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   
   #### Cheem tour ----
   h4("Cheem tour"),
-  #p("The data space projected through normalized attribution of the primary observation."),
   fluidRow(
-    column(width = 3L, checkboxGroupInput(
-      "inc_var_nms", label = "Variables to include:",
-      choices  = NULL, selected = NULL, inline = TRUE)),
     column(width = 3L,
-           selectInput("manip_var_nm", label = "Manipulation variable:",
-                       choices  = NULL)),
-    column(width = 3L, selectInput("do_add_pcp_segments", label = "Draw PCP lines on the basis distribution?",
-                           c("yes" = TRUE, "no" = FALSE))),
+           checkboxGroupInput(
+             "inc_var_nms", label = "Variables to include:",
+             choices = NULL, selected = NULL, inline = TRUE)),
+    column(width = 3L,
+           selectInput("manip_var_nm", "Manipulation variable:",  NULL)),
+    column(width = 3L, 
+           selectInput("do_add_pcp_segments", "Draw PCP lines on the basis distribution?",
+                       c("yes" = TRUE, "no" = FALSE))),
     column(3L)
   ),
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
   ## plotly tour
-   plotly::plotlyOutput( ## Sometimes this behaves like iframe and others like object itself. 
-     "cheem_tour_plotly", width = "1440px", height = "620px") %>%
-     shinycssloaders::withSpinner(type = 8L),
+  #### Sometimes this behaves like iframe and others like object itself. 
+  plotly::plotlyOutput("cheem_tour_plotly", width = "1440px", height = "620px") %>%
+    shinycssloaders::withSpinner(type = 8L),
   br()
 ) ## Assign tab1_cheem
 
@@ -130,7 +116,7 @@ tab_about <- tabPanel("About", fluidPage(
     By altering the projection basis we can explore how sensitive variable importances are and thus interrogate how well supported that explanation is."),
   img(src = "cheem_workflow.png"),
   p('(top) Wickham, H. & Grolemund, G. (2016). R for data science. ', a(href = 'https://r4ds.had.co.nz/', 'https://r4ds.had.co.nz/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
-  p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'http://ema.drwhy.ai/', 'http://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
+  p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'https://ema.drwhy.ai/', 'https://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(blue overlay) purposed application in terms of workflow and model specificity.'),
   p(''),
   h4("Namesake"),

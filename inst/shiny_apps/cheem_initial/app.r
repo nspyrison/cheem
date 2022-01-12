@@ -91,7 +91,7 @@ server <- function(input, output, session){
     ## Row NUMBER index of data selected in linked global view
     .d <- plotly::event_data("plotly_selected")
     if(is.null(.d)) return(NULL)
-    as.integer(.d$key)
+    unique(as.integer(.d$key))
   })
   
   
@@ -210,50 +210,57 @@ server <- function(input, output, session){
   
   ## Outputs -----
   output$desc_rows <- renderText({
-    dat <- req(input$dat_char)
+    dat     <- req(input$dat_char)
+    attr_df <- req(load_ls())$attr_df
     
     ## Load data:
-    he <- l1 <- l2 <- NULL
+    he <- l1 <- NULL
     if(dat == "toy classification"){
       he <- h4("Simulated triangle vertices")
-      l1 <- p("- 420 obsvations of 4 dimensions (2 signal, 2 noise, X's), and cluster grouping (Classification Y)")
-      # l2 <- p("- Fit a random forest model classifying cluster level and extract .")
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " features (2 signal, 2 noise), and cluster membership, the classification target"))
     }else if(dat == "penguins classification"){
       he <- h4("Palmer penguins")
-      l1 <- p("- 214 penguin observations of 4 continuous physical measurements (X's) and species of penguin (Classification Y).")
-      # l2 <- p("- Fit a random forest model classifying species from the physical measurements.")
+      l1 <-  p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " physical features and species of penguin, the classification target"))
     }else if(dat == "chocolates classification"){
       he <- h4("Chocolates")
-      l1 <- p("- 88 observations of 10 nutrition measures as labeled. These chocolates labels as 'milk' or 'dark'")
-      # l2 <- p("- Fit a random forest model classifying the type of chocolate from the nutrition label.")
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " nutritional label features. Type of chocolate 'Dark' or 'Milk' is the response"))
     }else if(dat == "toy quad regression"){
       he <- h4("Toy quadratic regression")
-      l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 5]. y = x1 * x2 + x1 + x2 + (x3 + x4 + x5) / 10 + error")
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " uniform features over [0, 5], regression y = x1 * x2 + x1 + x2 + (x3 + x4 + x5) / 10 +  error"))
     }else if(dat == "toy trig regression"){
       he <- h4("Toy trig regression")
-      l1 <- p("- Simulated data, 200 observations, 5 unifrom variable in [0, 4*pi]|[0, 1]. y = sin(x1) + sin(x2) + (x3 + x4 + x5) / 10 + error")
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " uniform variables in [0, 4*pi]|[0, 1], regression y = sin(x1) + sin(x2) + (x3 + x4 + x5) / 10 + error"))
     }else if(dat == "toy mixture model regression"){
       he <- h4("Toy mixture model regression")
-      l1 <- p("- Simulated data, 240 observations, 5 unifrom variable in [0, 5], y = {first third: x1^2 + (x2 + x3 + x4 +x5) / 10, second third: x2^2 + (x1 + x3 + x4 +x5) / 10, third third: x3^2 + (x1 + x2 + x4 +x5) / 10} + error.")
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " uniform variable in [0, 5], regression y = {first third: x1^2 + (x2 + x3 + x4 +x5) / 10, second third: x2^2 + (x1 + x3 + x4 +x5) / 10, third third: x3^2 + (x1 + x2 + x4 +x5) / 10} + error."))
     }else if(dat == "fifa regression"){
       he <- h4("FIFA soccer players, 2020 season")
-      l1 <- p("- 5000 player observations of 9 explanatory skill 'aspects' (X's) and log wages [2020 Euros] (Regression Y)")
-      # l2 <- p("- Fit a random forest model regressing continuous wages from the skill aggregates.")
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " aggregated skill features, regressing on wages [2020 EUR]"))
     }else if(dat == "ames housing 2018 regression"){
       he <- h4("Ames housing 2018 (North Ames only)")
-      l1 <- p("- 338 observations of 9 house attributes. Point aesthetics on zoning subclass, (exogenous to the model).")
-      # l2 <- p("- Fit a random forest model regression log hose price from the 9 housing variables.")
-    }else { ## _ie_ user uploaded data
+      l1 <- p(paste0(
+        "- ", nrow(attr_df), " instances of ", ncol(attr_df),
+        " features, regressing on Sale Price [2018 USD]."))
+    }else { ## User uploaded data
       he <- h4("User uploaded data")
-      .cheem_ls <- req(load_ls())
-      .dim <- dim(.cheem_ls$attr_df)
-      ## Use dim and type attr to describe data
-      l1 <- p(paste0("- ", .dim[1L], " observations of ", .dim[2L], " variables."))
-      # l2 <- p("- Fit a ", .cheem_ls$type, " random forest model ")
+      l1 <- p(paste0("- ", nrow(attr_df), " instances of ", ncol(attr_df), " variables."))
     }
-    
     ## Return
-    HTML(paste(he, l1, l2))
+    HTML(paste(he, l1))
   })
   outputOptions(output, "desc_rows",
                 suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
@@ -278,8 +285,8 @@ server <- function(input, output, session){
     bindEvent(load_ls(), input$primary_obs, input$comparison_obs,
               input$glob_view_col)# %>%
     #debounce(millis = 200L)
+  ## Lazy eval, heavy work, let the other stuff calculate first.
   output$global_view <- plotly::renderPlotly(glob_view())
-  ## NO EAGER EVAL, want last
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
@@ -290,18 +297,17 @@ server <- function(input, output, session){
       spinifex::animate_plotly(fps = 4L) %>%
       plotly::layout(showlegend = FALSE) %>%
       plotly::style(hoverinfo = "none")
-    ## %>% plotly::toWebGL() ## maybe faster, may have more issues.
-    #### the following hasn't helped:
-    ## - starting at frame 11 doesn't help
-    ## - hiding gridlines again doesn't remove them.
+    ## the following hasn't helped:
+    #### %>% plotly::toWebGL() & plotly::partial_bundle(), not reliably faster and may increase visual issues.
+    #### - starting at frame 11 doesn't get arround frame 1 sometimes being skipped.
+    #### - redundantly hiding gridlines in plotly doesn't remove them.
     .anim
   })
   ## Lazy eval, heavy work, let the other stuff calculate first.
-  ## NO EAGER EVAL, desired last
   
   ### DT table of selected data
-  output$selected_df <- DT::renderDT({  ## Original data of selection
-    idx_rownum <- unique(sel_rownums()) ## NULL is no selection
+  output$selected_df <- DT::renderDT({ ## Original data of selection
+    idx_rownum <- sel_rownums() ## NULL is no selection
     if(is.null(idx_rownum)) return(NULL)
     .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(

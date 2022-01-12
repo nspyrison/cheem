@@ -81,8 +81,8 @@ library(cheem)
 library(spinifex)
 
 ## Classification:
-X    <- penguins[, 1:4]
-clas <- penguins$species
+X    <- penguins_na.rm[, 1:4]
+clas <- penguins_na.rm$species
 Y    <- as.integer(clas)
 
 rf_fit  <- default_rf(X, Y)

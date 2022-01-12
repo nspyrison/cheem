@@ -4,8 +4,8 @@
   s <- function(sec = .01) Sys.sleep(sec)
   
   ## Data preprocess ------
-  ## Data setup, spinifex::penguins
-  raw <- spinifex::penguins
+  ## Data setup, spinifex::penguins_na.rm
+  raw <- spinifex::penguins_na.rm
   clas <- raw$species
   lvls <- levels(clas)
   # ## Filter to closest 2 classes

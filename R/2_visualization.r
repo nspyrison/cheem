@@ -621,8 +621,8 @@ global_view_subplots <- function(
 #' library(spinifex)
 #' 
 #' ## Classification:
-#' X    <- penguins[, 1:4]
-#' clas <- penguins$species
+#' X    <- penguins_na.rm[, 1:4]
+#' clas <- penguins_na.rm$species
 #' Y    <- as.integer(clas)
 #' 
 #' rf_fit  <- default_rf(X, Y)
@@ -672,7 +672,7 @@ radial_cheem_tour <- function(
   do_center_frame     = TRUE
 ){
   if(is.null(row_index) == FALSE)
-    if(sum(row_index) == 0L)
+    if(sum(row_index) == 0L) 
       stop("radial_cheem_tour: sum of row_index was 0.")
   
   ## Initialize
@@ -680,7 +680,7 @@ radial_cheem_tour <- function(
   decode_df <- cheem_ls$decode_df
   .prim_obs <- primary_obs    ## Proto_basis1d_distribution EXPECTS NUMERIC INDEX;
   .comp_obs <- comparison_obs ## Don't coerce to logical index
-  .n <- nrow(decode_df)
+  .n        <- nrow(decode_df)
   ## column & row indexes
   if(is.null(inc_var_nms)) inc_var_nms <- colnames(cheem_ls$attr_df)
   .col_idx <- colnames(decode_df) %in% inc_var_nms
@@ -732,17 +732,14 @@ radial_cheem_tour <- function(
   if(.prob_type == "regression"){
     ## Double up data; observed y and residual
     .doub_prim_obs <- .doub_comp_obs <- NULL
-    if(is.null(.prim_obs) == FALSE)
-      .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
-    if(is.null(.comp_obs) == FALSE)
-      .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
+    if(is.null(.prim_obs) == FALSE) .doub_prim_obs <- c(.prim_obs, .n + .prim_obs)
+    if(is.null(.comp_obs) == FALSE) .doub_comp_obs <- c(.comp_obs, .n + .comp_obs)
     
     ## Foreground:
     .dat_fore   <- rbind(.dat, .dat)
     .idx_fore   <- c(row_index, row_index)
     .facet_fore <- factor(rep(c("observed y", "residual"), each = 2L * .n))
-    if(length(.class) > 1L){
-      .class_fore <- c(.class, .class)
+    if(length(.class) > 1L){.class_fore <- c(.class, .class)
     } else .class_fore <- .class ## could be dummy factor(FALSE)
     .y        <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid    <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
@@ -761,8 +758,7 @@ radial_cheem_tour <- function(
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       spinifex::proto_point(
         aes_args = list(color = .class_fore, shape = .class_fore),
-        identity_args = list(alpha = .alpha),
-        row_index = .idx_fore) +
+        identity_args = list(alpha = .alpha), row_index = .idx_fore) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, position = "floor1d", shape = pcp_shape,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
@@ -780,7 +776,6 @@ radial_cheem_tour <- function(
       ## Use manual geom_hline as proto_hline0 is on all facets.
       ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline, color = "grey40")
   }
-  
   ## Return the static ggtour, animate in app
   ggt
 }

@@ -26,7 +26,7 @@ observation.
 library(cheem)
 
 ## Suggest an opacity to use in plotting:
-(my_alpha <- linear_tform(nrow(spinifex::penguins)))
+(my_alpha <- linear_tform(nrow(spinifex::penguins_na.rm)))
 
 ## Visualize
 x <- 1:2000
