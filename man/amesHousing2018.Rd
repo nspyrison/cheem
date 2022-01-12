@@ -7,14 +7,16 @@
 \alias{amesHousing2018_NorthAmes}
 \title{Ames housing data 2018}
 \format{
-A complete data.frame with 2291 rows and 18 numeric variables, SalesPrice, the response variable, and 3 class variables
+complete data.frame with 2291 rows and 18 numeric variables,
+SalesPrice, the response variable, and 3 class variables
 
 An object of class \code{data.frame} with 2930 rows and 82 columns.
 
 An object of class \code{data.frame} with 338 rows and 11 columns.
 }
 \source{
-{Kaggle, Ames Housing Dataset} \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
+{Kaggle, Ames Housing Dataset}
+\url{https://www.kaggle.com/prevek18/ames-housing-dataset}
 Replicating this dataset:\preformatted{if(FALSE) ## Don't accidentally open the URL.
   browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
 ames <- readr::read_csv("./ignore/AmesHousing.csv")
@@ -75,7 +77,7 @@ amesHousing2018_raw
 amesHousing2018_NorthAmes
 }
 \description{
-Cleaned house price data for Ames, Iowa, USA from 2018. Only complete
+House sales prices from Ames, Iowa, USA between 2006 and 2010. Only complete
 numeric observations remain.
 }
 \details{
@@ -84,12 +86,37 @@ numeric observations remain.
 (including 2 temporal: MoSold, YrSold ), response variable SalePrice,
 3 class factors.}
 \item{amesHousing2018_NorthAmes}{A simplified subsample, just North Ames
-(largest neighborhood). Complete data.frame, n = 338, 9 numeric variables, response variable SalePrice,
-1 class factor SubclassMS, a zoning subclass.}
-\item{amesHousing2018_raw}{Original data from Kaggle before sparse rows
-(~700) and sparse columns (60) are removed, 2930 rows of 82
-variables. Included for transparency or extracting information from
-sparse rows/columns.}
+(largest neighborhood). Complete data.frame, n = 338, 9 numeric variables,
+response variable SalePrice, 1 class factor SubclassMS, a zoning subclass.}
+\item{amesHousing2018_raw}{Original data from Kaggle, 2930 rows of 82
+variables. Sparse rows (639) and sparse/defaulted columns (64) are removed.}
+}
+
+No data dictionary is provided on Kaggle, but amesHousing2018 variables
+are inferred to be:
+\itemize{
+\item LotFrontage, Length of the front (street facing) side of the lot
+in yards (0.914m)
+\item LotArea, Area of the lot in square yards (0.836m^2)
+\item OverallQual, Overall quality (of the house?)
+\item OverallCond, Overall condition (of the lot?)
+\item YearBuild, The year the house was originally built
+\item BsmtUnfArea, Unfinished basement area, in square yards (0.836m^2)
+\item TotBsmtArea, Total basement area, in square yards (0.836m^2)
+\item 1stFlrArea,  First (ground) floor living area in square yards (0.836m^2)
+\item LivingArea, Total living area in square yards (0.836m^2)
+\item Bathrms, The number of bathrooms
+\item Bedrms, The number of bedrooms
+\item TotRms, The total number of rooms
+\item GarageYrBlt, The year the garage was build
+\item GarageCars, The number of car spaces in the garage
+\item GarageArea, The area of the garage in square yards (0.836m^2)
+\item MoSold, The number of the month of the house sale
+\item YrSold, The number of the year of the house sale
+\item SalePrice, The sale of the house in USD (as of the year of sale?)
+\item SubclassMS, Factor subclass of construction zone, 16 levels
+\item SubclassMS, Factor major class of construction zone, 7 levels
+\item Neighborhd, Factor neighborhood of Ames, IA, 28 levels
 }
 }
 \examples{

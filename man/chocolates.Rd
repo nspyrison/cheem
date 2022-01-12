@@ -42,9 +42,9 @@ chocolates[, 4] <- factor(chocolates[, 4])
 chocolates
 }
 \description{
-The chocolates data was compiled by students in a Introduction to Machine
-Learning class (circa 2020) of Prof Cook, by collecting nutrition
-information on the chocolates as listed on their internet sites.
+The chocolates data was compiled by students at Iowa State University of
+STAT503 (circa 2015) taught by Dianne Cook. Nutrition label information
+on the chocolates as listed on manufacturer websites.
 All numbers were normalized to be equivalent to a 100g serving.
 Units of measurement are listed in the variable name.
 }

@@ -1,24 +1,51 @@
 ## Ames housing 2018 ----
 #' Ames housing data 2018
 #' 
-#' Cleaned house price data for Ames, Iowa, USA from 2018. Only complete 
+#' House sales prices from Ames, Iowa, USA between 2006 and 2010. Only complete 
 #' numeric observations remain.
 #' 
-#'  \describe{
+#' \describe{
 #'   \item{amesHousing2018}{Complete data.frame, n = 2291, 18 numeric variable 
 #'   (including 2 temporal: MoSold, YrSold ), response variable SalePrice, 
 #'   3 class factors.}
 #'   \item{amesHousing2018_NorthAmes}{A simplified subsample, just North Ames 
-#'   (largest neighborhood). Complete data.frame, n = 338, 9 numeric variables, response variable SalePrice, 
-#'   1 class factor SubclassMS, a zoning subclass.}
-#'   \item{amesHousing2018_raw}{Original data from Kaggle before sparse rows
-#'   (~700) and sparse columns (60) are removed, 2930 rows of 82 
-#'   variables. Included for transparency or extracting information from 
-#'   sparse rows/columns.}
+#'   (largest neighborhood). Complete data.frame, n = 338, 9 numeric variables, 
+#'   response variable SalePrice, 1 class factor SubclassMS, a zoning subclass.}
+#'   \item{amesHousing2018_raw}{Original data from Kaggle, 2930 rows of 82 
+#'   variables. Sparse rows (639) and sparse/defaulted columns (64) are removed.}
 #' }
 #' 
-#' @format  A complete data.frame with 2291 rows and 18 numeric variables, SalesPrice, the response variable, and 3 class variables
-#' @source {Kaggle, Ames Housing Dataset} \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
+#' No data dictionary is provided on Kaggle, but amesHousing2018 variables 
+#' are inferred to be:
+#' \itemize{
+#'   \item LotFrontage, Length of the front (street facing) side of the lot 
+#'   in yards (0.914m)
+#'   \item LotArea, Area of the lot in square yards (0.836m^2)
+#'   \item OverallQual, Overall quality (of the house?)
+#'   \item OverallCond, Overall condition (of the lot?)
+#'   \item YearBuild, The year the house was originally built
+#'   \item BsmtUnfArea, Unfinished basement area, in square yards (0.836m^2)
+#'   \item TotBsmtArea, Total basement area, in square yards (0.836m^2)
+#'   \item 1stFlrArea,  First (ground) floor living area in square yards (0.836m^2)
+#'   \item LivingArea, Total living area in square yards (0.836m^2)
+#'   \item Bathrms, The number of bathrooms
+#'   \item Bedrms, The number of bedrooms
+#'   \item TotRms, The total number of rooms
+#'   \item GarageYrBlt, The year the garage was build
+#'   \item GarageCars, The number of car spaces in the garage
+#'   \item GarageArea, The area of the garage in square yards (0.836m^2)
+#'   \item MoSold, The number of the month of the house sale
+#'   \item YrSold, The number of the year of the house sale
+#'   \item SalePrice, The sale of the house in USD (as of the year of sale?)
+#'   \item SubclassMS, Factor subclass of construction zone, 16 levels
+#'   \item SubclassMS, Factor major class of construction zone, 7 levels
+#'   \item Neighborhd, Factor neighborhood of Ames, IA, 28 levels
+#' }
+#' 
+#' @format complete data.frame with 2291 rows and 18 numeric variables, 
+#' SalesPrice, the response variable, and 3 class variables
+#' @source {Kaggle, Ames Housing Dataset} 
+#' \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
 #' Replicating this dataset:
 #' ```
 #' if(FALSE) ## Don't accidentally open the URL.
@@ -104,9 +131,9 @@
 ## Chocolates -----
 #' Chocolates dataset
 #' 
-#' The chocolates data was compiled by students in a Introduction to Machine 
-#' Learning class (circa 2020) of Prof Cook, by collecting nutrition 
-#' information on the chocolates as listed on their internet sites. 
+#' The chocolates data was compiled by students at Iowa State University of 
+#' STAT503 (circa 2015) taught by Dianne Cook. Nutrition label information
+#' on the chocolates as listed on manufacturer websites. 
 #' All numbers were normalized to be equivalent to a 100g serving. 
 #' Units of measurement are listed in the variable name.
 #' 
