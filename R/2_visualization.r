@@ -752,7 +752,7 @@ radial_cheem_tour <- function(
     ## Scale obs y, resid, df_hline
     .y        <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid    <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
-    .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "y: residual")
+    .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "residual")
     
     # Aesthetics setup
     .class    <- factor(FALSE) #decode_df$class|predicted_class
@@ -769,10 +769,10 @@ radial_cheem_tour <- function(
       ## Foreground:
       .dat_fore   <- rbind(.dat, .dat)
       .idx_fore   <- c(row_index, row_index)
-      .facet_fore <- factor(rep(c("y: observed y", "y: residual"), each = 2L * .n))
+      .facet_fore <- factor(rep(c("observed y", "residual"), each = 2L * .n))
       .fixed_y    <- c(.y, .resid)
     } else {
-      ## not doubled up data; just fixed_y: observed y
+      ## not doubled up data; just fixed_observed y
       if(is.null(.prim_obs) == FALSE)
         .pts_prim_obs <- .prim_obs
       if(is.null(.comp_obs) == FALSE)
@@ -780,7 +780,7 @@ radial_cheem_tour <- function(
       ## Foreground:
       .dat_fore   <- .dat
       .idx_fore   <- row_index
-      .facet_fore <- rep("y: observed y", each = .n)
+      .facet_fore <- rep("observed y", each = .n)
       .class_fore <- .class
       .fixed_y    <- .y
     }

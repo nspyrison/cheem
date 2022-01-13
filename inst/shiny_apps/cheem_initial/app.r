@@ -265,8 +265,7 @@ server <- function(input, output, session){
               input$glob_view_col)# %>%
     #debounce(millis = 200L)
   ## Lazy eval, heavy work, let the other stuff calculate first.
-  output$global_view <- glob_view() %>% suppressWarnings() %>%
-    plotly::renderPlotly()
+  output$global_view <- plotly::renderPlotly(suppressWarnings(glob_view()))
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
