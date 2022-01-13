@@ -466,7 +466,7 @@ cheem_ls <- function(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
 
   if(is_classification){
-    .vec_yjitter <- stats::runif(nrow(x), -.3, .3)
+    .vec_yjitter <- stats::runif(nrow(x), -.2, .2)
     .layer_nm    <- "model (w/ y jitter)"
   }else{ ## Regression
     .vec_yjitter <- 0L

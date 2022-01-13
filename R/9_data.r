@@ -21,8 +21,8 @@
 #'   \item LotFrontage, Length of the front (street facing) side of the lot 
 #'   in yards (0.914m)
 #'   \item LotArea, Area of the lot in square yards (0.836m^2)
-#'   \item OverallQual, Overall quality (of the house?)
-#'   \item OverallCond, Overall condition (of the lot?)
+#'   \item OverallQual, Overall quality (of the house?), integer in (1, 10)
+#'   \item OverallCond, Overall condition (of the lot?), integer in (1, 10)
 #'   \item YearBuild, The year the house was originally built
 #'   \item BsmtUnfArea, Unfinished basement area, in square yards (0.836m^2)
 #'   \item TotBsmtArea, Total basement area, in square yards (0.836m^2)
@@ -74,7 +74,8 @@
 #' ames_char <- ames[, unlist(lapply(ames, is.character))]
 #' ames_clas <- as.data.frame(lapply(ames_char, factor))[, -1]
 #' ames_clasint <- data.frame(lapply(ames_clas, as.integer))
-#' col_idx_char <- which(names(ames_clas) %in% c("MS.SubClass", "MS.Zoning", "Neighborhood"))
+#' col_idx_char <- which(names(ames_clas) %in%
+#'                         c("MS.SubClass", "MS.Zoning", "Neighborhood"))
 #' classes <- ames_clas[row_idx, col_idx_char]
 #' 
 #' amesHousing2018 <- cbind(ames2, classes)
@@ -96,7 +97,8 @@
 #'   amesHousing2018$SubclassMS %in% c("020", "050", "080", "090", "060")
 #' amesHousing2018_NorthAmes <- amesHousing2018_thin[r_idx, ]
 #' amesHousing2018_NorthAmes$SubclassMS <- factor(
-#'   amesHousing2018_NorthAmes$SubclassMS, levels = unique(amesHousing2018_NorthAmes$SubclassMS))
+#'   amesHousing2018_NorthAmes$SubclassMS,
+#'   unique(amesHousing2018_NorthAmes$SubclassMS))
 #' ## save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
 #' ```
 #' @examples

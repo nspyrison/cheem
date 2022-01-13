@@ -8,7 +8,7 @@ proto_basis1d_distribution(
   attr_df,
   group_by = as.factor(FALSE),
   position = c("top1d", "floor1d", "bottom1d", "off"),
-  shape = c(142, 124),
+  pcp_shape = c(142, 124, 3),
   do_add_pcp_segments = TRUE,
   primary_obs = 1,
   comparison_obs = 2,
@@ -26,8 +26,8 @@ such as a return from \code{attr_df_treeshap()}.}
 "bottom1d", "off").
 Defaults to "top1d"; basis above the density curves.}
 
-\item{shape}{Number specifying the shape of the basis distribution points.
-Typically 142 or 124 indicating '|' for \code{plotly} and \code{gganimate} respectively.
+\item{pcp_shape}{The number of the shape character to add. Expects
+142, 124, 3  '|' for \code{plotly} and \code{gganimate} or '+' in either respectively.
 Defaults to 142, '|' for \code{plotly}.}
 
 \item{do_add_pcp_segments}{Logical, whether or not to add to add faint

@@ -42,7 +42,8 @@ Suggests:
     beepr,
     knitr,
     testthat (>= 3.0.0),
-    spelling
+    spelling,
+    rmarkdown
 Additional_repositories: https://nspyrison.github.io/drat
 VignetteBuilder: knitr
 Encoding: UTF-8

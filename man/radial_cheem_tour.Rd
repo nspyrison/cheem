@@ -12,11 +12,12 @@ radial_cheem_tour(
   primary_obs = NULL,
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape = c(142, 124),
+  pcp_shape = c(142, 124, 3),
   angle = 0.2,
   row_index = NULL,
   inc_var_nms = NULL,
-  do_center_frame = TRUE
+  do_center_frame = TRUE,
+  do_add_residual = FALSE
 )
 
 radial_cheem_tour_subplots(
@@ -26,7 +27,7 @@ radial_cheem_tour_subplots(
   primary_obs = NULL,
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape = c(142, 124),
+  pcp_shape = c(142, 124, 3),
   angle = 0.2,
   row_index = NULL,
   inc_var_nms = NULL,
@@ -51,9 +52,9 @@ is highlighted as a dotted line.}
 \item{do_add_pcp_segments}{Logical, whether or not to add parallel coordinate
 line segments to the basis display.}
 
-\item{pcp_shape}{The number of the shape character to add. Typically
-142 or 124, '|' for \code{plotly} and \code{gganimate} respectively. Defaults to 142,
-'|' for \code{plotly}.}
+\item{pcp_shape}{The number of the shape character to add. Expects
+142, 124, 3  '|' for \code{plotly} and \code{gganimate} or '+' in either respectively.
+Defaults to 142, '|' for \code{plotly}.}
 
 \item{angle}{The step size between interpolated frames, in radians.}
 
@@ -63,14 +64,17 @@ Defaults to TRUE; 1:n.}
 \item{inc_var_nms}{A vector of the names of the variables to include in the
 projection.}
 
+\item{do_add_residual}{Whether of not to add a facet with a fixed y on
+residual. Doing so may cause issues with animation. Defaults to FALSE.}
+
 \item{do_scale_in_frame}{Whether or not to scale by standard deviations away
 from the mean within each frame or not.
 Defaults to TRUE, helping to keep the animation centered.}
 }
 \value{
-\code{ggplot}/ggtour of the cheem tour, animation frames of a radial tour
-manipulating the contribution of a selected tour. Consumed by a
-\verb{spinifex::animate_*} function.
+ggtour (ggplot2 object with frame info) animation frames of a radial
+tour manipulating the contribution of a selected tour. Animated with
+\verb{spinifex::animate_*} functions.
 }
 \description{
 Create a linked \code{plotly}of the global data-

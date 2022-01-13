@@ -14,42 +14,24 @@ server <- function(input, output, session){
     
     if(dat == "toy classification"){
       ret      <- toy_class_ls
-      # prim_obs <- 36L
-      # comp_obs <- 23L
     }else if(dat == "penguins classification"){
       ret      <- penguins_ls
-      # prim_obs <- 243L ## Presubmission seminar looked at 124, 86
-      # comp_obs <- 169L
     }else if(dat == "chocolates classification"){
       ret      <- chocolates_ls
-      # prim_obs <- 22L
-      # comp_obs <- 7L
     }else if(dat == "toy quad regression"){
       ret      <- toy_quad_reg_ls
-      # prim_obs <- 11L
-      # comp_obs <- 121L
     }else if(dat == "toy trig regression"){
       ret      <- toy_trig_reg_ls
-      # prim_obs <- 87L
-      # comp_obs <- 102L
     }else if(dat == "toy mixture model regression"){
       ret      <- toy_mix_reg_ls
-      # prim_obs <- 23L
-      # comp_obs <- 130L
     }else if(dat == "fifa regression"){
       ret      <- fifa_ls
-      # prim_obs <- 1L
-      # comp_obs <- 8L
     }else if(dat == "ames housing 2018 regression"){
       ret      <- ames2018_ls
-      # prim_obs <- 311L
-      # comp_obs <- 220L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
       file_path <- req(input$in_cheem_ls$datapath)
       tryCatch(ret <- readRDS(file_path),
                error = function(e) stop(safeError(e)))
-      prim_obs <- 1L
-      comp_obs <- 2L
     }
     
     ## SIDE EFFECT: Update prim/comp_obs
@@ -104,8 +86,8 @@ server <- function(input, output, session){
     mv_nm       <- req(input$manip_var_nm)
     add_pcp     <- req(input$do_add_pcp_segments)
     inc_var_nms <- req(input$inc_var_nms)
-    #idx_rownum  <- sel_rownums() ## NULL is no selection; all points
-    idx_rownum  <- NULL ## all points
+    idx_rownum  <- sel_rownums() ## NULL is no selection; all points
+    #idx_rownum  <- NULL ## all points
     ## sel_rownums() is Leading to a hard to explore plotly method error:
     # Error: object 'x' not found
     ## abandoning and defaulting to full selection.
@@ -159,9 +141,6 @@ server <- function(input, output, session){
       prim_obs <- 74L
       comp_obs <- 192L
     }else{ ## _ie._ user loaded data; no priors of good obs to pick.
-      file_path <- req(input$in_cheem_ls$datapath)
-      tryCatch(ret <- readRDS(file_path),
-               error = function(e) stop(safeError(e)))
       prim_obs <- 1L
       comp_obs <- 2L
     }
@@ -286,7 +265,8 @@ server <- function(input, output, session){
               input$glob_view_col)# %>%
     #debounce(millis = 200L)
   ## Lazy eval, heavy work, let the other stuff calculate first.
-  output$global_view <- plotly::renderPlotly(glob_view())
+  output$global_view <- glob_view() %>% suppressWarnings() %>%
+    plotly::renderPlotly()
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
