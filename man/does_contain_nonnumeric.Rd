@@ -10,7 +10,7 @@ does_contain_nonnumeric(x)
 \item{x}{A vector to be tested for existence of non-numeric characters.}
 }
 \value{
-Character in c("classification", "regression")
+Logical, whether or not x contains any non-numeric characters.
 }
 \description{
 Returns a logical, whether or not a vector contains any non-numeric
@@ -30,7 +30,6 @@ Other cheem utility:
 \code{\link{color_scale_of}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

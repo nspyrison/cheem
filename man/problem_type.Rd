@@ -10,7 +10,8 @@ problem_type(y)
 \item{y}{Response variable to be modeled}
 }
 \value{
-Character in c("classification", "regression")
+Character either c("classification", "regression") specifying the
+assumed model task based on the discretness of y.
 }
 \description{
 Whether the Y is a "classification", "regression" or ill-defined problem.
@@ -34,7 +35,6 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

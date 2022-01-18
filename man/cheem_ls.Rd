@@ -67,9 +67,9 @@ this_ls <- cheem_ls(X, Y, class = clas,
 names(this_ls)
 
 ## Regression:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)

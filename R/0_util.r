@@ -87,7 +87,7 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
   x <- x[is.na(x) == FALSE] ## Remove NAs
   b <- "blue3" #scales::muted("blue")
   g <- "grey80"
-  r <- "red3" #scales::muted("red")
+  r <- "red3"  #scales::muted("red")
   if(is_discrete(x)){
     ret <- list(ggplot2::scale_color_brewer(palette = "Dark2", ...),
                 ggplot2::scale_fill_brewer( palette = "Dark2", ...))
@@ -109,6 +109,7 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
       ggplot2::scale_color_gradient(low = b, high = g, limits = limits, ...),
       ggplot2::scale_fill_gradient( low = b, high = g, limits = limits, ...))
   }
+  ## Return
   ret
 }
 
@@ -120,7 +121,8 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
 #' for `DALEX::explain(type)` as it also expects "classification" or 
 #' "regression".
 #' @param y Response variable to be modeled
-#' @return Character in c("classification", "regression")
+#' @return Character either c("classification", "regression") specifying the 
+#' assumed model task based on the discretness of y.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -131,7 +133,7 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
 #' problem_type(letters)
 problem_type <- function(y){
   if(is_discrete(y) == TRUE) return("classification")
-  if(is.numeric(y) == TRUE)  return("regression")
+  if(is.numeric(y)  == TRUE) return("regression")
   stop("y was expected as a with less than 25 unique values, or continuous numeric; indicating a classification or regression problem respectivly.")
 }
 
@@ -142,7 +144,7 @@ problem_type <- function(y){
 #' characters. Typically used to test if row names hold non-index information.
 #' 
 #' @param x A vector to be tested for existence of non-numeric characters.
-#' @return Character in c("classification", "regression")
+#' @return Logical, whether or not x contains any non-numeric characters.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -166,7 +168,11 @@ does_contain_nonnumeric <- function(x){
 #' @param var_coeff Variance coefficient, closer to 0 make points near the 
 #' median, above 1 makes more points further away from the median. 
 #' Defaults to 1.
-#' @return A data.frame with column names of the original data.
+#' @param method The method of the covariance matrix. Expects "person" 
+#' (continuous numeric), "kendall" or "spearman" 
+#' (latter two are ranked based ordinal).
+#' @return A data.frame, sampled observations given the means and covariance of 
+#' the data based on with column names kept.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -175,9 +181,11 @@ does_contain_nonnumeric <- function(x){
 #' sub <- mtcars[mtcars$cyl == 6, ]
 #' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
 #' rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
-rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
+rnorm_from <- function(
+  data, n_obs = 1, var_coeff = 1, method = c("pearson", "kendall", "spearman")
+){
   .mns <- apply(data, 2L, stats::median)
-  .cov <- stats::cov(data, method = "pearson")
+  .cov <- stats::cov(data, method = match.arg(method))
   diag(.cov) <- var_coeff * diag(.cov) ## Decrease univariate variance if needed.
   ## person numeric, not spearman ranked/ordinal
   
@@ -186,10 +194,8 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
     .cov <- lqmm::make.positive.definite(.cov)
   }
   
-  ## Sample
-  ret <- mvtnorm::rmvnorm(n = n_obs,
-                          mean = .mns,
-                          sigma =  var_coeff * .cov)
+  ## Sample and return
+  ret <- mvtnorm::rmvnorm(n = n_obs, mean = .mns, sigma =  var_coeff * .cov)
   as.data.frame(ret)
 }
 
@@ -201,7 +207,7 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #' @param n Number of observations to plot.
 #' @param appox_max_n The number of observation to reach floor opacity.
 #' @param ceiling The highest number returned. Defaults to 1.
-#' @param floor The lowest number returned. Defaults to 0.2.
+#' @param floor The lowest number returned. Defaults to 0.3.
 #' @return A scalar numeric, suggested value to set alpha opacity.
 #' @export
 #' @family cheem utility
@@ -213,9 +219,9 @@ rnorm_from <- function(data, n_obs = 1, var_coeff = 1){
 #'
 #' ## Visualize
 #' x <- 1:2000
-#' plot(x, sapply(x, linear_tform), col = 'blue')
+#' plot(x, sapply(x, linear_tform), col = "blue")
 linear_tform = function(
-  n, appox_max_n = 5000L, ceiling = 1, floor = .2
+  n, appox_max_n = 5000L, ceiling = 1, floor = .3
 ){
   vec <- 1L - min(n / appox_max_n, 1L)
   ceiling * (floor + (1L - floor) * vec)
@@ -243,7 +249,7 @@ linear_tform = function(
 #'
 #' ## Visualize
 #' x <- 1:2000
-#' plot(x, logistic_tform(x), col = 'blue')
+#' plot(x, logistic_tform(x), col = "blue")
 logistic_tform = function(
   n, mid_pt = 600, k_attenuation = 5, ceiling = 1, floor = .3
 ){
@@ -261,7 +267,7 @@ logistic_tform = function(
 #' coerce to a logical index.
 #' @param n Single numeric, the number of rows of the data use as a replicate
 #' return length.
-#' @return A logical index of length `n`.
+#' @return A logical index of length n.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -295,7 +301,7 @@ devMessage <- function(text){
 
 #' Evaluate if development
 #' 
-#' Evaluate the epression if the 4th chunk of the package version is 9000.
+#' Evaluate the expression if the 4th chunk of the package version is 9000.
 #' @param expr A character string to message() if package version is 9000.
 ifDev <- function(expr){
   version4 <- utils::packageVersion(pkg = "cheem")[1L, 4L]

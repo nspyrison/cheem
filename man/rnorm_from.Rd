@@ -4,7 +4,12 @@
 \alias{rnorm_from}
 \title{Draw new samples from the supplied data given its mean and covariances.}
 \usage{
-rnorm_from(data, n_obs = 1, var_coeff = 1)
+rnorm_from(
+  data,
+  n_obs = 1,
+  var_coeff = 1,
+  method = c("pearson", "kendall", "spearman")
+)
 }
 \arguments{
 \item{data}{A data.frame or matrix to sample from.}
@@ -14,9 +19,14 @@ rnorm_from(data, n_obs = 1, var_coeff = 1)
 \item{var_coeff}{Variance coefficient, closer to 0 make points near the
 median, above 1 makes more points further away from the median.
 Defaults to 1.}
+
+\item{method}{The method of the covariance matrix. Expects "person"
+(continuous numeric), "kendall" or "spearman"
+(latter two are ranked based ordinal).}
 }
 \value{
-A data.frame with column names of the original data.
+A data.frame, sampled observations given the means and covariance of
+the data based on with column names kept.
 }
 \description{
 Creates new observation of the data given its specific means and shapes.
@@ -38,7 +48,6 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

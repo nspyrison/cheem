@@ -60,9 +60,9 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
   fluidRow(
     column(3L, numericInput(
-      "primary_obs", "Primary observation rownum, ('*', dashed line below):", NULL)),
+      "primary_inst", "Primary instance ('*', dashed line below):", NULL)),
     column(3L, numericInput(
-      "comparison_obs", "Comparison observation rownum, ('x', dotted line below):", NULL)),
+      "comparison_inst", "Comparison instance ('x', dotted line below):", NULL)),
     column(3L, selectInput(
       "glob_view_col", "Global view point color",
       c("default", "log_maha.data", "cor_attr_proj.y", "residual"))),
@@ -81,10 +81,10 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   fluidRow(
     column(width = 3L,
            checkboxGroupInput(
-             "inc_var_nms", label = "Variables to include:",
+             "inc_feat_nms", label = "Features to include:",
              choices = NULL, selected = NULL, inline = TRUE)),
     column(width = 3L,
-           selectInput("manip_var_nm", "Manipulation variable:",  NULL)),
+           selectInput("manip_feat_nm", "Manipulation feature:",  NULL)),
     column(width = 3L, 
            selectInput("do_add_pcp_segments", "Draw PCP lines on the basis distribution?",
                        c("yes" = TRUE, "no" = FALSE))),
@@ -108,12 +108,12 @@ tab_about <- tabPanel("About", fluidPage(
   img(src = "lime_nonlinear.png"),
   p('Ribeiro, M. et. al. (2017). Why Should I Trust You? ', a(href = 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   br(),
-  HTML("Recently, <em>local explainations</em> approximate the linear variable importances at one particular point, typically an observation.
-    Originally, the explanations were then plotted to illustrate those variables that contribute to moving that observation from the intercept to its prediction."),
+  HTML("Recently, <em>local explainations</em> approximate the linear feature (variable, predictor) importances at one particular point, typically an instance.
+    Originally, the explanations were then plotted to illustrate those features that contribute to moving that instance from the intercept to its prediction."),
   br(),
-  HTML("Our approach is to select a primary and comparison observation and use a local explanation's variable-attribution of the primary observation to project the data. 
-    The explanation can then be interrogated by playing a <em>manual tour</em> by rotating the contribution of a selected variable.
-    By altering the projection basis we can explore how sensitive variable importances are and thus interrogate how well supported that explanation is."),
+  HTML("Our approach is to select a primary and comparison instance (observation) and use a local explanation's feature-attribution of the primary instance to project the data. 
+    The explanation can then be interrogated by playing a <em>manual tour</em> by rotating the contribution of a selected feature.
+    By altering the projection basis we can explore how sensitive feature importances are and thus interrogate how well supported that explanation is."),
   img(src = "cheem_workflow.png"),
   p('(top) Wickham, H. & Grolemund, G. (2016). R for data science. ', a(href = 'https://r4ds.had.co.nz/', 'https://r4ds.had.co.nz/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'https://ema.drwhy.ai/', 'https://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),

@@ -13,7 +13,7 @@ radial_cheem_tour(
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124, 3),
-  angle = 0.2,
+  angle = 0.15,
   row_index = NULL,
   inc_var_nms = NULL,
   do_center_frame = TRUE,
@@ -28,7 +28,7 @@ radial_cheem_tour_subplots(
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape = c(142, 124, 3),
-  angle = 0.2,
+  angle = 0.15,
   row_index = NULL,
   inc_var_nms = NULL,
   do_center_frame = TRUE
@@ -44,10 +44,11 @@ radial_cheem_tour_subplots(
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
-as a dashed line.}
+as a dashed line. Defaults to NULL, no primary observation highlighted.}
 
 \item{comparison_obs}{The rownumber of the comparison observation. Point
-is highlighted as a dotted line.}
+is highlighted as a dotted line. Defaults to NULL,
+no comparison observation highlighted.}
 
 \item{do_add_pcp_segments}{Logical, whether or not to add parallel coordinate
 line segments to the basis display.}
@@ -56,7 +57,8 @@ line segments to the basis display.}
 142, 124, 3  '|' for \code{plotly} and \code{gganimate} or '+' in either respectively.
 Defaults to 142, '|' for \code{plotly}.}
 
-\item{angle}{The step size between interpolated frames, in radians.}
+\item{angle}{The step size between interpolated frames, in radians.
+Defaults to .15.}
 
 \item{row_index}{Numeric index of selected observations.
 Defaults to TRUE; 1:n.}
@@ -72,8 +74,8 @@ from the mean within each frame or not.
 Defaults to TRUE, helping to keep the animation centered.}
 }
 \value{
-ggtour (ggplot2 object with frame info) animation frames of a radial
-tour manipulating the contribution of a selected tour. Animated with
+ggtour (\code{ggplot2} object with frame info) animation frames of a
+radial tour manipulating the contribution of a selected tour. Animated with
 \verb{spinifex::animate_*} functions.
 }
 \description{

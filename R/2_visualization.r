@@ -7,7 +7,7 @@
 #' 
 #' @param attr_df A data frame of local explanation attributions,
 #' such as a return from `attr_df_treeshap()`.
-#' @param rownum The rownumber of the primary observation. Defaults to 1.
+#' @param rownum The rownumber of the observation.
 #' @return A matrix of the 1D basis.
 #' @export
 #' @family cheem utility
@@ -26,14 +26,15 @@
 #' basis_attr_df(shap_df, rownum = 1)
 basis_attr_df <- function(
   attr_df,
-  rownum = 1
+  rownum
 ){
   ## Remove last column if layer_name
-  .attr_df <- attr_df[rownum,, drop = FALSE] ## 1 row of a 
+  .attr_df <- attr_df[rownum,, drop = FALSE]
   ## Extract formatted basis
-  LA_bas <- .attr_df %>% as.numeric() %>%
-    matrix(ncol = 1L, dimnames =
-             list(colnames(attr_df), class(attr_df)[length(class(attr_df))]))
+  LA_bas <- matrix(
+    as.numeric(.attr_df), ncol = 1L, 
+    dimnames = list(colnames(attr_df), tail(class(attr_df), 1L)))
+  ## Orthonormalise
   tourr::orthonormalise(LA_bas)
 }
 
@@ -50,7 +51,7 @@ basis_attr_df <- function(
 #' as a dashed line.
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line.
-#' @return A single number of the variable with the largest difference. 
+#' @return A single number of the variable with the largest difference.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -67,10 +68,10 @@ basis_attr_df <- function(
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
-  .bas      <- basis_attr_df(attr_df, rownum = primary_obs)
-  .expected <- basis_attr_df(attr_df, rownum = comparison_obs)
-  .diff     <- abs(.bas - .expected)
-  which(.diff == max(.diff)) ## number
+  .prim <- basis_attr_df(attr_df, rownum = primary_obs)
+  .comp <- basis_attr_df(attr_df, rownum = comparison_obs)
+  .diff <- abs(.prim - .comp)
+  which(.diff == max(.diff)) ## Number of the variable with the largest difference
 }
 
 ## proto_* extensions ----
@@ -94,13 +95,15 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' parallel coordinate lines on the 1D basis. Defaults to TRUE.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
-#' as a dashed line.
+#' as a dashed line. Defaults to NULL, no highlighting.
 #' @param comparison_obs The rownumber of the comparison observation. Point
-#' is highlighted as a dotted line.
+#' is highlighted as a dotted line. Defaults to NULL, no highlighting.
 #' @param inc_var_nms A character vector, the names of the variables to keep. 
 #' Defaults to NULL, all variables kept.
 #' @param row_index A numeric or logical vector, the index of the rows to keep.
 #' Defaults to NULL, all rows kept.
+#' @return A `ggplot` object of the the distribution of the local explanation's
+#' attributions.
 #' @family ggtour proto
 #' @export
 #' @examples
@@ -108,28 +111,26 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' library(spinifex)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
-#' rf_fit <- default_rf(X, Y)
+#' rf_fit  <- default_rf(X, Y)
 #' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
-#' bas_p <- basis_attr_df(shap_df, rownum = 1)
-#' bas_c <- basis_attr_df(shap_df, rownum = 2)
-#' diff <- abs(bas_p - bas_c)
-#' mv <- which(diff == max(diff))
+#' mv      <- manip_var_of_attr_df(shap_df, 1, 2)
 #' mt_path <- manual_tour(bas_p, mv)
-#' fixed_pred <- stats::predict(rf_fit)
+#' pred    <- predict_unify(rf_fit, X)
 #' 
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
 #'   append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
 #'   proto_point(list(color = clas, shape = clas)) +
 #'   proto_basis1d_distribution(
-#'     attr_df = shap_df, group_by = clas, position = "top1d",
-#'     primary_obs = 1, comparison_obs = 2) +
+#'     attr_df = shap_df,
+#'     primary_obs = 1, comparison_obs = 2,
+#'     position = "top1d", group_by = clas) +
 #'   proto_basis1d(position = "bottom1d") +
 #'   proto_origin()
 #' \dontrun{
@@ -137,14 +138,14 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' }
 proto_basis1d_distribution <- function(
   attr_df, ## Only for distribution of bases.
-  group_by = as.factor(FALSE),
-  position = c("top1d", "floor1d", "bottom1d", "off"), ## Needs to match that of `proto_basis1d()`
-  pcp_shape = c(142, 124, 3), ## '|' for plotly and ggplot, or '+' respectively
+  primary_obs         = NULL,
+  comparison_obs      = NULL,
+  position            = c("top1d", "floor1d", "bottom1d", "off"), ## Needs to match that of `proto_basis1d()`
+  group_by            = as.factor(FALSE),
+  pcp_shape           = c(142, 124, 3), ## '|' for plotly and ggplot, or '+' respectively
   do_add_pcp_segments = TRUE,
-  primary_obs = 1,
-  comparison_obs = 2,
-  inc_var_nms = NULL,
-  row_index = NULL
+  inc_var_nms         = NULL,
+  row_index           = NULL
 ){
   if(is.matrix(attr_df) & ncol(attr_df) < 3L)
     stop("proto_basis1d_distribution: attr_df was matrix and less than 3 columns, was the basis of the attr_df used?")
@@ -161,7 +162,7 @@ proto_basis1d_distribution <- function(
   
   ## Subset rows then columns
   if(is.null(row_index) == FALSE){
-    ## enforce keep prim/comp obs
+    ## Ensure prim/comp obs kept
     row_index[c(primary_obs, comparison_obs)] <- TRUE
     attr_df  <- attr_df[ row_index, ]
     group_by <- group_by[row_index]
@@ -180,10 +181,9 @@ proto_basis1d_distribution <- function(
   attr_df$rownum <- 1L:.n
   attr_df$group_by <- as.factor(group_by)
   class(attr_df) <- "data.frame"
-  .attr_df_longer <- tidyr::pivot_longer(attr_df,
-                                         cols = !c(rownum, group_by),
-                                         names_to = "var_name",
-                                         values_to = "contribution")
+  .attr_df_longer <- tidyr::pivot_longer(
+    attr_df, cols = !c(rownum, group_by),
+    names_to = "var_name", values_to = "contribution")
   .df_basis_distr <- dplyr::mutate(
     .attr_df_longer, .keep = "none", x = contribution,
     ## Must be reverse order; var 1 on top, highest value.
@@ -217,8 +217,8 @@ proto_basis1d_distribution <- function(
   .df_seg0 <- spinifex::map_relative(.df_seg0, position, .map_to)
   if(.is_faceted){
     .facet_var <- list(facet_var = "_basis_")
-    .df_rect <- spinifex:::.bind_elements2df(.facet_var, .df_rect)
-    .df_seg0 <- spinifex:::.bind_elements2df(.facet_var, .df_seg0)
+    .df_rect   <- spinifex:::.bind_elements2df(.facet_var, .df_rect)
+    .df_seg0   <- spinifex:::.bind_elements2df(.facet_var, .df_seg0)
   }
   ## Add protos
   ret <- c(
@@ -226,11 +226,10 @@ proto_basis1d_distribution <- function(
     ggplot2::geom_segment(
       ggplot2::aes(x = min(x), y = min(y), xend = max(x), yend = max(y)),
       .df_seg0, color = "grey80", linetype = 2L),
-    ## Outside rectangle, grey60, unit-width, (height = p+1)
+    ## Outside rectangle, grey60, unit - width, (height = p + 1)
     ggplot2::geom_rect(
       ggplot2::aes(xmin = min(x), xmax = max(x), ymin = min(y), ymax = max(y)),
       .df_rect, fill = NA, color = "grey60"))
-           
   
   #### Add PCP lines if needed. ----
   ## Make the right table to inner join to.
@@ -268,11 +267,11 @@ proto_basis1d_distribution <- function(
       color = "black", size = 1L, alpha = .8, linetype = 2L))))
   
   ## Return
- ret
+  ret
 }
 
 
-## completed visuals ------
+## Completed visuals ------
 
 #' Linked `plotly` display, global view of data and attribution space.
 #' 
@@ -282,9 +281,9 @@ proto_basis1d_distribution <- function(
 #' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
-#' as a dashed line.
+#' as a dashed line. Defaults to NULL, no highlighting applied.
 #' @param comparison_obs The rownumber of the comparison observation. Point
-#' is highlighted as a dotted line.
+#' is highlighted as a dotted line. Defaults to NULL, no highlighting applied.
 #' @param height_px The height in pixels of the returned `plotly` plot.
 #' Defaults to 480.
 #' @param width_px The width in pixels of the returned `plotly` plot.
@@ -295,8 +294,8 @@ proto_basis1d_distribution <- function(
 #' for regression.
 #' @param as_ggplot Logical, if TRUE returns the plots before being passed to
 #' `plotly` functions.
-#' @return `plotly` html widget of the global view, first 2 components of the basis of
-#' the data- and attribution- spaces.
+#' @return A `plotly` plot, an interactive html widget of the global view, 
+#' first two components of the basis of the data- and attribution- spaces.
 #' @export
 #' @family cheem consumers
 #' @examples
@@ -337,12 +336,12 @@ global_view <- function(
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(decode_df))
-  ## Setup shape and color
   color <- match.arg(color)
   if(color %in% c("default", colnames(global_view_df)) == FALSE)
     stop(paste0("global_view: `color` column ", color,
                 " not in the cheem_ls. Try to reprocess that dataset."))
   if(is_classification){
+    ## Classification
     if(color == "default") color <- "predicted_class"
     .color <- global_view_df[, color]
     .shape <- global_view_df[, "predicted_class"]
@@ -351,10 +350,10 @@ global_view <- function(
     if(color == "default"){
       .color <- rep_len(factor(FALSE), nrow(global_view_df))
     }else .color <- global_view_df[, color]
-    .shape <- rep_len(factor(FALSE), nrow(global_view_df))
+    .shape   <- rep_len(factor(FALSE), nrow(global_view_df))
   }
   if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
-  .col_scale    <- color_scale_of(.color, limits = .lim)
+  .col_scale <- color_scale_of(.color, limits = .lim)
   
   ## Work around for differnt X axis titles.
   .spaces       <- paste(rep(" ", 61L), collapse = "")
@@ -371,11 +370,11 @@ global_view <- function(
   
   ## Proto for main points
   pts_main <- list()
-  .u_nms <- unique(global_view_df$layer_name)
+  .u_nms   <- unique(global_view_df$layer_name)
   ## if classification: redisual/obs LM line
   if(is_classification == FALSE)
     pts_main <- c(pts_main, ggplot2::geom_smooth(
-      data = subset(global_view_df, layer_name == .u_nms[length(.u_nms)]),
+      data   = subset(global_view_df, layer_name == .u_nms[length(.u_nms)]),
       method = "lm", formula = y ~ x, se = FALSE))
   ## Add main points
   pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
@@ -418,11 +417,10 @@ global_view <- function(
     ggplot2::theme_bw() +
     ggplot2::labs(x = .x_axis_title, y = "",
                   color = substitute(color), fill = substitute(color)) +
-    ggplot2::theme(aspect.ratio    = 1L,
-                   axis.text       = ggplot2::element_blank(),
+    ggplot2::theme(axis.text       = ggplot2::element_blank(),
                    axis.ticks      = ggplot2::element_blank(),
                    legend.position = "off")
-  if(as_ggplot) return(gg)
+  if(as_ggplot) return(gg + ggplot2::theme(aspect.ratio = 1L))
   
   ## Plotly options & box selection
   gg %>%
@@ -442,12 +440,12 @@ global_view <- function(
 #' ## Experimental global view made from plotly::subplots rather than facets
 #' global_view_subplots(this_ls)
 global_view_subplots <- function(
-  cheem_ls,
-  primary_obs    = NULL,
+  cheem_ls, 
+  primary_obs    = NULL, 
   comparison_obs = NULL,
   color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  height_px      = 480L,
-  width_px       = 1440L
+  height_px      = 480,
+  width_px       = 1440
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
@@ -533,8 +531,8 @@ global_view_subplots <- function(
         pts_highlight <- c(
           pts_highlight,
           ## Highlight comparison obs
-          ggplot2::geom_point(ggplot2::aes(V1, V2),
-                              .df, size = 3L, shape = 4L, color = "black")
+          ggplot2::geom_point(
+            ggplot2::aes(V1, V2), .df, size = 3L, shape = 4L, color = "black")
         )
       }
     }
@@ -545,8 +543,8 @@ global_view_subplots <- function(
         .df <- subset_global_view_df[.idx_shap, ]
         pts_highlight <- c(
           pts_highlight,
-          ggplot2::geom_point(ggplot2::aes(V1, V2),
-                              .df, size = 5L, shape = 8L, color = "black")
+          ggplot2::geom_point(
+            ggplot2::aes(V1, V2), .df, size = 5L, shape = 8L, color = "black")
         )
       }
     }
@@ -561,8 +559,7 @@ global_view_subplots <- function(
       ggplot2::coord_fixed() +
       ggplot2::theme_bw() +
       ggplot2::labs(x = "", y = "") +
-      ggplot2::theme(aspect.ratio    = 1L,
-                     axis.text       = ggplot2::element_blank(),
+      ggplot2::theme(axis.text       = ggplot2::element_blank(),
                      axis.ticks      = ggplot2::element_blank(),
                      legend.position = "off")
   }
@@ -584,13 +581,10 @@ global_view_subplots <- function(
     plotly::layout(xaxis = list(title = "predicted"),
                    yaxis = list(title = "observed"))
   sp <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L)
-  ## direct on ggplots isn't better.
-  #plotly::subplot(g1, g2, g3, titleY = TRUE, titleX = TRUE, margin = 0L)
   
   ## Plotly options & box selection
   sp %>%
-    plotly::ggplotly(tooltip = "tooltip",
-                     height = height_px, width = width_px) %>%
+    plotly::ggplotly(tooltip = "tooltip", height = height_px, width = width_px) %>%
     plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
     plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
     plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
@@ -609,15 +603,17 @@ global_view_subplots <- function(
 #' @param manip_var The , _number_ of the manipulation variable.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
-#' as a dashed line.
+#' as a dashed line. Defaults to NULL, no primary observation highlighted.
 #' @param comparison_obs The rownumber of the comparison observation. Point
-#' is highlighted as a dotted line.
+#' is highlighted as a dotted line. Defaults to NULL, 
+#' no comparison observation highlighted.
 #' @param do_add_pcp_segments Logical, whether or not to add parallel coordinate
 #' line segments to the basis display.
 #' @param pcp_shape The number of the shape character to add. Expects
 #' 142, 124, 3  '|' for `plotly` and `gganimate` or '+' in either respectively. 
 #' Defaults to 142, '|' for `plotly`.
-#' @param angle The step size between interpolated frames, in radians.
+#' @param angle The step size between interpolated frames, in radians. 
+#' Defaults to .15.
 #' @param row_index Numeric index of selected observations. 
 #' Defaults to TRUE; 1:n.
 #' @param inc_var_nms A vector of the names of the variables to include in the 
@@ -627,8 +623,8 @@ global_view_subplots <- function(
 #' Defaults to TRUE, helping to keep the animation centered.
 #' @param do_add_residual Whether of not to add a facet with a fixed y on 
 #' residual. Doing so may cause issues with animation. Defaults to FALSE.
-#' @return ggtour (ggplot2 object with frame info) animation frames of a radial 
-#' tour manipulating the contribution of a selected tour. Animated with 
+#' @return ggtour (`ggplot2` object with frame info) animation frames of a 
+#' radial tour manipulating the contribution of a selected tour. Animated with 
 #' `spinifex::animate_*` functions.
 #' @export
 #' @family cheem consumers
@@ -677,12 +673,12 @@ global_view_subplots <- function(
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
 radial_cheem_tour <- function(
-  cheem_ls, basis, manip_var,
+  cheem_ls, basis, manip_var, 
   primary_obs         = NULL,
   comparison_obs      = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape           = c(142, 124, 3), ## '|' plotly and gganimate, or '+' respectively
-  angle               = .2,
+  angle               = .15,
   row_index           = NULL,
   inc_var_nms         = NULL,
   do_center_frame     = TRUE,
@@ -728,10 +724,12 @@ radial_cheem_tour <- function(
         row_index = row_index, rug_shape = pcp_shape) +
       ## PCP on Basis, 1D
       proto_basis1d_distribution(
-        cheem_ls$attr_df, group_by = .pred_clas, position = "bottom1d",
-        do_add_pcp_segments = as.logical(do_add_pcp_segments),
+        cheem_ls$attr_df, 
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
-        pcp_shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
+        position = "bottom1d", group_by = .pred_clas, 
+        do_add_pcp_segments = as.logical(do_add_pcp_segments),
+        pcp_shape = pcp_shape, inc_var_nms = inc_var_nms, 
+        row_index = row_index) +
       ## Basis 1D
       spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
       spinifex::proto_origin1d() +
@@ -743,7 +741,9 @@ radial_cheem_tour <- function(
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
         identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
-    return(ggt)
+    
+    ## return
+    ggt
   }
   
   ### Regression case -----
@@ -801,9 +801,10 @@ radial_cheem_tour <- function(
         aes_args = list(color = .class_fore, shape = .class_fore),
         identity_args = list(alpha = .alpha), row_index = .idx_fore) +
       proto_basis1d_distribution(
-        cheem_ls$attr_df, position = "floor1d", pcp_shape = pcp_shape,
-        do_add_pcp_segments = as.logical(do_add_pcp_segments),
+        cheem_ls$attr_df, 
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
+        position = "floor1d", group_by = .class, pcp_shape = pcp_shape,
+        do_add_pcp_segments = as.logical(do_add_pcp_segments),
         inc_var_nms = inc_var_nms, row_index = row_index) +
       spinifex::proto_basis1d(position = "floor1d", manip_col = "black") +
       ## Highlight comparison obs
@@ -834,11 +835,11 @@ radial_cheem_tour <- function(
 #' animate_plotly(ggt)
 radial_cheem_tour_subplots <- function(
   cheem_ls, basis, manip_var,
-  primary_obs         = NULL,
+  primary_obs         = NULL, 
   comparison_obs      = NULL,
   do_add_pcp_segments = TRUE,
   pcp_shape           = c(142, 124, 3), ## '|' plotly and gganimate, or '+' respectively
-  angle               = .2,
+  angle               = .15,
   row_index           = NULL,
   inc_var_nms         = NULL,
   do_center_frame     = TRUE
@@ -879,8 +880,8 @@ radial_cheem_tour_subplots <- function(
   if(.prob_type == "classification"){
     .pred_clas <- decode_df$predicted_class ## for classification color/shape
     ## Left facet, 1D Basis (1/3)
-    ggt_bas <- spinifex::ggtour(.mt_path, .dat, angle = angle,
-                                do_center_frame = do_center_frame) +
+    ggt_bas <- spinifex::ggtour(
+      .mt_path, .dat, angle = angle, do_center_frame = do_center_frame) +
       proto_basis1d_distribution(
         cheem_ls$attr_df, group_by = .pred_clas, position = "floor1d",
         do_add_pcp_segments = as.logical(do_add_pcp_segments),

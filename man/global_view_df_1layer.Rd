@@ -37,9 +37,9 @@ Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 library(cheem)
 
 ## Regression:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)

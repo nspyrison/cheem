@@ -56,7 +56,6 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

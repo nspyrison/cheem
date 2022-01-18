@@ -61,7 +61,7 @@ fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 is_gbm(fit)
 
 ## xgboost
-fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 25,
+fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
                         params = list(objective = "reg:squarederror"))
 is_xgboost(fit)
 
@@ -83,17 +83,7 @@ this_ls <- cheem_ls(X, Y, class = clas,
 global_view(this_ls)
 }
 \seealso{
-Other cheem utility: 
-\code{\link{as_logical_index}()},
-\code{\link{basis_attr_df}()},
-\code{\link{color_scale_of}()},
-\code{\link{does_contain_nonnumeric}()},
-\code{\link{is_discrete}()},
-\code{\link{is_diverging}()},
-\code{\link{linear_tform}()},
-\code{\link{logistic_tform}()},
-\code{\link{manip_var_of_attr_df}()},
-\code{\link{problem_type}()},
-\code{\link{rnorm_from}()}
+Other cheem unify: 
+\code{\link{unify_predict}()}
 }
-\concept{cheem utility}
+\concept{cheem unify}

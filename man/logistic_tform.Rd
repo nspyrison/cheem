@@ -33,7 +33,7 @@ library(cheem)
 
 ## Visualize
 x <- 1:2000
-plot(x, logistic_tform(x), col = 'blue')
+plot(x, logistic_tform(x), col = "blue")
 }
 \seealso{
 Other cheem utility: 
@@ -43,7 +43,6 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{manip_var_of_attr_df}()},
 \code{\link{problem_type}()},

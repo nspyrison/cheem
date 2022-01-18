@@ -4,13 +4,13 @@
 \alias{basis_attr_df}
 \title{Basis matrix, 1D, of the local attribution basis}
 \usage{
-basis_attr_df(attr_df, rownum = 1)
+basis_attr_df(attr_df, rownum)
 }
 \arguments{
 \item{attr_df}{A data frame of local explanation attributions,
 such as a return from \code{attr_df_treeshap()}.}
 
-\item{rownum}{The rownumber of the primary observation. Defaults to 1.}
+\item{rownum}{The rownumber of the observation.}
 }
 \value{
 A matrix of the 1D basis.
@@ -40,7 +40,6 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},

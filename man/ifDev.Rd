@@ -10,5 +10,5 @@ ifDev(expr)
 \item{expr}{A character string to message() if package version is 9000.}
 }
 \description{
-Evaluate the epression if the 4th chunk of the package version is 9000.
+Evaluate the expression if the 4th chunk of the package version is 9000.
 }

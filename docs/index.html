@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interactively interrogate local explanations of a model with radial tours • cheem</title>
+<title>Interactively Interrogate Local Explanations of a Model with the Radial Tour • cheem</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Interactively interrogate local explanations of a model with radial tours">
+<script src="pkgdown.js"></script><meta property="og:title" content="Interactively Interrogate Local Explanations of a Model with the Radial Tour">
 <meta property="og:description" content="Given a model, extract the local explanation of every 
   observation in a data set. View the data- and 
   explanation-spaces side-by-side in an interactive shiny application. 
@@ -25,6 +25,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -37,25 +39,34 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
+  <a href="reference/index.html">Reference</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
      
+    <span class="caret"></span>
   </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="articles/getting-started-with-cheem.html">Getting started with cheem</a>
+    </li>
+  </ul>
 </li>
 <li>
-  <a href="reference/index.html">Reference</a>
+  <a href="news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/nspyrison/cheem/">
+  <a href="https://github.com/nspyrison/cheem/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -72,50 +83,52 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="cheem" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#cheem" class="anchor"></a><strong>cheem</strong>
+<div class="section level1">
+<div class="page-header"><h1 id="cheem">
+<strong>cheem</strong><a class="anchor" aria-label="anchor" href="#cheem"></a>
 </h1></div>
 <p>Interactively explore data- and local explanation- spaces side-by-side. Further interrogate observation explanations with a radial tour.</p>
-<div id="context" class="section level2">
-<h2 class="hasAnchor">
-<a href="#context" class="anchor"></a>Context</h2>
+<div class="section level2">
+<h2 id="context">Context<a class="anchor" aria-label="anchor" href="#context"></a>
+</h2>
 <p><em>Local explanations</em> are an approximation of instance(observation) level variable importance to a model. That is, a point-measure of each variable’s importance to the model at the particular location in the <em>x</em>-space.</p>
-<p><a href="https://github.com/nspyrison/cheem/">cheem</a> extracts the local explanation of every observation in a dataset, given a model. Given a model, extract the local explanation of every observation in a data set. View the data- and explanation-spaces side-by-side in an interactive shiny application. Further explored a selected point against a comparison by using its explanation as a 1D projection basis. The structure of explanation projection is then explored by a radial tour.</p>
+<p><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a> extracts the local explanation of every observation in a dataset, given a model. Given a model, extract the local explanation of every observation in a data set. View the data- and explanation-spaces side-by-side in an interactive shiny application. Further explored a selected point against a comparison by using its explanation as a 1D projection basis. The structure of explanation projection is then explored by a radial tour.</p>
 </div>
-<div id="getting-started" class="section level2">
-<h2 class="hasAnchor">
-<a href="#getting-started" class="anchor"></a>Getting started</h2>
-<pre><code><a href="https://remotes.r-lib.org/reference/install_github.html">## Github dependancies:
-remotes::install_github('ModelOriented/treeshap')
-remotes::install_github("nspyrison/spinifex")
+<div class="section level2">
+<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
+</h2>
+<pre><code><span class="co">## Download the package</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="co">## Restart the R session so the IDE has the correct directory structure</span>
+<span class="fu">restartSession</span><span class="op">(</span><span class="op">)</span>
+<span class="co">## Load cheem into session</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/nspyrison/cheem/" class="external-link">"cheem"</a></span><span class="op">)</span>
+<span class="co">## Try the app</span>
+<span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span>
 
-## Install cheem development version &amp; its CRAN dependancies.
-remotes::install_github("nspyrison/cheem", dependencies = TRUE)
-## Run the {cheem} app including 3 preprocessed datasets
-cheem::run_app()
-
-## Preprocess your own dataset:
-## Follow along with the cheem_ls() exampes:
-?cheem_ls</a></code></pre>
+<span class="co"># Processing your data</span>
+<span class="co">## Install treeshap from github, to use as a local explainer</span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'ModelOriented/treeshap'</span><span class="op">)</span> <span class="co">## Local </span>
+<span class="co">## Follow the examples in cheem_ls()</span>
+<span class="op">?</span><span class="va">cheem_ls</span></code></pre>
 </div>
-<div id="global-view" class="section level2">
-<h2 class="hasAnchor">
-<a href="#global-view" class="anchor"></a>Global view</h2>
+<div class="section level2">
+<h2 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
+</h2>
 <p>The global view show data-, attribution-spaces, and model fit side-by-side with linked brushing and hover tooltip.</p>
 <p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/global_view_toy_class.PNG?raw=true"></p>
 <p>Through exploration of the global view, identify a primary and comparison observation to compare. For the classification task, typically a misclassified point is selected against a near-by correctly classified one. In regression we can compare a point with an extreme residual with a nearby point that is more accurately predicted.</p>
 </div>
-<div id="radial-cheem-tour" class="section level2">
-<h2 class="hasAnchor">
-<a href="#radial-cheem-tour" class="anchor"></a>Radial cheem tour</h2>
+<div class="section level2">
+<h2 id="radial-cheem-tour">Radial cheem tour<a class="anchor" aria-label="anchor" href="#radial-cheem-tour"></a>
+</h2>
 <p>The attribution of the primary observation become the 1D basis for the tour. The variable with the largest difference between the primary and comparison point’s bases is selected as the manipulation variable. That is the variable whose contribution change drives the change in the projection basis.</p>
 <p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/radial_cheem_tour_toy_class.gif?raw=true"></p>
 <p>By doing this we are testing the local explanation. By testing the variable sensitivity to the structure identified in the local explanation we can better evaluate how good of an explanation it is; how sensitive it’s prediction is to a change in the variable contributions.</p>
-<div id="original-application" class="section level3">
-<h3 class="hasAnchor">
-<a href="#original-application" class="anchor"></a>Original application</h3>
-<p>We started by looking at the model-agnostic local explanation <em>SHAP</em> as applied to random forests. We made this choice out of concern for runtime ({treeshap} uses an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The <a href="https://tardis.fandom.com/wiki/Tree_of_Cheem">Cheem</a> are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.</p>
+<div class="section level3">
+<h3 id="original-application">Original application<a class="anchor" aria-label="anchor" href="#original-application"></a>
+</h3>
+<p>We started by looking at the model-agnostic local explanation <em>SHAP</em> as applied to random forests. We made this choice out of concern for runtime ({treeshap} uses an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The <a href="https://tardis.fandom.com/wiki/Tree_of_Cheem" class="external-link">Cheem</a> are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.</p>
 <!---
 ### Extensions
 
@@ -124,13 +137,10 @@ cheem::run_app()
 1. Extend the scope of random forest models; from only {randomForest} to all RF models handled by {treeshap}.\
 2. Extend the scope of local explanations; from {treeshap} SHAP values to all local explanations handled by {DALEX}.\
 --->
-<div id="sources" class="section level4">
-<h4 class="hasAnchor">
-<a href="#sources" class="anchor"></a>Sources</h4>
-<p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode">Explanatory Model Analysis (ebook)</a> 
-<a href="https://CRAN.R-project.org/package=DALEX">DALEX CRAN page</a> 
-<a href="https://cran.r-project.org/package=spinifex">spinifex CRAN page</a> 
-<a href="https://github.com/ModelOriented/treeshap">treeshap GitHub page</a></p>
+<div class="section level4">
+<h4 id="sources">Sources<a class="anchor" aria-label="anchor" href="#sources"></a>
+</h4>
+<p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a><br><a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a><br><a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a><br><a href="https://github.com/ModelOriented/treeshap" class="external-link">treeshap GitHub page</a></p>
 </div>
 </div>
 </div>
@@ -139,37 +149,49 @@ cheem::run_app()
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/nspyrison/cheem/">https://​github.com/​nspyrison/​cheem/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/nspyrison/cheem/issues">https://​github.com/​nspyrison/​cheem/​issues</a>
-</li>
+<li><a href="https://github.com/nspyrison/cheem/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/nspyrison/cheem/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
+
 <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a></li>
+<li><a href="https://creativecommons.org/licenses/by-nc-sa/4.0" class="external-link">CC BY-NC-SA 4.0</a></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing cheem</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Nicholas Spyrison <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Nicholas Spyrison <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/https://orcid.org/0000-0002-8417-0212" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
+
+
 
   </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Nicholas Spyrison.</p>
+  <p></p>
+<p>Developed by Nicholas Spyrison.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -177,6 +199,8 @@ cheem::run_app()
 
   
 
+
+  
 
   </body>
 </html>

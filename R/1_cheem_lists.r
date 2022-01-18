@@ -20,9 +20,9 @@
 #' library(cheem)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
@@ -65,7 +65,7 @@ default_rf <- function(
 #' @param model A model object to check the class/origin.
 #' @return A logical, whether or not the model is of a certain class.
 #' @export
-#' @family cheem utility
+#' @family cheem unify
 #' @examples
 #' library(cheem)
 #' 
@@ -90,7 +90,7 @@ default_rf <- function(
 #' is_gbm(fit)
 #' 
 #' ## xgboost
-#' fit <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 25,
+#' fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
 #'                         params = list(objective = "reg:squarederror"))
 #' is_xgboost(fit)
 #' 
@@ -138,22 +138,59 @@ is_lightgbm <- function(model){
 is_catboost <- function(model){
   "catboost.Model" %in% class(model)
 }
-#' #' Check is the model is supported by treeshap.
-#' #' 
-#' #' 
-#' #' @param model A model to check the treeshap support of.
-#' is_treeshap_supported <- function(model){
-#'   any(is_randomForest(model), is_ranger(model), is_gmb(model),
-#'     is_xgboost(model), is_catboost(model), is_lightgbm(model))
-#' }
 
+#' Unified predictions to a standard format
+#' 
+#' A wrapper function for stat::predict(). Condition handling for various 
+#' treeshap supported models.
+#' 
+#' @param model A tree based model supported by `treeshap`: 
+#' a model from `randomForest::randomForest`, `ranger::ranger`, `gbm::gbm`, 
+#' `xgboost::xgb.train`, `catboost::catboost.train`, `lightgbm::lightgbm`.
+#' @param x The explanatory data (without response) to extract the local 
+#' attributions from.
+#' @return A vector of predicted values
+#' @family cheem unify
+#' @export
+#' @examples
+#' library(cheem)
+#' 
+#' ## Regression:
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
+#' 
+#' rf_fit  <- default_rf(X, Y)
+#' ## Applies the correct format to a predict function for the model type.
+#' unify_predict(rf_fit, X)
+unify_predict <- function(model, x){
+  if(is_xgboost(model)){
+    .pred <- xgboost:::predict.xgb.Booster(model, newdata = as.matrix(x))
+  }else if(is_lightgbm(model)){
+    .pred <- stats::predict(model, data = as.matrix(x))
+  }else suppressMessages(.pred <- stats::predict(model, data = x))
+  ## suppress: Using 25 trees... \n
+  
+  ## ranger predict returns a list
+  if(is.list(.pred)) .pred <- .pred$predictions
+  
+  ## Return
+  .pred
+}
 
 #' Unifies models into a standard format
 #' 
 #' Unifies models supported by treeshap into a standard format.
-unify_tree_model <- function(
-  model, x
-){
+#' 
+#' @rdname unify_predict
+#' @export
+#' @examples
+#'
+#' ## Applies the correct treeshap::*.unify for the model type.
+#' unif_mod <- unify_tree_model(rf_fit, X)
+#' str(unif_mod)
+unify_tree_model <- function(model, x){
   if(is_randomForest(model)){
     ret <- treeshap::randomForest.unify(model, x)
   }else if(is_ranger(model)){
@@ -167,7 +204,10 @@ unify_tree_model <- function(
   }else if(is_lightgbm(model)){
     ret <- treeshap::lightgbm.unify(model, x)
   }else
-    stop("Wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
+    stop("unify_tree_model: wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
+  if(nrow(ret[[1L]]) == 0L)
+    stop("unify_tree_model: treeshap unified model has 0 rows, model may not be supported.")
+  ## Return
   ret
 }
 
@@ -220,8 +260,7 @@ attr_df_treeshap <- function(
     writeLines(paste0("Started attr_df_treeshap at: ", Sys.time()))
     tictoc::tic("attr_df_treeshap")
   }
-  ## suppress: Using 25 trees... \n
-  suppressMessages(.pred <- stats::predict(model, data = x))
+  .pred <- unify_predict(model, x)
   if(any(is.na(.pred)))
     stop("attr_df_treeshap: model had NA values in its predictions; does the model have enough trees/leaves?")
   .unified_mod <- unify_tree_model(model, x)
@@ -267,10 +306,7 @@ model_performance_df <- function(
   # but at least consistent format and measures.
   .y <- y
   if(is.null(.y)) .y <- model$y
-  ## suppress: Using 25 trees... \n
-  suppressMessages(.pred <- stats::predict(model, data = x))
-  ## ranger doens't have $y and prediction is a list rather than vector
-  if(is.list(.pred)) .pred <- .pred$predictions
+  .pred <- unify_predict(model, x)
   .e      <- .y - .pred ## Residual
   .se     <- .e^2L
   .sse    <- sum(.se)
@@ -313,9 +349,9 @@ model_performance_df <- function(
 #' library(cheem)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
@@ -335,16 +371,18 @@ global_view_df_1layer <- function(
   if(is.null(class)) class <- as.factor(FALSE)
   
   ## Projection
-  x_std <- x %>% spinifex::scale_01()
+  x_std <- spinifex::scale_01(x)
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
-  proj  <- x_std %*% basis %>% spinifex::scale_01() ## Output mapped to 01 for global view
+  proj  <- spinifex::scale_01(x_std %*% basis) ## Output mapped to 01 for global view
   
   ## Column bind wide
   ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, proj)
   colnames(ret) <- c("basis_type", "layer_name", "rownum", "class", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
+  
+  ## Return
   ret
 }
 
@@ -391,9 +429,9 @@ global_view_df_1layer <- function(
 #' names(this_ls)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
@@ -445,10 +483,7 @@ cheem_ls <- function(
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
-  ## suppress: Using 25 trees... \n
-  suppressMessages(.pred <- stats::predict(model, data = x))
-  ## ranger.prediction is a list rather than vector
-  if(is.list(.pred)) .pred <- .pred$predictions
+  .pred <- unify_predict(model, x)
   .decode_left <- data.frame(
     rownum = 1L:nrow(x), class = class, y, prediction = .pred)
   .decode_right <- data.frame(residual = y - .pred, cor_attr_proj.y, x)
@@ -531,7 +566,7 @@ if(FALSE){ ## Extension ideas -----
   
   ## Wrapper function to create a breakdown plot of the 
   bd_plot <- function(explainer, new_obs){
-    parts_bd <- DALEX::predict_parts_break_down(explainer = , new_observation )
+    parts_bd <- DALEX::predict_parts_break_down(explainer, new_observation )
     plot(parts_bd)
   }
   

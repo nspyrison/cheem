@@ -20,8 +20,8 @@ global_view_subplots(
   primary_obs = NULL,
   comparison_obs = NULL,
   color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  height_px = 480L,
-  width_px = 1440L
+  height_px = 480,
+  width_px = 1440
 )
 }
 \arguments{
@@ -29,10 +29,10 @@ global_view_subplots(
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
-as a dashed line.}
+as a dashed line. Defaults to NULL, no highlighting applied.}
 
 \item{comparison_obs}{The rownumber of the comparison observation. Point
-is highlighted as a dotted line.}
+is highlighted as a dotted line. Defaults to NULL, no highlighting applied.}
 
 \item{color}{The name of the column in cheem_ls$global_view_df to map to
 color. Expects c("default", "residual", "log_maha.data", "cor_attr_proj.y").
@@ -49,8 +49,8 @@ Defaults to 1440.}
 \code{plotly} functions.}
 }
 \value{
-\code{plotly} html widget of the global view, first 2 components of the basis of
-the data- and attribution- spaces.
+A \code{plotly} plot, an interactive html widget of the global view,
+first two components of the basis of the data- and attribution- spaces.
 }
 \description{
 from a cheem_ls() list, create a linked \code{plotly} of the global data-

@@ -6,12 +6,12 @@
 \usage{
 proto_basis1d_distribution(
   attr_df,
-  group_by = as.factor(FALSE),
+  primary_obs = NULL,
+  comparison_obs = NULL,
   position = c("top1d", "floor1d", "bottom1d", "off"),
+  group_by = as.factor(FALSE),
   pcp_shape = c(142, 124, 3),
   do_add_pcp_segments = TRUE,
-  primary_obs = 1,
-  comparison_obs = 2,
   inc_var_nms = NULL,
   row_index = NULL
 )
@@ -20,11 +20,18 @@ proto_basis1d_distribution(
 \item{attr_df}{An data frame, the attributions of a local explanation,
 such as a return from \code{attr_df_treeshap()}.}
 
-\item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
+\item{primary_obs}{The rownumber of the primary observation. Its local
+attribution becomes the 1d projection basis, and the point it highlighted
+as a dashed line. Defaults to NULL, no highlighting.}
+
+\item{comparison_obs}{The rownumber of the comparison observation. Point
+is highlighted as a dotted line. Defaults to NULL, no highlighting.}
 
 \item{position}{The position for the basis, one of: c("top1d", "floor1d",
 "bottom1d", "off").
 Defaults to "top1d"; basis above the density curves.}
+
+\item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
 \item{pcp_shape}{The number of the shape character to add. Expects
 142, 124, 3  '|' for \code{plotly} and \code{gganimate} or '+' in either respectively.
@@ -33,18 +40,15 @@ Defaults to 142, '|' for \code{plotly}.}
 \item{do_add_pcp_segments}{Logical, whether or not to add to add faint
 parallel coordinate lines on the 1D basis. Defaults to TRUE.}
 
-\item{primary_obs}{The rownumber of the primary observation. Its local
-attribution becomes the 1d projection basis, and the point it highlighted
-as a dashed line.}
-
-\item{comparison_obs}{The rownumber of the comparison observation. Point
-is highlighted as a dotted line.}
-
 \item{inc_var_nms}{A character vector, the names of the variables to keep.
 Defaults to NULL, all variables kept.}
 
 \item{row_index}{A numeric or logical vector, the index of the rows to keep.
 Defaults to NULL, all rows kept.}
+}
+\value{
+A \code{ggplot} object of the the distribution of the local explanation's
+attributions.
 }
 \description{
 A {spinifex} proto_*-like function, that adds the distribution of
@@ -56,28 +60,26 @@ library(cheem)
 library(spinifex)
 
 ## Regression:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
-rf_fit <- default_rf(X, Y)
+rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
-bas_p <- basis_attr_df(shap_df, rownum = 1)
-bas_c <- basis_attr_df(shap_df, rownum = 2)
-diff <- abs(bas_p - bas_c)
-mv <- which(diff == max(diff))
+mv      <- manip_var_of_attr_df(shap_df, 1, 2)
 mt_path <- manual_tour(bas_p, mv)
-fixed_pred <- stats::predict(rf_fit)
+pred    <- predict_unify(rf_fit, X)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
   append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
   proto_point(list(color = clas, shape = clas)) +
   proto_basis1d_distribution(
-    attr_df = shap_df, group_by = clas, position = "top1d",
-    primary_obs = 1, comparison_obs = 2) +
+    attr_df = shap_df,
+    primary_obs = 1, comparison_obs = 2,
+    position = "top1d", group_by = clas) +
   proto_basis1d(position = "bottom1d") +
   proto_origin()
 \dontrun{

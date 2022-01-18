@@ -14,7 +14,7 @@ coerce to a logical index.}
 return length.}
 }
 \value{
-A logical index of length \code{n}.
+A logical index of length n.
 }
 \description{
 Suggests a alpha opacity to plot with as a function of the number of
@@ -33,7 +33,6 @@ Other cheem utility:
 \code{\link{does_contain_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
-\code{\link{is_randomForest}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{manip_var_of_attr_df}()},
