@@ -144,7 +144,7 @@
 #' \itemize{
 #'   \item Name, the name of the chocolate
 #'   \item MFR, chocolate manufacturer
-#'   \item Country, the country the manufacturer is incorperated.
+#'   \item Country, the country the manufacturer is incorporated.
 #'   \item Type, the type of chocolate according to the website, either 'Dark' 
 #'   or 'Milk"
 #'   \item Calories, the number of calories per 100 grams
@@ -173,9 +173,10 @@
 #' ```
 #' @examples
 #' library(cheem)
+#' 
 #' ## Classification:
-#' X <- chocolates[, 5:14]
-#' Y <- as.integer(chocolates$Type)
+#' X    <- chocolates[, 5:14]
+#' Y    <- as.integer(chocolates$Type)
 #' clas <- chocolates$Type
 #' 
 #' rf_fit  <- default_rf(X, Y)

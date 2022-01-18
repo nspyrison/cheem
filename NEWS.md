@@ -22,7 +22,7 @@
 ## Primary Preprocessing functions
 
 - `default_rf()` create a `randomForest::randomForest()` with more conservative defaults.
-- `attr_df_treeshap()` create `treeshap::treeshap()` local explainations of each observation.
+- `attr_df_treeshap()` create `treeshap::treeshap()` local explanations of each observation.
 - `cheem_ls()` create a cheem list of prepared tables for use in `run_app()`. 
 
 ## Primary visual functions

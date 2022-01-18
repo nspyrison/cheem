@@ -8,7 +8,7 @@
 #' been selected the attribution of the primary is used as the 1D basis for a 
 #' manual tour. This tour changes the contribution from the variable that 
 #' deviates the most from its expected value. By viewing the positions of the 
-#' primary and comparison points, one can interrogate the explanation identify 
+#' primary and comparison points, one can scrutinize the explanation identify 
 #' improperly weighted variable especially in the case of of a misclassified 
 #' point as compared with a correctly classified neighbor.
 #' 

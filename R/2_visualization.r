@@ -33,7 +33,7 @@ basis_attr_df <- function(
   ## Extract formatted basis
   LA_bas <- matrix(
     as.numeric(.attr_df), ncol = 1L, 
-    dimnames = list(colnames(attr_df), tail(class(attr_df), 1L)))
+    dimnames = list(colnames(attr_df), utils::tail(class(attr_df), 1L)))
   ## Orthonormalise
   tourr::orthonormalise(LA_bas)
 }
@@ -302,9 +302,9 @@ proto_basis1d_distribution <- function(
 #' library(cheem)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
@@ -319,6 +319,10 @@ proto_basis1d_distribution <- function(
 #' global_view(this_ls, color = "residual")
 #' global_view(this_ls, color = "log_maha.data") 
 #' global_view(this_ls, color = "cor_attr_proj.y")
+#' 
+#' 
+#' ## Experimental global view made from plotly::subplots rather than facets
+#' global_view_subplots(this_ls)
 global_view <- function(
   cheem_ls,
   primary_obs    = NULL,
@@ -348,9 +352,9 @@ global_view <- function(
   }else{
     ## Regression
     if(color == "default"){
-      .color <- rep_len(factor(FALSE), nrow(global_view_df))
+      .color <- factor(FALSE)
     }else .color <- global_view_df[, color]
-    .shape   <- rep_len(factor(FALSE), nrow(global_view_df))
+    .shape   <- factor(FALSE)
   }
   if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
   .col_scale <- color_scale_of(.color, limits = .lim)
@@ -434,11 +438,6 @@ global_view <- function(
 
 #' @rdname global_view
 #' @export
-#' @examples
-#' 
-#' 
-#' ## Experimental global view made from plotly::subplots rather than facets
-#' global_view_subplots(this_ls)
 global_view_subplots <- function(
   cheem_ls, 
   primary_obs    = NULL, 
@@ -466,12 +465,12 @@ global_view_subplots <- function(
   }else{
     ## Regression
     if(color == "default"){
-      .color <- rep_len(factor(FALSE), nrow(global_view_df))
+      .color <- factor(FALSE)
     }else .color <- global_view_df[, color]
-    .shape <- rep_len(factor(FALSE), nrow(global_view_df))
+    .shape <- factor(FALSE)
   }
   if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
-  .col_scale    <- color_scale_of(.color, limits = .lim)
+  .col_scale   <- color_scale_of(.color, limits = .lim)
   
   ## Get the bases of the global view, map them
   u_nms        <- unique(global_view_df$layer_name)
@@ -482,42 +481,35 @@ global_view_subplots <- function(
                              layer_name = u_nms[2L])
   .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
   
-  single_facet <- function(subset_global_view_df){
+  single_facet <- function(r_idx, df = global_view_df){
+    sub      <- df[r_idx, ]
+    .color   <- .color[r_idx]
+    .shape   <- .shape[r_idx]
     ## Proto for main points
     pts_main <- list()
-    .u_nms   <- unique(subset_global_view_df$layer_name)
+    .u_nms   <- unique(df$layer_name)
     if(is_classification == FALSE &
-       all(subset_global_view_df$layer_name == u_nms[3L]))
-      pts_main <- c(pts_main, ggplot2::geom_smooth(
-        data = subset(subset_global_view_df, layer_name == .u_nms[length(.u_nms)]),
-        method = "lm", formula = y ~ x, se = FALSE))
-    if(is_discrete(.color) == TRUE){
-      ### Discrete color mapping
-      pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = .color, shape = .shape,
-                     tooltip = tooltip), alpha = .alpha)),
-        ggplot2::scale_color_brewer(palette = "Dark2"))
-    }
-    if(is_discrete(color) == FALSE){
-      ### continuous color mapping
-      pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
-        ggplot2::aes(color = .color, shape = .shape,
-                     tooltip = tooltip),  alpha = .alpha)),
-        ggplot2::scale_colour_gradient2(low = scales::muted("blue"),
-                                        mid = "grey80",
-                                        high = scales::muted("red")))
-    }
+       all(df$layer_name == u_nms[3L]))
+      pts_main <- c(
+        ## Model fit for yhaty
+        pts_main, ggplot2::geom_smooth( 
+          data = sub, method = "lm", formula = y ~ x, se = FALSE),
+        ## Main points
+        suppressWarnings(ggplot2::geom_point(
+          ggplot2::aes(color = .color, shape = .shape,
+                       tooltip = tooltip), alpha = .alpha))
+      )
     
     ## Proto for highlighted points
     pts_highlight <- list()
     ## Red misclassified points, if present
-    if(is_classification == TRUE){
-      .rn_misclass <- which(decode_df$is_misclassified == TRUE)
+    if(is_classification){
+      .rn_misclass <- which(decode_df$is_misclassified[r_idx] == TRUE)
       .idx_misclas <- global_view_df$rownum %in% .rn_misclass
       if(sum(.idx_misclas) > 0L){
-        .df <- global_view_df[.idx_misclas, ]
+        .df <- 
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-          ggplot2::aes(V1, V2), .df,
+          ggplot2::aes(V1, V2), global_view_df[.idx_misclas,,  drop == FALSE],
           color = "red", fill = NA,
           shape = 21L, size = 3L, alpha = .alpha)
         )
@@ -525,34 +517,27 @@ global_view_subplots <- function(
     }
     ## Highlight comparison obs, if passed
     if(is.null(comparison_obs) == FALSE){
-      .idx_comp <- subset_global_view_df$rownum == comparison_obs
+      .idx_comp <- df$rownum[r_idx] == comparison_obs
       if(sum(.idx_comp) > 0L){
-        .df <- subset_global_view_df[.idx_comp, ]
-        pts_highlight <- c(
-          pts_highlight,
-          ## Highlight comparison obs
-          ggplot2::geom_point(
-            ggplot2::aes(V1, V2), .df, size = 3L, shape = 4L, color = "black")
-        )
+          pts_highlight <- c(pts_highlight, ggplot2::geom_point(
+              ggplot2::aes(V1, V2), df[.idx_comp,, drop == FALSE], 
+              size = 3L, shape = 4L, color = "black")
+          )
       }
     }
-    ## Highlight shap obs, if passed
+    ## Highlight primary obs, if passed
     if(is.null(primary_obs) == FALSE){
-      .idx_shap <- subset_global_view_df$rownum == primary_obs
+      .idx_shap <- df$rownum[r_idx] == primary_obs
       if(sum(.idx_shap) > 0L){
-        .df <- subset_global_view_df[.idx_shap, ]
-        pts_highlight <- c(
-          pts_highlight,
-          ggplot2::geom_point(
-            ggplot2::aes(V1, V2), .df, size = 5L, shape = 8L, color = "black")
+        pts_highlight <- c(pts_highlight, ggplot2::geom_point(
+            ggplot2::aes(V1, V2), df[.idx_shap,, drop == FALSE], 
+            size = 5L, shape = 8L, color = "black")
         )
       }
     }
     
     ## ggplot
-    ggplot2::ggplot(
-      data = subset_global_view_df,
-      mapping = ggplot2::aes(V1, V2)) +
+    ggplot2::ggplot(sub, ggplot2::aes(V1, V2)) +
       .col_scale + 
       pts_main +
       pts_highlight +
@@ -565,11 +550,11 @@ global_view_subplots <- function(
   }
   
   ## Individual ggplots
-  g1 <- single_facet(subset(global_view_df, layer_name == u_nms[1L]))# +
+  g1 <- single_facet(global_view_df$layer_name == u_nms[1L])# +
     # spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft")
-  g2 <- single_facet(subset(global_view_df, layer_name == u_nms[2L]))# +
+  g2 <- single_facet(global_view_df$layer_name == u_nms[2L])# +
     # spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft")
-  g3 <- single_facet(subset(global_view_df, layer_name == u_nms[3L]))
+  g3 <- single_facet(global_view_df$layer_name == u_nms[3L])
   ## Individual plotly plots with axes titles
   p1 <- plotly::ggplotly(g1) %>%
     plotly::layout(xaxis = list(title = paste0(u_nms[1L], " PC1")),
@@ -618,7 +603,7 @@ global_view_subplots <- function(
 #' Defaults to TRUE; 1:n.
 #' @param inc_var_nms A vector of the names of the variables to include in the 
 #' projection.
-#' @param do_scale_in_frame Whether or not to scale by standard deviations away 
+#' @param do_center_frame Whether or not to scale by standard deviations away 
 #' from the mean within each frame or not.
 #' Defaults to TRUE, helping to keep the animation centered.
 #' @param do_add_residual Whether of not to add a facet with a fixed y on 

@@ -66,12 +66,12 @@ Defaults to TRUE; 1:n.}
 \item{inc_var_nms}{A vector of the names of the variables to include in the
 projection.}
 
-\item{do_add_residual}{Whether of not to add a facet with a fixed y on
-residual. Doing so may cause issues with animation. Defaults to FALSE.}
-
-\item{do_scale_in_frame}{Whether or not to scale by standard deviations away
+\item{do_center_frame}{Whether or not to scale by standard deviations away
 from the mean within each frame or not.
 Defaults to TRUE, helping to keep the animation centered.}
+
+\item{do_add_residual}{Whether of not to add a facet with a fixed y on
+residual. Doing so may cause issues with animation. Defaults to FALSE.}
 }
 \value{
 ggtour (\code{ggplot2} object with frame info) animation frames of a

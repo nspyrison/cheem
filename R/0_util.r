@@ -122,7 +122,7 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
 #' "regression".
 #' @param y Response variable to be modeled
 #' @return Character either c("classification", "regression") specifying the 
-#' assumed model task based on the discretness of y.
+#' assumed model task based on the discreteness of y.
 #' @export
 #' @family cheem utility
 #' @examples

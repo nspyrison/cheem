@@ -405,8 +405,8 @@ global_view_df_1layer <- function(
 #' attribution space from. Expects "pca" or "olda" (requires `clas`).
 #'  Defaults to "pca".
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
-#' @param keep_model Logical, if the heavy model object should be kept.
-#' Defaults to FALSE.
+#' @param keep_model Logical, whether or not the heavy model object should be 
+#' kept. Defaults to FALSE.
 #' @return A list of data.frames needed for the `shiny` application.
 #' @seealso [global_view()] [radial_cheem_tour()] [radial_cheem_tour()]
 #' @export
@@ -452,7 +452,7 @@ cheem_ls <- function(
   x, y, class = NULL,
   model, attr_df,
   basis_type = c("pca", "olda"), ## class req for olda
-  layer_name = tail(class(model))[1],
+  layer_name = utils::tail(class(model), 1),
   verbose    = getOption("verbose"),
   keep_model = FALSE
 ){
@@ -465,12 +465,12 @@ cheem_ls <- function(
   
   ## global_view_df -----
   .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")
-  .cl        <- tail(class(attr_df), 1L)
+  .cl        <- utils::tail(class(attr_df), 1L)
   .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, .cl)
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
-  .dat_bas   <- tail(attributes(.glob_dat),  1L)
-  .attr_bas  <- tail(attributes(.glob_attr), 1L)
+  .dat_bas   <- utils::tail(attributes(.glob_dat),  1L)
+  .attr_bas  <- utils::tail(attributes(.glob_attr), 1L)
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
   ## log maha distance of data sapce
   log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))

@@ -11,7 +11,7 @@ cheem_ls(
   model,
   attr_df,
   basis_type = c("pca", "olda"),
-  layer_name = tail(class(model))[1],
+  layer_name = utils::tail(class(model), 1),
   verbose = getOption("verbose"),
   keep_model = FALSE
 )
@@ -39,8 +39,8 @@ attribution used. Defaults to the last class of the model.}
 
 \item{verbose}{Logical, if runtime should be printed. Defaults to TRUE.}
 
-\item{keep_model}{Logical, if the heavy model object should be kept.
-Defaults to FALSE.}
+\item{keep_model}{Logical, whether or not the heavy model object should be
+kept. Defaults to FALSE.}
 }
 \value{
 A list of data.frames needed for the \code{shiny} application.

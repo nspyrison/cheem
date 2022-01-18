@@ -1,18 +1,20 @@
 Package: cheem
-Title: Interactively Interrogate Local Explanations of a Model with the Radial Tour
+Title: Interactively Explore the Support of Local Explanations with the Radial Tour
 Version: 0.2.0
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
     email = "spyrison@gmail.com",
     comment = c(ORCID = "https://orcid.org/0000-0002-8417-0212"))
   )
-Description: Given a model, extract the local explanation of every 
-  observation in a data set. View the data- and 
-  explanation-spaces side-by-side in an interactive shiny application. 
-  Further explored a selected point against a 
-  comparison by using its explanation as a 1D projection basis. 
-  The structure of explanation projection is then explored by a
-  radial tour.
+Description: Given a tree-based model, calculate the local explanation of 
+  every observation. View the data space, explanation space and model 
+  information as ensemble graphic interactive on a shiny application.
+  After an observation of interest is identified, the normalized 
+  variable importance of the local explanation is used as a 1D projection
+  basis. The local explanation is then scrutinized by exploring the support
+  of the variable attribution where a models prediction is supported or may
+  be completely unreliable. Variable attribution is manipulated with the 
+  use of the radial, manual tour.
 Depends:
     R (>= 3.5.0)
 License: CC BY-NC-SA 4.0
@@ -28,12 +30,10 @@ Imports:
     shinycssloaders,
     DT
 Suggests:
-    gganimate,
     treeshap,
     randomForest,
     tourr,
-    DALEX,
-    scales,
+    gganimate,
     lqmm,
     mvtnorm,
     dplyr,

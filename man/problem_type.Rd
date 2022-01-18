@@ -11,7 +11,7 @@ problem_type(y)
 }
 \value{
 Character either c("classification", "regression") specifying the
-assumed model task based on the discretness of y.
+assumed model task based on the discreteness of y.
 }
 \description{
 Whether the Y is a "classification", "regression" or ill-defined problem.
