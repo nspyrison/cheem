@@ -364,22 +364,14 @@ global_view <- function(
   .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
   .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   
-  ## Get the bases of the global view, map them
-  .u_nms    <- unique(global_view_df$layer_name)
-  .bas_data <- data.frame(
-    cheem_ls$global_view_basis_ls[[1L]], layer_name = .u_nms[1L])
-  .bas_attr <- data.frame(
-    cheem_ls$global_view_basis_ls[[2L]], layer_name = .u_nms[2L])
-  .map_to   <- data.frame(x = c(0L, 1L), y = c(0L, 1L))
-  
   ## Proto for main points
   pts_main <- list()
   .u_nms   <- unique(global_view_df$layer_name)
-  ## if classification: redisual/obs LM line
+  ## if classification: redisual/obs LM line behind pts
   if(is_classification == FALSE)
-    pts_main <- c(pts_main, ggplot2::geom_smooth(
-      data   = subset(global_view_df, layer_name == .u_nms[length(.u_nms)]),
-      method = "lm", formula = y ~ x, se = FALSE))
+    pts_main <- c(ggplot2::geom_smooth(
+      ggplot2::aes(V1, V2), subset(global_view_df, layer_name == .u_nms[3L]),
+      method = "lm", formula = y ~ x, se = FALSE), pts_main)
   ## Add main points
   pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
     ggplot2::aes(color = .color, shape = .shape, tooltip = tooltip),
@@ -410,10 +402,19 @@ global_view <- function(
           size = 5L, shape = 8L, color = "black"))
   }
   
+  # ## Bases of the data and attribution space
+  # .u_nms    <- unique(global_view_df$layer_name)
+  # .bas_data <- data.frame(
+  #   cheem_ls$global_view_basis_ls[[1L]], layer_name = .u_nms[1L])
+  # .bas_attr <- data.frame(
+  #   cheem_ls$global_view_basis_ls[[2L]], layer_name = .u_nms[2L])
+  # .map_to   <- data.frame(x = c(0L, 1L), y = c(0L, 1L))
+  
   ## Visualize
   gg <- global_view_df %>% plotly::highlight_key(~rownum) %>%
     ggplot2::ggplot(ggplot2::aes(V1, V2)) +
     pts_main +
+    ## Draw bases
     # spinifex::draw_basis(.bas_data, .map_to, "bottomleft", line_size = .5, text_size = 4L) +
     # spinifex::draw_basis(.bas_attr, .map_to, "bottomleft", line_size = .5, text_size = 4L) +
     ggplot2::coord_fixed() +
@@ -473,46 +474,45 @@ global_view_subplots <- function(
   .col_scale   <- color_scale_of(.color, limits = .lim)
   
   ## Get the bases of the global view, map them
-  u_nms        <- unique(global_view_df$layer_name)
+  .u_nms       <- unique(global_view_df$layer_name)
   .bas_data    <- data.frame(cheem_ls$global_view_basis_ls[[1L]],
-                             layer_name = u_nms[1L])
-  .map_to_data <- global_view_df[global_view_df$layer_name == u_nms[1L], c("V1", "V2")]
+                             layer_name = .u_nms[1L])
+  .map_to_data <- global_view_df[global_view_df$layer_name == .u_nms[1L], c("V1", "V2")]
   .bas_attr    <- data.frame(cheem_ls$global_view_basis_ls[[2L]],
-                             layer_name = u_nms[2L])
-  .map_to_attr <- global_view_df[global_view_df$layer_name == u_nms[2L], c("V1", "V2")]
+                             layer_name = .u_nms[2L])
+  .map_to_attr <- global_view_df[global_view_df$layer_name == .u_nms[2L], c("V1", "V2")]
   
   single_facet <- function(r_idx, df = global_view_df){
-    sub      <- df[r_idx, ]
-    .color   <- .color[r_idx]
-    .shape   <- .shape[r_idx]
+    sub      <- df[r_idx,, drop = FALSE]
+    if(length(.color) != 1L)
+      .color <- .color[r_idx]
+    if(length(.shape) != 1L)
+      .shape <- .shape[r_idx]
     ## Proto for main points
-    pts_main <- list()
-    .u_nms   <- unique(df$layer_name)
-    if(is_classification == FALSE &
-       all(df$layer_name == u_nms[3L]))
-      pts_main <- c(
-        ## Model fit for yhaty
-        pts_main, ggplot2::geom_smooth( 
-          data = sub, method = "lm", formula = y ~ x, se = FALSE),
-        ## Main points
-        suppressWarnings(ggplot2::geom_point(
-          ggplot2::aes(color = .color, shape = .shape,
-                       tooltip = tooltip), alpha = .alpha))
+    
+    pts_main <- list(
+      ## Main points
+      suppressWarnings(
+        ggplot2::geom_point(
+          ggplot2::aes(V1, V2, color = .color, shape = .shape,
+                       tooltip = tooltip), data = sub, alpha = .alpha)
       )
+    )
+    if(is_classification == FALSE & all(sub$layer_name == .u_nms[3L]))
+      ## Model fit for yhaty, when regression and 3rd panel
+      pts_main <- c(ggplot2::geom_smooth(
+        ggplot2::aes(V1, V2), sub, method = "lm", formula = y ~ x, se = FALSE),
+        pts_main)
     
     ## Proto for highlighted points
     pts_highlight <- list()
     ## Red misclassified points, if present
     if(is_classification){
       .rn_misclass <- which(decode_df$is_misclassified[r_idx] == TRUE)
-      .idx_misclas <- global_view_df$rownum %in% .rn_misclass
       if(sum(.idx_misclas) > 0L){
-        .df <- 
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-          ggplot2::aes(V1, V2), global_view_df[.idx_misclas,,  drop == FALSE],
-          color = "red", fill = NA,
-          shape = 21L, size = 3L, alpha = .alpha)
-        )
+          ggplot2::aes(V1, V2), df[.rn_misclass,,  drop == FALSE],
+          color = "red", fill = NA, shape = 21L, size = 3L, alpha = .alpha))
       }
     }
     ## Highlight comparison obs, if passed
@@ -521,8 +521,7 @@ global_view_subplots <- function(
       if(sum(.idx_comp) > 0L){
           pts_highlight <- c(pts_highlight, ggplot2::geom_point(
               ggplot2::aes(V1, V2), df[.idx_comp,, drop == FALSE], 
-              size = 3L, shape = 4L, color = "black")
-          )
+              size = 3L, shape = 4L, color = "black"))
       }
     }
     ## Highlight primary obs, if passed
@@ -531,14 +530,13 @@ global_view_subplots <- function(
       if(sum(.idx_shap) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
             ggplot2::aes(V1, V2), df[.idx_shap,, drop == FALSE], 
-            size = 5L, shape = 8L, color = "black")
-        )
+            size = 5L, shape = 8L, color = "black"))
       }
     }
     
     ## ggplot
-    ggplot2::ggplot(sub, ggplot2::aes(V1, V2)) +
-      .col_scale + 
+    ggplot2::ggplot() +
+      .col_scale +
       pts_main +
       pts_highlight +
       ggplot2::coord_fixed() +
@@ -550,18 +548,18 @@ global_view_subplots <- function(
   }
   
   ## Individual ggplots
-  g1 <- single_facet(global_view_df$layer_name == u_nms[1L])# +
+  g1 <- single_facet(global_view_df$layer_name == .u_nms[1L])# +
     # spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft")
-  g2 <- single_facet(global_view_df$layer_name == u_nms[2L])# +
+  g2 <- single_facet(global_view_df$layer_name == .u_nms[2L])# +
     # spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft")
-  g3 <- single_facet(global_view_df$layer_name == u_nms[3L])
+  g3 <- single_facet(global_view_df$layer_name == .u_nms[3L])
   ## Individual plotly plots with axes titles
   p1 <- plotly::ggplotly(g1) %>%
-    plotly::layout(xaxis = list(title = paste0(u_nms[1L], " PC1")),
-                   yaxis = list(title = paste0(u_nms[1L], " PC2")))
+    plotly::layout(xaxis = list(title = paste0(.u_nms[1L], " PC1")),
+                   yaxis = list(title = paste0(.u_nms[1L], " PC2")))
   p2 <- plotly::ggplotly(g2) %>%
-    plotly::layout(xaxis = list(title = paste0(u_nms[2L], " PC1")),
-                   yaxis = list(title = paste0(u_nms[2L], " PC2")))
+    plotly::layout(xaxis = list(title = paste0(.u_nms[2L], " PC1")),
+                   yaxis = list(title = paste0(.u_nms[2L], " PC2")))
   p3 <- plotly::ggplotly(g3) %>%
     plotly::layout(xaxis = list(title = "predicted"),
                    yaxis = list(title = "observed"))

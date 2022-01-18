@@ -45,10 +45,11 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
       column(3L, selectInput("dat_char", "Data:",
                              choices  = expected_data_char,
                              selected = "penguins classification")),
-      column(9L,  conditionalPanel(
+      column(3L, conditionalPanel(
         "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
         fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
-                  multiple = FALSE, accept = c("text/rds", ".rds"))))
+                  multiple = FALSE, accept = c("text/rds", ".rds")))),
+      column(6L, tableOutput("perf_df"))
     ),
     htmlOutput("desc_rows"),
     p("- fit a modest randomForest model, ")

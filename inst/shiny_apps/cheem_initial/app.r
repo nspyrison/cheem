@@ -60,7 +60,7 @@ server <- function(input, output, session){
     ## isolated, not eager to eval twice, as prim_inst also updated as 
     #### prim/comp_inst also update as side effects of load_ls()
     inc_feat_nms <- req(input$inc_feat_nms)
-    prim_inst   <- req(input$primary_inst)
+    prim_inst    <- req(input$primary_inst)
     if(all(inc_feat_nms %in% colnames(attr_df)) == FALSE){
       cheem:::devMessage("bas(): bas tried to react before inc_feat_nms updated...")
       return()
@@ -76,8 +76,9 @@ server <- function(input, output, session){
     unique(as.integer(.d$key))
   })
   
-  
-  ### cheem_ggtour() -----
+  ### perf_df ----
+
+  ### cheem_ggtour -----
   cheem_ggtour <- reactive({
     cheem_ls     <- req(load_ls())
     bas          <- req(bas())
@@ -100,9 +101,8 @@ server <- function(input, output, session){
     }
     mv <- which(rownames(bas) == mv_nm)
     radial_cheem_tour_subplots(
-      cheem_ls, bas, mv, prim_inst, comp_inst,
-      do_add_pcp_segments = add_pcp, angle = .15,
-      row_index = idx_rownum, inc_var_nms = inc_feat_nms)
+      cheem_ls, bas, mv, prim_inst, comp_inst, do_add_pcp_segments = add_pcp,
+      angle = .15, row_index = idx_rownum, inc_var_nms = inc_feat_nms)
   }) %>%
     ## Leaving load_ls out; only load when all are ready
     bindCache(bas(), input$primary_inst, input$comparison_inst,
@@ -283,6 +283,13 @@ server <- function(input, output, session){
     .anim
   })
   ## Lazy eval, heavy work, let the other stuff calculate first.
+  
+  output$perf_df <- renderTable({
+    df <- req(load_ls()$model_performance_df)
+    df %>% dplyr::mutate_if(is.numeric, round, digits = 2L)
+  })
+  outputOptions(output, "perf_df",
+                suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation
   
   ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
