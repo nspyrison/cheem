@@ -9,7 +9,7 @@ global_view_df_1layer(
   y,
   class = NULL,
   basis_type = c("pca", "olda"),
-  layer_name = class(x)[length(class(x))]
+  layer_name = utils::tail(class(x), 1)
 )
 }
 \arguments{

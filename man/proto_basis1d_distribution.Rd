@@ -69,12 +69,13 @@ rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
+bas     <- basis_attr_df(shap_df, 1)
 mv      <- manip_var_of_attr_df(shap_df, 1, 2)
-mt_path <- manual_tour(bas_p, mv)
-pred    <- predict_unify(rf_fit, X)
+mt_path <- manual_tour(bas, mv)
+pred    <- unify_predict(rf_fit, X)
 
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-  append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
+  append_fixed_y(fixed_y = scale_sd(pred)) +
   proto_point(list(color = clas, shape = clas)) +
   proto_basis1d_distribution(
     attr_df = shap_df,

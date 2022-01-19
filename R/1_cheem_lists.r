@@ -70,37 +70,44 @@ default_rf <- function(
 #' library(cheem)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' # treeshap handles various tree-based models:
 #' 
-#' ## randomForest
+#' ## randomForest model
 #' fit <- randomForest::randomForest(X, Y, ntree = 25)
 #' is_randomForest(fit)
 #' 
-#' ## ranger
-#' fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
+#' \dontrun{
+#' ## ranger model, if package available
+#' if(require(ranger, quietly = TRUE))
+#'   fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
 #' is_ranger(fit)
 #' 
-#' ## gbm
-#' fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
+#' ## gbm model, if package available
+#' if(require(gbm, quietly = TRUE))
+#'   fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 #' is_gbm(fit)
 #' 
-#' ## xgboost
-#' fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
-#'                         params = list(objective = "reg:squarederror"))
+#' ## xgboost, if package available
+#' if(require(xgboost, quietly = TRUE))
+#'   fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
+#'                           params = list(objective = "reg:squarederror"))
 #' is_xgboost(fit)
 #' 
-#' ## catboost R examples error.
-#' 
 #' ## lightgbm
-#' lgbm_params <- list(objective = "regression", num_leaves = 25)
-#' fit <- lightgbm::lightgbm(as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+#' if(require(lightgbm, quietly = TRUE)){
+#'   lgbm_params <- list(objective = "regression", num_leaves = 25)
+#'   fit <- lightgbm::lightgbm(
+#'     as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+#' }
 #' is_lightgbm(fit)
 #' 
+#' ## catboost model; working examples hard to find. 
+#' }
 #' 
 #' # Continue cheem workflow with tree-based models:
 #' 
@@ -166,7 +173,8 @@ is_catboost <- function(model){
 #' unify_predict(rf_fit, X)
 unify_predict <- function(model, x){
   if(is_xgboost(model)){
-    .pred <- xgboost:::predict.xgb.Booster(model, newdata = as.matrix(x))
+    ## xgboost:::predict.xgb.Booster expects arg name newdata, rather than data.
+    .pred <- stats::predict(model, newdata = as.matrix(x))
   }else if(is_lightgbm(model)){
     .pred <- stats::predict(model, data = as.matrix(x))
   }else suppressMessages(.pred <- stats::predict(model, data = x))
@@ -306,7 +314,7 @@ model_performance_df <- function(
   # but at least consistent format and measures.
   .y <- y
   if(is.null(.y)) .y <- model$y
-  .pred <- unify_predict(model, x)
+  .pred   <- unify_predict(model, x)
   .e      <- .y - .pred ## Residual
   .se     <- .e^2L
   .sse    <- sum(.se)
@@ -320,15 +328,15 @@ model_performance_df <- function(
   # .mae  <- mean(abs(.e))
   # .mad  <- .mae / length(y)
   # .ROC <- ROCR::
-  data.frame(
-    row.names  = NULL,
-    model_type = class(model)[length(class(model))],
-    sse        = .sse,
-    mse        = .mse,
-    rmse       = .rmse,
-    rse        = .rse,
-    r2         = .r2,
-    r2_adj     = .r2_adj)
+  data.frame(`model type` = utils::tail(class(model), 1L),
+             sse          = .sse,
+             mse          = .mse,
+             rmse         = .rmse,
+             rse          = .rse,
+             r2           = .r2,
+             `r2 adj`     = .r2_adj,
+             row.names    = NULL, 
+             check.names  = FALSE)
 }
 
 #' Create the plot data.frame for the global linked plotly display.
@@ -362,9 +370,9 @@ model_performance_df <- function(
 #'                     attr_df = shap_df)
 global_view_df_1layer <- function(
   x, y,
-  class = NULL, ## required for olda
+  class      = NULL, ## required for olda
   basis_type = c("pca", "olda"),
-  layer_name = class(x)[length(class(x))] ## Name of the last class _ie_ `treeshap``
+  layer_name = utils::tail(class(x), 1) ## Name of the last class _ie_ `treeshap``
 ){
   d <- 2L ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
@@ -375,11 +383,12 @@ global_view_df_1layer <- function(
   basis <- switch(basis_type,
                   pca  = spinifex::basis_pca(x_std, d),
                   olda = spinifex::basis_olda(x_std, class, d))
-  proj  <- spinifex::scale_01(x_std %*% basis) ## Output mapped to 01 for global view
+  proj  <- spinifex::scale_01(x_std %*% basis)
   
-  ## Column bind wide
+  ## Column bind wider
   ret <- data.frame(basis_type, layer_name, 1L:nrow(x), class, proj)
-  colnames(ret) <- c("basis_type", "layer_name", "rownum", "class", paste0("V", 1L:d))
+  colnames(ret) <-
+    c("basis_type", "layer_name", "rownum", "class", paste0("V", 1L:d))
   attr(ret, paste0(basis_type, ":", layer_name)) <- basis
   
   ## Return
@@ -491,7 +500,7 @@ cheem_ls <- function(
   if(is_classification){
     .pred_clas <- factor(
       levels(class)[round(.pred)], levels = levels(class))
-    .is_misclass <- .pred_clas!= class
+    .is_misclass <- .pred_clas != class
     .decode_middle <- data.frame(
       predicted_class  = .pred_clas, is_misclassified = .is_misclass)
     .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
@@ -508,7 +517,8 @@ cheem_ls <- function(
     .layer_nm    <- "model"
   }
   ## rbind yhaty to global_view_df ----
-  .yhaty_df <- data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
+  .yhaty_df <-
+    data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
     spinifex::scale_01()
   .yhaty_df <- data.frame(basis_type = NA, layer_name = .layer_nm,
                           rownum = 1L:nrow(x), class = .decode_df$class, .yhaty_df)
@@ -559,29 +569,11 @@ cheem_ls <- function(
 }
 
 
-if(FALSE){ ## Extension ideas -----
-  ## TAKEAWAY:
-  #-CP and BD, each need DALEX::Explain;
-  #-basically want to extract a model-less DALEX::explain before model is removed. 
-  
-  ## Wrapper function to create a breakdown plot of the 
-  bd_plot <- function(explainer, new_obs){
-    parts_bd <- DALEX::predict_parts_break_down(explainer, new_observation )
-    plot(parts_bd)
-  }
-  
-  # .explain <- DALEX::explain(model = model,
-  #                            data  = x,
-  #                            y     = y,
-  #                            type  = problem_type)
-  
-  ## Wrapper function for predict & plot cp profile
-  cp_profiles_plots <- function(explainer, new_obs, var_nms){
-    .pred_prof <- DALEX::predict_profile(explainer = explainer,
-                                         new_observation = new_obs)
-  
-    plot(.pred_prof, variables = var_nms) +
-      ggtitle::ggtitle("Ceteris-paribus profile", "")# +
-    # + ggplot2::ylim(min(y), max(y))
-  }
-}
+## Extension ideas -----
+#- Ceteris-paribus profiles for prim/comp obs? 
+#-- DALEX::explain(model) %>%
+#-- DALEX::predict_profile(prim/comp_obs)
+#- Breakdown plots for prim/comp obs? 
+#-- Probably now; good for illustrating shap, not really 1:1 with treeshap
+#-- DALEX::explain(model) %>%
+#-- DALEX::predict_parts(prim/comp_obs, type [NOT INTEROPERABLE WITH treeshap])

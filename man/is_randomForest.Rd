@@ -41,37 +41,44 @@ certain model. Checks if a model is made with:
 library(cheem)
 
 ## Regression:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 # treeshap handles various tree-based models:
 
-## randomForest
+## randomForest model
 fit <- randomForest::randomForest(X, Y, ntree = 25)
 is_randomForest(fit)
 
-## ranger
-fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
+\dontrun{
+## ranger model, if package available
+if(require(ranger, quietly = TRUE))
+  fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
 is_ranger(fit)
 
-## gbm
-fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
+## gbm model, if package available
+if(require(gbm, quietly = TRUE))
+  fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 is_gbm(fit)
 
-## xgboost
-fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
-                        params = list(objective = "reg:squarederror"))
+## xgboost, if package available
+if(require(xgboost, quietly = TRUE))
+  fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
+                          params = list(objective = "reg:squarederror"))
 is_xgboost(fit)
 
-## catboost R examples error.
-
 ## lightgbm
-lgbm_params <- list(objective = "regression", num_leaves = 25)
-fit <- lightgbm::lightgbm(as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+if(require(lightgbm, quietly = TRUE)){
+  lgbm_params <- list(objective = "regression", num_leaves = 25)
+  fit <- lightgbm::lightgbm(
+    as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+}
 is_lightgbm(fit)
 
+## catboost model; working examples hard to find. 
+}
 
 # Continue cheem workflow with tree-based models:
 

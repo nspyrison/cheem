@@ -9,7 +9,7 @@ require(shiny)
 require(shinythemes) ## Themes for shiny, think preset css styling.
 require(shinycssloaders) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
 require(DT) ## For html table and buttons
-## Dependancies
+## Dependencies
 require(cheem) ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
 require(spinifex)
 require(plotly)
@@ -28,15 +28,21 @@ toy_trig_reg_ls <- readRDS("./data/preprocess_toy_trig_regression.rds")
 toy_mix_reg_ls  <- readRDS("./data/preprocess_toy_mixture_regression.rds")
 chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
 
-# diabetes_wide_ls <- readRDS("./data/preprocess_diabetes_wide.rds")
-# diabetes_long_ls <- readRDS("./data/preprocess_diabetes_long.rds")
+## Create contextLine; App name, version, and sys date.
+.wd         <- getwd()
+.regex      <- regexpr("\\/[^\\/]*$", .wd)
+.local_path <- substr(.wd, .regex + 1L, nchar(.wd))
+.title      <- paste0("cheem --- ", .local_path)
+contextLine <- paste0(.local_path, " app, ",
+                      " --- cheem (v", packageVersion("cheem"), ")",
+                      " --- ", Sys.Date())
 
 ## UI content ----
 ### tab1_cheem -----
 expected_data_char <- c(
   "toy classification", "penguins classification", "chocolates classification",
-  "toy quad regression", "toy trig regression", "toy mixture model regression", "fifa regression", "ames housing 2018 regression",
-  #"diabetes (wide) classification", "diabetes (long) classification",
+  "toy quad regression", "toy trig regression", "toy mixture model regression", 
+  "fifa regression", "ames housing 2018 regression",
   "<Upload saved cheem_ls (.rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----
@@ -97,7 +103,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Sometimes this behaves like iframe and others like object itself. 
   plotly::plotlyOutput("cheem_tour_plotly", width = "1440px", height = "620px") %>%
     shinycssloaders::withSpinner(type = 8L),
-  br()
+  br(), br(), br()
 ) ## Assign tab1_cheem
 
 ### tab_about -----
@@ -123,12 +129,13 @@ tab_about <- tabPanel("About", fluidPage(
   h4("Namesake"),
   p("The Trees of Cheem, are a fictional race of tree-based humanoids in the Dr. Who universe. The initial application applies tree SHAP (a local explain of tree-based models via {treeshap}), and explanations from {DALEX}, a reference to Dr. Who lore."),
   img(src = "cheem_namesake.png"),
-  br(), br(), br(), br()
+  br(), br(), br()
 )) ## Assign tabZ_about
 
 ## Combined ui object ----
 ui <- fluidPage(theme = shinythemes::shinytheme("flatly"),
-                navbarPage("Cheem",
+                navbarPage(.title,
                            tab1_cheem,
-                           tab_about)
+                           tab_about),
+                h5(contextLine, style = "color: #A9A9A9")
 )

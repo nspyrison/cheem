@@ -198,7 +198,7 @@ server <- function(input, output, session){
       he <- h4("Simulated triangle vertices")
       l1 <- p(paste0(
         "- ", nrow(attr_df), " instances of ", ncol(attr_df),
-        " features (2 signal, 2 noise), and cluster membership, the classification target"))
+        " features (two signal, two noise), and cluster membership, the classification target"))
     }else if(dat == "penguins classification"){
       he <- h4("Palmer penguins")
       l1 <-  p(paste0(
@@ -246,7 +246,8 @@ server <- function(input, output, session){
   
   ### GLOBAL VIEW PLOTLY
   glob_view <- reactive({
-    cheem_ls   <- req(load_ls()) 
+    cheem_ls   <- req(load_ls()) ## will this not trigger BYO-Data make? req(input$dat_char)
+    .BYOData   <- req(input$dat_char)
     .prim_inst <- req(input$primary_inst)
     .comp_inst <- req(input$comparison_inst)
     .col       <- req(input$glob_view_col)
@@ -278,7 +279,7 @@ server <- function(input, output, session){
       plotly::style(hoverinfo = "none")
     ## the following hasn't helped:
     #### %>% plotly::toWebGL() & plotly::partial_bundle(), not reliably faster and may increase visual issues.
-    #### - starting at frame 11 doesn't get arround frame 1 sometimes being skipped.
+    #### - starting at frame 11 doesn't get around frame 1 sometimes being skipped.
     #### - redundantly hiding gridlines in plotly doesn't remove them.
     .anim
   })

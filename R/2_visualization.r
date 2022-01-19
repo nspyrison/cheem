@@ -120,12 +120,13 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
+#' bas     <- basis_attr_df(shap_df, 1)
 #' mv      <- manip_var_of_attr_df(shap_df, 1, 2)
-#' mt_path <- manual_tour(bas_p, mv)
-#' pred    <- predict_unify(rf_fit, X)
+#' mt_path <- manual_tour(bas, mv)
+#' pred    <- unify_predict(rf_fit, X)
 #' 
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-#'   append_fixed_y(fixed_y = scale_sd(fixed_pred)) +
+#'   append_fixed_y(fixed_y = scale_sd(pred)) +
 #'   proto_point(list(color = clas, shape = clas)) +
 #'   proto_basis1d_distribution(
 #'     attr_df = shap_df,
@@ -509,9 +510,10 @@ global_view_subplots <- function(
     ## Red misclassified points, if present
     if(is_classification){
       .rn_misclass <- which(decode_df$is_misclassified[r_idx] == TRUE)
+      .idx_misclas <- df$rownum %in% .rn_misclass
       if(sum(.idx_misclas) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-          ggplot2::aes(V1, V2), df[.rn_misclass,,  drop == FALSE],
+          ggplot2::aes(V1, V2), df[.rn_misclass,, drop == FALSE],
           color = "red", fill = NA, shape = 21L, size = 3L, alpha = .alpha))
       }
     }
@@ -629,7 +631,7 @@ global_view_subplots <- function(
 #' 
 #' bas <- basis_attr_df(shap_df, rownum = 1)
 #' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
-#'   primary_obs = 1, comparison_obs = 2)
+#'                           primary_obs = 1, comparison_obs = 2)
 #' \dontrun{
 #' animate_plotly(ggt)
 #' if(FALSE) ## or animate with gganimate

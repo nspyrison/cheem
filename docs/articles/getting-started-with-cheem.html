@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Getting started with cheem</h1>
                         <h4 data-toc-skip class="author">Nicholas Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2022-01-18</h4>
+            <h4 data-toc-skip class="date">2022-01-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
       <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
@@ -101,14 +101,14 @@ https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-nani
 <p>(ref:limenonlinear) Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From <em>Ribiro, M. et. all. (2017). Why should I trust you?</em></p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png"</span><span class="op">)</span></code></pre></div>
-<p>Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unrealiable. This is the type of analysis visually explored in <strong>cheem</strong>.</p>
-<p>We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization <em>tour</em> animates linear projection-embedings over small changes in the basis. The package <strong>spinifex</strong> facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the suppor of the features.</p>
-<p>While this framework would for any non-linear model and compatible local explanation we’ll illustrate with <strong>randomForest</strong> models and the tree SHAP local explanaion with <strong>treeshap</strong> (available on GitHub).</p>
+<p>Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. This is the type of analysis visually explored in <strong>cheem</strong>.</p>
+<p>We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization <em>tour</em> animates linear projection-embeddings over small changes in the basis. The package <strong>spinifex</strong> facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the support of the features.</p>
+<p>While this framework would for any non-linear model and compatible local explanation we’ll illustrate with <strong>randomForest</strong> models and the tree SHAP local explanation with <strong>treeshap</strong> (available on GitHub).</p>
 </div>
 <div class="section level1">
 <h1 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
 </h1>
-<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. Altnatively, <strong>treeshape</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>ranger</strong>, <strong>gbm</strong>, <strong>xgboost</strong>, <strong>catboost</strong>, and <strong>lightgbm</strong>.</p>
+<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. Alternatively, <strong>treeshape</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>ranger</strong>, <strong>gbm</strong>, <strong>xgboost</strong>, <strong>catboost</strong>, and <strong>lightgbm</strong>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/spinifex/" class="external-link">spinifex</a></span><span class="op">)</span>
@@ -134,7 +134,7 @@ https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-nani
 <div class="section level1">
 <h1 id="cheem-viewer">Cheem viewer<a class="anchor" aria-label="anchor" href="#cheem-viewer"></a>
 </h1>
-<p>We have extracted tree SHAP, an feature importance measure in the vicinity of each observation. We need to identify an instance of interest to explore; we do so with the linked brushing available in the <em>global view</em>. Then we will vary contributions from different features to test the support an exaplanation in a <em>radial tour</em></p>
+<p>We have extracted tree SHAP, an feature importance measure in the vicinity of each observation. We need to identify an instance of interest to explore; we do so with the linked brushing available in the <em>global view</em>. Then we will vary contributions from different features to test the support an explanation in a <em>radial tour</em></p>
 <div class="section level2">
 <h2 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
 </h2>
@@ -146,7 +146,7 @@ https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-nani
 <div class="section level2">
 <h2 id="radial-tour">Radial tour<a class="anchor" aria-label="anchor" href="#radial-tour"></a>
 </h2>
-<p>There is a lot to unpack here. The normalized distribution of all feature attribtuion from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it’s (incorrect) prediction of Chinstrap (orange) in terms of bill length (<code>bll_l_</code>) and flipper length (<code>f__</code>). In terms of bill depth and body mass (<code>bll_d_</code> and <code>bd__</code>) it is more like its observed species Gentoo (purple). We select flipper length (<code>f__</code>) as the feature to manipulate.</p>
+<p>There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it’s (incorrect) prediction of Chinstrap (orange) in terms of bill length (<code>bll_l_</code>) and flipper length (<code>f__</code>). In terms of bill depth and body mass (<code>bll_d_</code> and <code>bd__</code>) it is more like its observed species Gentoo (purple). We select flipper length (<code>f__</code>) as the feature to manipulate.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Normalized attribution basis of the PI</span>
 <span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis_attr_df.html">basis_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, rownum <span class="op">=</span> <span class="fl">243</span><span class="op">)</span>
@@ -176,7 +176,7 @@ https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-nani
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Flipper length [mm]"</span>, x <span class="op">=</span> <span class="st">"Bill length [mm]"</span>, 
        color <span class="op">=</span> <span class="st">"Observed species"</span>, shape <span class="op">=</span> <span class="st">"Observed species"</span><span class="op">)</span></code></pre></div>
 <p><img src="getting-started-with-cheem_files/figure-html/unnamed-chunk-5-1.png" width="576" style="display: block; margin: auto;"></p>
-<p>This profile, with two features that are most distinguished between the PI and CI. This instance is nested in the inbetween the Chinstrap peguins. That makes this instance particularly hard for a random forest model to classify as decision tree can only make partition on one value (horizontal and vertical lines in this case.</p>
+<p>This profile, with two features that are most distinguished between the PI and CI. This instance is nested in the in between the Chinstrap penguins. That makes this instance particularly hard for a random forest model to classify as decision tree can only make partition on one value (horizontal and vertical lines in this case.</p>
 </div>
 <div class="section level2">
 <h2 id="shiny-application">Shiny application<a class="anchor" aria-label="anchor" href="#shiny-application"></a>

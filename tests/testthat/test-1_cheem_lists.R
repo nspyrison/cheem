@@ -38,58 +38,65 @@ test_that("randomForest thru global_view", {
   expect_equal(class(c_gv), c("plotly", "htmlwidget"))
 })
 
-#### ranger -----
-if(require("ranger")){ ## test if available, but not a depend/suggest
-  r_fit     <- ranger::ranger(r_Y ~ ., data.frame(r_X, r_Y), num.trees = 25)
-  r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
-  r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
-  r_gv      <- global_view(r_this_ls)
-  c_fit     <- ranger::ranger(c_Y ~ ., data.frame(c_X, c_Y), num.trees = 25)
-  c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
-  c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
-  c_gv      <- global_view(c_this_ls)
-  test_that("ranger thru global_view", {
-    expect_equal(class(r_gv), c("plotly", "htmlwidget"))
-    expect_equal(class(c_gv), c("plotly", "htmlwidget"))
-  })
-}
 
-#### gbm -----
-if(require("gbm")){
-  r_fit     <- gbm::gbm(r_Y ~ ., "gaussian", data.frame(r_X, r_Y), n.trees = 25)
-  r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
-  r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
-  r_gv      <- global_view(r_this_ls)
-  c_fit     <- gbm::gbm(c_Y ~ ., "tdist", data.frame(c_X, c_Y), n.trees = 50) ## 25 not enough for 
-  c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
-  c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
-  c_gv      <- global_view(c_this_ls)
-  test_that("gbm thru global_view", {
-    expect_equal(class(r_gv), c("plotly", "htmlwidget"))
-    expect_equal(class(c_gv), c("plotly", "htmlwidget"))
-  })
-}
+#### Testing other models -----
+##### but avoiding depends warning, counting against check()
+#' @examples
+#' \dontrun{ ## trying to avoid testing warning
+#'   #### ranger -----
+#'   if(require(ranger, quietly = TRUE)){ ## test if available, but not a depend/suggest
+#'     r_fit     <- ranger::ranger(r_Y ~ ., data.frame(r_X, r_Y), num.trees = 25)
+#'     r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
+#'     r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
+#'     r_gv      <- global_view(r_this_ls)
+#'     c_fit     <- ranger::ranger(c_Y ~ ., data.frame(c_X, c_Y), num.trees = 25)
+#'     c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
+#'     c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
+#'     c_gv      <- global_view(c_this_ls)
+#'     test_that("ranger thru global_view", {
+#'       expect_equal(class(r_gv), c("plotly", "htmlwidget"))
+#'       expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+#'     })
+#'   }
+#'   
+#'   #### gbm -----
+#'   if(require(gbm, quietly = TRUE)){
+#'     r_fit     <- gbm::gbm(r_Y ~ ., "gaussian", data.frame(r_X, r_Y), n.trees = 25)
+#'     r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
+#'     r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
+#'     r_gv      <- global_view(r_this_ls)
+#'     c_fit     <- gbm::gbm(c_Y ~ ., "tdist", data.frame(c_X, c_Y), n.trees = 50) ## 25 not enough for 
+#'     c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
+#'     c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
+#'     c_gv      <- global_view(c_this_ls)
+#'     test_that("gbm thru global_view", {
+#'       expect_equal(class(r_gv), c("plotly", "htmlwidget"))
+#'       expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+#'     })
+#'   }
+#'   
+#'   #### xgboost -----
+#'   if(require(xgboost, quietly = TRUE)){
+#'     r_fit     <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 25, verbose = 0,
+#'                                   params = list(objective = "reg:squarederror"))
+#'     r_attr_df <- attr_df_treeshap(r_fit, as.matrix(r_X), noisy = FALSE, verbose = FALSE)
+#'     r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
+#'     r_gv      <- global_view(r_this_ls)
+#'     c_fit     <- xgboost::xgboost(as.matrix(c_X), c_Y, nrounds = 25, verbose = 0,
+#'                                   params = list(objective = "reg:squarederror"))
+#'     c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
+#'     c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
+#'     c_gv      <- global_view(c_this_ls)
+#'     test_that("xgboost thru global_view", {
+#'       expect_equal(class(r_gv), c("plotly", "htmlwidget"))
+#'       expect_equal(class(c_gv), c("plotly", "htmlwidget"))
+#'     })
+#'   }
+#' } ## End of \dontrun tests.
 
-#### xgboost -----
-if(require("xgboost")){
-  r_fit     <- xgboost::xgboost(as.matrix(r_X), r_Y, nrounds = 25, verbose = 0,
-                                params = list(objective = "reg:squarederror"))
-  r_attr_df <- attr_df_treeshap(r_fit, as.matrix(r_X), noisy = FALSE, verbose = FALSE)
-  r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
-  r_gv      <- global_view(r_this_ls)
-  c_fit     <- xgboost::xgboost(as.matrix(c_X), c_Y, nrounds = 25, verbose = 0,
-                                params = list(objective = "reg:squarederror"))
-  c_attr_df <- attr_df_treeshap(c_fit, c_X, noisy = FALSE, verbose = FALSE)
-  c_this_ls <- cheem_ls(c_X, c_Y, class = c_clas, model = c_fit, attr_df = c_attr_df)
-  c_gv      <- global_view(c_this_ls)
-  test_that("xgboost thru global_view", {
-    expect_equal(class(r_gv), c("plotly", "htmlwidget"))
-    expect_equal(class(c_gv), c("plotly", "htmlwidget"))
-  })
-}
-
-#### lightgbm -----
-# if(require("lightgbm")){
+#### lightgbm ---
+###### Not working atm.
+# if(require(lightgbm, quietly = TRUE)){
 #   lgbm_params <- list(objective = "regression", num_leaves = 25)
 #   r_fit     <- lightgbm::lightgbm(as.matrix(r_X), r_Y, params = lgbm_params, nrounds = 2)
 #   print("Continue here, with lightgbm models.")
@@ -117,8 +124,9 @@ if(require("xgboost")){
 #   })
 # }
 
-#### catboost ----
-###### No catboost model example easily found.
+#### catboost ---
+###### No catboost model examples easily found.
+
 
 ### default_rf -----
 r_rf <- default_rf(r_X, r_Y, verbose = FALSE)
@@ -128,7 +136,7 @@ test_that("default_rf", {
   expect_true("randomForest" %in% class(r_rf))
   expect_true("randomForest" %in% class(c_rf))
 })
-
+  
 ### attr_df_treeshap ----
 ## doesn't work when rows are few:  Error in 1:nrow(tree) : argument of length 0
 r_attr_df <- attr_df_treeshap(r_rf, r_X, noisy = FALSE, verbose = FALSE)
