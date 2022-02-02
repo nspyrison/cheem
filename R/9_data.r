@@ -44,6 +44,9 @@
 #' 
 #' @format complete data.frame with 2291 rows and 18 numeric variables, 
 #' SalesPrice, the response variable, and 3 class variables
+#' @source De Cock, D. (2011). "Ames, Iowa: Alternative to the Boston Housing Data as an End of Semester Regression Project," \emph{Journal of Statistics Education},  Volume 19, Number 3.
+#' \url{https://ww2.amstat.org/publications/jse/v19n3/decock/DataDocumentation.txt}
+#' \url{http://ww2.amstat.org/publications/jse/v19n3/decock.pdf}
 #' @source {Kaggle, Ames Housing Dataset} 
 #' \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
 #' Replicating this dataset:
@@ -101,6 +104,7 @@
 #'   unique(amesHousing2018_NorthAmes$SubclassMS))
 #' ## save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
 #' ```
+#' @keywords datasets
 #' @examples
 #' library(cheem)
 #' ## Regression:

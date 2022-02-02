@@ -43,7 +43,6 @@ default_rf <- function(
     .mod <- randomForest::randomForest(
       x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree)
   )
-  .m <- gc()
   if(verbose) tictoc::toc()
   .mod
 }
@@ -562,7 +561,6 @@ cheem_ls <- function(
     global_view_df = .glob_view,
     global_view_basis_ls = .glob_basis_ls,
     decode_df = .decode_df)
-  .m <- gc()
   if(keep_model) ret_ls <- c(ret_ls, model = model)
   if(verbose) tictoc::toc()
   ret_ls
