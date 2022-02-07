@@ -110,8 +110,9 @@ bas <- basis_attr_df(shap_df, rownum = 243)
 #### the feature with largest separation between PI and CI attribution
 mv  <- manip_var_of_attr_df(shap_df, primary_obs = 243, comparison_obs = 169)
 ## Make the radial tour
-ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = mv,
-                                  primary_obs = 243, comparison_obs = 169)
+ggt <- radial_cheem_tour_subplots(
+  this_ls, basis = bas, manip_var = mv,
+  primary_obs = 243, comparison_obs = 169, angle = .25)
 ## Animate it
 animate_plotly(ggt, fps = 4)
 ```
