@@ -37,8 +37,7 @@ Non-linear models regularly result in more accurate prediction than their linear
 
 One part of this is with the use of _local explanations_. Local explanations approximate the feature importance in the vicinity of one instance (observation).
 
-(ref:limenonlinear-cap) Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_
-```{r limenonlinear, echo=FALSE, fig.cap="(ref:limenonlinear-cap)"}
+```{r limenonlinear, echo=FALSE, fig.cap="Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_"}
 knitr::include_graphics("../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png")
 ```
 
