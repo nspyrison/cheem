@@ -10,7 +10,7 @@ proto_basis1d_distribution(
   comparison_obs = NULL,
   position = c("top1d", "floor1d", "bottom1d", "off"),
   group_by = as.factor(FALSE),
-  pcp_shape = c(142, 124, 3),
+  pcp_shape = c(3, 142, 124),
   do_add_pcp_segments = TRUE,
   inc_var_nms = NULL,
   row_index = NULL
@@ -34,8 +34,8 @@ Defaults to "top1d"; basis above the density curves.}
 \item{group_by}{Vector to group densities by. Originally \emph{predicted} class.}
 
 \item{pcp_shape}{The number of the shape character to add. Expects
-142, 124, 3  '|' for \code{plotly} and \code{gganimate} or '+' in either respectively.
-Defaults to 142, '|' for \code{plotly}.}
+3, 142, or 124, '+', '|' in \code{plotly}, and '|' in \code{gganimate}, respectively.
+Defaults to 3, '+' in either output.}
 
 \item{do_add_pcp_segments}{Logical, whether or not to add to add faint
 parallel coordinate lines on the 1D basis. Defaults to TRUE.}

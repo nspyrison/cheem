@@ -73,7 +73,7 @@ Does not draw the basis bars; use in conjunction with <code><a href="https://rdr
   comparison_obs <span class="op">=</span> <span class="cn">NULL</span>,
   position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"top1d"</span>, <span class="st">"floor1d"</span>, <span class="st">"bottom1d"</span>, <span class="st">"off"</span><span class="op">)</span>,
   group_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>,
-  pcp_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">142</span>, <span class="fl">124</span>, <span class="fl">3</span><span class="op">)</span>,
+  pcp_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">142</span>, <span class="fl">124</span><span class="op">)</span>,
   do_add_pcp_segments <span class="op">=</span> <span class="cn">TRUE</span>,
   inc_var_nms <span class="op">=</span> <span class="cn">NULL</span>,
   row_index <span class="op">=</span> <span class="cn">NULL</span>
@@ -100,8 +100,8 @@ Defaults to "top1d"; basis above the density curves.</p></dd>
 <dd><p>Vector to group densities by. Originally <em>predicted</em> class.</p></dd>
 <dt>pcp_shape</dt>
 <dd><p>The number of the shape character to add. Expects
-142, 124, 3  '|' for <code>plotly</code> and <code>gganimate</code> or '+' in either respectively.
-Defaults to 142, '|' for <code>plotly</code>.</p></dd>
+3, 142, or 124, '+', '|' in <code>plotly</code>, and '|' in <code>gganimate</code>, respectively.
+Defaults to 3, '+' in either output.</p></dd>
 <dt>do_add_pcp_segments</dt>
 <dd><p>Logical, whether or not to add to add faint
 parallel coordinate lines on the 1D basis. Defaults to TRUE.</p></dd>

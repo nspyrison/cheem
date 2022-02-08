@@ -89,8 +89,8 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' "bottom1d", "off"). 
 #' Defaults to "top1d"; basis above the density curves.
 #' @param pcp_shape The number of the shape character to add. Expects
-#' 142, 124, 3  '|' for `plotly` and `gganimate` or '+' in either respectively. 
-#' Defaults to 142, '|' for `plotly`.
+#' 3, 142, or 124, '+', '|' in `plotly`, and '|' in `gganimate`, respectively. 
+#' Defaults to 3, '+' in either output.
 #' @param do_add_pcp_segments Logical, whether or not to add to add faint 
 #' parallel coordinate lines on the 1D basis. Defaults to TRUE.
 #' @param primary_obs The rownumber of the primary observation. Its local
@@ -143,7 +143,7 @@ proto_basis1d_distribution <- function(
   comparison_obs      = NULL,
   position            = c("top1d", "floor1d", "bottom1d", "off"), ## Needs to match that of `proto_basis1d()`
   group_by            = as.factor(FALSE),
-  pcp_shape           = c(142, 124, 3), ## '|' for plotly and ggplot, or '+' respectively
+  pcp_shape           = c(3, 142, 124), ## '|' for plotly and ggplot, or '+' respectively
   do_add_pcp_segments = TRUE,
   inc_var_nms         = NULL,
   row_index           = NULL
@@ -595,8 +595,8 @@ global_view_subplots <- function(
 #' @param do_add_pcp_segments Logical, whether or not to add parallel coordinate
 #' line segments to the basis display.
 #' @param pcp_shape The number of the shape character to add. Expects
-#' 142, 124, 3  '|' for `plotly` and `gganimate` or '+' in either respectively. 
-#' Defaults to 142, '|' for `plotly`.
+#' 3, 142, or 124, '+', '|' in `plotly`, and '|' in `gganimate`, respectively. 
+#' Defaults to 3, '+' in either output.
 #' @param angle The step size between interpolated frames, in radians. 
 #' Defaults to .15.
 #' @param row_index Numeric index of selected observations. 
@@ -662,7 +662,7 @@ radial_cheem_tour <- function(
   primary_obs         = NULL,
   comparison_obs      = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape           = c(142, 124, 3), ## '|' plotly and gganimate, or '+' respectively
+  pcp_shape           = c(3, 142, 124), ## '+', '|' plotly and  '|' gganimate, or  respectively
   angle               = .15,
   row_index           = NULL,
   inc_var_nms         = NULL,
@@ -823,7 +823,7 @@ radial_cheem_tour_subplots <- function(
   primary_obs         = NULL, 
   comparison_obs      = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape           = c(142, 124, 3), ## '|' plotly and gganimate, or '+' respectively
+  pcp_shape           = c(3, 142, 124), ## '+', '|' plotly and  '|' gganimate, or  respectively
   angle               = .15,
   row_index           = NULL,
   inc_var_nms         = NULL,

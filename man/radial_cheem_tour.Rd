@@ -12,7 +12,7 @@ radial_cheem_tour(
   primary_obs = NULL,
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape = c(142, 124, 3),
+  pcp_shape = c(3, 142, 124),
   angle = 0.15,
   row_index = NULL,
   inc_var_nms = NULL,
@@ -27,7 +27,7 @@ radial_cheem_tour_subplots(
   primary_obs = NULL,
   comparison_obs = NULL,
   do_add_pcp_segments = TRUE,
-  pcp_shape = c(142, 124, 3),
+  pcp_shape = c(3, 142, 124),
   angle = 0.15,
   row_index = NULL,
   inc_var_nms = NULL,
@@ -54,8 +54,8 @@ no comparison observation highlighted.}
 line segments to the basis display.}
 
 \item{pcp_shape}{The number of the shape character to add. Expects
-142, 124, 3  '|' for \code{plotly} and \code{gganimate} or '+' in either respectively.
-Defaults to 142, '|' for \code{plotly}.}
+3, 142, or 124, '+', '|' in \code{plotly}, and '|' in \code{gganimate}, respectively.
+Defaults to 3, '+' in either output.}
 
 \item{angle}{The step size between interpolated frames, in radians.
 Defaults to .15.}

@@ -26,7 +26,6 @@ knitr::opts_chunk$set(
   fig.align  = "center",
   cache      = FALSE
 )
-library(cheem)
 ```
 
 __TL;DR__, you can jump straight into the visuals and application with `cheem::run_app()`, but we suggest you read the introduction to get situated with the context first.
@@ -38,8 +37,8 @@ Non-linear models regularly result in more accurate prediction than their linear
 
 One part of this is with the use of _local explanations_. Local explanations approximate the feature importance in the vicinity of one instance (observation).
 
-(ref:limenonlinear) Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_
-```{r limenonlinear, fig.cap="(ref:limenonlinear)"}
+(ref:limenonlinear-cap) Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_
+```{r limenonlinear, echo=FALSE, fig.cap="(ref:limenonlinear-cap)"}
 knitr::include_graphics("../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png")
 ```
 
@@ -58,10 +57,13 @@ The first thing we'll need are data and tree based model. We'll use a wrapper fu
 library(cheem)
 library(spinifex)
 
-## Classification:
-X      <- penguins_na.rm[, 1:4]
-clas   <- penguins_na.rm$species
-Y      <- as.integer(clas)
+## Classification case, Penguins data
+X           <- penguins_na.rm[, 1:4]
+clas        <- penguins_na.rm$species
+Y           <- as.integer(clas)
+colnames(X) <- c("b_l", "b_d", "f_l", "b_m")
+
+## Create a random forest classifying penguin species
 rf_fit <- default_rf(X, Y, verbose = FALSE)
 
 ## For other compatible tree based models see examples in:
@@ -101,20 +103,40 @@ From this _global view_ we want to identify a primary instance (PI) and optional
 
 ## Radial tour
 
-There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it's (incorrect) prediction of Chinstrap (orange) in terms of bill length (`bll_l_`) and flipper length (`f__`). In terms of bill depth and body mass (`bll_d_` and `bd__`) it is more like its observed species Gentoo (purple). We select flipper length (`f__`) as the feature to manipulate.
+There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it's (incorrect) prediction of Chinstrap (orange) in terms of bill length (`b_l`) and flipper length (`f_l`). In terms of bill depth and body mass (`b_d` and `b_m`) it is more like its observed species Gentoo (purple). We select flipper length as the feature to manipulate.
 
-```{r, out.width="100%"}
+```{r, out.width="100%", eval = FALSE}
 ## Normalized attribution basis of the PI
 bas <- basis_attr_df(shap_df, rownum = 243)
 ## Default to feature to manipulation; 
 #### the feature with largest separation between PI and CI attribution
 mv  <- manip_var_of_attr_df(shap_df, primary_obs = 243, comparison_obs = 169)
 ## Make the radial tour
-ggt <- radial_cheem_tour_subplots(
+ggt <- radial_cheem_tour(
   this_ls, basis = bas, manip_var = mv,
   primary_obs = 243, comparison_obs = 169, angle = .25)
+
 ## Animate it
-animate_plotly(ggt, fps = 4)
+animate_gganimate(ggt, fps = 6) 
+  #height = 2, width = 4.5, units = "in", res = 150
+## Or as a plotly html widget
+#animate_plotly(ggt, fps = 4)
+```
+```{r, echo=FALSE, out.width="100%"}
+if(FALSE){ ## To mitigate file size (CRAN note) create a gif and include that
+  bas <- basis_attr_df(shap_df, rownum = 243)
+  mv  <- manip_var_of_attr_df(shap_df, primary_obs = 243, comparison_obs = 169)
+  ggt <- radial_cheem_tour(
+    this_ls, basis = bas, manip_var = mv,
+    primary_obs = 243, comparison_obs = 169, angle = .25)
+  
+  #### .gif is about .2 Mb saved, while HTML widget is about 7 Mb.
+  anim <- animate_gganimate(ggt, fps = 6,
+                            height = 2, width = 4.5, units = "in", res = 150)
+  gganimate::anim_save("tour_penguins.gif", animation = anim)
+  beepr::beep()
+}
+knitr::include_graphics("tour_penguins.gif")
 ```
 
 Starting from the attribution projection, this instance already looks more like its observed Gentoo than predicted Chinstrap. However, by frame 8, the basis has a full contribution of flipper length and does look more like the predicted Chinstrap. Looking at the parallel coordinate lines on the basis visual we can see that flipper length has a large gap between PI and CI, lets check the original variables to digest.
@@ -137,20 +159,12 @@ ggplot(penguins_na.rm, aes(x = bill_length_mm,
        color = "Observed species", shape = "Observed species")
 ```
 
-This profile, with two features that are most distinguished between the PI and CI. This instance is nested in the in between the Chinstrap penguins. That makes this instance particularly hard for a random forest model to classify as decision tree can only make partition on one value (horizontal and vertical lines in this case.
+This profile, with two features that are most distinguished between the PI and CI. This instance is nested in the in between the Chinstrap penguins. That makes this instance particularly hard for a random forest model to classify as decision tree can only make partition on one value (horizontal and vertical lines here).
 
 
 ## Shiny application
 
-We provide an interactive __shiny__ application. Interactive features are made possible with __plotly__, __crosstalk__, and __DT__. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data.
-
-```{r, eval=F}
-## Bring your own data
-#### The app expects preprocessed data as a return from cheem::cheem_ls saved to .rds
-#### Follow along with the examples or the above preprocessing section
-?cheem_ls
-```
-
+We provide an interactive __shiny__ application. Interactive features are made possible with __plotly__, __crosstalk__, and __DT__. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data by saving the return of `cheem_ls()` as an .rds file. Follow along with the example in `?cheem_ls`.
 
 # Conclusion
 
