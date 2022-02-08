@@ -39,7 +39,7 @@ By exploring the global view, identify a primary and comparison observation to c
 
 The attribution of the primary observation becomes the 1D basis for the tour. The variable with the largest difference between the primary and comparison point's bases is selected as the manipulation variable. That is the variable whose contribution change drives the change in the projection basis.
 
-![](https://github.com/nspyrison/cheem/blob/main/ignore/tour_penguins.gif?raw=true)
+![](https://github.com/nspyrison/cheem/blob/main/buildignore/tour_penguins.gif?raw=true)
 
 By doing this, we are testing the local explanation. By testing the variable sensitivity to the structure identified in the local explanation, we can better evaluate how good of an explanation it is; how sensitive its prediction is to a change in the variable contributions.
 

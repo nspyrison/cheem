@@ -1,7 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 
-^ignore/.*$
+^buildignore/.*$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$

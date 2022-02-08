@@ -31,7 +31,7 @@ if(interactive()){
   gif <- animate_gganimate(
     ggt, height = 2, width = 4.5, units = "in", res = 150) #, render = gganimate::av_renderer())
   ## Save gif
-  gganimate::anim_save("tour_penguins.gif", animation = gif, path = "./ignore")
+  gganimate::anim_save("tour_penguins.gif", animation = gif, path = "./buildignore")
   beepr::beep()
   
   ## Render mp4

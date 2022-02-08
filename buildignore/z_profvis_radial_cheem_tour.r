@@ -61,8 +61,8 @@ profvis(
 
 if(F){
   ## Save gif
-  gganimate::anim_save("tour_penguins.gif", animation = gif, path = "./ignore")
+  gganimate::anim_save("tour_penguins.gif", animation = gif, path = "./buildignore")
   ## Save mp4
-  gganimate::anim_save("tour_penguins.mp4", animation = mp4, path = "./ignore")
+  gganimate::anim_save("tour_penguins.mp4", animation = mp4, path = "./buildignore")
   
 }

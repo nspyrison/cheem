@@ -53,7 +53,7 @@
 #' ```
 #' if(FALSE) ## Don't accidentally open the URL.
 #'   browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
-#' ames <- readr::read_csv("./ignore/AmesHousing.csv")
+#' ames <- readr::read_csv("./buildignore/AmesHousing.csv")
 #' amesHousing2018_raw <- data.frame(ames)
 #' ## save(amesHousing2018_raw, file = "./data/amesHousing2018_raw.rda")
 #' 
