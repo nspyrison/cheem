@@ -7,14 +7,12 @@ Authors@R: c(
     comment = c(ORCID = "https://orcid.org/0000-0002-8417-0212"))
   )
 Description: Given a tree-based model, calculate the local explanation of 
-  every observation. View the data space, explanation space and model 
+  every observation. View the data space, explanation space, and model 
   information as ensemble graphic interactive on a shiny application.
   After an observation of interest is identified, the normalized 
   variable importance of the local explanation is used as a 1D projection
-  basis. The local explanation is then scrutinized by exploring the support
-  of the variable attribution where a models prediction is supported or may
-  be completely unreliable. Variable attribution is manipulated with the 
-  use of the radial, manual tour.
+  basis. The support of the local explanation is then explored by changing
+  the basis with the use of the radial, manual tour.
 Depends:
     R (>= 3.5.0)
 License: CC BY-NC-SA 4.0

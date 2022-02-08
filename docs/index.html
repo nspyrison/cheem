@@ -13,14 +13,12 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="Interactively Explore the Support of Local Explanations with the Radial Tour">
 <meta property="og:description" content="Given a tree-based model, calculate the local explanation of 
-  every observation. View the data space, explanation space and model 
+  every observation. View the data space, explanation space, and model 
   information as ensemble graphic interactive on a shiny application.
   After an observation of interest is identified, the normalized 
   variable importance of the local explanation is used as a 1D projection
-  basis. The local explanation is then scrutinized by exploring the support
-  of the variable attribution where a models prediction is supported or may
-  be completely unreliable. Variable attribution is manipulated with the 
-  use of the radial, manual tour.">
+  basis. The support of the local explanation is then explored by changing
+  the basis with the use of the radial, manual tour.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -89,12 +87,12 @@
 <div class="page-header"><h1 id="cheem">
 <strong>cheem</strong><a class="anchor" aria-label="anchor" href="#cheem"></a>
 </h1></div>
-<p>Interactively explore data- and local explanation- spaces side-by-side. Further interrogate observation explanations with a radial tour.</p>
+<p>Interactively explore data- and local explanation- spaces and residual side-by-side. Further explore the support of a selected observation’s local explanation with a radial tour.</p>
 <div class="section level2">
 <h2 id="context">Context<a class="anchor" aria-label="anchor" href="#context"></a>
 </h2>
-<p><em>Local explanations</em> are an approximation of instance(observation) level variable importance to a model. That is, a point-measure of each variable’s importance to the model at the particular location in the <em>x</em>-space.</p>
-<p><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a> extracts the local explanation of every observation in a dataset, given a model. Given a model, extract the local explanation of every observation in a data set. View the data- and explanation-spaces side-by-side in an interactive shiny application. Further explored a selected point against a comparison by using its explanation as a 1D projection basis. The structure of explanation projection is then explored by a radial tour.</p>
+<p><em>Local explanations</em> approximate the linear variable importance of a non-linear model in the vicinity of one instance(observation). That is, a point-measure of each variable’s importance to the model at the particular location in data-space.</p>
+<p><strong>cheem</strong> extracts the local explanation of every observation in a dataset, given a model. Given a model, extract the local explanation of every observation in a data set. View the data- and explanation-spaces side-by-side in an interactive shiny application. Further explored a selected point against a comparison using its explanation as a 1D projection basis. A radial tour then explores the structure of explanation projection.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
@@ -110,27 +108,27 @@
 
 <span class="co"># Processing your data</span>
 <span class="co">## Install treeshap from github, to use as a local explainer</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'ModelOriented/treeshap'</span><span class="op">)</span> <span class="co">## Local </span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'ModelOriented/treeshap'</span><span class="op">)</span>
 <span class="co">## Follow the examples in cheem_ls()</span>
 <span class="op">?</span><span class="va">cheem_ls</span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
 </h2>
-<p>The global view show data-, attribution-spaces, and model fit side-by-side with linked brushing and hover tooltip.</p>
-<p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/global_view_toy_class.PNG?raw=true"></p>
-<p>Through exploration of the global view, identify a primary and comparison observation to compare. For the classification task, typically a misclassified point is selected against a near-by correctly classified one. In regression we can compare a point with an extreme residual with a nearby point that is more accurately predicted.</p>
+<p>The global view shows data-, attribution-spaces, and residual plot side-by-side with linked brushing and hover tooltip.</p>
+<p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/global_view_penguins.PNG?raw=true"></p>
+<p>By exploring the global view, identify a primary and comparison observation to compare. For the classification task, typically a misclassified point is selected and compared against a nearby correctly classified one. In regression, we can compare a point with an extreme residual with a nearby point that is more accurately predicted.</p>
 </div>
 <div class="section level2">
 <h2 id="radial-cheem-tour">Radial cheem tour<a class="anchor" aria-label="anchor" href="#radial-cheem-tour"></a>
 </h2>
-<p>The attribution of the primary observation become the 1D basis for the tour. The variable with the largest difference between the primary and comparison point’s bases is selected as the manipulation variable. That is the variable whose contribution change drives the change in the projection basis.</p>
-<p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/radial_cheem_tour_toy_class.gif?raw=true"></p>
-<p>By doing this we are testing the local explanation. By testing the variable sensitivity to the structure identified in the local explanation we can better evaluate how good of an explanation it is; how sensitive it’s prediction is to a change in the variable contributions.</p>
+<p>The attribution of the primary observation becomes the 1D basis for the tour. The variable with the largest difference between the primary and comparison point’s bases is selected as the manipulation variable. That is the variable whose contribution change drives the change in the projection basis.</p>
+<p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/tour_penguins.gif?raw=true"></p>
+<p>By doing this, we are testing the local explanation. By testing the variable sensitivity to the structure identified in the local explanation, we can better evaluate how good of an explanation it is; how sensitive its prediction is to a change in the variable contributions.</p>
 <div class="section level3">
 <h3 id="original-application">Original application<a class="anchor" aria-label="anchor" href="#original-application"></a>
 </h3>
-<p>We started by looking at the model-agnostic local explanation <em>SHAP</em> as applied to random forests. We made this choice out of concern for runtime ({treeshap} uses an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, Cheem, stems from the original application to tree-based models. The <a href="https://tardis.fandom.com/wiki/Tree_of_Cheem" class="external-link">Cheem</a> are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme of the {DALEX} ecosystem.</p>
+<p>We started by looking at the model-agnostic local explanation <em>tree SHAP</em> applied to random forests. We made this choice out of concern for runtime (<strong>treeshap</strong> uses an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, <strong>Cheem</strong>, stems from the original application to tree-based models in the <strong>DALEX</strong> ecosystem; <a href="https://tardis.fandom.com/wiki/Tree_of_Cheem" class="external-link">Cheem</a> are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme .</p>
 <!---
 ### Extensions
 
@@ -142,7 +140,7 @@
 <div class="section level4">
 <h4 id="sources">Sources<a class="anchor" aria-label="anchor" href="#sources"></a>
 </h4>
-<p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a><br><a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a><br><a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a><br><a href="https://github.com/ModelOriented/treeshap" class="external-link">treeshap GitHub page</a></p>
+<p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a> <a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a> <a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a> <a href="https://github.com/ModelOriented/treeshap" class="external-link">treeshap GitHub page</a></p>
 </div>
 </div>
 </div>
@@ -193,7 +191,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

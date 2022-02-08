@@ -15,40 +15,54 @@ Y    <- as.integer(clas)
 
 ## start prof
 
-profvis({
-  tictoc::tic("inside profvis")
-  rf_fit  <- default_rf(X, Y)
-  ## Long runtime for full datasets or complex models:
-  shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-  this_ls <- cheem_ls(X, Y, class = clas,
-                      model = rf_fit,
-                      attr_df = shap_df)
+profvis(
+  {
+    tictoc::tic("inside profvis")
+    rf_fit  <- default_rf(X, Y)
+    ## Long runtime for full datasets or complex models:
+    shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+    this_ls <- cheem_ls(X, Y, class = clas,
+                        model = rf_fit,
+                        attr_df = shap_df)
+    
+    bas <- basis_attr_df(shap_df, rownum = 1)
+    ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
+                             primary_obs = 1, comparison_obs = 2)
+    animate_plotly(ggt)
+    if(FALSE) ## or animate with gganimate
+      animate_gganimate(ggt) #, render = gganimate::av_renderer())
+    
+    ## Regression:
+    dat  <- amesHousing2018_NorthAmes
+    X    <- dat[, 1:9]
+    Y    <- log(dat$SalePrice)
+    clas <- dat$SubclassMS
+    
+    rf_fit  <- default_rf(X, Y)
+    ## Long runtime for full datasets or complex models:
+    shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+    this_ls <- cheem_ls(X, Y, class = clas,
+                        model = rf_fit,
+                        attr_df = shap_df)
+    
+    bas <- basis_attr_df(shap_df, rownum = 1)
+    ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1, angle = .25)
+    
+    animate_plotly(ggt)
+    if(FALSE){ ## or animate with gganimate
+      gif <- animate_gganimate(ggt)
+      beepr::beep()
+      mp4 <- animate_gganimate(ggt, renderer = gganimate::av_renderer())
+      beepr::beep()
+    }
+    tictoc::toc()
+  }
+)
+
+if(F){
+  ## Save gif
+  gganimate::anim_save("tour_penguins.gif", animation = gif, path = "./ignore")
+  ## Save mp4
+  gganimate::anim_save("tour_penguins.mp4", animation = mp4, path = "./ignore")
   
-  bas <- basis_attr_df(shap_df, rownum = 1)
-  ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
-                           primary_obs = 1, comparison_obs = 2)
-  animate_plotly(ggt)
-  if(FALSE) ## or animate with gganimate
-    animate_gganimate(ggt) #, render = gganimate::av_renderer())
-  
-  ## Regression:
-  dat  <- amesHousing2018_NorthAmes
-  X    <- dat[, 1:9]
-  Y    <- log(dat$SalePrice)
-  clas <- dat$SubclassMS
-  
-  rf_fit  <- default_rf(X, Y)
-  ## Long runtime for full datasets or complex models:
-  shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-  this_ls <- cheem_ls(X, Y, class = clas,
-                      model = rf_fit,
-                      attr_df = shap_df)
-  
-  bas <- basis_attr_df(shap_df, rownum = 1)
-  ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-  
-  animate_plotly(ggt)
-  if(FALSE) ## or animate with gganimate
-    animate_gganimate(ggt, render = gganimate::av_renderer())
-  tictoc::toc()
-})
+}
