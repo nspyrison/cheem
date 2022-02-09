@@ -94,7 +94,7 @@ To get more complete view lets look at approximations of the data space, attribu
 
 ```{r, out.width="100%"}
 global_view(this_ls, primary_obs = 243, comparison_obs = 169,
-            height_px = 240, width_px = 720)
+            height_px = 240, width_px = 720, as_ggplot = TRUE)
 ```
 
 From this _global view_ we want to identify a primary instance (PI) and optionally a comparison instance (CI) to explore. Misclassified or observations with high residuals are good targets for further exploration. One point sticks out in this case. Instance 243 (shown as *) is a Gentoo (purple) penguin, while the model predict it to be a Chinstrap penguin. Peguin 169 (shown as x) is reasonably close by and correctly predicted as Gentoo. In practice we used linked brushing and misclassification information to guide our search.
