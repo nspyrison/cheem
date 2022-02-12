@@ -13,7 +13,7 @@ future::plan("multiprocess", workers = n_cores - 1)
 X    <- penguins_na.rm[, 1:4]
 clas <- penguins_na.rm$species
 Y    <- as.integer(clas)
-colnames(X) <- c("b_l", "b_d", "f_l", "b_m")
+colnames(X) <- c("bl", "bd", "fl", "bm")
 
 rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets or complex models:
@@ -23,7 +23,7 @@ this_ls <- cheem_ls(X, Y, class = clas,
                     attr_df = shap_df)
 
 bas <- basis_attr_df(shap_df, rownum = 1)
-mv  <- which(colnames(penguins_ls$attr_df) == "f_l")
+mv  <- which(colnames(penguins_ls$attr_df) == "fl")
 ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv,
                          primary_obs = 243, comparison_obs = 169, angle = .25)
 if(interactive()){

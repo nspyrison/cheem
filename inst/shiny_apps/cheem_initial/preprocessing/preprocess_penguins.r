@@ -12,7 +12,7 @@
   # raw <- raw[raw$species %in% lvls[1:2], ]
   # clas <- factor(raw$species, levels = lvls[1:2]) ## Manually remove 3rd lvl
   X <- raw[, 1:4] %>% as.data.frame() ## X's not scaled.
-  colnames(X) <- c("b_l", "b_d", "f_l", "wgt")
+  colnames(X) <- c("bl", "bd", "fl", "bm")
   Y <- as.integer(raw$species)
 }
 

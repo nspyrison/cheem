@@ -60,7 +60,7 @@ library(spinifex)
 X           <- penguins_na.rm[, 1:4]
 clas        <- penguins_na.rm$species
 Y           <- as.integer(clas)
-colnames(X) <- c("b_l", "b_d", "f_l", "b_m")
+colnames(X) <- c("bl", "bd", "fl", "bm")
 
 ## Create a random forest classifying penguin species
 rf_fit <- default_rf(X, Y, verbose = FALSE)
@@ -102,7 +102,7 @@ From this _global view_ we want to identify a primary instance (PI) and optional
 
 ## Radial tour
 
-There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it's (incorrect) prediction of Chinstrap (orange) in terms of bill length (`b_l`) and flipper length (`f_l`). In terms of bill depth and body mass (`b_d` and `b_m`) it is more like its observed species Gentoo (purple). We select flipper length as the feature to manipulate.
+There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it's (incorrect) prediction of Chinstrap (orange) in terms of bill length (`bl`) and flipper length (`fl`). In terms of bill depth and body mass (`bd` and `bm`) it is more like its observed species Gentoo (purple). We select flipper length as the feature to manipulate.
 
 ```{r, out.width="100%", eval = FALSE}
 ## Normalized attribution basis of the PI
@@ -119,7 +119,7 @@ ggt <- radial_cheem_tour(
 animate_gganimate(ggt, fps = 6) 
   #height = 2, width = 4.5, units = "in", res = 150
 ## Or as a plotly html widget
-#animate_plotly(ggt, fps = 4)
+#animate_plotly(ggt, fps = 6)
 ```
 ```{r, echo=FALSE, out.width="100%"}
 if(FALSE){ ## To mitigate file size (CRAN note) create a gif and include that
@@ -132,7 +132,7 @@ if(FALSE){ ## To mitigate file size (CRAN note) create a gif and include that
   #### .gif is about .2 Mb saved, while HTML widget is about 7 Mb.
   anim <- animate_gganimate(ggt, fps = 6,
                             height = 2, width = 4.5, units = "in", res = 150)
-  gganimate::anim_save("tour_penguins.gif", animation = anim)
+  gganimate::anim_save("tour_penguins.gif", animation = anim)#, path = "./vignettes")
   beepr::beep()
 }
 knitr::include_graphics("tour_penguins.gif")
@@ -164,6 +164,7 @@ This profile, with two features that are most distinguished between the PI and C
 ## Shiny application
 
 We provide an interactive __shiny__ application. Interactive features are made possible with __plotly__, __crosstalk__, and __DT__. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data by saving the return of `cheem_ls()` as an .rds file. Follow along with the example in `?cheem_ls`.
+
 
 # Conclusion
 
