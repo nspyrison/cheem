@@ -117,7 +117,7 @@ tab_about <- tabPanel("About", fluidPage(
   br(), br(),
   img(src = "lime_nonlinear.png"),
   p("Local explanations can explain which features would influence one variable to cross a classification boundary or lead to an extreme residual."),
-  p('Ribeiro, M. et. al. (2017). Why Should I Trust You? ', 
+  p('Ribeiro, M. et al. (2017). Why Should I Trust You? ', 
     a(href = 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', 
       'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', .noWS = "outside"), 
     .noWS = c("after-begin", "before-end")),

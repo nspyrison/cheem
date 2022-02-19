@@ -16,6 +16,7 @@
 
 - Major rebase of `cheem_ls()`.
 - Added `linear/logistic_tform()` to suggest an alpha as a function of the number of observations.
+- Reduced the size of the vignette with prerended `gif` images, removing the heavy `html` subdirectories.
 
 
 # cheem v0.1.0 (GitHub only, commit 283da4)
