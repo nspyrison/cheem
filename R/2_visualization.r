@@ -341,7 +341,7 @@ global_view <- function(
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
   .alpha <- logistic_tform(nrow(decode_df))
-  color <- match.arg(color)
+  color  <- match.arg(color)
   if(color %in% c("default", colnames(global_view_df)) == FALSE)
     stop(paste0("global_view: `color` column ", color,
                 " not in the cheem_ls. Try to reprocess that dataset."))
@@ -359,11 +359,6 @@ global_view <- function(
   }
   if(color == "cor_attr_proj.y") .lim <- c(-1L, 1L) else .lim <- NULL
   .col_scale <- color_scale_of(.color, limits = .lim)
-  
-  ## Work around for differnt X axis titles.
-  .spaces       <- paste(rep(" ", 61L), collapse = "")
-  .x_axis_title <- c("             x: PC1, y: PC2", "        x: PC1, y: PC2", "x: predicted, y: observed")
-  .x_axis_title <- paste(.x_axis_title, collapse = .spaces)
   
   ## Proto for main points
   pts_main <- list()
@@ -388,7 +383,7 @@ global_view <- function(
   }
   ## Highlight comparison obs, if passed
   if(is.null(comparison_obs) == FALSE){
-    .idx_comp <- global_view_df$rownum == comparison_obs
+    .idx_comp  <- global_view_df$rownum == comparison_obs
     if(sum(.idx_comp) > 0L)
       pts_main <- c(pts_main,ggplot2::geom_point(
         ggplot2::aes(V1, V2), data = global_view_df[.idx_comp, ],
@@ -403,28 +398,17 @@ global_view <- function(
           size = 5L, shape = 8L, color = "black"))
   }
   
-  # ## Bases of the data and attribution space
-  # .u_nms    <- unique(global_view_df$layer_name)
-  # .bas_data <- data.frame(
-  #   cheem_ls$global_view_basis_ls[[1L]], layer_name = .u_nms[1L])
-  # .bas_attr <- data.frame(
-  #   cheem_ls$global_view_basis_ls[[2L]], layer_name = .u_nms[2L])
-  # .map_to   <- data.frame(x = c(0L, 1L), y = c(0L, 1L))
-  
   ## Visualize
   gg <- global_view_df %>% plotly::highlight_key(~rownum) %>%
     ggplot2::ggplot(ggplot2::aes(V1, V2)) +
     pts_main +
-    ## Draw bases
-    # spinifex::draw_basis(.bas_data, .map_to, "bottomleft", line_size = .5, text_size = 4L) +
-    # spinifex::draw_basis(.bas_attr, .map_to, "bottomleft", line_size = .5, text_size = 4L) +
     ggplot2::coord_fixed() +
     ggplot2::facet_grid(cols = ggplot2::vars(layer_name)) +
     ggplot2::theme_bw() +
-    ggplot2::labs(x = .x_axis_title, y = "",
-                  color = substitute(color), fill = substitute(color)) +
+    ggplot2::labs(color = substitute(color), fill = substitute(color)) +
     ggplot2::theme(axis.text       = ggplot2::element_blank(),
                    axis.ticks      = ggplot2::element_blank(),
+                   axis.title      = ggplot2::element_blank(), 
                    legend.position = "off")
   if(as_ggplot) return(gg + ggplot2::theme(aspect.ratio = 1L))
   
@@ -500,7 +484,7 @@ global_view_subplots <- function(
       )
     )
     if(is_classification == FALSE & all(sub$layer_name == .u_nms[3L]))
-      ## Model fit for yhaty, when regression and 3rd panel
+      ## Model fit for yhaty line, when regression for 3rd panel
       pts_main <- c(ggplot2::geom_smooth(
         ggplot2::aes(V1, V2), sub, method = "lm", formula = y ~ x, se = FALSE),
         pts_main)
@@ -513,7 +497,7 @@ global_view_subplots <- function(
       .idx_misclas <- df$rownum %in% .rn_misclass
       if(sum(.idx_misclas) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-          ggplot2::aes(V1, V2), df[.rn_misclass,, drop == FALSE],
+          ggplot2::aes(V1, V2), df[.rn_misclass,, drop = FALSE],
           color = "red", fill = NA, shape = 21L, size = 3L, alpha = .alpha))
       }
     }
@@ -522,7 +506,7 @@ global_view_subplots <- function(
       .idx_comp <- df$rownum[r_idx] == comparison_obs
       if(sum(.idx_comp) > 0L){
           pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-              ggplot2::aes(V1, V2), df[.idx_comp,, drop == FALSE], 
+              ggplot2::aes(V1, V2), df[.idx_comp,, drop = FALSE], 
               size = 3L, shape = 4L, color = "black"))
       }
     }
@@ -531,7 +515,7 @@ global_view_subplots <- function(
       .idx_shap <- df$rownum[r_idx] == primary_obs
       if(sum(.idx_shap) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-            ggplot2::aes(V1, V2), df[.idx_shap,, drop == FALSE], 
+            ggplot2::aes(V1, V2), df[.idx_shap,, drop = FALSE], 
             size = 5L, shape = 8L, color = "black"))
       }
     }
@@ -543,17 +527,15 @@ global_view_subplots <- function(
       pts_highlight +
       ggplot2::coord_fixed() +
       ggplot2::theme_bw() +
-      ggplot2::labs(x = "", y = "") +
       ggplot2::theme(axis.text       = ggplot2::element_blank(),
                      axis.ticks      = ggplot2::element_blank(),
+                     axis.title      = ggplot2::element_blank(), 
                      legend.position = "off")
   }
   
   ## Individual ggplots
-  g1 <- single_facet(global_view_df$layer_name == .u_nms[1L])# +
-    # spinifex::draw_basis(.bas_data, .map_to_data, "bottomleft")
-  g2 <- single_facet(global_view_df$layer_name == .u_nms[2L])# +
-    # spinifex::draw_basis(.bas_attr, .map_to_attr, "bottomleft")
+  g1 <- single_facet(global_view_df$layer_name == .u_nms[1L])
+  g2 <- single_facet(global_view_df$layer_name == .u_nms[2L])
   g3 <- single_facet(global_view_df$layer_name == .u_nms[3L])
   ## Individual plotly plots with axes titles
   p1 <- plotly::ggplotly(g1) %>%
@@ -854,15 +836,16 @@ radial_cheem_tour_subplots <- function(
   .mt_path <- spinifex::manual_tour(basis, manip_var)
   
   ## Problem type & aesthetics
-  .prob_type <- cheem_ls$type ## Either "classification" or "regression"
+  is_classification <- cheem_ls$type == "classification" ## Either "classification" or "regression"
   .alpha <- logistic_tform(nrow(decode_df))
   ## plotly complains about removed legend when this is inside single_facet.
   .t <- ggplot2::theme(
     legend.position  = "off", 
-    legend.direction = "vertical") ## plotly complains about horizontal...
+    legend.direction = "vertical", ## horizontal legends not supported
+    aspect.ratio     = NULL)       ## aspect.ratio not supported
   
   ### Classification case -----
-  if(.prob_type == "classification"){
+  if(is_classification){
     .pred_clas <- decode_df$predicted_class ## for classification color/shape
     ## Left facet, 1D Basis (1/3)
     ggt_bas <- spinifex::ggtour(
@@ -872,7 +855,8 @@ radial_cheem_tour_subplots <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         pcp_shape = pcp_shape, inc_var_nms = inc_var_nms, row_index = row_index) +
-      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
+      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + 
+      .t + ggplot2::xlim(-.1, 1) ## Try to leave space for var names.
     ## Right facet, 1D density (2/3)
     ggt_dat1d <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                             do_center_frame = do_center_frame) +
@@ -887,7 +871,7 @@ radial_cheem_tour_subplots <- function(
       ## Highlight shap obs
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
-        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
+        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black")) + .t
     ## Plotly
     p_bas   <- plotly::ggplotly(ggt_bas)
     p_dat1d <- plotly::ggplotly(ggt_dat1d)
@@ -897,11 +881,10 @@ radial_cheem_tour_subplots <- function(
       plotly::layout(showlegend = FALSE)
     ## Return a plotly, pass animation options with animate_plotly()
     return(ggp)
-  }
-  
-  ### Regression case -----
-  ## Doubling data to facet on obs and residual.
-  if(.prob_type == "regression"){
+  } else {
+    
+    ### Regression case -----
+    ## Doubling data to facet on obs and residual.
     .class <- factor(FALSE) #decode_df$class|predicted_class
     
     single_facet <- function(data = .dat, fixed_y, facet_lvl){
@@ -929,7 +912,8 @@ radial_cheem_tour_subplots <- function(
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
         inc_var_nms = inc_var_nms, row_index = row_index) +
-      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + .t
+      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") + 
+      .t + ggplot2::xlim(-.1, 1) ## Try to leave space for var names.
     ## Obs y, and residual, (middle and right)
     .y     <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()

@@ -1,12 +1,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-
-^buildignore/.*$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^\.github$
-
 ^Meta$
 ^doc$
 ^\.lightgbm.model$
+
+^buildignore/.*$
+^cran-comments\.md$
+^CRAN-SUBMISSION$

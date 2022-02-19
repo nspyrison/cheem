@@ -1,20 +1,21 @@
 
 # cheem v0.2.0 (CRAN)
 
-## run_app changes
+## App related changes
 
-- Added AmesHousing data, chocolates, and new toy simulated datasets
-- Added inclusion variable, subsetting variables used in radial tour
-- Reduced shiny app wording
-- Added higher-level model performance to shiny app
-- Added global_view yhaty plot
-- Added global_view color options: log_maha.data and cor_attr.y
-- Added cheem_radial_tour - regression case facet with additional fixed y of residual
+- Added higher-level model performance to shiny app.
+- In `global_view()`, added yhaty panel (residual plot/confusion matrix).
+- In `global_view()`, added color options: log_maha.data and cor_attr.y.
+- In `cheem_radial_tour()`, added regression case panel with additional fixed y of residual.
+- In app radial tour inputs, added inclusion variable, subsetting variables used in radial tour.
+- `plotly::subplot()` variants of `global_view()` & `cheem_radial_tour()`. 
+- Added AmesHousing data, chocolates, and new toy simulated datasets (shiny app only).
+- Reduced shiny app wording.
 
-## Util & other
+## Interal & util
 
-- Major rebase of cheem_ls
-- Added linear/logistic_tforms to suggest an alpha as a function of number of observations
+- Major rebase of `cheem_ls()`.
+- Added `linear/logistic_tform()` to suggest an alpha as a function of the number of observations.
 
 
 # cheem v0.1.0 (GitHub only, commit 283da4)
