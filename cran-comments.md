@@ -14,9 +14,14 @@
 
 ## R CMD check results
 
+_local:_
 0 errors v | 0 warnings v | 0 notes v
 
 R CMD check succeeded
+
+_rhub::check:_
+The rhub platform "windows-x86_64-devel" errors from suggested, but unavailable packages:
+`randomForest` (??) and (drat-hosted) `treeshap`.
 
 
 

@@ -16,8 +16,8 @@ An object of class \code{data.frame} with 338 rows and 11 columns.
 }
 \source{
 De Cock, D. (2011). "Ames, Iowa: Alternative to the Boston Housing Data as an End of Semester Regression Project," \emph{Journal of Statistics Education},  Volume 19, Number 3.
-\url{https://ww2.amstat.org/publications/jse/v19n3/decock/DataDocumentation.txt}
-\url{http://ww2.amstat.org/publications/jse/v19n3/decock.pdf}
+\url{http://jse.amstat.org/v19n3/decock/DataDocumentation.txt}
+\url{http://jse.amstat.org/v19n3/decock.pdf}
 
 {Kaggle, Ames Housing Dataset}
 \url{https://www.kaggle.com/prevek18/ames-housing-dataset}

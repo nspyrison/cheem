@@ -108,26 +108,28 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
 
 ### tab_about -----
 tab_about <- tabPanel("About", fluidPage(
-  h2("Context & motivation; black-box interpretability"),
+  h2("Context: feature interpretability of nonlinear models"),
   p("Modern modeling faces a trade-off between the interpretability and accuracy of a model. 
-    Black-box models use increasingly many and increasingly complex terms. 
-    Doing so allows them to be more accurate, but makes their terms unrealistically complex to parse and interpret."),
+    Nonlinear models use increasingly many and complex terms.
+    The use of these terms improve the accuracy of the model, but can make the terms difficult to interpret."),
+  HTML("Recently, <em>local explainations</em> approximate the linear feature (variable, predictor) importances in the vicinity of one point, typically an instance.
+    Originally, the explanations were then plotted to illustrate those features that contribute to the difference between the mean of the explanatory variables and an instances prediction."),
+  br(), br(),
   img(src = "lime_nonlinear.png"),
+  p("Local explanations can explain which and how features would influence one variable to crossing a classification boundary or lead to an extreme residual."),
   p('Ribeiro, M. et. al. (2017). Why Should I Trust You? ', a(href = 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', 'https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
-  br(),
-  HTML("Recently, <em>local explainations</em> approximate the linear feature (variable, predictor) importances at one particular point, typically an instance.
-    Originally, the explanations were then plotted to illustrate those features that contribute to moving that instance from the intercept to its prediction."),
-  br(),
-  HTML("Our approach is to select a primary and comparison instance (observation) and use a local explanation's feature-attribution of the primary instance to project the data. 
-    The explanation can then be interrogated by playing a <em>manual tour</em> by rotating the contribution of a selected feature.
-    By altering the projection basis we can explore how sensitive feature importances are and thus interrogate how well supported that explanation is."),
+  br(), br(),
+  h2("Cheem analysis:"),
+  HTML("Given a nonlinear model we calculate the tree SHAP local explanation for each observation. In the Gobal view we explore Our approach is to select a primary and comparison instance (observation) and use a local explanation's feature-attribution of the primary instance to project the data. 
+    The explanation can then be examined by animating a <em>radial tour</em> that rotates the contribution of a selected feature.
+    By altering the projection basis we can explore how sensitive a feature is to the structure identified by the local explanation to see under which contibutions the prediction is support."),
   img(src = "cheem_workflow.png"),
   p('(top) Wickham, H. & Grolemund, G. (2016). R for data science. ', a(href = 'https://r4ds.had.co.nz/', 'https://r4ds.had.co.nz/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'https://ema.drwhy.ai/', 'https://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
-  p('(blue overlay) purposed application in terms of workflow and model specificity.'),
-  p(''),
-  h4("Namesake"),
-  p("The Trees of Cheem, are a fictional race of tree-based humanoids in the Dr. Who universe. The initial application applies tree SHAP (a local explain of tree-based models via {treeshap}), and explanations from {DALEX}, a reference to Dr. Who lore."),
+  p('(blue overlay) Purposed analysis in terms of workflow and model specificity.'),
+  br(), br(), br(),
+  h2("Namesake:"),
+  HTML("The Trees of Cheem, are a fictional race of tree-based humanoids in the Dr. Who universe. The initial application applies tree SHAP (a local explain of tree-based models woth the <b>treeshap</b> package), and explanations from <b>DALEX</b>, a reference to Dr. Who lore."),
   img(src = "cheem_namesake.png"),
   br(), br(), br()
 )) ## Assign tabZ_about
