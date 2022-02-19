@@ -122,12 +122,13 @@ tab_about <- tabPanel("About", fluidPage(
   h2("Cheem analysis:"),
   HTML("Given a nonlinear model we calculate the tree SHAP local explanation for each observation. In the Gobal view we explore Our approach is to select a primary and comparison instance (observation) and use a local explanation's feature-attribution of the primary instance to project the data. 
     The explanation can then be examined by animating a <em>radial tour</em> that rotates the contribution of a selected feature.
-    By altering the projection basis we can explore how sensitive a feature is to the structure identified by the local explanation to see under which contibutions the prediction is support."),
+    By altering the projection basis we can explore how sensitive a feature is to the structure identified by the local explanation to see under which contibutions the prediction is supported."),
+  br(), br(),
   img(src = "cheem_workflow.png"),
   p('(top) Wickham, H. & Grolemund, G. (2016). R for data science. ', a(href = 'https://r4ds.had.co.nz/', 'https://r4ds.had.co.nz/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'https://ema.drwhy.ai/', 'https://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(blue overlay) Purposed analysis in terms of workflow and model specificity.'),
-  br(), br(), br(),
+  br(), br(),
   h2("Namesake:"),
   HTML("The Trees of Cheem, are a fictional race of tree-based humanoids in the Dr. Who universe. The initial application applies tree SHAP (a local explain of tree-based models woth the <b>treeshap</b> package), and explanations from <b>DALEX</b>, a reference to Dr. Who lore."),
   img(src = "cheem_namesake.png"),
