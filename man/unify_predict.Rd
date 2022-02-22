@@ -12,7 +12,7 @@ unify_tree_model(model, x)
 \arguments{
 \item{model}{A tree based model supported by \code{treeshap}:
 a model from \code{randomForest::randomForest}, \code{ranger::ranger}, \code{gbm::gbm},
-\code{xgboost::xgb.train}, \code{catboost::catboost.train}, \code{lightgbm::lightgbm}.}
+\code{xgboost::xgb.train}, or \code{lightgbm::lightgbm}.}
 
 \item{x}{The explanatory data (without response) to extract the local
 attributions from.}

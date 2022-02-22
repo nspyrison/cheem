@@ -40,9 +40,9 @@ A wrapper for \code{treeshap::randomForest.unify} and \code{treeshap::treeshap}.
 library(cheem)
 
 ## Regression:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 rf_fit  <- default_rf(X, Y)

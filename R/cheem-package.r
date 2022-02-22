@@ -35,3 +35,10 @@ NULL
 #' @export
 magrittr::`%>%`
 NULL ## Required for roxygen2 to work, do not delete
+
+## globals.R -----
+globalVariables(c("Feature", "split_index", "tree_index", ".", "node_parent", 
+                  "default_left", "decision_type", "position", "cumulative",
+                  "prev", "text", "contribution", "var_value", "shap_value", 
+                  "reorder", "variable", "importance", "Tree",  "Missing",
+                  "Node", "Cover", "Yes", "No", 'Prediction', 'Decision.type'))

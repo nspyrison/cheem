@@ -12,7 +12,7 @@
 - Added AmesHousing data, chocolates, and new toy simulated datasets (shiny app only).
 - Reduced shiny app wording.
 
-## Interal & util
+## Internal & utilities
 
 - Major rebase of `cheem_ls()`.
 - Added `linear/logistic_tform()` to suggest an alpha as a function of the number of observations.

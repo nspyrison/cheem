@@ -6,7 +6,6 @@
 \alias{is_gbm}
 \alias{is_xgboost}
 \alias{is_lightgbm}
-\alias{is_catboost}
 \title{Check model type}
 \usage{
 is_randomForest(model)
@@ -18,8 +17,6 @@ is_gbm(model)
 is_xgboost(model)
 
 is_lightgbm(model)
-
-is_catboost(model)
 }
 \arguments{
 \item{model}{A model object to check the class/origin.}
@@ -71,13 +68,13 @@ is_xgboost(fit)
 
 ## lightgbm
 if(require(lightgbm, quietly = TRUE)){
-  lgbm_params <- list(objective = "regression", num_leaves = 25)
+  param_lgbm <-
+    list(objective = "regression", max_depth = 2,  force_row_wise = TRUE)
   fit <- lightgbm::lightgbm(
-    as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+    as.matrix(X), Y, params = param_lgbm, 
+    nrounds = 2, verbose = 0)
 }
 is_lightgbm(fit)
-
-## catboost model; working examples hard to find. 
 }
 
 # Continue cheem workflow with tree-based models:

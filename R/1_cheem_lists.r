@@ -99,13 +99,13 @@ default_rf <- function(
 #' 
 #' ## lightgbm
 #' if(require(lightgbm, quietly = TRUE)){
-#'   lgbm_params <- list(objective = "regression", num_leaves = 25)
+#'   param_lgbm <-
+#'     list(objective = "regression", max_depth = 2,  force_row_wise = TRUE)
 #'   fit <- lightgbm::lightgbm(
-#'     as.matrix(X), Y, params = lgbm_params, nrounds = 2)
+#'     as.matrix(X), Y, params = param_lgbm, 
+#'     nrounds = 2, verbose = 0)
 #' }
 #' is_lightgbm(fit)
-#' 
-#' ## catboost model; working examples hard to find. 
 #' }
 #' 
 #' # Continue cheem workflow with tree-based models:
@@ -119,31 +119,31 @@ default_rf <- function(
 is_randomForest <- function(model){
   "randomForest" %in% class(model)
 }
-##' @rdname is_randomForest
-##' @export
+#' @rdname is_randomForest
+#' @export
 is_ranger <- function(model){
   "ranger" %in% class(model)
 }
-##' @rdname is_randomForest
-##' @export
+#' @rdname is_randomForest
+#' @export
 is_gbm <- function(model){
   "gbm" %in% class(model)
 }
-##' @rdname is_randomForest
-##' @export
+#' @rdname is_randomForest
+#' @export
 is_xgboost <- function(model){
   "xgb.Booster" %in% class(model)
 }
-##' @rdname is_randomForest
-##' @export
+#' @rdname is_randomForest
+#' @export
 is_lightgbm <- function(model){
   "lgb.Booster" %in% class(model)
 }
-##' @rdname is_randomForest
-##' @export
-is_catboost <- function(model){
-  "catboost.Model" %in% class(model)
-}
+# #' @rdname is_randomForest
+# #' @export
+# is_catboost <- function(model){
+#   "catboost.Model" %in% class(model)
+# }
 
 #' Unified predictions to a standard format
 #' 
@@ -152,7 +152,7 @@ is_catboost <- function(model){
 #' 
 #' @param model A tree based model supported by `treeshap`: 
 #' a model from `randomForest::randomForest`, `ranger::ranger`, `gbm::gbm`, 
-#' `xgboost::xgb.train`, `catboost::catboost.train`, `lightgbm::lightgbm`.
+#' `xgboost::xgb.train`, or `lightgbm::lightgbm`.
 #' @param x The explanatory data (without response) to extract the local 
 #' attributions from.
 #' @return A vector of predicted values
@@ -199,17 +199,17 @@ unify_predict <- function(model, x){
 #' str(unif_mod)
 unify_tree_model <- function(model, x){
   if(is_randomForest(model)){
-    ret <- treeshap::randomForest.unify(model, x)
+    ret <- randomForest.unify(model, x) ## treeshap:: ported function
   }else if(is_ranger(model)){
-    ret <- treeshap::ranger.unify(model, x)
+    ret <- ranger.unify(model, x) ## treeshap:: ported function
   }else if(is_gbm(model)){
-    ret <- treeshap::gbm.unify(model, x)
+    ret <- gbm.unify(model, x) ## treeshap:: ported function
   }else if(is_xgboost(model)){
-    ret <- treeshap::xgboost.unify(model, x)
-  }else if(is_catboost(model)){
-    ret <- treeshap::catboost.unify(model, x)
+    ret <- xgboost.unify(model, x) ## treeshap:: ported function
+  # }else if(is_catboost(model)){
+  #   ret <- catboost.unify(model, x) ## treeshap:: ported function
   }else if(is_lightgbm(model)){
-    ret <- treeshap::lightgbm.unify(model, x)
+    ret <- lightgbm.unify(model, x) ## treeshap:: ported function
   }else
     stop("unify_tree_model: wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
   if(nrow(ret[[1L]]) == 0L)
@@ -244,9 +244,9 @@ unify_tree_model <- function(model, x){
 #' library(cheem)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
@@ -271,11 +271,11 @@ attr_df_treeshap <- function(
   if(any(is.na(.pred)))
     stop("attr_df_treeshap: model had NA values in its predictions; does the model have enough trees/leaves?")
   .unified_mod <- unify_tree_model(model, x)
-  ret <- treeshap::treeshap(.unified_mod, x = x)
+  ret <- treeshap(.unified_mod, x = x) ## treeshap:: ported function
   if(keep_heavy == FALSE)
     ret <- ret[[1L]]
-  ## Keeping only 1; reduces ~99% of the obj size, keep shap values.
-  ## But, we lose the iBreakdown-like plot of treeshap::plot_contribution when we take this apart.
+  ## Keeping only 1; reduces ~99% of the obj size, while keeping shap values.
+  ## But, we lose the iBreakdown-like plot of treeshap::plot_contribution
   
   class(ret) <- c("data.frame", "treeshap")
   if(verbose) tictoc::toc()
@@ -298,9 +298,9 @@ attr_df_treeshap <- function(
 #' library(cheem)
 #' 
 #' ## Regression:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit <- default_rf(X, Y)
@@ -321,11 +321,11 @@ model_performance_df <- function(
   .rmse   <- sqrt(.mse)
   .rse    <- .sse / sum((.y - mean(.y))^2L)
   .r2     <- 1L - .rse
-  .r2_adj <- 1L - (.mse / stats::var(.y))
+  .adj_r2 <- 1L - (.mse / stats::var(.y))
   ## We could be at this all day...
-  # .auc    <- Metrics::auc(y, .pred)
-  # .mae  <- mean(abs(.e))
-  # .mad  <- .mae / length(y)
+  # .auc <- Metrics::auc(y, .pred)
+  # .mae <- mean(abs(.e))
+  # .mad <- .mae / length(y)
   # .ROC <- ROCR::
   data.frame(`model type` = utils::tail(class(model), 1L),
              sse          = .sse,
@@ -333,7 +333,7 @@ model_performance_df <- function(
              rmse         = .rmse,
              rse          = .rse,
              r2           = .r2,
-             `r2 adj`     = .r2_adj,
+             `adj r2`     = .adj_r2,
              row.names    = NULL, 
              check.names  = FALSE)
 }
