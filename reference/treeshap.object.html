@@ -69,7 +69,7 @@
 <dd><p>A <code>data.frame</code> with M columns, X rows (M - number of features, X - number of explained observations). Every row corresponds to SHAP values for a observation.</p></dd>
 
 <dt>interactions</dt>
-<dd><p>An <code>array</code> with dimensions (M, M, X) (M - number of features, X - number of explained observations). Every <code>[, , i]</code> slice is a symertric matrix - SHAP Interaction values for a observation. <code>[a, b, i]</code> element is SHAP Interaction value of features <code>a</code> and <code>b</code> for observation <code>i</code>. Is <code>NULL</code> if interactions where not calculated (parameter <code>interactions</code> set <code>FALSE</code>.)</p></dd>
+<dd><p>An <code>array</code> with dimensions (M, M, X) (M - number of features, X - number of explained observations). Every <code>[, , i]</code> slice is a symmetric matrix - SHAP Interaction values for a observation. <code>[a, b, i]</code> element is SHAP Interaction value of features <code>a</code> and <code>b</code> for observation <code>i</code>. Is <code>NULL</code> if interactions where not calculated (parameter <code>interactions</code> set <code>FALSE</code>.)</p></dd>
 
 <dt>unified_model</dt>
 <dd><p>An object of type <code><a href="model_unified.object.html">model_unified.object</a></code>. Unified representation of a model for which SHAP values were calculated. It is used by some of the plotting functions.</p></dd>

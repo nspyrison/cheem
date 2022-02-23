@@ -87,7 +87,7 @@
 <div class="page-header"><h1 id="cheem">
 <strong>cheem</strong><a class="anchor" aria-label="anchor" href="#cheem"></a>
 </h1></div>
-<p>Interactively explore data- and local explanation- spaces and residual side-by-side. Further explore the support of a selected observation’s local explanation with a radial tour.</p>
+<p>Interactively explore data- and local explanation- spaces and residual side-by-side. Further explore the support of a selected observation’s local explanation with the radial tour.</p>
 <div class="section level2">
 <h2 id="context">Context<a class="anchor" aria-label="anchor" href="#context"></a>
 </h2>
@@ -99,24 +99,21 @@
 </h2>
 <pre><code><span class="co">## Download the package</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">## Restart the R session so the IDE has the correct directory structure</span>
-<span class="fu">restartSession</span><span class="op">(</span><span class="op">)</span>
+<span class="co">## May need to restart the R session so RSudio has the correct file structure</span>
+<span class="fu">rstudioapi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rstudioapi/man/restartSession.html" class="external-link">restartSession</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co">## Load cheem into session</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/nspyrison/cheem/" class="external-link">"cheem"</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
 <span class="co">## Try the app</span>
 <span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span>
 
-<span class="co"># Processing your data</span>
-<span class="co">## Install treeshap from github, to use as a local explainer</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'ModelOriented/treeshap'</span><span class="op">)</span>
-<span class="co">## Follow the examples in cheem_ls()</span>
+<span class="co">## Processing your data; follow the examples in cheem_ls()</span>
 <span class="op">?</span><span class="va">cheem_ls</span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
 </h2>
 <p>The global view shows data-, attribution-spaces, and residual plot side-by-side with linked brushing and hover tooltip.</p>
-<p><img src="https://github.com/nspyrison/cheem/blob/main/ignore/global_view_penguins.PNG?raw=true"></p>
+<p><img src="https://github.com/nspyrison/cheem/blob/main/buildignore/global_view_penguins.PNG?raw=true"></p>
 <p>By exploring the global view, identify a primary and comparison observation to compare. For the classification task, typically a misclassified point is selected and compared against a nearby correctly classified one. In regression, we can compare a point with an extreme residual with a nearby point that is more accurately predicted.</p>
 </div>
 <div class="section level2">
@@ -125,28 +122,20 @@
 <p>The attribution of the primary observation becomes the 1D basis for the tour. The variable with the largest difference between the primary and comparison point’s bases is selected as the manipulation variable. That is the variable whose contribution change drives the change in the projection basis.</p>
 <p><img src="https://github.com/nspyrison/cheem/blob/main/buildignore/tour_penguins.gif?raw=true"></p>
 <p>By doing this, we are testing the local explanation. By testing the variable sensitivity to the structure identified in the local explanation, we can better evaluate how good of an explanation it is; how sensitive its prediction is to a change in the variable contributions.</p>
-<div class="section level3">
-<h3 id="original-application">Original application<a class="anchor" aria-label="anchor" href="#original-application"></a>
-</h3>
-<p>We started by looking at the model-agnostic local explanation <em>tree SHAP</em> applied to random forests. We made this choice out of concern for runtime (<strong>treeshap</strong> uses an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, <strong>Cheem</strong>, stems from the original application to tree-based models in the <strong>DALEX</strong> ecosystem; <a href="https://tardis.fandom.com/wiki/Tree_of_Cheem" class="external-link">Cheem</a> are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme .</p>
-<!---
-### Extensions
-
-18 Sept, 2021, Generalizing the code-base will likely take the order of:
-
-1. Extend the scope of random forest models; from only {randomForest} to all RF models handled by {treeshap}.\
-2. Extend the scope of local explanations; from {treeshap} SHAP values to all local explanations handled by {DALEX}.\
---->
-<div class="section level4">
-<h4 id="sources">Sources<a class="anchor" aria-label="anchor" href="#sources"></a>
-</h4>
+</div>
+<div class="section level2">
+<h2 id="original-application">Original application<a class="anchor" aria-label="anchor" href="#original-application"></a>
+</h2>
+<p>We started by looking at the model-agnostic local explanation <em>tree SHAP</em> applied to random forests. We made this choice out of concern for runtime (<strong>treeshap</strong> uses an alternative algorithm with reduced computational complexity and thus achieves much faster run time extracting the full SHAP matrix during the preprocessing step). The namesake, <strong>Cheem</strong>, stems from the original application to tree-based models in the <strong>DALEX</strong> ecosystem; <a href="https://tardis.fandom.com/wiki/Tree_of_Cheem" class="external-link">Cheem</a> are a fictional race of tree-based humanoids for consistency with the Dr. who/Dr. why theme.</p>
+</div>
+<div class="section level2">
+<h2 id="sources">Sources<a class="anchor" aria-label="anchor" href="#sources"></a>
+</h2>
 <p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a> <a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a> <a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a> <a href="https://github.com/ModelOriented/treeshap" class="external-link">treeshap GitHub page</a></p>
 <!-- CSS change figure width to 100% -->
 <style>
   img{width: 100%;}
 </style>
-</div>
-</div>
 </div>
 </div>
   </div>
