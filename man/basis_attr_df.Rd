@@ -22,15 +22,18 @@ the provided local explanation's attribution.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat <- amesHousing2018_NorthAmes
 X <- dat[, 1:9]
 Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
+## Model and treeSHAP explanation:
 rf_fit <- default_rf(X, Y)
 ## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+
+## Attribution basis of one obs:
 basis_attr_df(shap_df, rownum = 1)
 }
 \seealso{

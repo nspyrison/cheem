@@ -20,6 +20,11 @@
 #' @seealso [cheem_ls()] [run_app()]
 NULL
 
+## usethis namespace: start
+#' @importFrom Rcpp sourceCpp
+## usethis namespace: end
+NULL
+
 ## Print message -----
 #### prints upon first attaching the package
 .onAttach <- function(...){

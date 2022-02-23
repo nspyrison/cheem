@@ -18,6 +18,11 @@
 - Added `linear/logistic_tform()` to suggest an alpha as a function of the number of observations.
 - Reduced the size of the vignette with prerended `gif` images, removing the heavy `html` subdirectories.
 
+## Sourcing __treeshap__
+
+- __drat__ repository hosting __treeshap__ did not work with debian and window rhub platforms.
+- Minimally ported functions and cpp source files with @author & @source. Change examples for consistency and smaller support.
+
 
 # cheem v0.1.0 (GitHub only, commit 283da4)
 

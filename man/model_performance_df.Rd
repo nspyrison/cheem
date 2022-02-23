@@ -23,12 +23,13 @@ Internal function, used downstream in cheem_ls.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
+## Model and performance:
 rf_fit <- default_rf(X, Y)
 cheem:::model_performance_df(rf_fit)
 }

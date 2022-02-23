@@ -39,7 +39,7 @@ A wrapper for \code{treeshap::randomForest.unify} and \code{treeshap::treeshap}.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)

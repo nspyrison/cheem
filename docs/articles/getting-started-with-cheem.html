@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Getting started with cheem</h1>
                         <h4 data-toc-skip class="author">Nicholas Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2022-02-12</h4>
+            <h4 data-toc-skip class="date">2022-02-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
       <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
@@ -130,6 +130,7 @@ Illustration of non-linear classification boundary. The use of local explanation
 <p>Next we need to extract the local explanation from each observation. Originally only tree SHAP is supported. Then we’ll prepare the information to be consumed by the cheem visuals.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Local attribution of all observations</span>
+<span class="co">#### !! This is expensive for complex models/data</span>
 <span class="va">shap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/attr_df_treeshap.html">attr_df_treeshap</a></span><span class="op">(</span><span class="va">rf_fit</span>, <span class="va">X</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, noisy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="co">## Extract statistics and prep for cheem consumption</span>
 <span class="va">this_ls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cheem_ls.html">cheem_ls</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, class <span class="op">=</span> <span class="va">clas</span>,

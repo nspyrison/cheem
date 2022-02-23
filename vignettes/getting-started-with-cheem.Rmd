@@ -74,6 +74,7 @@ Next we need to extract the local explanation from each observation. Originally 
 
 ```{r}
 ## Local attribution of all observations
+#### !! This is expensive for complex models/data
 shap_df <- attr_df_treeshap(rf_fit, X, verbose = FALSE, noisy = FALSE)
 ## Extract statistics and prep for cheem consumption
 this_ls <- cheem_ls(X, Y, class = clas,

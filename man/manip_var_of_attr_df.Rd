@@ -27,15 +27,17 @@ primary and comparison observations.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat <- amesHousing2018_NorthAmes
 X <- dat[, 1:9]
 Y <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
+## Model and treeSHAP explanation:
 rf_fit <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+
+## Suggest the number of a variable to manipulate
 manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 }
 \seealso{

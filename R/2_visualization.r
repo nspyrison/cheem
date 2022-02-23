@@ -14,15 +14,18 @@
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat <- amesHousing2018_NorthAmes
 #' X <- dat[, 1:9]
 #' Y <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model and treeSHAP explanation:
 #' rf_fit <- default_rf(X, Y)
 #' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' 
+#' ## Attribution basis of one obs:
 #' basis_attr_df(shap_df, rownum = 1)
 basis_attr_df <- function(
   attr_df,
@@ -57,15 +60,17 @@ basis_attr_df <- function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat <- amesHousing2018_NorthAmes
 #' X <- dat[, 1:9]
 #' Y <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model and treeSHAP explanation:
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' 
+#' ## Suggest the number of a variable to manipulate
 #' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
   .prim <- basis_attr_df(attr_df, rownum = primary_obs)
@@ -110,21 +115,23 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' library(cheem)
 #' library(spinifex)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
+#' ## Basis, manipulation var, manual tour path, & predictions to fix to y-axis
 #' bas     <- basis_attr_df(shap_df, 1)
 #' mv      <- manip_var_of_attr_df(shap_df, 1, 2)
 #' mt_path <- manual_tour(bas, mv)
 #' pred    <- unify_predict(rf_fit, X)
 #' 
+#' ## Compose and animate the tour
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
 #'   append_fixed_y(fixed_y = scale_sd(pred)) +
 #'   proto_point(list(color = clas, shape = clas)) +
@@ -302,28 +309,28 @@ proto_basis1d_distribution <- function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model, explanation, cheem list, global view:
 #' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
-#' global_view(this_ls)
+#' 
+#' ## Visualize
+#' global_view(this_ls)                   ## uses ggplot facets %>% plotly
+#' global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
+#' global_view_subplots(this_ls)          ## uses plotly::subplots
 #' 
 #' ## Different color mappings, especially for regression
-#' global_view(this_ls, color = "residual")
-#' global_view(this_ls, color = "log_maha.data") 
-#' global_view(this_ls, color = "cor_attr_proj.y")
-#' 
-#' 
-#' ## Experimental global view made from plotly::subplots rather than facets
-#' global_view_subplots(this_ls)
+#' global_view_subplots(this_ls, color = "residual")
+#' global_view_subplots(this_ls, color = "log_maha.data") 
+#' global_view_subplots(this_ls, color = "cor_attr_proj.y")
 global_view <- function(
   cheem_ls,
   primary_obs    = NULL,
@@ -599,45 +606,61 @@ global_view_subplots <- function(
 #' library(cheem)
 #' library(spinifex)
 #' 
-#' ## Classification:
+#' ## Classification setup:
 #' X    <- penguins_na.rm[, 1:4]
 #' clas <- penguins_na.rm$species
 #' Y    <- as.integer(clas)
 #' 
+#' ## Model and tree SHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
+#' ## Basis & suggest manipulation var
 #' bas <- basis_attr_df(shap_df, rownum = 1)
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
-#'                           primary_obs = 1, comparison_obs = 2)
+#' mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
+#' 
+#' ## Radial tour with ggplot facets & animate
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 #' \dontrun{
 #' animate_plotly(ggt)
 #' if(FALSE) ## or animate with gganimate
-#'   animate_gganimate(ggt) #, render = gganimate::av_renderer())
+#'   animate_gganimate(ggt, render = gganimate::av_renderer())
 #' 
-#' ## Regression:
+#' ## Radial tour using plotly::subplots, not compatible with gganimate.
+#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+#' animate_plotly(ggt)
+#' 
+#' 
+#' 
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model and tree SHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' 
+#' ## Basis & suggest manipulation var
 #' bas <- basis_attr_df(shap_df, rownum = 1)
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
+#' mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 #' 
+#' ## Radial tour with ggplot facets & animate
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 #' animate_plotly(ggt)
 #' if(FALSE) ## or animate with gganimate
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
+#' 
+#' ## Radial tour using plotly::subplots, not compatible with gganimate.
+#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+#' animate_plotly(ggt)
 #' }
 radial_cheem_tour <- function(
   cheem_ls, basis, manip_var, 
@@ -794,12 +817,6 @@ radial_cheem_tour <- function(
 
 #' @rdname radial_cheem_tour
 #' @export
-#' @examples
-#' 
-#' 
-#' ## Experimental radial tour made from plotly::subplots rather than facets
-#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
-#' animate_plotly(ggt)
 radial_cheem_tour_subplots <- function(
   cheem_ls, basis, manip_var,
   primary_obs         = NULL, 

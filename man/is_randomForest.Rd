@@ -31,36 +31,36 @@ certain model. Checks if a model is made with:
 \code{\link[ranger:ranger]{ranger::ranger}},
 \code{\link[gbm:gbm]{gbm::gbm}},
 \code{\link[xgboost:xgb.train]{xgboost::xgb.train}},
-\code{\link[catboost:catboost.train]{catboost::catboost.train}}, or
 \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm}}.
 }
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
-# treeshap handles various tree-based models:
+
+# Treeshap handles various tree-based models:
 
 ## randomForest model
 fit <- randomForest::randomForest(X, Y, ntree = 25)
 is_randomForest(fit)
 
 \dontrun{
-## ranger model, if package available
+## ranger model
 if(require(ranger, quietly = TRUE))
   fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
 is_ranger(fit)
 
-## gbm model, if package available
+## gbm model
 if(require(gbm, quietly = TRUE))
   fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 is_gbm(fit)
 
-## xgboost, if package available
+## xgboost
 if(require(xgboost, quietly = TRUE))
   fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
                           params = list(objective = "reg:squarederror"))
@@ -77,9 +77,10 @@ if(require(lightgbm, quietly = TRUE)){
 is_lightgbm(fit)
 }
 
+
 # Continue cheem workflow with tree-based models:
 
-## Long runtime for full datasets or complex models:
+## treeSHAP, cheem list, visualize:
 shap_df <- attr_df_treeshap(fit, X, verbose = TRUE, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = fit,
@@ -88,6 +89,6 @@ global_view(this_ls)
 }
 \seealso{
 Other cheem unify: 
-\code{\link{unify_predict}()}
+\code{\link{unify_tree_model}()}
 }
 \concept{cheem unify}

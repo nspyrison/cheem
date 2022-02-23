@@ -19,7 +19,7 @@ are not supported - please encode them before training.}
 a unified model representation - a \code{\link{model_unified.object}} object
 }
 \description{
-Convert your GBM model into a standarized representation.
+Convert your GBM model into a standardized representation.
 The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 }
 \examples{
@@ -42,7 +42,7 @@ gbm_model <- gbm::gbm(
 unified_model <- gbm.unify(gbm_model, X)
 
 ## Calculate treeSHAP: 
-shaps <- treeshap(unified_model, data[1:2,])
+shaps <- treeshap(unified_model, X[1:2,])
 str(shaps)
 }
 \seealso{

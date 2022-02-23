@@ -53,7 +53,7 @@
 #' 
 #' @importFrom Rcpp sourceCpp
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @useDynLib cheem
+#' @useDynLib cheem, .registration = TRUE
 #'
 #' @seealso
 #' \code{\link{unify_tree_model}}, a wrapper function unifying these models.
@@ -67,7 +67,7 @@
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
@@ -159,7 +159,7 @@ treeshap <- function(unified_model, x, interactions = FALSE, verbose = TRUE) {
 #' @return List consisting of four elements:
 #' \describe{
 #'   \item{shaps}{A \code{data.frame} with M columns, X rows (M - number of features, X - number of explained observations). Every row corresponds to SHAP values for a observation. }
-#'   \item{interactions}{An \code{array} with dimensions (M, M, X) (M - number of features, X - number of explained observations). Every \code{[, , i]} slice is a symertric matrix - SHAP Interaction values for a observation. \code{[a, b, i]} element is SHAP Interaction value of features \code{a} and \code{b} for observation \code{i}. Is \code{NULL} if interactions where not calculated (parameter \code{interactions} set \code{FALSE}.) }
+#'   \item{interactions}{An \code{array} with dimensions (M, M, X) (M - number of features, X - number of explained observations). Every \code{[, , i]} slice is a symmetric matrix - SHAP Interaction values for a observation. \code{[a, b, i]} element is SHAP Interaction value of features \code{a} and \code{b} for observation \code{i}. Is \code{NULL} if interactions where not calculated (parameter \code{interactions} set \code{FALSE}.) }
 #'   \item{unified_model}{An object of type \code{\link{model_unified.object}}. Unified representation of a model for which SHAP values were calculated. It is used by some of the plotting functions.}
 #'   \item{observations}{Explained dataset. \code{data.frame} or \code{matrix}. It is used by some of the plotting functions.}
 #' }
@@ -218,7 +218,7 @@ print.treeshap <- function(x, ...){
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
@@ -388,7 +388,7 @@ is.model_unified <- function(x) {
 # 
 # #' Unify Catboost model
 # #'
-# #' Convert your Catboost model into a standarized representation.
+# #' Convert your Catboost model into a standardized representation.
 # #' The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 # #'
 # #' @param catboost_model An object of \code{catboost.Model} class. At the moment, models built on data with categorical features
@@ -418,7 +418,7 @@ is.model_unified <- function(x) {
 # #' @examples
 # #' library(cheem)
 # #' 
-# #' ## Regression:
+# #' ## Regression setup:
 # #' dat  <- amesHousing2018_NorthAmes
 # #' X    <- dat[, 1:9]
 # #' Y    <- log(dat$SalePrice)
@@ -561,7 +561,7 @@ is.model_unified <- function(x) {
 
 #' Unify GBM model
 #'
-#' Convert your GBM model into a standarized representation.
+#' Convert your GBM model into a standardized representation.
 #' The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 #'
 #' @param gbm_model An object of \code{gbm} class. At the moment, models built on data with categorical features
@@ -602,7 +602,7 @@ is.model_unified <- function(x) {
 #' unified_model <- gbm.unify(gbm_model, X)
 #' 
 #' ## Calculate treeSHAP: 
-#' shaps <- treeshap(unified_model, data[1:2,])
+#' shaps <- treeshap(unified_model, X[1:2,])
 #' str(shaps)
 gbm.unify <- function(gbm_model, data) {
   if(class(gbm_model) != 'gbm') {
@@ -662,7 +662,7 @@ gbm.unify <- function(gbm_model, data) {
 # should be preceded with lgb.model.dt.tree
 #' Unify LightGBM model
 #'
-#' Convert your LightGBM model into a standarized representation.
+#' Convert your LightGBM model into a standardized representation.
 #' The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 #'
 #' @param lgb_model A lightgbm model - object of class \code{lgb.Booster}
@@ -776,7 +776,7 @@ lightgbm.unify <- function(lgb_model, data, recalculate = FALSE) {
 
 #' Unify randomForest model
 #'
-#' Convert your randomForest model into a standarized representation.
+#' Convert your randomForest model into a standardized representation.
 #' The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 #'
 #' @param rf_model An object of \code{randomForest} class. At the moment, models built on data with categorical features
@@ -870,7 +870,7 @@ randomForest.unify <- function(rf_model, data) {
 
 #' Unify ranger model
 #'
-#' Convert your ranger model into a standarized representation.
+#' Convert your ranger model into a standardized representation.
 #' The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 #'
 #' @param rng_model An object of \code{ranger} class. At the moment, models built on data with categorical features
@@ -960,7 +960,7 @@ ranger.unify <- function(rng_model, data) {
 
 #' Unify xgboost model
 #'
-#' Convert your xgboost model into a standarized representation.
+#' Convert your xgboost model into a standardized representation.
 #' The returned representation is easy to be interpreted by the user and ready to be used as an argument in \code{treeshap()} function.
 #'
 #' @param xgb_model A xgboost model - object of class \code{xgb.Booster}

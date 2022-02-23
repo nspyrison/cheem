@@ -59,28 +59,28 @@ and attribution- spaces. Typically consumed directly by shiny app.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
+## Model, explanation, cheem list, global view:
 rf_fit <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
-global_view(this_ls)
+
+## Visualize
+global_view(this_ls)                   ## uses ggplot facets \%>\% plotly
+global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
+global_view_subplots(this_ls)          ## uses plotly::subplots
 
 ## Different color mappings, especially for regression
-global_view(this_ls, color = "residual")
-global_view(this_ls, color = "log_maha.data") 
-global_view(this_ls, color = "cor_attr_proj.y")
-
-
-## Experimental global view made from plotly::subplots rather than facets
-global_view_subplots(this_ls)
+global_view_subplots(this_ls, color = "residual")
+global_view_subplots(this_ls, color = "log_maha.data") 
+global_view_subplots(this_ls, color = "cor_attr_proj.y")
 }
 \seealso{
 Other cheem consumers: 

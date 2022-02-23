@@ -24,7 +24,7 @@ Important property of reference dataset is that SHAPs for each observation add u
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)

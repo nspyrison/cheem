@@ -158,8 +158,8 @@ test_that("model_performance_df", {
 })
 
 ### global_view_df_1layer ----
-r_gv1 <- cheem:::global_view_df_1layer(r_X, r_Y, r_clas)
-c_gv1 <- cheem:::global_view_df_1layer(c_X, c_Y, c_clas)
+r_gv1 <- cheem:::global_view_df_1layer(r_X)
+c_gv1 <- cheem:::global_view_df_1layer(c_X)
 
 test_that(":::global_view_df_1layer", {
   expect_equal(class(r_mp), "data.frame")

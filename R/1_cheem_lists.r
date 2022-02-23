@@ -19,14 +19,14 @@
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model, treeSHAP, cheem list, visualize
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
@@ -58,7 +58,7 @@ default_rf <- function(
 #' \code{\link[ranger:ranger]{ranger::ranger}},
 #' \code{\link[gbm:gbm]{gbm::gbm}},
 #' \code{\link[xgboost:xgb.train]{xgboost::xgb.train}},
-#' \code{\link[catboost:catboost.train]{catboost::catboost.train}}, or
+# #' \code{\link[catboost:catboost.train]{catboost::catboost.train}}, or
 #' \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm}}.
 #' 
 #' @param model A model object to check the class/origin.
@@ -68,30 +68,31 @@ default_rf <- function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
-#' # treeshap handles various tree-based models:
+#' 
+#' # Treeshap handles various tree-based models:
 #' 
 #' ## randomForest model
 #' fit <- randomForest::randomForest(X, Y, ntree = 25)
 #' is_randomForest(fit)
 #' 
 #' \dontrun{
-#' ## ranger model, if package available
+#' ## ranger model
 #' if(require(ranger, quietly = TRUE))
 #'   fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
 #' is_ranger(fit)
 #' 
-#' ## gbm model, if package available
+#' ## gbm model
 #' if(require(gbm, quietly = TRUE))
 #'   fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
 #' is_gbm(fit)
 #' 
-#' ## xgboost, if package available
+#' ## xgboost
 #' if(require(xgboost, quietly = TRUE))
 #'   fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
 #'                           params = list(objective = "reg:squarederror"))
@@ -108,9 +109,10 @@ default_rf <- function(
 #' is_lightgbm(fit)
 #' }
 #' 
+#' 
 #' # Continue cheem workflow with tree-based models:
 #' 
-#' ## Long runtime for full datasets or complex models:
+#' ## treeSHAP, cheem list, visualize:
 #' shap_df <- attr_df_treeshap(fit, X, verbose = TRUE, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = fit,
@@ -145,10 +147,10 @@ is_lightgbm <- function(model){
 #   "catboost.Model" %in% class(model)
 # }
 
-#' Unified predictions to a standard format
+#' Unify various models/predictions to a standard format
 #' 
-#' A wrapper function for stat::predict(). Condition handling for various 
-#' treeshap supported models.
+#' Unifies models/prediction functions for supported by tree-based models 
+#' into a standard format.
 #' 
 #' @param model A tree based model supported by `treeshap`: 
 #' a model from `randomForest::randomForest`, `ranger::ranger`, `gbm::gbm`, 
@@ -161,15 +163,42 @@ is_lightgbm <- function(model){
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
-#' rf_fit  <- default_rf(X, Y)
-#' ## Applies the correct format to a predict function for the model type.
+#' ## Model, unified prediction from any model (not unified)
+#' rf_fit <- default_rf(X, Y)
 #' unify_predict(rf_fit, X)
+#' 
+#' ## Applies the correct treeshap::*.unify for the model type.
+#' unified_model <- unify_tree_model(rf_fit, X)
+#' str(unified_model)
+unify_tree_model <- function(model, x){
+if(is_randomForest(model)){
+  ret <- randomForest.unify(model, x) ## treeshap:: ported function
+}else if(is_ranger(model)){
+  ret <- ranger.unify(model, x) ## treeshap:: ported function
+}else if(is_gbm(model)){
+  ret <- gbm.unify(model, x) ## treeshap:: ported function
+}else if(is_xgboost(model)){
+  ret <- xgboost.unify(model, x) ## treeshap:: ported function
+  # }else if(is_catboost(model)){
+  #   ret <- catboost.unify(model, x) ## treeshap:: ported function
+}else if(is_lightgbm(model)){
+  ret <- lightgbm.unify(model, x) ## treeshap:: ported function
+}else
+  stop("unify_tree_model: wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
+if(nrow(ret[[1L]]) == 0L)
+  stop("unify_tree_model: treeshap unified model has 0 rows, model may not be supported.")
+## Return
+ret
+}
+
+#' @rdname unify_tree_model
+#' @export
 unify_predict <- function(model, x){
   if(is_xgboost(model)){
     ## xgboost:::predict.xgb.Booster expects arg name newdata, rather than data.
@@ -186,40 +215,8 @@ unify_predict <- function(model, x){
   .pred
 }
 
-#' Unifies models into a standard format
-#' 
-#' Unifies models supported by treeshap into a standard format.
-#' 
-#' @rdname unify_predict
-#' @export
-#' @examples
-#'
-#' ## Applies the correct treeshap::*.unify for the model type.
-#' unif_mod <- unify_tree_model(rf_fit, X)
-#' str(unif_mod)
-unify_tree_model <- function(model, x){
-  if(is_randomForest(model)){
-    ret <- randomForest.unify(model, x) ## treeshap:: ported function
-  }else if(is_ranger(model)){
-    ret <- ranger.unify(model, x) ## treeshap:: ported function
-  }else if(is_gbm(model)){
-    ret <- gbm.unify(model, x) ## treeshap:: ported function
-  }else if(is_xgboost(model)){
-    ret <- xgboost.unify(model, x) ## treeshap:: ported function
-  # }else if(is_catboost(model)){
-  #   ret <- catboost.unify(model, x) ## treeshap:: ported function
-  }else if(is_lightgbm(model)){
-    ret <- lightgbm.unify(model, x) ## treeshap:: ported function
-  }else
-    stop("unify_tree_model: wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
-  if(nrow(ret[[1L]]) == 0L)
-    stop("unify_tree_model: treeshap unified model has 0 rows, model may not be supported.")
-  ## Return
-  ret
-}
 
-
-# treeshap -----
+## treeshap -----
 
 #' Extract the full treeSHAP data.frame of a randomForest model
 #' 
@@ -233,7 +230,7 @@ unify_tree_model <- function(model, x){
 #' @param x The explanatory data (without response) to extract the local 
 #' attributions from.
 #' @param keep_heavy Logical, if the heavy items "interactions",
-#'  "unified_model", and "observations" should be kept. Defaults to FALSE.
+#' "unified_model", and "observations" should be kept. Defaults to FALSE.
 #' @param verbose Logical, if runtime should be printed. Defaults to TRUE.
 #' @param noisy Logical, if a tone should be played on completion. 
 #' Defaults to TRUE.
@@ -243,7 +240,7 @@ unify_tree_model <- function(model, x){
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
@@ -297,12 +294,13 @@ attr_df_treeshap <- function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model and performance:
 #' rf_fit <- default_rf(X, Y)
 #' cheem:::model_performance_df(rf_fit)
 model_performance_df <- function(
@@ -344,7 +342,6 @@ model_performance_df <- function(
 #' Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 #' 
 #' @param x The explanatory variables of the model.
-#' @param y The target variable of the model.
 #' @param class The variable to group points by. Originally the _predicted_
 #'  class.
 #' @param basis_type The type of basis used to approximate the data and 
@@ -355,20 +352,14 @@ model_performance_df <- function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression:
-#' dat  <- amesHousing2018_NorthAmes
-#' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
-#' clas <- dat$SubclassMS
+#' ## Regression setup:
+#' dat <- amesHousing2018_NorthAmes
+#' X   <- dat[, 1:9]
 #' 
-#' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#' ## data.frame for one space/panel
+#' cheem:::global_view_df_1layer(X)
 global_view_df_1layer <- function(
-  x, y,
+  x,
   class      = NULL, ## required for olda
   basis_type = c("pca", "olda"),
   layer_name = utils::tail(class(x), 1) ## Name of the last class _ie_ `treeshap``
@@ -423,33 +414,40 @@ global_view_df_1layer <- function(
 #' library(cheem)
 #' library(spinifex)
 #' 
-#' ## Classification:
+#' ## Classification setup:
 #' X    <- penguins_na.rm[, 1:4]
 #' clas <- penguins_na.rm$species
 #' Y    <- as.integer(clas)
 #' 
+#' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
-#' names(this_ls)
+#' global_view(this_ls) ## Preview spaces
+#'
+#' ## Save for used with shiny app (expects .rds):
+#' if(FALSE){ ## Don't accidentally save.
+#'   saveRDS(this_ls, "./my_cheem_ls.rds")
+#'   run_app() ## Select the saved .rds file from the Data dropdown.
+#' }
 #' 
-#' ## Regression:
+#' 
+#' 
+#' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- log(dat$SalePrice)
 #' clas <- dat$SubclassMS
 #' 
+#' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
-#' names(this_ls)
-#' global_view(this_ls)
+#' global_view(this_ls) ## Preview spaces
 #' 
 #' ## Save for used with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
@@ -464,7 +462,7 @@ cheem_ls <- function(
   verbose    = getOption("verbose"),
   keep_model = FALSE
 ){
-  ## Initialize -----
+  ## Initialize 
   if(verbose) tictoc::tic("cheem_ls")
   d <- 2L
   basis_type <- match.arg(basis_type)
@@ -472,9 +470,9 @@ cheem_ls <- function(
   rownum <- V2 <- projection_nm <- NULL
   
   ## global_view_df -----
-  .glob_dat  <- global_view_df_1layer(x, y, class, basis_type, "data")
+  .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data")
   .cl        <- utils::tail(class(attr_df), 1L)
-  .glob_attr <- global_view_df_1layer(attr_df, y, class, basis_type, .cl)
+  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, .cl)
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
   .dat_bas   <- utils::tail(attributes(.glob_dat),  1L)
@@ -515,7 +513,7 @@ cheem_ls <- function(
     .vec_yjitter <- 0L
     .layer_nm    <- "model"
   }
-  ## rbind yhaty to global_view_df ----
+  ## append yhaty to global_view_df ----
   .yhaty_df <-
     data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
     spinifex::scale_01()
@@ -523,7 +521,7 @@ cheem_ls <- function(
                           rownum = 1L:nrow(x), class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
-  ## Add tooltips ----
+  ## add tooltips ----
   tooltip <- paste0("row: ", 1L:nrow(x)) ## Base tooltip
   if(is.null(rownames(x)) == FALSE)
     ### Character rownames?
@@ -567,7 +565,10 @@ cheem_ls <- function(
 }
 
 
-## Extension ideas -----
+
+
+
+# cheem extension ideas -----
 #- Ceteris-paribus profiles for prim/comp obs? 
 #-- DALEX::explain(model) %>%
 #-- DALEX::predict_profile(prim/comp_obs)

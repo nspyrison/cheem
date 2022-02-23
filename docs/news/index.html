@@ -60,19 +60,29 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.0" id="cheem-v020-cran">cheem v0.2.0 (CRAN)<a class="anchor" aria-label="anchor" href="#cheem-v020-cran"></a></h2>
 <div class="section level3">
-<h3 id="run_app-changes-0-2-0">run_app changes<a class="anchor" aria-label="anchor" href="#run_app-changes-0-2-0"></a></h3>
-<ul><li>Added AmesHousing data, chocolates, and new toy simulated datasets</li>
-<li>Added inclusion variable, subsetting variables used in radial tour</li>
-<li>Reduced shiny app wording</li>
-<li>Added higher-level model performance to shiny app</li>
-<li>Added global_view yhaty plot</li>
-<li>Added global_view color options: log_maha.data and cor_attr.y</li>
-<li>Added cheem_radial_tour - regression case facet with additional fixed y of residual</li>
+<h3 id="app-related-changes-0-2-0">App related changes<a class="anchor" aria-label="anchor" href="#app-related-changes-0-2-0"></a></h3>
+<ul><li>Added higher-level model performance to shiny app.</li>
+<li>In <code><a href="../reference/global_view.html">global_view()</a></code>, added yhaty panel (residual plot/confusion matrix).</li>
+<li>In <code><a href="../reference/global_view.html">global_view()</a></code>, added color options: log_maha.data and cor_attr.y.</li>
+<li>In <code>cheem_radial_tour()</code>, added regression case panel with additional fixed y of residual.</li>
+<li>In app radial tour inputs, added inclusion variable, subsetting variables used in radial tour.</li>
+<li>
+<code><a href="https://rdrr.io/pkg/plotly/man/subplot.html" class="external-link">plotly::subplot()</a></code> variants of <code><a href="../reference/global_view.html">global_view()</a></code> &amp; <code>cheem_radial_tour()</code>.</li>
+<li>Added AmesHousing data, chocolates, and new toy simulated datasets (shiny app only).</li>
+<li>Reduced shiny app wording.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="util--other-0-2-0">Util &amp; other<a class="anchor" aria-label="anchor" href="#util--other-0-2-0"></a></h3>
-<ul><li>Major rebase of cheem_ls</li>
-<li>Added linear/logistic_tforms to suggest an alpha as a function of number of observations</li>
+<h3 id="internal--utilities-0-2-0">Internal &amp; utilities<a class="anchor" aria-label="anchor" href="#internal--utilities-0-2-0"></a></h3>
+<ul><li>Major rebase of <code><a href="../reference/cheem_ls.html">cheem_ls()</a></code>.</li>
+<li>Added <code>linear/logistic_tform()</code> to suggest an alpha as a function of the number of observations.</li>
+<li>Reduced the size of the vignette with prerended <code>gif</code> images, removing the heavy <code>html</code> subdirectories.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="sourcing-treeshap-0-2-0">Sourcing <strong>treeshap</strong>
+<a class="anchor" aria-label="anchor" href="#sourcing-treeshap-0-2-0"></a></h3>
+<ul><li>
+<strong>drat</strong> repository hosting <strong>treeshap</strong> did not work with debian and window rhub platforms.</li>
+<li>Minimally ported functions and cpp source files with <a href="https://github.com/author" class="external-link">@author</a> &amp; <a href="https://github.com/source" class="external-link">@source</a>. Change examples for consistency and smaller support.</li>
 </ul></div>
 </div>
     <div class="section level2">

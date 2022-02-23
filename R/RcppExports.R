@@ -2,18 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 predict_cpp <- function(x, is_na, roots, yes, no, missing, is_leaf, feature, split, decision_type, value) {
-    .Call('_cheem_predict_cpp', PACKAGE = 'cheem', x, is_na, roots, yes, no, missing, is_leaf, feature, split, decision_type, value)
+    .Call(`_cheem_predict_cpp`, x, is_na, roots, yes, no, missing, is_leaf, feature, split, decision_type, value)
 }
 
 new_covers <- function(x, is_na, roots, yes, no, missing, is_leaf, feature, split, decision_type) {
-    .Call('_cheem_new_covers', PACKAGE = 'cheem', x, is_na, roots, yes, no, missing, is_leaf, feature, split, decision_type)
+    .Call(`_cheem_new_covers`, x, is_na, roots, yes, no, missing, is_leaf, feature, split, decision_type)
 }
 
 treeshap_cpp <- function(x, is_na, roots, yes, no, missing, feature, split, decision_type, is_leaf, value, cover, verbose) {
-    .Call('_cheem_treeshap_cpp', PACKAGE = 'cheem', x, is_na, roots, yes, no, missing, feature, split, decision_type, is_leaf, value, cover, verbose)
+    .Call(`_cheem_treeshap_cpp`, x, is_na, roots, yes, no, missing, feature, split, decision_type, is_leaf, value, cover, verbose)
 }
 
 treeshap_interactions_cpp <- function(x, is_na, roots, yes, no, missing, feature, split, decision_type, is_leaf, value, cover, verbose) {
-    .Call('_cheem_treeshap_interactions_cpp', PACKAGE = 'cheem', x, is_na, roots, yes, no, missing, feature, split, decision_type, is_leaf, value, cover, verbose)
+    .Call(`_cheem_treeshap_interactions_cpp`, x, is_na, roots, yes, no, missing, feature, split, decision_type, is_leaf, value, cover, verbose)
 }
 

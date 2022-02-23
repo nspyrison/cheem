@@ -86,51 +86,62 @@ and attribution- spaces. Typically consumed directly by shiny app.
 library(cheem)
 library(spinifex)
 
-## Classification:
+## Classification setup:
 X    <- penguins_na.rm[, 1:4]
 clas <- penguins_na.rm$species
 Y    <- as.integer(clas)
 
+## Model and tree SHAP explanation:
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 
+## Basis & suggest manipulation var
 bas <- basis_attr_df(shap_df, rownum = 1)
-ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
-                          primary_obs = 1, comparison_obs = 2)
+mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
+
+## Radial tour with ggplot facets & animate
+ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 \dontrun{
 animate_plotly(ggt)
 if(FALSE) ## or animate with gganimate
-  animate_gganimate(ggt) #, render = gganimate::av_renderer())
+  animate_gganimate(ggt, render = gganimate::av_renderer())
 
-## Regression:
+## Radial tour using plotly::subplots, not compatible with gganimate.
+ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
+animate_plotly(ggt)
+
+
+
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
+## Model and tree SHAP explanation:
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 
+## Basis & suggest manipulation var
 bas <- basis_attr_df(shap_df, rownum = 1)
-ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
+mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 
+## Radial tour with ggplot facets & animate
+ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
 animate_plotly(ggt)
 if(FALSE) ## or animate with gganimate
   animate_gganimate(ggt, render = gganimate::av_renderer())
-}
 
-
-## Experimental radial tour made from plotly::subplots rather than facets
+## Radial tour using plotly::subplots, not compatible with gganimate.
 ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 animate_plotly(ggt)
+}
 }
 \seealso{
 Other cheem consumers: 

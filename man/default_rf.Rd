@@ -38,14 +38,14 @@ hyperparameter defaults and arguments consistent with \code{cheem}.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
+## Model, treeSHAP, cheem list, visualize
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,

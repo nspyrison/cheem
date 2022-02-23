@@ -27,7 +27,7 @@ Calculate SHAP values and optionally SHAP Interaction values.
 \examples{
 library(cheem)
 
-## Regression:
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- log(dat$SalePrice)

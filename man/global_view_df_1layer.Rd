@@ -6,7 +6,6 @@
 \usage{
 global_view_df_1layer(
   x,
-  y,
   class = NULL,
   basis_type = c("pca", "olda"),
   layer_name = utils::tail(class(x), 1)
@@ -14,8 +13,6 @@ global_view_df_1layer(
 }
 \arguments{
 \item{x}{The explanatory variables of the model.}
-
-\item{y}{The target variable of the model.}
 
 \item{class}{The variable to group points by. Originally the \emph{predicted}
 class.}
@@ -36,16 +33,10 @@ Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 \examples{
 library(cheem)
 
-## Regression:
-dat  <- amesHousing2018_NorthAmes
-X    <- dat[, 1:9]
-Y    <- log(dat$SalePrice)
-clas <- dat$SubclassMS
+## Regression setup:
+dat <- amesHousing2018_NorthAmes
+X   <- dat[, 1:9]
 
-rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+## data.frame for one space/panel
+cheem:::global_view_df_1layer(X)
 }
