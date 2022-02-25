@@ -97,16 +97,3 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
-static const R_CallMethodDef CallEntries[] = {
-    {"_cheem_predict_cpp", (DL_FUNC) &_cheem_predict_cpp, 11},
-    {"_cheem_new_covers", (DL_FUNC) &_cheem_new_covers, 10},
-    {"_cheem_treeshap_cpp", (DL_FUNC) &_cheem_treeshap_cpp, 13},
-    {"_cheem_treeshap_interactions_cpp", (DL_FUNC) &_cheem_treeshap_interactions_cpp, 13},
-    {NULL, NULL, 0}
-};
-
-RcppExport void R_init_cheem(DllInfo *dll) {
-    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-    R_useDynamicSymbols(dll, FALSE);
-}

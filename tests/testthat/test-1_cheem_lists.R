@@ -100,7 +100,6 @@ test_that("randomForest thru global_view", {
 #   lgbm_params <- list(objective = "regression", num_leaves = 25)
 #   r_fit     <- lightgbm::lightgbm(as.matrix(r_X), r_Y, params = lgbm_params, nrounds = 2)
 #   print("Continue here, with lightgbm models.")
-#   # debugonce(cheem::unify_predict)
 #   r_attr_df <- attr_df_treeshap(r_fit, r_X, noisy = FALSE, verbose = FALSE)
 #   r_this_ls <- cheem_ls(r_X, r_Y, class = r_clas, model = r_fit, attr_df = r_attr_df)
 #   # warning: eig_sym(): given matrix is not symmetric

@@ -100,3 +100,26 @@ lp <- lineprof({
                            primary_obs = 1, comparison_obs = 2)
 })
 shine(lp)
+
+
+# amesHousing2018 -----
+{
+  tictoc::tic("amesHousing2018")
+  library(cheem)
+  ## Regression setup:
+  sub  <- amesHousing2018_NorthAmes[1:100, ]
+  X    <- sub[, 1:9]
+  Y    <- log(sub$SalePrice)
+  clas <- sub$SubclassMS
+  ## Model, treeSHAP explanation, cheem list:
+  rf_fit  <- default_rf(X, Y)
+  ## Treeshap/attr_df_treeshap returning NaN df.
+  #debugonce(treeshap)
+  shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+  this_ls <- cheem_ls(X, Y, class = clas,
+                      model = rf_fit,
+                      attr_df = shap_df)
+  ## Visualize:
+  global_view(this_ls)
+  tictoc::toc() 
+}

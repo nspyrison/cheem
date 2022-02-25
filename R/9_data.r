@@ -49,7 +49,8 @@
 #' \url{http://jse.amstat.org/v19n3/decock.pdf}
 #' @source {Kaggle, Ames Housing Dataset} 
 #' \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
-#' Replicating this dataset:
+#' 
+#' __Replicating this dataset:__
 #' ```
 #' if(FALSE) ## Don't accidentally open the URL.
 #'   browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
@@ -107,19 +108,21 @@
 #' @keywords datasets
 #' @examples
 #' library(cheem)
-#' ## Regression:
-#' sub <- amesHousing2018_NorthAmes[1:200, ]
-#' X <- sub[, 1:9]
-#' Y <- log(sub$SalePrice)
-#' clas <- sub$SubclassMS
 #' 
+#' ## Regression setup:
+#' dat  <- amesHousing2018_NorthAmes[1:100, ]
+#' X    <- dat[, 1:9]
+#' Y    <- log(dat$SalePrice)
+#' clas <- dat$SubclassMS
+#' 
+#' ## Model, treeSHAP explanation, cheem list:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                      model = rf_fit,
-#'                      attr_df = shap_df)
-#'  
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
+#' 
+#' ## Visualize:
 #' global_view(this_ls)
 #' 
 #' ## Save for used with shiny app (expects .rds):
@@ -163,7 +166,8 @@
 #'   \item Protein_g, grams of sugar per 100 grams
 #' }
 #' @source {Monash University, Introduction to Machine Learning course} \url{https://iml.numbat.space/}
-#' Replicating this dataset:
+#' 
+#' __Replicating this dataset:__
 #' ```
 #' if(FALSE) ## Don't accidentally open the URL.
 #'   browseURL("https://iml.numbat.space/")
@@ -178,18 +182,19 @@
 #' @examples
 #' library(cheem)
 #' 
-#' ## Classification:
+#' ## Classification setup:
 #' X    <- chocolates[, 5:14]
 #' Y    <- as.integer(chocolates$Type)
 #' clas <- chocolates$Type
 #' 
+#' ## Model, treeSHAP explanation, cheem list:
 #' rf_fit  <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                      model = rf_fit,
-#'                      attr_df = shap_df)
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' 
+#' ## Visualize:
 #' global_view(this_ls)
 #' 
 #' ## Save for used with shiny app (expects .rds):

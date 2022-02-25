@@ -27,7 +27,8 @@ or 'Milk"
 }
 \source{
 {Monash University, Introduction to Machine Learning course} \url{https://iml.numbat.space/}
-Replicating this dataset:\preformatted{if(FALSE) ## Don't accidentally open the URL.
+
+\strong{Replicating this dataset:}\preformatted{if(FALSE) ## Don't accidentally open the URL.
   browseURL("https://iml.numbat.space/")
 ## Accessed Jan 2022
 chocolates <- readr::read_csv("https://iml.numbat.space/data/chocolates.csv")
@@ -51,18 +52,19 @@ Units of measurement are listed in the variable name.
 \examples{
 library(cheem)
 
-## Classification:
+## Classification setup:
 X    <- chocolates[, 5:14]
 Y    <- as.integer(chocolates$Type)
 clas <- chocolates$Type
 
+## Model, treeSHAP explanation, cheem list:
 rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
+                    model = rf_fit,
+                    attr_df = shap_df)
 
+## Visualize:
 global_view(this_ls)
 
 ## Save for used with shiny app (expects .rds):
