@@ -38,9 +38,7 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-
 /doc/
 /Meta/
 *.model
-
-/.lightgbm.model
+lightgbm.model

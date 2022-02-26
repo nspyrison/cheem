@@ -6,8 +6,9 @@
 ^\.github$
 ^Meta$
 ^doc$
-^\.lightgbm.model$
 
 ^buildignore/.*$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^lightgbm\.model$
+^lightgbm\\.model$
