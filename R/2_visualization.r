@@ -186,13 +186,13 @@ proto_basis1d_distribution <- function(
   })
   
   ## Pivot the attr values (columns) longer to rows.
-  attr_df$rownum <- 1L:.n
+  attr_df$rownum   <- 1L:.n
   attr_df$group_by <- as.factor(group_by)
-  class(attr_df) <- "data.frame"
-  .attr_df_longer <- tidyr::pivot_longer(
+  class(attr_df)   <- "data.frame"
+  .attr_df_longer  <- tidyr::pivot_longer(
     attr_df, cols = !c(rownum, group_by),
     names_to = "var_name", values_to = "contribution")
-  .df_basis_distr <- dplyr::mutate(
+  .df_basis_distr  <- dplyr::mutate(
     .attr_df_longer, .keep = "none", x = contribution,
     ## Must be reverse order; var 1 on top, highest value.
     y = (rep_len(.p:1L, .n * .p) + .05 * (as.integer(group_by) - 2L)) / .p,
@@ -201,15 +201,15 @@ proto_basis1d_distribution <- function(
     as.data.frame()
   
   ## IF FACETED:
-  if(.is_faceted == TRUE){
+  if(.is_faceted){
     ## "_basis_" becomes an honorary level of facet_var
     .df_basis_distr <- spinifex:::.bind_elements2df(list(
       facet_var = rep_len("_basis_", nrow(.df_basis_distr))), .df_basis_distr)
   }
   
-  ## Map them to position
-  .df_basis_distr <- spinifex::map_relative(
-    .df_basis_distr, position, .map_to)
+  ## Map (display dim) to position
+  .df_basis_distr[, c("x", "y")] <- spinifex::map_relative(
+    .df_basis_distr[, c("x", "y")], position, .map_to)
   
   .alpha <- logistic_tform(.n) / 5L
   ## Basis/attribution distribution of the rows of the attr_df
@@ -712,14 +712,17 @@ radial_cheem_tour <- function(
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         row_index = row_index, rug_shape = pcp_shape) +
+      
+      #Warning message:
+      #In Ops.factor(yscale, x[, 2L]) : '*' not meaningful for factors
       ## PCP on Basis, 1D
       proto_basis1d_distribution(
-        cheem_ls$attr_df, 
+        cheem_ls$attr_df,
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
-        position = "bottom1d", group_by = .pred_clas, 
+        position = "bottom1d", group_by = .pred_clas,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
-        pcp_shape = pcp_shape, inc_var_nms = inc_var_nms, 
-        row_index = row_index) +
+        pcp_shape = pcp_shape, inc_var_nms = inc_var_nms,
+       row_index = row_index) +
       ## Basis 1D
       spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
       spinifex::proto_origin1d() +
