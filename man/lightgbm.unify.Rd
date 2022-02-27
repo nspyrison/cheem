@@ -39,6 +39,9 @@ lightgbm_model <- lightgbm::lightgbm(
   as.matrix(X), Y, params = param_lgbm, 
   nrounds = 2, verbose = 0)
 unified_model <- lightgbm.unify(lightgbm_model, X)
+## Delete model file if it exists
+if(file.exists("lightgbm.model"))
+  file.remove("lightgbm.model")
 
 ## Calculate treeSHAP:
 shaps <- treeshap(unified_model, X[1:2, ])

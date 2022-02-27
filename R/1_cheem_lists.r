@@ -225,8 +225,7 @@ unify_predict <- function(model, x){
 #' A wrapper for `treeshap::randomForest.unify` and `treeshap::treeshap`.
 #' 
 #' @param model A tree based model supported by `treeshap`: 
-#' a model from `randomForest::randomForest`, `ranger::ranger`, `gbm::gbm`, 
-#' `xgboost::xgb.train`, `catboost::catboost.train`, `lightgbm::lightgbm`.
+#' a model from `gbm`, `lightgbm`, `randomForest`, `ranger`, or  `xgboost`.
 #' @param x The explanatory data (without response) to extract the local 
 #' attributions from.
 #' @param keep_heavy Logical, if the heavy items "interactions",

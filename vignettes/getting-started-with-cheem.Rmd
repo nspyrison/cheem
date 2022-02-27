@@ -50,7 +50,7 @@ While this framework would for any non-linear model and compatible local explana
 
 # Preprocessing
 
-The first thing we'll need are data and tree based model. We'll use a wrapper function for a __randomForest__ modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. Alternatively, __treeshape__ and __cheem__ are compatible with tree based models from __ranger__, __gbm__, __xgboost__, __catboost__, and __lightgbm__.
+The first thing we'll need are data and tree based model. We'll use a wrapper function for a __randomForest__ modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. __treeshap__ and __cheem__ are compatible with tree based models from __gbm__, __lightgbm__, __randomForest__, __ranger__, and __xgboost__.
 
 ```{r}
 library(cheem)
@@ -130,7 +130,7 @@ if(FALSE){ ## To mitigate file size (CRAN note) create a gif and include that
     this_ls, basis = bas, manip_var = mv,
     primary_obs = 243, comparison_obs = 169, angle = .25)
   
-  #### .gif is about .2 Mb saved, while HTML widget is about 7 Mb.
+  #### .gif is about .2 Mb saved, while HTML widget was about 7 Mb.
   anim <- animate_gganimate(ggt, fps = 6,
                             height = 2, width = 4.5, units = "in", res = 150)
   gganimate::anim_save("tour_penguins.gif", animation = anim)#, path = "./vignettes")

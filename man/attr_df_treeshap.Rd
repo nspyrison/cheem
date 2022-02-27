@@ -14,8 +14,7 @@ attr_df_treeshap(
 }
 \arguments{
 \item{model}{A tree based model supported by \code{treeshap}:
-a model from \code{randomForest::randomForest}, \code{ranger::ranger}, \code{gbm::gbm},
-\code{xgboost::xgb.train}, \code{catboost::catboost.train}, \code{lightgbm::lightgbm}.}
+a model from \code{gbm}, \code{lightgbm}, \code{randomForest}, \code{ranger}, or  \code{xgboost}.}
 
 \item{x}{The explanatory data (without response) to extract the local
 attributions from.}

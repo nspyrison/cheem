@@ -10,5 +10,6 @@
 ^buildignore/.*$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^lightgbm.model$
 ^lightgbm\.model$
 ^lightgbm\\.model$
