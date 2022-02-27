@@ -115,6 +115,10 @@ The returned representation is easy to be interpreted by the user and ready to b
 <span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="va">Y</span>, params <span class="op">=</span> <span class="va">param_lgbm</span>, </span>
 <span class="r-in">  nrounds <span class="op">=</span> <span class="fl">2</span>, verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">unified_model</span> <span class="op">&lt;-</span> <span class="fu">lightgbm.unify</span><span class="op">(</span><span class="va">lightgbm_model</span>, <span class="va">X</span><span class="op">)</span></span>
+<span class="r-in"><span class="co">## Delete model file if it exists</span></span>
+<span class="r-in"><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="st">"lightgbm.model"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.remove</a></span><span class="op">(</span><span class="st">"lightgbm.model"</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Calculate treeSHAP:</span></span>
 <span class="r-in"><span class="va">shaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="treeshap.html">treeshap</a></span><span class="op">(</span><span class="va">unified_model</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="op">]</span><span class="op">)</span></span>

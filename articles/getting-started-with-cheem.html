@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Getting started with cheem</h1>
                         <h4 data-toc-skip class="author">Nicholas Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2022-02-26</h4>
+            <h4 data-toc-skip class="date">2022-02-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
       <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
@@ -110,7 +110,7 @@ Illustration of non-linear classification boundary. The use of local explanation
 <div class="section level2">
 <h2 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
 </h2>
-<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. Alternatively, <strong>treeshape</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>ranger</strong>, <strong>gbm</strong>, <strong>xgboost</strong>, <strong>catboost</strong>, and <strong>lightgbm</strong>.</p>
+<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. <strong>treeshap</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>gbm</strong>, <strong>lightgbm</strong>, <strong>randomForest</strong>, <strong>ranger</strong>, and <strong>xgboost</strong>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/spinifex/" class="external-link">spinifex</a></span><span class="op">)</span>
