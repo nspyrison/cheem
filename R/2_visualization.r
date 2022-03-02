@@ -525,10 +525,10 @@ global_view_subplots <- function(
     }
     ## Highlight primary obs, if passed
     if(is.null(primary_obs) == FALSE){
-      .idx_shap <- df$rownum[r_idx] == primary_obs
+      .idx_shap <- data$rownum[r_idx] == primary_obs
       if(sum(.idx_shap) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-          ggplot2::aes(V1, V2), df[.idx_shap,, drop = FALSE], 
+          ggplot2::aes(V1, V2), data[.idx_shap,, drop = FALSE], 
           size = 5L, shape = 8L, color = "black"))
       }
     }
@@ -639,7 +639,7 @@ global_view_subplots <- function(
 #' ## Radial tour using plotly::subplots, not compatible with gganimate.
 #' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
 #' animate_plotly(ggt)
-#' 
+#' }
 #' 
 #' 
 #' ## Regression setup:
@@ -661,6 +661,7 @@ global_view_subplots <- function(
 #' 
 #' ## Radial tour with ggplot facets & animate
 #' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
+#' \donttest{
 #' animate_plotly(ggt)
 #' if(FALSE) ## or animate with gganimate
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())

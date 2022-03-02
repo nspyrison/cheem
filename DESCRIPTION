@@ -14,7 +14,7 @@ Description: Given a tree-based model, calculate the tree SHAP
     variable importance of the local explanation is used as a 1D projection
     basis. The support of the local explanation is then explored by changing
     the basis with the use of the radial tour <doi:10.32614/RJ-2020-027>; 
-    <doi:10.2307/1390747>.
+    <doi:10.1080/10618600.1997.10474754>.
 Depends:
     R (>= 3.5.0)
 License: MIT + file LICENSE

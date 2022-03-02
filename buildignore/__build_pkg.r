@@ -9,11 +9,14 @@ Kmisc::registerFunctions(prefix = "")
 devtools::document()
 ## Needed for rebuild after adding Rcpp treeshap content
 rstudioapi::restartSession()
-## Not sure this replaces exisiting package, use Build tab > Install and Restart
-devtools::install() 
+message("Not sure this replaces exisiting package, use Build tab > Install and Restart")
+#devtools::install() 
 beepr::beep(1)
+message("have been running into hung session from check, goodluck")
 devtools::check()
 beepr::beep(2)
+message("Note that tests seem to be working ")
+devtools::test()
 
 
 ## Also consider
