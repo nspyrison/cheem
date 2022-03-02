@@ -81,32 +81,35 @@ default_rf <- function(
 #' fit <- randomForest::randomForest(X, Y, ntree = 25)
 #' is_randomForest(fit)
 #' 
-#' \dontrun{
-#' ## ranger model
-#' if(require(ranger, quietly = TRUE))
-#'   fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
-#' is_ranger(fit)
-#' 
 #' ## gbm model
-#' if(require(gbm, quietly = TRUE))
+#' if(require(gbm, quietly = TRUE)){
 #'   fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
-#' is_gbm(fit)
-#' 
-#' ## xgboost
-#' if(require(xgboost, quietly = TRUE))
-#'   fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
-#'                           params = list(objective = "reg:squarederror"))
-#' is_xgboost(fit)
+#'   is_gbm(fit)
+#' }
 #' 
 #' ## lightgbm
 #' if(require(lightgbm, quietly = TRUE)){
-#'   param_lgbm <-
-#'     list(objective = "regression", max_depth = 2,  force_row_wise = TRUE)
+#'   param_lgbm <- list(num_leaves = 25, objective = "regression")
 #'   fit <- lightgbm::lightgbm(
 #'     as.matrix(X), Y, params = param_lgbm, 
 #'     nrounds = 2, verbose = 0)
+#'   ## Delete model file if it exists
+#'   if(file.exists("lightgbm.model"))
+#'     file.remove("lightgbm.model")
+#'   is_lightgbm(fit)
 #' }
-#' is_lightgbm(fit)
+#' 
+#' ## ranger model
+#' if(require(ranger, quietly = TRUE)){
+#'   fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
+#'   is_ranger(fit)
+#' }
+#' 
+#' ## xgboost
+#' if(require(xgboost, quietly = TRUE)){
+#'   fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
+#'                           params = list(objective = "reg:squarederror"))
+#'   is_xgboost(fit)
 #' }
 #' 
 #' 
@@ -290,18 +293,18 @@ attr_df_treeshap <- function(
 #' @param x Data to predict, required by ranger models.
 #' @param y Observed response, required by ranger models.
 #' @return A data.frame of model performance statistics.
-#' @examples
-#' library(cheem)
-#' 
-#' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes
-#' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
-#' clas <- dat$SubclassMS
-#' 
-#' ## Model and performance:
-#' rf_fit <- default_rf(X, Y)
-#' cheem:::model_performance_df(rf_fit)
+# #' @examples
+# #' library(cheem)
+# #' 
+# #' ## Regression setup:
+# #' dat  <- amesHousing2018_NorthAmes
+# #' X    <- dat[, 1:9]
+# #' Y    <- log(dat$SalePrice)
+# #' clas <- dat$SubclassMS
+# #' 
+# #' ## Model and performance:
+# #' rf_fit <- default_rf(X, Y)
+# #' cheem:::model_performance_df(rf_fit)
 model_performance_df <- function(
   model, x = NULL, y = NULL
 ){
@@ -347,16 +350,16 @@ model_performance_df <- function(
 #' attribution space from. Defaults to "pca".
 #' @param layer_name Character layer name, typically the type of local 
 #' attribution used. Defaults to the name of the last class of x.
-#' @return A data.frame, for the global linked plotly display.
-#' @examples
-#' library(cheem)
-#' 
-#' ## Regression setup:
-#' dat <- amesHousing2018_NorthAmes
-#' X   <- dat[, 1:9]
-#' 
-#' ## data.frame for one space/panel
-#' cheem:::global_view_df_1layer(X)
+#' @return A data.frame, for the global linked __plotly__ display.
+# #' @examples
+# #' library(cheem)
+# #' 
+# #' ## Regression setup:
+# #' dat <- amesHousing2018_NorthAmes
+# #' X   <- dat[, 1:9]
+# #' 
+# #' ## data.frame for one space/panel
+# #' cheem:::global_view_df_1layer(X)
 global_view_df_1layer <- function(
   x,
   class      = NULL, ## required for olda
@@ -366,6 +369,7 @@ global_view_df_1layer <- function(
   d <- 2L ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
+
   
   ## Projection
   x_std <- spinifex::scale_01(x)
@@ -442,11 +446,13 @@ global_view_df_1layer <- function(
 #' 
 #' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
+#' \donttest{
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
 #' global_view(this_ls) ## Preview spaces
+#' }
 #' 
 #' ## Save for used with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
@@ -461,6 +467,12 @@ cheem_ls <- function(
   verbose    = getOption("verbose"),
   keep_model = FALSE
 ){
+  if(any(sapply(attr_df, function(i) length(unique(i)) == 1L)))
+    stop(paste0(
+      "cheem_ls: ", layer_name, 
+      " had at least one column with one unique level.", 
+      " Eigen matrix not be symmetric.",
+      " Please review model complexity and attr_df."))
   ## Initialize 
   if(verbose) tictoc::tic("cheem_ls")
   d <- 2L

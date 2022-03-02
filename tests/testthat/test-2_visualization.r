@@ -21,17 +21,19 @@
   r_rf   <- default_rf(r_X, r_Y, verbose = FALSE)
   r_attr <- attr_df_treeshap(r_rf, x = r_X, noisy = FALSE, verbose = FALSE)
   r_chee <- cheem_ls(x = r_X, y = r_Y, class = r_clas, r_rf, r_attr, verbose = FALSE)
+  
+  
+  ## basis_attr -----
+  c_bas_attr <- basis_attr_df(attr_df = c_attr, 1)
+  r_bas_attr <- basis_attr_df(attr_df = r_attr, 2)
+  
+  test_that("basis_attr", {
+    expect_equal(class(c_bas_attr), c("matrix", "array"))
+    expect_equal(class(r_bas_attr), c("matrix", "array"))
+  })
+  
+  
 }
-
-
-## basis_attr -----
-c_bas_attr <- basis_attr_df(attr_df = c_attr, 1)
-r_bas_attr <- basis_attr_df(attr_df = r_attr, 2)
-
-test_that("basis_attr", {
-  expect_equal(class(c_bas_attr), c("matrix", "array"))
-  expect_equal(class(r_bas_attr), c("matrix", "array"))
-})
 
 ## proto_basis1d_distribution -----
 c_ggt <- ggtour(c_bas_attr, scale_sd(c_X), angle = .3) +
@@ -81,7 +83,12 @@ test_that("radial_cheem_tour", {
 
 ## radial_cheem_tour_subplots -----
 c_ggtsp <- radial_cheem_tour_subplots(c_chee, c_bas_attr, manip_var = 1L, 1L, 2L)
-r_ggtsp <- radial_cheem_tour_subplots(r_chee, r_bas_attr, manip_var = 1L, 1L, 2L)
+## Plotly uses gather_ in regression case: offending line in radial_cheem_tour_subplots:
+# p3 <- plotly::ggplotly(g3) %>% plotly::layout(yaxis = list(title = "residual"))
+suppressWarnings(
+  r_ggtsp <- radial_cheem_tour_subplots(r_chee, r_bas_attr, manip_var = 1L, 1L, 2L)
+)
+
 test_that("radial_cheem_tour_subplots", {
   expect_equal(class(c_ggtsp), c("plotly", "htmlwidget"))
   expect_equal(class(r_ggtsp),  c("plotly", "htmlwidget"))

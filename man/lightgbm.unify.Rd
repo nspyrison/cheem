@@ -33,8 +33,7 @@ Y    <- log(dat$SalePrice)
 clas <- dat$SubclassMS
 
 ## Fit a model:
-param_lgbm <-
-  list(objective = "regression", max_depth = 2,  force_row_wise = TRUE)
+param_lgbm <- list(num_leaves = 50, objective = "regression")
 lightgbm_model <- lightgbm::lightgbm(
   as.matrix(X), Y, params = param_lgbm, 
   nrounds = 2, verbose = 0)

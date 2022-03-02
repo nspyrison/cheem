@@ -24,19 +24,9 @@ attribution space from. Defaults to "pca".}
 attribution used. Defaults to the name of the last class of x.}
 }
 \value{
-A data.frame, for the global linked plotly display.
+A data.frame, for the global linked \strong{plotly} display.
 }
 \description{
 Internal function consumed in the cheem workflow.
 Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
-}
-\examples{
-library(cheem)
-
-## Regression setup:
-dat <- amesHousing2018_NorthAmes
-X   <- dat[, 1:9]
-
-## data.frame for one space/panel
-cheem:::global_view_df_1layer(X)
 }

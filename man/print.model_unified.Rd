@@ -11,6 +11,9 @@
 
 \item{...}{other arguments}
 }
+\value{
+Prints a data.frame of the $model of the treeshap unified model.
+}
 \description{
 Prints model_unified objects
 }

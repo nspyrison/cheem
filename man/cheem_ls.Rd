@@ -82,11 +82,13 @@ clas <- dat$SubclassMS
 
 ## Model and treeSHAP explanation:
 rf_fit  <- default_rf(X, Y)
+\donttest{
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
                      model = rf_fit,
                      attr_df = shap_df)
 global_view(this_ls) ## Preview spaces
+}
 
 ## Save for used with shiny app (expects .rds):
 if(FALSE){ ## Don't accidentally save.

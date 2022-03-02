@@ -156,15 +156,19 @@ NULL
 #'
 #' @param x a treeshap object
 #' @param ... other arguments
+#' 
+#' @return A data.frame of $shaps of the treeshap object. Also prints 
+#' interactions if used.
 #'
 #' @export
 #'
 print.treeshap <- function(x, ...){
-  print(x$shaps)
+  ret <- x$shaps
+  print(ret)
   if (!is.null(x$interactions)) {
     print(x$interactions)
   }
-  return(invisible(NULL))
+  ret
 }
 
 
@@ -316,12 +320,12 @@ NULL
 #' @param x a model_unified object
 #' @param ... other arguments
 #'
+#' @return Prints a data.frame of the $model of the treeshap unified model.
+#'
 #' @export
 #'
-#'
 print.model_unified <- function(x, ...){
-  print(x$model)
-  return(invisible(NULL))
+  x$model
 }
 
 #' Check whether object is a valid model_unified object
@@ -676,8 +680,7 @@ gbm.unify <- function(gbm_model, data) {
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
-#' param_lgbm <-
-#'   list(objective = "regression", max_depth = 2,  force_row_wise = TRUE)
+#' param_lgbm <- list(num_leaves = 50, objective = "regression")
 #' lightgbm_model <- lightgbm::lightgbm(
 #'   as.matrix(X), Y, params = param_lgbm, 
 #'   nrounds = 2, verbose = 0)

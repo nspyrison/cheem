@@ -141,7 +141,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #'     position = "top1d", group_by = clas) +
 #'   proto_basis1d(position = "bottom1d") +
 #'   proto_origin()
-#' \dontrun{
+#' \donttest{
 #' animate_plotly(ggt)
 #' }
 proto_basis1d_distribution <- function(
@@ -328,9 +328,11 @@ proto_basis1d_distribution <- function(
 #' global_view_subplots(this_ls)          ## uses plotly::subplots
 #' 
 #' ## Different color mappings, especially for regression
+#' \donttest{
 #' global_view_subplots(this_ls, color = "residual")
 #' global_view_subplots(this_ls, color = "log_maha.data") 
 #' global_view_subplots(this_ls, color = "cor_attr_proj.y")
+#' }
 global_view <- function(
   cheem_ls,
   primary_obs    = NULL,
@@ -474,8 +476,12 @@ global_view_subplots <- function(
                              layer_name = .u_nms[2L])
   .map_to_attr <- global_view_df[global_view_df$layer_name == .u_nms[2L], c("V1", "V2")]
   
-  single_facet <- function(r_idx, df = global_view_df){
-    sub      <- df[r_idx,, drop = FALSE]
+  # Creates the ggtour for one facet of the global view display
+  #
+  # @param r_ind logical row index of the data to use
+  # @param data a data frame to subset.
+  global_view_1facet <- function(r_idx, data = global_view_df){
+    sub <- data[r_idx,, drop = FALSE]
     if(length(.color) != 1L)
       .color <- .color[r_idx]
     if(length(.shape) != 1L)
@@ -501,20 +507,20 @@ global_view_subplots <- function(
     ## Red misclassified points, if present
     if(is_classification){
       .rn_misclass <- which(decode_df$is_misclassified[r_idx] == TRUE)
-      .idx_misclas <- df$rownum %in% .rn_misclass
+      .idx_misclas <- data$rownum %in% .rn_misclass
       if(sum(.idx_misclas) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-          ggplot2::aes(V1, V2), df[.rn_misclass,, drop = FALSE],
+          ggplot2::aes(V1, V2), data[.rn_misclass,, drop = FALSE],
           color = "red", fill = NA, shape = 21L, size = 3L, alpha = .alpha))
       }
     }
     ## Highlight comparison obs, if passed
     if(is.null(comparison_obs) == FALSE){
-      .idx_comp <- df$rownum[r_idx] == comparison_obs
+      .idx_comp <- data$rownum[r_idx] == comparison_obs
       if(sum(.idx_comp) > 0L){
-          pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-              ggplot2::aes(V1, V2), df[.idx_comp,, drop = FALSE], 
-              size = 3L, shape = 4L, color = "black"))
+        pts_highlight <- c(pts_highlight, ggplot2::geom_point(
+          ggplot2::aes(V1, V2), data[.idx_comp,, drop = FALSE], 
+          size = 3L, shape = 4L, color = "black"))
       }
     }
     ## Highlight primary obs, if passed
@@ -522,8 +528,8 @@ global_view_subplots <- function(
       .idx_shap <- df$rownum[r_idx] == primary_obs
       if(sum(.idx_shap) > 0L){
         pts_highlight <- c(pts_highlight, ggplot2::geom_point(
-            ggplot2::aes(V1, V2), df[.idx_shap,, drop = FALSE], 
-            size = 5L, shape = 8L, color = "black"))
+          ggplot2::aes(V1, V2), df[.idx_shap,, drop = FALSE], 
+          size = 5L, shape = 8L, color = "black"))
       }
     }
     
@@ -541,9 +547,9 @@ global_view_subplots <- function(
   }
   
   ## Individual ggplots
-  g1 <- single_facet(global_view_df$layer_name == .u_nms[1L])
-  g2 <- single_facet(global_view_df$layer_name == .u_nms[2L])
-  g3 <- single_facet(global_view_df$layer_name == .u_nms[3L])
+  g1 <- global_view_1facet(global_view_df$layer_name == .u_nms[1L])
+  g2 <- global_view_1facet(global_view_df$layer_name == .u_nms[2L])
+  g3 <- global_view_1facet(global_view_df$layer_name == .u_nms[3L])
   ## Individual plotly plots with axes titles
   p1 <- plotly::ggplotly(g1) %>%
     plotly::layout(xaxis = list(title = paste0(.u_nms[1L], " PC1")),
@@ -564,6 +570,7 @@ global_view_subplots <- function(
     plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
     plotly::highlight(on = "plotly_selected", off = "plotly_deselect")
 }
+
 
 
 #' Cheem tour; 1D manual tour on the selected attribution
@@ -624,7 +631,7 @@ global_view_subplots <- function(
 #' 
 #' ## Radial tour with ggplot facets & animate
 #' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-#' \dontrun{
+#' \donttest{
 #' animate_plotly(ggt)
 #' if(FALSE) ## or animate with gganimate
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
@@ -902,12 +909,13 @@ radial_cheem_tour_subplots <- function(
     ## Return a plotly, pass animation options with animate_plotly()
     return(ggp)
   } else {
-    
     ### Regression case -----
-    ## Doubling data to facet on obs and residual.
-    .class <- factor(FALSE) #decode_df$class|predicted_class
     
-    single_facet <- function(data = .dat, fixed_y, facet_lvl){
+    # Creates a ggtour object for one facet of the radial tour
+    # 
+    # @param data the data frame to project.
+    # @param fixed_y Vector of length, n, rows of the data.
+    radial_tour_1regressionfacet <- function(data = .dat, fixed_y){
       spinifex::ggtour(.mt_path, data, angle = angle,
                        do_center_frame = do_center_frame) +
         spinifex::append_fixed_y(fixed_y = fixed_y) +
@@ -924,6 +932,9 @@ radial_cheem_tour_subplots <- function(
           row_index = .prim_obs,
           identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"))
     }
+    
+    ## Doubling data to facet on obs and residual.
+    .class <- factor(FALSE) #decode_df$class|predicted_class
     ## Basis 1D, left
     g1 <- spinifex::ggtour(.mt_path, data = .dat, angle = angle,
                            do_center_frame = do_center_frame) +
@@ -938,8 +949,8 @@ radial_cheem_tour_subplots <- function(
     .y     <- decode_df$y %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .resid <- decode_df$residual %>% spinifex::scale_sd() %>% spinifex::scale_01()
     .df_hline <- data.frame(x = FALSE, y = mean(.resid), facet_var = "residual")
-    g2 <- single_facet(.dat, .y,     factor("observed y")) + .t
-    g3 <- single_facet(.dat, .resid, factor("residual"))   + .t +
+    g2 <- radial_tour_1regressionfacet(.dat, .y    ) + .t
+    g3 <- radial_tour_1regressionfacet(.dat, .resid) + .t +
       ggplot2::geom_hline(ggplot2::aes(yintercept = y), .df_hline, color = "grey40")
     ## Individual ggplotly with axes titles
     p1 <- plotly::ggplotly(g1)

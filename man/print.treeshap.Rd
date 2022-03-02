@@ -11,6 +11,10 @@
 
 \item{...}{other arguments}
 }
+\value{
+A data.frame of $shaps of the treeshap object. Also prints
+interactions if used.
+}
 \description{
 Prints treeshap objects
 }

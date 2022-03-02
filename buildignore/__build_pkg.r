@@ -9,7 +9,8 @@ Kmisc::registerFunctions(prefix = "")
 devtools::document()
 ## Needed for rebuild after adding Rcpp treeshap content
 rstudioapi::restartSession()
-devtools::install()
+## Not sure this replaces exisiting package, use Build tab > Install and Restart
+devtools::install() 
 beepr::beep(1)
 devtools::check()
 beepr::beep(2)

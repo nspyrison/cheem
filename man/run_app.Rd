@@ -20,12 +20,13 @@ Runs a local shiny app that demonstrates manual tour and comparable
 traditional techniques for static projections of multivariate data sets.
 }
 \examples{
-\dontrun{
+\donttest{
 ## Runs the app
 run_app("cheem_initial")
 
 ## Run with app code displayed
-run_app(app_nm = "cheem_initial", display.mode = "showcase")}
+run_app(app_nm = "cheem_initial", display.mode = "showcase")
+}
 }
 \seealso{
 Other cheem consumers: 

@@ -49,32 +49,35 @@ clas <- dat$SubclassMS
 fit <- randomForest::randomForest(X, Y, ntree = 25)
 is_randomForest(fit)
 
-\dontrun{
-## ranger model
-if(require(ranger, quietly = TRUE))
-  fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
-is_ranger(fit)
-
 ## gbm model
-if(require(gbm, quietly = TRUE))
+if(require(gbm, quietly = TRUE)){
   fit <- gbm::gbm(Y ~ ., "gaussian", data.frame(X, Y), n.trees = 25)
-is_gbm(fit)
-
-## xgboost
-if(require(xgboost, quietly = TRUE))
-  fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
-                          params = list(objective = "reg:squarederror"))
-is_xgboost(fit)
+  is_gbm(fit)
+}
 
 ## lightgbm
 if(require(lightgbm, quietly = TRUE)){
-  param_lgbm <-
-    list(objective = "regression", max_depth = 2,  force_row_wise = TRUE)
+  param_lgbm <- list(num_leaves = 25, objective = "regression")
   fit <- lightgbm::lightgbm(
     as.matrix(X), Y, params = param_lgbm, 
     nrounds = 2, verbose = 0)
+  ## Delete model file if it exists
+  if(file.exists("lightgbm.model"))
+    file.remove("lightgbm.model")
+  is_lightgbm(fit)
 }
-is_lightgbm(fit)
+
+## ranger model
+if(require(ranger, quietly = TRUE)){
+  fit <- ranger::ranger(Y ~ ., data.frame(X, Y), num.trees = 25)
+  is_ranger(fit)
+}
+
+## xgboost
+if(require(xgboost, quietly = TRUE)){
+  fit <- xgboost::xgboost(as.matrix(X), Y, nrounds = 25, verbose = 0,
+                          params = list(objective = "reg:squarederror"))
+  is_xgboost(fit)
 }
 
 
