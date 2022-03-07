@@ -136,8 +136,11 @@ if(FALSE){ ## To mitigate file size (CRAN note) create a gif and include that
   gganimate::anim_save("tour_penguins.gif", animation = anim)#, path = "./vignettes")
   beepr::beep()
 }
-knitr::include_graphics("tour_penguins.gif")
+#knitr::include_graphics("tour_penguins.gif")
 ```
+
+![](https://github.com/nspyrison/cheem/blob/main/vignettes/tour_penguins.gif?raw=true)
+
 
 Starting from the attribution projection, this instance already looks more like its observed Gentoo than predicted Chinstrap. However, by frame 8, the basis has a full contribution of flipper length and does look more like the predicted Chinstrap. Looking at the parallel coordinate lines on the basis visual we can see that flipper length has a large gap between PI and CI, lets check the original variables to digest.
 
