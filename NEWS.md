@@ -4,6 +4,7 @@
 ## App related changes
 
 - Added vignette: _Getting started with cheem_.
+- Added __pkgdown__ site: https://nspyrison.github.io/cheem/.
 - Added global model performance metrics to shiny app.
 - In `global_view()`, added yhaty panel (residual plot/confusion matrix).
 - In `global_view()`, added color options: log_maha.data and cor_attr.y.
@@ -21,7 +22,7 @@
 
 ## Sourcing __treeshap__
 
-- __drat__ repository hosting __treeshap__ did not work with debian and window rhub platforms.
+- __drat__ repository hosting __treeshap__ did not work with debian and window rhub platforms;
 - Minimally ported functions and cpp source files with @author & @source. Changed examples for consistency and smaller code base support.
 
 
