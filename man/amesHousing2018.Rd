@@ -132,7 +132,7 @@ library(cheem)
 ## Regression setup:
 dat  <- amesHousing2018_NorthAmes[1:100, ]
 X    <- dat[, 1:9]
-Y    <- log(dat$SalePrice)
+Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
 ## Model, treeSHAP explanation, cheem list:

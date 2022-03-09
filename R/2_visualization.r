@@ -15,14 +15,13 @@
 #' library(cheem)
 #' 
 #' ## Regression setup:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model and treeSHAP explanation:
-#' rf_fit <- default_rf(X, Y)
-#' ## Long runtime for full datasets or complex models:
+#' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
 #' ## Attribution basis of one obs:
@@ -61,16 +60,16 @@ basis_attr_df <- function(
 #' library(cheem)
 #' 
 #' ## Regression setup:
-#' dat <- amesHousing2018_NorthAmes
-#' X <- dat[, 1:9]
-#' Y <- log(dat$SalePrice)
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model and treeSHAP explanation:
-#' rf_fit <- default_rf(X, Y)
+#' rf_fit  <- default_rf(X, Y)
 #' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 #' 
-#' ## Suggest the number of a variable to manipulate
+#' ## Suggest the number of a variable to manipulate:
 #' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
   .prim <- basis_attr_df(attr_df, rownum = primary_obs)
@@ -118,7 +117,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model and treeSHAP explanation:
@@ -312,7 +311,7 @@ proto_basis1d_distribution <- function(
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model, explanation, cheem list, global view:
@@ -645,7 +644,7 @@ global_view_subplots <- function(
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model and tree SHAP explanation:

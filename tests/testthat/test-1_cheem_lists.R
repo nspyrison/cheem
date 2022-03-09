@@ -15,7 +15,7 @@
   sub    <- amesHousing2018_NorthAmes[r_idx, ]
   r_X    <- sub[, 1:5]
   r_clas <- sub$SubclassMS[r_idx]
-  r_Y    <- log(sub$SalePrice[r_idx])
+  r_Y    <- sub$SalePrice[r_idx]
 }
 
 

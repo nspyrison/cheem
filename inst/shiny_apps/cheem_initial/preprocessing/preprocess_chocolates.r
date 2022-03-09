@@ -9,7 +9,6 @@
     saveRDS(chocolates,
             file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/chocolates_raw.rds")
   }
-  chocolates <- readRDS("~/R/cheem/inst/shiny_apps/cheem_initial/data/chocolates_raw.rds")
   clas <- factor(chocolates$Type, levels = rev(unique(chocolates$Type)))
   lvls <- levels(clas)
   X <- chocolates[, 5:14] %>% as.data.frame() ## X's not scaled.

@@ -48,7 +48,7 @@
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
@@ -204,7 +204,7 @@ print.treeshap <- function(x, ...){
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
@@ -406,7 +406,7 @@ is.model_unified <- function(x) {
 # #' ## Regression setup:
 # #' dat  <- amesHousing2018_NorthAmes
 # #' X    <- dat[, 1:9]
-# #' Y    <- log(dat$SalePrice)
+# #' Y    <- dat$SalePrice
 # #' 
 # #' dt.pool <- catboost::catboost.load_pool(data = X, label = Y)
 # #' cat_model <- catboost::catboost.train(
@@ -573,7 +573,7 @@ is.model_unified <- function(x) {
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
@@ -676,7 +676,7 @@ gbm.unify <- function(gbm_model, data) {
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
@@ -792,7 +792,7 @@ lightgbm.unify <- function(lgb_model, data, recalculate = FALSE) {
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
@@ -886,7 +886,7 @@ randomForest.unify <- function(rf_model, data) {
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:
@@ -974,7 +974,7 @@ ranger.unify <- function(rng_model, data) {
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Fit a model:

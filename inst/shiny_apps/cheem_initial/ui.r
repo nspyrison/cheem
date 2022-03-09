@@ -87,9 +87,8 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   h4("Cheem tour"),
   fluidRow(
     column(width = 3L,
-           checkboxGroupInput(
-             "inc_feat_nms", label = "Features to include:",
-             choices = NULL, selected = NULL, inline = TRUE)),
+           checkboxGroupInput("inc_feat_nms", label = "Features to include:",
+                              choices = NULL, selected = NULL, inline = TRUE)),
     column(width = 3L,
            selectInput("manip_feat_nm", "Manipulation feature:",  NULL)),
     column(width = 3L, 

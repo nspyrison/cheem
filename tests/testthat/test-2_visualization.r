@@ -17,7 +17,7 @@
   sub    <- amesHousing2018_NorthAmes[r_idx, ]
   r_X    <- sub[, 1:5]
   r_clas <- sub$SubclassMS[r_idx]
-  r_Y    <- log(sub$SalePrice[r_idx])
+  r_Y    <- sub$SalePrice[r_idx]
   r_rf   <- default_rf(r_X, r_Y, verbose = FALSE)
   r_attr <- attr_df_treeshap(r_rf, x = r_X, noisy = FALSE, verbose = FALSE)
   r_chee <- cheem_ls(x = r_X, y = r_Y, class = r_clas, r_rf, r_attr, verbose = FALSE)

@@ -22,7 +22,7 @@
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model, treeSHAP, cheem list, visualize
@@ -71,7 +71,7 @@ default_rf <- function(
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' 
@@ -169,7 +169,7 @@ is_lightgbm <- function(model){
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model, unified prediction from any model (not unified)
@@ -245,7 +245,7 @@ unify_predict <- function(model, x){
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' rf_fit  <- default_rf(X, Y)
@@ -299,7 +299,7 @@ attr_df_treeshap <- function(
 # #' ## Regression setup:
 # #' dat  <- amesHousing2018_NorthAmes
 # #' X    <- dat[, 1:9]
-# #' Y    <- log(dat$SalePrice)
+# #' Y    <- dat$SalePrice
 # #' clas <- dat$SubclassMS
 # #' 
 # #' ## Model and performance:
@@ -308,34 +308,49 @@ attr_df_treeshap <- function(
 model_performance_df <- function(
   model, x = NULL, y = NULL
 ){
-  #### Following the functions in {Metrics}
-  # liable to differ from the performance of the model object (due to adj values?)
-  # but at least consistent format and measures.
-  .y <- y
-  if(is.null(.y)) .y <- model$y
-  .pred   <- unify_predict(model, x)
-  .e      <- .y - .pred ## Residual
-  .se     <- .e^2L
-  .sse    <- sum(.se)
-  .mse    <- mean(.se)
-  .rmse   <- sqrt(.mse)
-  .rse    <- .sse / sum((.y - mean(.y))^2L)
-  .r2     <- 1L - .rse
-  .adj_r2 <- 1L - (.mse / stats::var(.y))
-  ## We could be at this all day...
-  # .auc <- Metrics::auc(y, .pred)
-  # .mae <- mean(abs(.e))
-  # .mad <- .mae / length(y)
-  # .ROC <- ROCR::
-  data.frame(`model type` = utils::tail(class(model), 1L),
-             sse          = .sse,
-             mse          = .mse,
-             rmse         = .rmse,
-             rse          = .rse,
-             r2           = .r2,
-             `adj r2`     = .adj_r2,
-             row.names    = NULL, 
-             check.names  = FALSE)
+  tryCatch(
+    { ## Try
+      
+      #### Following the functions in {Metrics}
+      # liable to differ from the performance of the model object (due to adj values?)
+      # but at least consistent format and measures.
+      .y <- y
+      if(is.null(.y)) .y <- model$y
+      .pred   <- unify_predict(model, x)
+      .e      <- .y - .pred ## Residual
+      .se     <- .e^2L
+      .sse    <- sum(.se)
+      .mse    <- mean(.se)
+      .rmse   <- sqrt(.mse)
+      .mad    <- stats::median(abs(.e))
+      .rse    <- .sse / sum((.y - mean(.y))^2L)
+      .r2     <- 1L - .rse
+      .adj_r2 <- 1L - (.mse / stats::var(.y))
+      
+      ## AUC, only applicable to classification case
+      # {## auc, from DALEX:::model_performance_auc
+      #   tpr_tmp <- tapply(.y, .pred, sum)
+      #   TPR <- c(0L, cumsum(rev(tpr_tmp))) / sum(.y)
+      #   fpr_tmp <- tapply(1L - .y, .pred, sum)
+      #   FPR <- c(0L, cumsum(rev(fpr_tmp))) / sum(1L - .y)
+      #   auc <- sum(diff(FPR) * (TPR[-1L] + TPR[-length(TPR)]) / 2L)
+      # }
+      
+      data.frame(model_type = utils::tail(class(model), 1L),
+                 mse        = .mse,
+                 rmse       = .rmse,
+                 mad        = .mad,
+                 r2         = .r2,
+                 adj_r2     = .adj_r2,
+                 #auc        = auc,
+                 row.names  = NULL)
+    }, 
+    error = function(cond){
+      data.frame(model_type = utils::tail(class(model), 1L),
+                 result     = "Model performance caused an erorr:",
+                 erorr      = cond)
+    }
+  )
 }
 
 #' Create the plot data.frame for the global linked plotly display.
@@ -441,7 +456,7 @@ global_view_df_1layer <- function(
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
-#' Y    <- log(dat$SalePrice)
+#' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model and treeSHAP explanation:
@@ -516,7 +531,7 @@ cheem_ls <- function(
   ## Round numeric columns for display
   .decode_df <- data.frame(lapply(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2L) else c))
-
+  
   if(is_classification){
     .vec_yjitter <- stats::runif(nrow(x), -.2, .2)
     .layer_nm    <- "model (w/ y jitter)"

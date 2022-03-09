@@ -23,14 +23,13 @@ the provided local explanation's attribution.
 library(cheem)
 
 ## Regression setup:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
 ## Model and treeSHAP explanation:
-rf_fit <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
+rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
 ## Attribution basis of one obs:

@@ -81,7 +81,7 @@
       <h1 data-toc-skip>Getting started with cheem</h1>
                         <h4 data-toc-skip class="author">Nicholas Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2022-02-26</h4>
+            <h4 data-toc-skip class="date">2022-03-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
       <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
@@ -92,25 +92,24 @@
     
 <!-- #Example vignette: 
 https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-naniar.Rmd -->
-<p><strong>TL;DR</strong>, you can jump straight into the visuals and application with <code><a href="../reference/run_app.html">cheem::run_app()</a></code>, but we suggest you read the introduction to get situated with the context first.</p>
+<p><strong>Gist:</strong> We explore local explanation of nonlinear models by varying the contributions of the explanmation with a radial tour. We fit random forest models and examine tree SHAP explanation. An interactive <strong>shiny</strong> application facilitates this analysis; see <code><a href="../reference/run_app.html">cheem::run_app()</a></code>.</p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Non-linear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.</p>
+<p>Nonlinear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.</p>
 <p>One part of this is with the use of <em>local explanations</em>. Local explanations approximate the feature importance in the vicinity of one instance (observation).</p>
-<div class="figure" style="text-align: center">
-<img src="../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png" alt="Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_" width="224"><p class="caption">
-Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From <em>Ribiro, M. et. all. (2017). Why should I trust you?</em>
-</p>
-</div>
+<p><img src="https://github.com/nspyrison/cheem/blob/main/inst/shiny_apps/cheem_initial/www/lime_nonlinear.png?raw=true"></p>
+<blockquote>
+<p>Illustration of nonlinear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. Figure from <em>Ribiro, M. et. all. (2017). Why should I trust you?</em></p>
+</blockquote>
 <p>Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. This is the type of analysis visually explored in <strong>cheem</strong>.</p>
 <p>We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization <em>tour</em> animates linear projection-embeddings over small changes in the basis. The package <strong>spinifex</strong> facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the support of the features.</p>
-<p>While this framework would for any non-linear model and compatible local explanation we’ll illustrate with <strong>randomForest</strong> models and the tree SHAP local explanation with <strong>treeshap</strong> (available on GitHub).</p>
+<p>While this framework would for any nonlinear model and compatible local explanation we’ll illustrate with <strong>randomForest</strong> models and the tree SHAP local explanation with <strong>treeshap</strong> (available on GitHub).</p>
 </div>
 <div class="section level2">
 <h2 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
 </h2>
-<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. Alternatively, <strong>treeshape</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>ranger</strong>, <strong>gbm</strong>, <strong>xgboost</strong>, <strong>catboost</strong>, and <strong>lightgbm</strong>.</p>
+<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. <strong>treeshap</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>gbm</strong>, <strong>lightgbm</strong>, <strong>randomForest</strong>, <strong>ranger</strong>, and <strong>xgboost</strong>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/spinifex/" class="external-link">spinifex</a></span><span class="op">)</span>
@@ -171,7 +170,7 @@ Illustration of non-linear classification boundary. The use of local explanation
   <span class="co">#height = 2, width = 4.5, units = "in", res = 150</span>
 <span class="co">## Or as a plotly html widget</span>
 <span class="co">#animate_plotly(ggt, fps = 6)</span></code></pre></div>
-<p><img src="tour_penguins.gif" width="100%" style="display: block; margin: auto;"></p>
+<p><img src="https://github.com/nspyrison/cheem/blob/main/vignettes/tour_penguins.gif?raw=true"></p>
 <p>Starting from the attribution projection, this instance already looks more like its observed Gentoo than predicted Chinstrap. However, by frame 8, the basis has a full contribution of flipper length and does look more like the predicted Chinstrap. Looking at the parallel coordinate lines on the basis visual we can see that flipper length has a large gap between PI and CI, lets check the original variables to digest.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>

@@ -104,7 +104,7 @@ are not supported - please encode them before training.</p></dd>
 <span class="r-in"><span class="co">## Regression setup:</span></span>
 <span class="r-in"><span class="va">dat</span>  <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span></span>
 <span class="r-in"><span class="va">X</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">dat</span><span class="op">$</span><span class="va">SalePrice</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SalePrice</span></span>
 <span class="r-in"><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SubclassMS</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co">## Fit a model:</span></span>
@@ -116,28 +116,28 @@ are not supported - please encode them before training.</p></dd>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">shaps</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ shaps        :'data.frame':	2 obs. of  9 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 0.12837 0.00181</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 0.0443 -0.028</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 0.02376 0.00235</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 0.104 -0.131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] -0.00544 -0.00828</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 0.00275 -0.0104</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 0.00823 -0.02637</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 0.00922 -0.0064</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 0.03223 -0.00561</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 25429 -553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 7399 -4693</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 2719 215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 13926 -16296</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] -2341 -2341</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 152 -986</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 2314 -3959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 1345 -1053</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 5138 -391</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ interactions : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ unified_model:List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ model:'data.frame':	28283 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Tree         : int [1:28283] 0 0 0 0 0 0 0 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Node         : int [1:28283] 0 1 2 3 4 5 6 7 8 9 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:28283] "LivingArea" "YearBuild" "OverallQual" "TotRms" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ model:'data.frame':	28417 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Tree         : int [1:28417] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Node         : int [1:28417] 0 1 2 3 4 5 6 7 8 9 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:28417] "LotArea" "LotArea" "GarageYrBlt" "TotRms" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Decision.type: Factor w/ 2 levels "&lt;=","&lt;": 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:28283] 1243 1950.5 6.5 5.5 943.5 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:28283] 2 4 6 8 10 12 14 16 18 20 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:28283] 3 5 7 9 11 13 15 17 19 21 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : int [1:28283] NA NA NA NA NA NA NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:28283] NA NA NA NA NA NA NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:28283] 338 186 152 21 165 137 15 11 10 53 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:28417] 13730 9010 1959 5.5 2367.5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:28417] 2 4 6 8 10 12 14 16 18 20 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:28417] 3 5 7 9 11 13 15 17 19 21 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : int [1:28417] NA NA NA NA NA NA NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:28417] NA NA NA NA NA NA NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:28417] 338 321 17 153 168 8 9 62 91 164 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ data :'data.frame':	338 obs. of  9 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ LotArea    : num [1:338] 31770 11622 14267 11160 8450 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ OverallQual: num [1:338] 6 5 6 7 5 4 5 5 5 5 ...</span>

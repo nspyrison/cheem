@@ -28,16 +28,16 @@ primary and comparison observations.
 library(cheem)
 
 ## Regression setup:
-dat <- amesHousing2018_NorthAmes
-X <- dat[, 1:9]
-Y <- log(dat$SalePrice)
+dat  <- amesHousing2018_NorthAmes
+X    <- dat[, 1:9]
+Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
 ## Model and treeSHAP explanation:
-rf_fit <- default_rf(X, Y)
+rf_fit  <- default_rf(X, Y)
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 
-## Suggest the number of a variable to manipulate
+## Suggest the number of a variable to manipulate:
 manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 }
 \seealso{

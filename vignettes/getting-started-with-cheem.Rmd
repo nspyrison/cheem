@@ -28,24 +28,25 @@ knitr::opts_chunk$set(
 )
 ```
 
-__TL;DR__, you can jump straight into the visuals and application with `cheem::run_app()`, but we suggest you read the introduction to get situated with the context first.
+__Gist:__ We explore local explanation of nonlinear models by varying the contributions of the explanmation with a radial tour. We fit random forest models and examine tree SHAP explanation. An interactive __shiny__ application facilitates this analysis; see `cheem::run_app()`.
 
 
 # Introduction
 
-Non-linear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.
+Nonlinear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.
 
 One part of this is with the use of _local explanations_. Local explanations approximate the feature importance in the vicinity of one instance (observation).
 
-```{r limenonlinear, echo=FALSE, fig.cap="Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_"}
-knitr::include_graphics("../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png")
-```
+![](https://github.com/nspyrison/cheem/blob/main/inst/shiny_apps/cheem_initial/www/lime_nonlinear.png?raw=true)
+
+>Illustration of nonlinear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. Figure from _Ribiro, M. et. all. (2017). Why should I trust you?_
+
 
 Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. This is the type of analysis visually explored in __cheem__.
 
 We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization _tour_ animates linear projection-embeddings over small changes in the basis. The package __spinifex__ facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the support of the features.
 
-While this framework would for any non-linear model and compatible local explanation we'll illustrate with __randomForest__ models and the tree SHAP local explanation with __treeshap__ (available on GitHub).
+While this framework would for any nonlinear model and compatible local explanation we'll illustrate with __randomForest__ models and the tree SHAP local explanation with __treeshap__ (available on GitHub).
 
 
 # Preprocessing

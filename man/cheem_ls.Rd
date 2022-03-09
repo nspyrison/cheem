@@ -77,7 +77,7 @@ if(FALSE){ ## Don't accidentally save.
 ## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
-Y    <- log(dat$SalePrice)
+Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
 ## Model and treeSHAP explanation:
