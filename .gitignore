@@ -42,3 +42,5 @@ vignettes/*.pdf
 /Meta/
 *.model
 lightgbm.model
+
+inst/shiny_apps/cheem_initial/rsconnect/*
