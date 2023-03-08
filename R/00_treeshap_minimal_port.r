@@ -62,7 +62,7 @@ treeshap <- function(unified_model, x, interactions = FALSE, verbose = TRUE) {
   model <- unified_model$model
   
   # argument check
-  if (!("matrix" %in% class(x) | "data.frame" %in% class(x))) {
+  if (!("matrix" %in% methods::is(x) | "data.frame" %in% methods::is(x))) {
     stop("x parameter has to be data.frame or matrix.")
   }
   
@@ -222,11 +222,11 @@ set_reference_dataset <- function(unified_model, x) {
   data <- x
   
   # argument check
-  if (!("matrix" %in% class(x) | "data.frame" %in% class(x))) {
+  if (!("matrix" %in% methods::is(x) | "data.frame" %in% methods::is(x))) {
     stop("x parameter has to be data.frame or matrix.")
   }
   
-  if (!("model_unified" %in% class(unified_model))) {
+  if (!("model_unified" %in% methods::is(unified_model))) {
     stop("unified_model parameter has to of class model_unified. Produce it using *.unify function.")
   }
   
@@ -340,7 +340,7 @@ print.model_unified <- function(x, ...){
 #'
 is.model_unified <- function(x) {
   # class checks
-  ("model_unified" %in% class(x)) &
+  ("model_unified" %in% methods::is(x)) &
     is.data.frame(x$data) &
     is.data.frame(x$model) &
     # attributes check
@@ -590,7 +590,7 @@ is.model_unified <- function(x) {
 #' shaps <- treeshap(unified_model, X[1:2,])
 #' str(shaps)
 gbm.unify <- function(gbm_model, data) {
-  if(class(gbm_model) != 'gbm') {
+  if('gbm' %in% methods::is(c)) {
     stop('Object gbm_model was not of class "gbm"')
   }
   if(any(gbm_model$var.type > 0)) {
@@ -803,7 +803,7 @@ lightgbm.unify <- function(lgb_model, data, recalculate = FALSE) {
 #' shaps <- treeshap(unified_model, X[1:2, ])
 #' str(shaps)
 randomForest.unify <- function(rf_model, data) {
-  if(!'randomForest' %in% class(rf_model)){stop('Object rf_model was not of class "randomForest"')}
+  if(!'randomForest' %in% methods::is(rf_model)){stop('Object rf_model was not of class "randomForest"')}
   if(any(attr(rf_model$terms, "dataClasses") != "numeric")) {
     stop('Models built on data with categorical features are not supported - please encode them before training.')
   }
@@ -901,7 +901,7 @@ ranger.unify <- function(rng_model, data) {
     stop("Package \"ranger\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
-  if(!'ranger' %in% class(rng_model)) {
+  if(!'ranger' %in% methods::is(rng_model)) {
     stop('Object rng_model was not of class "ranger"')
   }
   n <- rng_model$num.trees

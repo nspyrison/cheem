@@ -1,6 +1,6 @@
 Package: cheem
 Title: Interactively Explore the Support of Local Explanations with the Radial Tour
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
     email = "spyrison@gmail.com",
@@ -24,7 +24,6 @@ LinkingTo:
     Rcpp
 Imports:
     Rcpp,
-    data.table,
     spinifex (>= 0.3.3),
     ggplot2,
     plotly,
@@ -32,6 +31,7 @@ Imports:
     shiny,
     shinythemes,
     shinycssloaders,
+    data.table,
     DT
 Suggests:
     gbm,
@@ -55,6 +55,6 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE, roclets=c('rd', 'collate', 'namespace'))
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Language: en-US
 Config/testthat/edition: 3

@@ -22,7 +22,9 @@ De Cock, D. (2011). "Ames, Iowa: Alternative to the Boston Housing Data as an En
 {Kaggle, Ames Housing Dataset}
 \url{https://www.kaggle.com/prevek18/ames-housing-dataset}
 
-\strong{Replicating this dataset:}\preformatted{if(FALSE) ## Don't accidentally open the URL.
+\strong{Replicating this dataset:}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{if(FALSE) ## Don't accidentally open the URL.
   browseURL("https://www.kaggle.com/prevek18/ames-housing-dataset")
 ames <- readr::read_csv("./buildignore/AmesHousing.csv")
 amesHousing2018_raw <- data.frame(ames)
@@ -74,7 +76,7 @@ amesHousing2018_NorthAmes$SubclassMS <- factor(
   amesHousing2018_NorthAmes$SubclassMS,
   unique(amesHousing2018_NorthAmes$SubclassMS))
 ## save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
-}
+}\if{html}{\out{</div>}}
 }
 \usage{
 amesHousing2018

@@ -28,7 +28,9 @@ or 'Milk"
 \source{
 {Monash University, Introduction to Machine Learning course} \url{https://iml.numbat.space/}
 
-\strong{Replicating this dataset:}\preformatted{if(FALSE) ## Don't accidentally open the URL.
+\strong{Replicating this dataset:}
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{if(FALSE) ## Don't accidentally open the URL.
   browseURL("https://iml.numbat.space/")
 ## Accessed Jan 2022
 chocolates <- readr::read_csv("https://iml.numbat.space/data/chocolates.csv")
@@ -37,7 +39,7 @@ chocolates[, 2] <- factor(chocolates[, 2])
 chocolates[, 3] <- factor(chocolates[, 3])
 chocolates[, 4] <- factor(chocolates[, 4])
 ## save(chocolates, file = "./data/chocolates.rda")
-}
+}\if{html}{\out{</div>}}
 }
 \usage{
 chocolates
