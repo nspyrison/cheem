@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -43,7 +43,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -79,9 +79,10 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Getting started with cheem</h1>
-                        <h4 data-toc-skip class="author">Nicholas Spyrison</h4>
+                        <h4 data-toc-skip class="author">Nicholas
+Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2022-03-09</h4>
+            <h4 data-toc-skip class="date">2023-03-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
       <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
@@ -92,115 +93,868 @@
     
 <!-- #Example vignette: 
 https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-naniar.Rmd -->
-<p><strong>Gist:</strong> We explore local explanation of nonlinear models by varying the contributions of the explanmation with a radial tour. We fit random forest models and examine tree SHAP explanation. An interactive <strong>shiny</strong> application facilitates this analysis; see <code><a href="../reference/run_app.html">cheem::run_app()</a></code>.</p>
+<p><strong>Gist:</strong> We explore local explanation of nonlinear
+models by varying the contributions of the explanmation with a radial
+tour. We fit random forest models and examine tree SHAP explanation. An
+interactive <strong>shiny</strong> application facilitates this
+analysis; see <code><a href="../reference/run_app.html">cheem::run_app()</a></code>.</p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Nonlinear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.</p>
-<p>One part of this is with the use of <em>local explanations</em>. Local explanations approximate the feature importance in the vicinity of one instance (observation).</p>
+<p>Nonlinear models regularly result in more accurate prediction than
+their linear counterparts. However the number and complexity of the
+terms in the model make them more opaque to the interpretability of the
+terms and correspondingly our ability to understand how features
+(variables or predictors) influence predictions. The emergence of
+eXplainable Artificial Intelligence (XAI) attempts to bring
+interpretability back to models.</p>
+<p>One part of this is with the use of <em>local explanations</em>.
+Local explanations approximate the feature importance in the vicinity of
+one instance (observation).</p>
 <p><img src="https://github.com/nspyrison/cheem/blob/main/inst/shiny_apps/cheem_initial/www/lime_nonlinear.png?raw=true"></p>
 <blockquote>
-<p>Illustration of nonlinear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. Figure from <em>Ribiro, M. et. all. (2017). Why should I trust you?</em></p>
+<p>Illustration of nonlinear classification boundary. The use of local
+explanations approximates the feature importance in the vicinity of one
+instance. This allow us to understand a change in which features would
+result in a red plus being classified as a blue circle. Figure from
+<em>Ribiro, M. et. all. (2017). Why should I trust you?</em></p>
 </blockquote>
-<p>Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. This is the type of analysis visually explored in <strong>cheem</strong>.</p>
-<p>We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization <em>tour</em> animates linear projection-embeddings over small changes in the basis. The package <strong>spinifex</strong> facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the support of the features.</p>
-<p>While this framework would for any nonlinear model and compatible local explanation we’ll illustrate with <strong>randomForest</strong> models and the tree SHAP local explanation with <strong>treeshap</strong> (available on GitHub).</p>
+<p>Should we trust the purposed feature importance in the vicinity of a
+misclassified or an extreme residual? An analyst may want to explore the
+support feature contributions where the explanations makes sense or may
+be completely unreliable. This is the type of analysis visually explored
+in <strong>cheem</strong>.</p>
+<p>We use the normalized linear-feature attribution as a basis and
+explore the support of features that confirm this explanation what under
+which contributions this explanation does not hold. A data visualization
+<em>tour</em> animates linear projection-embeddings over small changes
+in the basis. The package <strong>spinifex</strong> facilitates radial,
+manual tours which vary the contribution of a select feature. By using a
+radial tour we test the support of the features.</p>
+<p>While this framework would for any nonlinear model and compatible
+local explanation we’ll illustrate with <strong>randomForest</strong>
+models and the tree SHAP local explanation with
+<strong>treeshap</strong> (available on GitHub).</p>
 </div>
 <div class="section level2">
 <h2 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
 </h2>
-<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. <strong>treeshap</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>gbm</strong>, <strong>lightgbm</strong>, <strong>randomForest</strong>, <strong>ranger</strong>, and <strong>xgboost</strong>.</p>
+<p>The first thing we’ll need are data and tree based model. We’ll use a
+wrapper function for a <strong>randomForest</strong> modest with modest
+hyperparameters. This will avoid overfitting and help mitigate the
+runtime of tree SHAP. <strong>treeshap</strong> and
+<strong>cheem</strong> are compatible with tree based models from
+<strong>gbm</strong>, <strong>lightgbm</strong>,
+<strong>randomForest</strong>, <strong>ranger</strong>, and
+<strong>xgboost</strong>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/spinifex/" class="external-link">spinifex</a></span><span class="op">)</span>
-
-<span class="co">## Classification case, Penguins data</span>
-<span class="va">X</span>           <span class="op">&lt;-</span> <span class="va">penguins_na.rm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>
-<span class="va">clas</span>        <span class="op">&lt;-</span> <span class="va">penguins_na.rm</span><span class="op">$</span><span class="va">species</span>
-<span class="va">Y</span>           <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">clas</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bl"</span>, <span class="st">"bd"</span>, <span class="st">"fl"</span>, <span class="st">"bm"</span><span class="op">)</span>
-
-<span class="co">## Create a random forest classifying penguin species</span>
-<span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/default_rf.html">default_rf</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="co">## For other compatible tree based models see examples in:</span>
-<span class="kw">if</span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>
-  <span class="op">?</span><span class="va">is_randomForest</span></code></pre></div>
-<p>Next we need to extract the local explanation from each observation. Originally only tree SHAP is supported. Then we’ll prepare the information to be consumed by the cheem visuals.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Local attribution of all observations</span>
-<span class="co">#### !! This is expensive for complex models/data</span>
-<span class="va">shap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/attr_df_treeshap.html">attr_df_treeshap</a></span><span class="op">(</span><span class="va">rf_fit</span>, <span class="va">X</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span>, noisy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">## Extract statistics and prep for cheem consumption</span>
-<span class="va">this_ls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cheem_ls.html">cheem_ls</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, class <span class="op">=</span> <span class="va">clas</span>,
-                    model <span class="op">=</span> <span class="va">rf_fit</span>, attr_df <span class="op">=</span> <span class="va">shap_df</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p>Now we are done with all of the leg work, let’s turn our attention towards the visuals and analysis.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/spinifex/" class="external-link">spinifex</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Classification case, Penguins data</span></span>
+<span><span class="va">X</span>           <span class="op">&lt;-</span> <span class="va">penguins_na.rm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="va">clas</span>        <span class="op">&lt;-</span> <span class="va">penguins_na.rm</span><span class="op">$</span><span class="va">species</span></span>
+<span><span class="va">Y</span>           <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">clas</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bl"</span>, <span class="st">"bd"</span>, <span class="st">"fl"</span>, <span class="st">"bm"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Create a random forest classifying penguin species</span></span>
+<span><span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/default_rf.html">default_rf</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## For other compatible tree based models see examples in:</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="op">?</span><span class="va">is_randomForest</span></span></code></pre></div>
+<p>Next we need to extract the local explanation from each observation.
+Originally only tree SHAP is supported. Then we’ll prepare the
+information to be consumed by the cheem visuals.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Local attribution of all observations</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">#### !! This is expensive for complex models/data</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>shap_df <span class="ot">&lt;-</span> <span class="fu">attr_df_treeshap</span>(rf_fit, X, <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">noisy =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="sc">|</span><span class="dv">0</span><span class="sc">%----|------|20%---</span><span class="er">|</span><span class="sc">------</span><span class="er">|</span><span class="dv">40</span><span class="sc">%---|------|60%---</span><span class="er">|</span><span class="sc">------</span><span class="er">|</span><span class="dv">80</span><span class="sc">%---|------|100%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; =---------------------------------------------------------------------- (0%)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="er">=</span><span class="sc">----------------------------------------------------------------------</span> (<span class="dv">0</span>%)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span><span class="sc">----------------------------------------------------------------------</span> (<span class="dv">0</span>%)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span><span class="sc">----------------------------------------------------------------------</span> (<span class="dv">0</span>%)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ot">=</span><span class="sc">----------------------------------------------------------------------</span> (<span class="dv">1</span>%)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="sc">==---------------------------------------------------------------------</span> (<span class="dv">1</span>%)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="sc">==---------------------------------------------------------------------</span> (<span class="dv">1</span>%)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="sc">==---------------------------------------------------------------------</span> (<span class="dv">2</span>%)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="sc">==---------------------------------------------------------------------</span> (<span class="dv">2</span>%)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="sc">==---------------------------------------------------------------------</span> (<span class="dv">2</span>%)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span><span class="sc">--------------------------------------------------------------------</span> (<span class="dv">3</span>%)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span><span class="sc">--------------------------------------------------------------------</span> (<span class="dv">3</span>%)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span><span class="sc">--------------------------------------------------------------------</span> (<span class="dv">3</span>%)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span><span class="sc">--------------------------------------------------------------------</span> (<span class="dv">3</span>%)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=</span><span class="sc">--------------------------------------------------------------------</span> (<span class="dv">4</span>%)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==</span><span class="sc">-------------------------------------------------------------------</span> (<span class="dv">4</span>%)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==</span><span class="sc">-------------------------------------------------------------------</span> (<span class="dv">4</span>%)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==</span><span class="sc">-------------------------------------------------------------------</span> (<span class="dv">5</span>%)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==</span><span class="sc">-------------------------------------------------------------------</span> (<span class="dv">5</span>%)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==</span><span class="sc">-------------------------------------------------------------------</span> (<span class="dv">5</span>%)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===</span><span class="sc">------------------------------------------------------------------</span> (<span class="dv">6</span>%)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===</span><span class="sc">------------------------------------------------------------------</span> (<span class="dv">6</span>%)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===</span><span class="sc">------------------------------------------------------------------</span> (<span class="dv">6</span>%)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===</span><span class="sc">------------------------------------------------------------------</span> (<span class="dv">6</span>%)</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====</span><span class="sc">-----------------------------------------------------------------</span> (<span class="dv">7</span>%)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====</span><span class="sc">-----------------------------------------------------------------</span> (<span class="dv">7</span>%)</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====</span><span class="sc">-----------------------------------------------------------------</span> (<span class="dv">7</span>%)</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====</span><span class="sc">-----------------------------------------------------------------</span> (<span class="dv">8</span>%)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====</span><span class="sc">-----------------------------------------------------------------</span> (<span class="dv">8</span>%)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====</span><span class="sc">----------------------------------------------------------------</span> (<span class="dv">8</span>%)</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====</span><span class="sc">----------------------------------------------------------------</span> (<span class="dv">9</span>%)</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====</span><span class="sc">----------------------------------------------------------------</span> (<span class="dv">9</span>%)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====</span><span class="sc">----------------------------------------------------------------</span> (<span class="dv">9</span>%)</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====</span><span class="sc">----------------------------------------------------------------</span> (<span class="dv">9</span>%)</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======</span><span class="sc">---------------------------------------------------------------</span> (<span class="dv">10</span>%)</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======</span><span class="sc">---------------------------------------------------------------</span> (<span class="dv">10</span>%)</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======</span><span class="sc">---------------------------------------------------------------</span> (<span class="dv">10</span>%)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======</span><span class="sc">---------------------------------------------------------------</span> (<span class="dv">11</span>%)</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======</span><span class="sc">---------------------------------------------------------------</span> (<span class="dv">11</span>%)</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======</span><span class="sc">--------------------------------------------------------------</span> (<span class="dv">11</span>%)</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======</span><span class="sc">--------------------------------------------------------------</span> (<span class="dv">12</span>%)</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======</span><span class="sc">--------------------------------------------------------------</span> (<span class="dv">12</span>%)</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======</span><span class="sc">--------------------------------------------------------------</span> (<span class="dv">12</span>%)</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========</span><span class="sc">-------------------------------------------------------------</span> (<span class="dv">12</span>%)</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========</span><span class="sc">-------------------------------------------------------------</span> (<span class="dv">13</span>%)</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========</span><span class="sc">-------------------------------------------------------------</span> (<span class="dv">13</span>%)</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========</span><span class="sc">-------------------------------------------------------------</span> (<span class="dv">13</span>%)</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========</span><span class="sc">-------------------------------------------------------------</span> (<span class="dv">14</span>%)</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========</span><span class="sc">------------------------------------------------------------</span> (<span class="dv">14</span>%)</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========</span><span class="sc">------------------------------------------------------------</span> (<span class="dv">14</span>%)</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========</span><span class="sc">------------------------------------------------------------</span> (<span class="dv">15</span>%)</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========</span><span class="sc">------------------------------------------------------------</span> (<span class="dv">15</span>%)</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========</span><span class="sc">------------------------------------------------------------</span> (<span class="dv">15</span>%)</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========</span><span class="sc">-----------------------------------------------------------</span> (<span class="dv">15</span>%)</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========</span><span class="sc">-----------------------------------------------------------</span> (<span class="dv">16</span>%)</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========</span><span class="sc">-----------------------------------------------------------</span> (<span class="dv">16</span>%)</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========</span><span class="sc">-----------------------------------------------------------</span> (<span class="dv">16</span>%)</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========</span><span class="sc">-----------------------------------------------------------</span> (<span class="dv">17</span>%)</span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========</span><span class="sc">----------------------------------------------------------</span> (<span class="dv">17</span>%)</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========</span><span class="sc">----------------------------------------------------------</span> (<span class="dv">17</span>%)</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========</span><span class="sc">----------------------------------------------------------</span> (<span class="dv">18</span>%)</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========</span><span class="sc">----------------------------------------------------------</span> (<span class="dv">18</span>%)</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============</span><span class="sc">---------------------------------------------------------</span> (<span class="dv">18</span>%)</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============</span><span class="sc">---------------------------------------------------------</span> (<span class="dv">18</span>%)</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============</span><span class="sc">---------------------------------------------------------</span> (<span class="dv">19</span>%)</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============</span><span class="sc">---------------------------------------------------------</span> (<span class="dv">19</span>%)</span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============</span><span class="sc">---------------------------------------------------------</span> (<span class="dv">19</span>%)</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============</span><span class="sc">--------------------------------------------------------</span> (<span class="dv">20</span>%)</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============</span><span class="sc">--------------------------------------------------------</span> (<span class="dv">20</span>%)</span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============</span><span class="sc">--------------------------------------------------------</span> (<span class="dv">20</span>%)</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============</span><span class="sc">--------------------------------------------------------</span> (<span class="dv">21</span>%)</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============</span><span class="sc">--------------------------------------------------------</span> (<span class="dv">21</span>%)</span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============</span><span class="sc">-------------------------------------------------------</span> (<span class="dv">21</span>%)</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============</span><span class="sc">-------------------------------------------------------</span> (<span class="dv">21</span>%)</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============</span><span class="sc">-------------------------------------------------------</span> (<span class="dv">22</span>%)</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============</span><span class="sc">-------------------------------------------------------</span> (<span class="dv">22</span>%)</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============</span><span class="sc">-------------------------------------------------------</span> (<span class="dv">22</span>%)</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============</span><span class="sc">------------------------------------------------------</span> (<span class="dv">23</span>%)</span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============</span><span class="sc">------------------------------------------------------</span> (<span class="dv">23</span>%)</span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============</span><span class="sc">------------------------------------------------------</span> (<span class="dv">23</span>%)</span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============</span><span class="sc">------------------------------------------------------</span> (<span class="dv">24</span>%)</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================</span><span class="sc">-----------------------------------------------------</span> (<span class="dv">24</span>%)</span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================</span><span class="sc">-----------------------------------------------------</span> (<span class="dv">24</span>%)</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================</span><span class="sc">-----------------------------------------------------</span> (<span class="dv">24</span>%)</span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================</span><span class="sc">-----------------------------------------------------</span> (<span class="dv">25</span>%)</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================</span><span class="sc">-----------------------------------------------------</span> (<span class="dv">25</span>%)</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================</span><span class="sc">----------------------------------------------------</span> (<span class="dv">25</span>%)</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================</span><span class="sc">----------------------------------------------------</span> (<span class="dv">26</span>%)</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================</span><span class="sc">----------------------------------------------------</span> (<span class="dv">26</span>%)</span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================</span><span class="sc">----------------------------------------------------</span> (<span class="dv">26</span>%)</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================</span><span class="sc">----------------------------------------------------</span> (<span class="dv">27</span>%)</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================</span><span class="sc">---------------------------------------------------</span> (<span class="dv">27</span>%)</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================</span><span class="sc">---------------------------------------------------</span> (<span class="dv">27</span>%)</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================</span><span class="sc">---------------------------------------------------</span> (<span class="dv">27</span>%)</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================</span><span class="sc">---------------------------------------------------</span> (<span class="dv">28</span>%)</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================</span><span class="sc">---------------------------------------------------</span> (<span class="dv">28</span>%)</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================</span><span class="sc">--------------------------------------------------</span> (<span class="dv">28</span>%)</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================</span><span class="sc">--------------------------------------------------</span> (<span class="dv">29</span>%)</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================</span><span class="sc">--------------------------------------------------</span> (<span class="dv">29</span>%)</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================</span><span class="sc">--------------------------------------------------</span> (<span class="dv">29</span>%)</span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================</span><span class="sc">-------------------------------------------------</span> (<span class="dv">30</span>%)</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================</span><span class="sc">-------------------------------------------------</span> (<span class="dv">30</span>%)</span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================</span><span class="sc">-------------------------------------------------</span> (<span class="dv">30</span>%)</span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================</span><span class="sc">-------------------------------------------------</span> (<span class="dv">30</span>%)</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================</span><span class="sc">-------------------------------------------------</span> (<span class="dv">31</span>%)</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================</span><span class="sc">------------------------------------------------</span> (<span class="dv">31</span>%)</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================</span><span class="sc">------------------------------------------------</span> (<span class="dv">31</span>%)</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================</span><span class="sc">------------------------------------------------</span> (<span class="dv">32</span>%)</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================</span><span class="sc">------------------------------------------------</span> (<span class="dv">32</span>%)</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================</span><span class="sc">------------------------------------------------</span> (<span class="dv">32</span>%)</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================</span><span class="sc">-----------------------------------------------</span> (<span class="dv">33</span>%)</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================</span><span class="sc">-----------------------------------------------</span> (<span class="dv">33</span>%)</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================</span><span class="sc">-----------------------------------------------</span> (<span class="dv">33</span>%)</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================</span><span class="sc">-----------------------------------------------</span> (<span class="dv">33</span>%)</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================</span><span class="sc">-----------------------------------------------</span> (<span class="dv">34</span>%)</span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================</span><span class="sc">----------------------------------------------</span> (<span class="dv">34</span>%)</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================</span><span class="sc">----------------------------------------------</span> (<span class="dv">34</span>%)</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================</span><span class="sc">----------------------------------------------</span> (<span class="dv">35</span>%)</span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================</span><span class="sc">----------------------------------------------</span> (<span class="dv">35</span>%)</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================</span><span class="sc">---------------------------------------------</span> (<span class="dv">35</span>%)</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================</span><span class="sc">---------------------------------------------</span> (<span class="dv">36</span>%)</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================</span><span class="sc">---------------------------------------------</span> (<span class="dv">36</span>%)</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================</span><span class="sc">---------------------------------------------</span> (<span class="dv">36</span>%)</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================</span><span class="sc">---------------------------------------------</span> (<span class="dv">36</span>%)</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================</span><span class="sc">--------------------------------------------</span> (<span class="dv">37</span>%)</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================</span><span class="sc">--------------------------------------------</span> (<span class="dv">37</span>%)</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================</span><span class="sc">--------------------------------------------</span> (<span class="dv">37</span>%)</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================</span><span class="sc">--------------------------------------------</span> (<span class="dv">38</span>%)</span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================</span><span class="sc">--------------------------------------------</span> (<span class="dv">38</span>%)</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================</span><span class="sc">-------------------------------------------</span> (<span class="dv">38</span>%)</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================</span><span class="sc">-------------------------------------------</span> (<span class="dv">39</span>%)</span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================</span><span class="sc">-------------------------------------------</span> (<span class="dv">39</span>%)</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================</span><span class="sc">-------------------------------------------</span> (<span class="dv">39</span>%)</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================</span><span class="sc">-------------------------------------------</span> (<span class="dv">39</span>%)</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================</span><span class="sc">------------------------------------------</span> (<span class="dv">40</span>%)</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================</span><span class="sc">------------------------------------------</span> (<span class="dv">40</span>%)</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================</span><span class="sc">------------------------------------------</span> (<span class="dv">40</span>%)</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================</span><span class="sc">------------------------------------------</span> (<span class="dv">41</span>%)</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================</span><span class="sc">-----------------------------------------</span> (<span class="dv">41</span>%)</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================</span><span class="sc">-----------------------------------------</span> (<span class="dv">41</span>%)</span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================</span><span class="sc">-----------------------------------------</span> (<span class="dv">42</span>%)</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================</span><span class="sc">-----------------------------------------</span> (<span class="dv">42</span>%)</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================</span><span class="sc">-----------------------------------------</span> (<span class="dv">42</span>%)</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================</span><span class="sc">----------------------------------------</span> (<span class="dv">42</span>%)</span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================</span><span class="sc">----------------------------------------</span> (<span class="dv">43</span>%)</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================</span><span class="sc">----------------------------------------</span> (<span class="dv">43</span>%)</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================</span><span class="sc">----------------------------------------</span> (<span class="dv">43</span>%)</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================</span><span class="sc">----------------------------------------</span> (<span class="dv">44</span>%)</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================</span><span class="sc">---------------------------------------</span> (<span class="dv">44</span>%)</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================</span><span class="sc">---------------------------------------</span> (<span class="dv">44</span>%)</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================</span><span class="sc">---------------------------------------</span> (<span class="dv">45</span>%)</span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================</span><span class="sc">---------------------------------------</span> (<span class="dv">45</span>%)</span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================</span><span class="sc">---------------------------------------</span> (<span class="dv">45</span>%)</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================</span><span class="sc">--------------------------------------</span> (<span class="dv">45</span>%)</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================</span><span class="sc">--------------------------------------</span> (<span class="dv">46</span>%)</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================</span><span class="sc">--------------------------------------</span> (<span class="dv">46</span>%)</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================</span><span class="sc">--------------------------------------</span> (<span class="dv">46</span>%)</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================</span><span class="sc">-------------------------------------</span> (<span class="dv">47</span>%)</span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================</span><span class="sc">-------------------------------------</span> (<span class="dv">47</span>%)</span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================</span><span class="sc">-------------------------------------</span> (<span class="dv">47</span>%)</span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================</span><span class="sc">-------------------------------------</span> (<span class="dv">48</span>%)</span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================</span><span class="sc">-------------------------------------</span> (<span class="dv">48</span>%)</span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================</span><span class="sc">------------------------------------</span> (<span class="dv">48</span>%)</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================</span><span class="sc">------------------------------------</span> (<span class="dv">48</span>%)</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================</span><span class="sc">------------------------------------</span> (<span class="dv">49</span>%)</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================</span><span class="sc">------------------------------------</span> (<span class="dv">49</span>%)</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================</span><span class="sc">------------------------------------</span> (<span class="dv">49</span>%)</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================</span><span class="sc">-----------------------------------</span> (<span class="dv">50</span>%)</span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================</span><span class="sc">-----------------------------------</span> (<span class="dv">50</span>%)</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================</span><span class="sc">-----------------------------------</span> (<span class="dv">50</span>%)</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================</span><span class="sc">-----------------------------------</span> (<span class="dv">51</span>%)</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================</span><span class="sc">-----------------------------------</span> (<span class="dv">51</span>%)</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================</span><span class="sc">----------------------------------</span> (<span class="dv">51</span>%)</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================</span><span class="sc">----------------------------------</span> (<span class="dv">51</span>%)</span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================</span><span class="sc">----------------------------------</span> (<span class="dv">52</span>%)</span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================</span><span class="sc">----------------------------------</span> (<span class="dv">52</span>%)</span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================</span><span class="sc">----------------------------------</span> (<span class="dv">52</span>%)</span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================</span><span class="sc">---------------------------------</span> (<span class="dv">53</span>%)</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================</span><span class="sc">---------------------------------</span> (<span class="dv">53</span>%)</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================</span><span class="sc">---------------------------------</span> (<span class="dv">53</span>%)</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================</span><span class="sc">---------------------------------</span> (<span class="dv">54</span>%)</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================</span><span class="sc">--------------------------------</span> (<span class="dv">54</span>%)</span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================</span><span class="sc">--------------------------------</span> (<span class="dv">54</span>%)</span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================</span><span class="sc">--------------------------------</span> (<span class="dv">54</span>%)</span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================</span><span class="sc">--------------------------------</span> (<span class="dv">55</span>%)</span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================</span><span class="sc">--------------------------------</span> (<span class="dv">55</span>%)</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================</span><span class="sc">-------------------------------</span> (<span class="dv">55</span>%)</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================</span><span class="sc">-------------------------------</span> (<span class="dv">56</span>%)</span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================</span><span class="sc">-------------------------------</span> (<span class="dv">56</span>%)</span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================</span><span class="sc">-------------------------------</span> (<span class="dv">56</span>%)</span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================</span><span class="sc">-------------------------------</span> (<span class="dv">57</span>%)</span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================</span><span class="sc">------------------------------</span> (<span class="dv">57</span>%)</span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================</span><span class="sc">------------------------------</span> (<span class="dv">57</span>%)</span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================</span><span class="sc">------------------------------</span> (<span class="dv">57</span>%)</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================</span><span class="sc">------------------------------</span> (<span class="dv">58</span>%)</span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================</span><span class="sc">------------------------------</span> (<span class="dv">58</span>%)</span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================</span><span class="sc">-----------------------------</span> (<span class="dv">58</span>%)</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================</span><span class="sc">-----------------------------</span> (<span class="dv">59</span>%)</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================</span><span class="sc">-----------------------------</span> (<span class="dv">59</span>%)</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================</span><span class="sc">-----------------------------</span> (<span class="dv">59</span>%)</span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================</span><span class="sc">----------------------------</span> (<span class="dv">60</span>%)</span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================</span><span class="sc">----------------------------</span> (<span class="dv">60</span>%)</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================</span><span class="sc">----------------------------</span> (<span class="dv">60</span>%)</span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================</span><span class="sc">----------------------------</span> (<span class="dv">60</span>%)</span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================</span><span class="sc">----------------------------</span> (<span class="dv">61</span>%)</span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================</span><span class="sc">---------------------------</span> (<span class="dv">61</span>%)</span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================</span><span class="sc">---------------------------</span> (<span class="dv">61</span>%)</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================</span><span class="sc">---------------------------</span> (<span class="dv">62</span>%)</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================</span><span class="sc">---------------------------</span> (<span class="dv">62</span>%)</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================</span><span class="sc">---------------------------</span> (<span class="dv">62</span>%)</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================</span><span class="sc">--------------------------</span> (<span class="dv">63</span>%)</span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================</span><span class="sc">--------------------------</span> (<span class="dv">63</span>%)</span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================</span><span class="sc">--------------------------</span> (<span class="dv">63</span>%)</span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================</span><span class="sc">--------------------------</span> (<span class="dv">63</span>%)</span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================</span><span class="sc">--------------------------</span> (<span class="dv">64</span>%)</span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================</span><span class="sc">-------------------------</span> (<span class="dv">64</span>%)</span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================</span><span class="sc">-------------------------</span> (<span class="dv">64</span>%)</span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================</span><span class="sc">-------------------------</span> (<span class="dv">65</span>%)</span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================</span><span class="sc">-------------------------</span> (<span class="dv">65</span>%)</span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================</span><span class="sc">------------------------</span> (<span class="dv">65</span>%)</span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================</span><span class="sc">------------------------</span> (<span class="dv">66</span>%)</span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================</span><span class="sc">------------------------</span> (<span class="dv">66</span>%)</span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================</span><span class="sc">------------------------</span> (<span class="dv">66</span>%)</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================</span><span class="sc">------------------------</span> (<span class="dv">66</span>%)</span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================</span><span class="sc">-----------------------</span> (<span class="dv">67</span>%)</span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================</span><span class="sc">-----------------------</span> (<span class="dv">67</span>%)</span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================</span><span class="sc">-----------------------</span> (<span class="dv">67</span>%)</span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================</span><span class="sc">-----------------------</span> (<span class="dv">68</span>%)</span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================</span><span class="sc">-----------------------</span> (<span class="dv">68</span>%)</span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================</span><span class="sc">----------------------</span> (<span class="dv">68</span>%)</span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================</span><span class="sc">----------------------</span> (<span class="dv">69</span>%)</span>
+<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================</span><span class="sc">----------------------</span> (<span class="dv">69</span>%)</span>
+<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================</span><span class="sc">----------------------</span> (<span class="dv">69</span>%)</span>
+<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================</span><span class="sc">----------------------</span> (<span class="dv">69</span>%)</span>
+<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================</span><span class="sc">---------------------</span> (<span class="dv">70</span>%)</span>
+<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================</span><span class="sc">---------------------</span> (<span class="dv">70</span>%)</span>
+<span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================</span><span class="sc">---------------------</span> (<span class="dv">70</span>%)</span>
+<span id="cb2-479"><a href="#cb2-479" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-480"><a href="#cb2-480" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================</span><span class="sc">---------------------</span> (<span class="dv">71</span>%)</span>
+<span id="cb2-481"><a href="#cb2-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-482"><a href="#cb2-482" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================</span><span class="sc">--------------------</span> (<span class="dv">71</span>%)</span>
+<span id="cb2-483"><a href="#cb2-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-484"><a href="#cb2-484" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================</span><span class="sc">--------------------</span> (<span class="dv">71</span>%)</span>
+<span id="cb2-485"><a href="#cb2-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-486"><a href="#cb2-486" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================</span><span class="sc">--------------------</span> (<span class="dv">72</span>%)</span>
+<span id="cb2-487"><a href="#cb2-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-488"><a href="#cb2-488" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================</span><span class="sc">--------------------</span> (<span class="dv">72</span>%)</span>
+<span id="cb2-489"><a href="#cb2-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-490"><a href="#cb2-490" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================</span><span class="sc">--------------------</span> (<span class="dv">72</span>%)</span>
+<span id="cb2-491"><a href="#cb2-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-492"><a href="#cb2-492" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================</span><span class="sc">-------------------</span> (<span class="dv">72</span>%)</span>
+<span id="cb2-493"><a href="#cb2-493" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-494"><a href="#cb2-494" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================</span><span class="sc">-------------------</span> (<span class="dv">73</span>%)</span>
+<span id="cb2-495"><a href="#cb2-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-496"><a href="#cb2-496" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================</span><span class="sc">-------------------</span> (<span class="dv">73</span>%)</span>
+<span id="cb2-497"><a href="#cb2-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-498"><a href="#cb2-498" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================</span><span class="sc">-------------------</span> (<span class="dv">73</span>%)</span>
+<span id="cb2-499"><a href="#cb2-499" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-500"><a href="#cb2-500" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================</span><span class="sc">-------------------</span> (<span class="dv">74</span>%)</span>
+<span id="cb2-501"><a href="#cb2-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-502"><a href="#cb2-502" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================</span><span class="sc">------------------</span> (<span class="dv">74</span>%)</span>
+<span id="cb2-503"><a href="#cb2-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-504"><a href="#cb2-504" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================</span><span class="sc">------------------</span> (<span class="dv">74</span>%)</span>
+<span id="cb2-505"><a href="#cb2-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-506"><a href="#cb2-506" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================</span><span class="sc">------------------</span> (<span class="dv">75</span>%)</span>
+<span id="cb2-507"><a href="#cb2-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-508"><a href="#cb2-508" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================</span><span class="sc">------------------</span> (<span class="dv">75</span>%)</span>
+<span id="cb2-509"><a href="#cb2-509" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-510"><a href="#cb2-510" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================</span><span class="sc">------------------</span> (<span class="dv">75</span>%)</span>
+<span id="cb2-511"><a href="#cb2-511" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-512"><a href="#cb2-512" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================</span><span class="sc">-----------------</span> (<span class="dv">75</span>%)</span>
+<span id="cb2-513"><a href="#cb2-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-514"><a href="#cb2-514" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================</span><span class="sc">-----------------</span> (<span class="dv">76</span>%)</span>
+<span id="cb2-515"><a href="#cb2-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-516"><a href="#cb2-516" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================</span><span class="sc">-----------------</span> (<span class="dv">76</span>%)</span>
+<span id="cb2-517"><a href="#cb2-517" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-518"><a href="#cb2-518" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================</span><span class="sc">-----------------</span> (<span class="dv">76</span>%)</span>
+<span id="cb2-519"><a href="#cb2-519" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-520"><a href="#cb2-520" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================================</span><span class="sc">----------------</span> (<span class="dv">77</span>%)</span>
+<span id="cb2-521"><a href="#cb2-521" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-522"><a href="#cb2-522" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================================</span><span class="sc">----------------</span> (<span class="dv">77</span>%)</span>
+<span id="cb2-523"><a href="#cb2-523" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-524"><a href="#cb2-524" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================================</span><span class="sc">----------------</span> (<span class="dv">77</span>%)</span>
+<span id="cb2-525"><a href="#cb2-525" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-526"><a href="#cb2-526" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================================</span><span class="sc">----------------</span> (<span class="dv">78</span>%)</span>
+<span id="cb2-527"><a href="#cb2-527" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-528"><a href="#cb2-528" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================================</span><span class="sc">----------------</span> (<span class="dv">78</span>%)</span>
+<span id="cb2-529"><a href="#cb2-529" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-530"><a href="#cb2-530" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================================</span><span class="sc">---------------</span> (<span class="dv">78</span>%)</span>
+<span id="cb2-531"><a href="#cb2-531" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-532"><a href="#cb2-532" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================================</span><span class="sc">---------------</span> (<span class="dv">78</span>%)</span>
+<span id="cb2-533"><a href="#cb2-533" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-534"><a href="#cb2-534" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================================</span><span class="sc">---------------</span> (<span class="dv">79</span>%)</span>
+<span id="cb2-535"><a href="#cb2-535" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-536"><a href="#cb2-536" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================================</span><span class="sc">---------------</span> (<span class="dv">79</span>%)</span>
+<span id="cb2-537"><a href="#cb2-537" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-538"><a href="#cb2-538" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">======================================================</span><span class="sc">---------------</span> (<span class="dv">79</span>%)</span>
+<span id="cb2-539"><a href="#cb2-539" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-540"><a href="#cb2-540" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================================</span><span class="sc">--------------</span> (<span class="dv">80</span>%)</span>
+<span id="cb2-541"><a href="#cb2-541" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-542"><a href="#cb2-542" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================================</span><span class="sc">--------------</span> (<span class="dv">80</span>%)</span>
+<span id="cb2-543"><a href="#cb2-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-544"><a href="#cb2-544" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================================</span><span class="sc">--------------</span> (<span class="dv">80</span>%)</span>
+<span id="cb2-545"><a href="#cb2-545" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-546"><a href="#cb2-546" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================================</span><span class="sc">--------------</span> (<span class="dv">81</span>%)</span>
+<span id="cb2-547"><a href="#cb2-547" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=======================================================</span><span class="sc">--------------</span> (<span class="dv">81</span>%)</span>
+<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================================</span><span class="sc">-------------</span> (<span class="dv">81</span>%)</span>
+<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================================</span><span class="sc">-------------</span> (<span class="dv">81</span>%)</span>
+<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================================</span><span class="sc">-------------</span> (<span class="dv">82</span>%)</span>
+<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">========================================================</span><span class="sc">-------------</span> (<span class="dv">82</span>%)</span>
+<span id="cb2-557"><a href="#cb2-557" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-558"><a href="#cb2-558" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================================</span><span class="sc">------------</span> (<span class="dv">82</span>%)</span>
+<span id="cb2-559"><a href="#cb2-559" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-560"><a href="#cb2-560" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================================</span><span class="sc">------------</span> (<span class="dv">83</span>%)</span>
+<span id="cb2-561"><a href="#cb2-561" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-562"><a href="#cb2-562" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================================</span><span class="sc">------------</span> (<span class="dv">83</span>%)</span>
+<span id="cb2-563"><a href="#cb2-563" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-564"><a href="#cb2-564" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================================</span><span class="sc">------------</span> (<span class="dv">83</span>%)</span>
+<span id="cb2-565"><a href="#cb2-565" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-566"><a href="#cb2-566" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=========================================================</span><span class="sc">------------</span> (<span class="dv">84</span>%)</span>
+<span id="cb2-567"><a href="#cb2-567" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-568"><a href="#cb2-568" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================================</span><span class="sc">-----------</span> (<span class="dv">84</span>%)</span>
+<span id="cb2-569"><a href="#cb2-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-570"><a href="#cb2-570" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================================</span><span class="sc">-----------</span> (<span class="dv">84</span>%)</span>
+<span id="cb2-571"><a href="#cb2-571" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-572"><a href="#cb2-572" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================================</span><span class="sc">-----------</span> (<span class="dv">84</span>%)</span>
+<span id="cb2-573"><a href="#cb2-573" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-574"><a href="#cb2-574" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================================</span><span class="sc">-----------</span> (<span class="dv">85</span>%)</span>
+<span id="cb2-575"><a href="#cb2-575" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-576"><a href="#cb2-576" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==========================================================</span><span class="sc">-----------</span> (<span class="dv">85</span>%)</span>
+<span id="cb2-577"><a href="#cb2-577" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-578"><a href="#cb2-578" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================================</span><span class="sc">----------</span> (<span class="dv">85</span>%)</span>
+<span id="cb2-579"><a href="#cb2-579" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-580"><a href="#cb2-580" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================================</span><span class="sc">----------</span> (<span class="dv">86</span>%)</span>
+<span id="cb2-581"><a href="#cb2-581" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-582"><a href="#cb2-582" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================================</span><span class="sc">----------</span> (<span class="dv">86</span>%)</span>
+<span id="cb2-583"><a href="#cb2-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-584"><a href="#cb2-584" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================================</span><span class="sc">----------</span> (<span class="dv">86</span>%)</span>
+<span id="cb2-585"><a href="#cb2-585" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-586"><a href="#cb2-586" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===========================================================</span><span class="sc">----------</span> (<span class="dv">87</span>%)</span>
+<span id="cb2-587"><a href="#cb2-587" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-588"><a href="#cb2-588" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================================</span><span class="sc">---------</span> (<span class="dv">87</span>%)</span>
+<span id="cb2-589"><a href="#cb2-589" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-590"><a href="#cb2-590" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================================</span><span class="sc">---------</span> (<span class="dv">87</span>%)</span>
+<span id="cb2-591"><a href="#cb2-591" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-592"><a href="#cb2-592" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================================</span><span class="sc">---------</span> (<span class="dv">87</span>%)</span>
+<span id="cb2-593"><a href="#cb2-593" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-594"><a href="#cb2-594" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">============================================================</span><span class="sc">---------</span> (<span class="dv">88</span>%)</span>
+<span id="cb2-595"><a href="#cb2-595" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-596"><a href="#cb2-596" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================================</span><span class="sc">--------</span> (<span class="dv">88</span>%)</span>
+<span id="cb2-597"><a href="#cb2-597" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-598"><a href="#cb2-598" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================================</span><span class="sc">--------</span> (<span class="dv">88</span>%)</span>
+<span id="cb2-599"><a href="#cb2-599" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-600"><a href="#cb2-600" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================================</span><span class="sc">--------</span> (<span class="dv">89</span>%)</span>
+<span id="cb2-601"><a href="#cb2-601" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-602"><a href="#cb2-602" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================================</span><span class="sc">--------</span> (<span class="dv">89</span>%)</span>
+<span id="cb2-603"><a href="#cb2-603" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-604"><a href="#cb2-604" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=============================================================</span><span class="sc">--------</span> (<span class="dv">89</span>%)</span>
+<span id="cb2-605"><a href="#cb2-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-606"><a href="#cb2-606" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================================</span><span class="sc">-------</span> (<span class="dv">90</span>%)</span>
+<span id="cb2-607"><a href="#cb2-607" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-608"><a href="#cb2-608" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================================</span><span class="sc">-------</span> (<span class="dv">90</span>%)</span>
+<span id="cb2-609"><a href="#cb2-609" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-610"><a href="#cb2-610" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================================</span><span class="sc">-------</span> (<span class="dv">90</span>%)</span>
+<span id="cb2-611"><a href="#cb2-611" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-612"><a href="#cb2-612" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================================</span><span class="sc">-------</span> (<span class="dv">90</span>%)</span>
+<span id="cb2-613"><a href="#cb2-613" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-614"><a href="#cb2-614" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==============================================================</span><span class="sc">-------</span> (<span class="dv">91</span>%)</span>
+<span id="cb2-615"><a href="#cb2-615" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-616"><a href="#cb2-616" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================================</span><span class="sc">------</span> (<span class="dv">91</span>%)</span>
+<span id="cb2-617"><a href="#cb2-617" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-618"><a href="#cb2-618" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================================</span><span class="sc">------</span> (<span class="dv">91</span>%)</span>
+<span id="cb2-619"><a href="#cb2-619" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-620"><a href="#cb2-620" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================================</span><span class="sc">------</span> (<span class="dv">92</span>%)</span>
+<span id="cb2-621"><a href="#cb2-621" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-622"><a href="#cb2-622" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================================</span><span class="sc">------</span> (<span class="dv">92</span>%)</span>
+<span id="cb2-623"><a href="#cb2-623" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-624"><a href="#cb2-624" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===============================================================</span><span class="sc">------</span> (<span class="dv">92</span>%)</span>
+<span id="cb2-625"><a href="#cb2-625" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-626"><a href="#cb2-626" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================================</span><span class="sc">-----</span> (<span class="dv">93</span>%)</span>
+<span id="cb2-627"><a href="#cb2-627" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-628"><a href="#cb2-628" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================================</span><span class="sc">-----</span> (<span class="dv">93</span>%)</span>
+<span id="cb2-629"><a href="#cb2-629" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-630"><a href="#cb2-630" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================================</span><span class="sc">-----</span> (<span class="dv">93</span>%)</span>
+<span id="cb2-631"><a href="#cb2-631" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-632"><a href="#cb2-632" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">================================================================</span><span class="sc">-----</span> (<span class="dv">93</span>%)</span>
+<span id="cb2-633"><a href="#cb2-633" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-634"><a href="#cb2-634" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================================</span><span class="sc">----</span> (<span class="dv">94</span>%)</span>
+<span id="cb2-635"><a href="#cb2-635" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-636"><a href="#cb2-636" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================================</span><span class="sc">----</span> (<span class="dv">94</span>%)</span>
+<span id="cb2-637"><a href="#cb2-637" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-638"><a href="#cb2-638" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================================</span><span class="sc">----</span> (<span class="dv">94</span>%)</span>
+<span id="cb2-639"><a href="#cb2-639" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-640"><a href="#cb2-640" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================================</span><span class="sc">----</span> (<span class="dv">95</span>%)</span>
+<span id="cb2-641"><a href="#cb2-641" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-642"><a href="#cb2-642" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=================================================================</span><span class="sc">----</span> (<span class="dv">95</span>%)</span>
+<span id="cb2-643"><a href="#cb2-643" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-644"><a href="#cb2-644" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================================</span><span class="sc">---</span> (<span class="dv">95</span>%)</span>
+<span id="cb2-645"><a href="#cb2-645" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-646"><a href="#cb2-646" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================================</span><span class="sc">---</span> (<span class="dv">96</span>%)</span>
+<span id="cb2-647"><a href="#cb2-647" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-648"><a href="#cb2-648" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================================</span><span class="sc">---</span> (<span class="dv">96</span>%)</span>
+<span id="cb2-649"><a href="#cb2-649" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-650"><a href="#cb2-650" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================================</span><span class="sc">---</span> (<span class="dv">96</span>%)</span>
+<span id="cb2-651"><a href="#cb2-651" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-652"><a href="#cb2-652" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">==================================================================</span><span class="sc">---</span> (<span class="dv">96</span>%)</span>
+<span id="cb2-653"><a href="#cb2-653" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-654"><a href="#cb2-654" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================================</span><span class="sc">--</span> (<span class="dv">97</span>%)</span>
+<span id="cb2-655"><a href="#cb2-655" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-656"><a href="#cb2-656" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================================</span><span class="sc">--</span> (<span class="dv">97</span>%)</span>
+<span id="cb2-657"><a href="#cb2-657" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-658"><a href="#cb2-658" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================================</span><span class="sc">--</span> (<span class="dv">97</span>%)</span>
+<span id="cb2-659"><a href="#cb2-659" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-660"><a href="#cb2-660" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================================</span><span class="sc">--</span> (<span class="dv">98</span>%)</span>
+<span id="cb2-661"><a href="#cb2-661" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-662"><a href="#cb2-662" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">===================================================================</span><span class="sc">--</span> (<span class="dv">98</span>%)</span>
+<span id="cb2-663"><a href="#cb2-663" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-664"><a href="#cb2-664" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================================</span><span class="sc">-</span> (<span class="dv">98</span>%)</span>
+<span id="cb2-665"><a href="#cb2-665" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-666"><a href="#cb2-666" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================================</span><span class="sc">-</span> (<span class="dv">99</span>%)</span>
+<span id="cb2-667"><a href="#cb2-667" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-668"><a href="#cb2-668" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================================</span><span class="sc">-</span> (<span class="dv">99</span>%)</span>
+<span id="cb2-669"><a href="#cb2-669" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-670"><a href="#cb2-670" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">====================================================================</span><span class="sc">-</span> (<span class="dv">99</span>%)</span>
+<span id="cb2-671"><a href="#cb2-671" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-672"><a href="#cb2-672" aria-hidden="true" tabindex="-1"></a><span class="sc">==</span><span class="er">=====================================================================</span> (<span class="dv">100</span>%)</span>
+<span id="cb2-673"><a href="#cb2-673" aria-hidden="true" tabindex="-1"></a><span class="do">## Extract statistics and prep for cheem consumption</span></span>
+<span id="cb2-674"><a href="#cb2-674" aria-hidden="true" tabindex="-1"></a>this_ls <span class="ot">&lt;-</span> <span class="fu">cheem_ls</span>(X, Y, <span class="at">class =</span> clas,</span>
+<span id="cb2-675"><a href="#cb2-675" aria-hidden="true" tabindex="-1"></a>                    <span class="at">model =</span> rf_fit, <span class="at">attr_df =</span> shap_df, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>Now we are done with all of the leg work, let’s turn our attention
+towards the visuals and analysis.</p>
 </div>
 <div class="section level2">
 <h2 id="cheem-viewer">Cheem viewer<a class="anchor" aria-label="anchor" href="#cheem-viewer"></a>
 </h2>
-<p>We have extracted tree SHAP, an feature importance measure in the vicinity of each observation. We need to identify an instance of interest to explore; we do so with the linked brushing available in the <em>global view</em>. Then we will vary contributions from different features to test the support an explanation in a <em>radial tour</em></p>
+<p>We have extracted tree SHAP, an feature importance measure in the
+vicinity of each observation. We need to identify an instance of
+interest to explore; we do so with the linked brushing available in the
+<em>global view</em>. Then we will vary contributions from different
+features to test the support an explanation in a <em>radial
+tour</em></p>
 <div class="section level3">
 <h3 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
 </h3>
-<p>To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of <strong>plotly</strong> and <strong>crosstalk</strong>. The model information is essentially the confusion matrix for the classification case.</p>
+<p>To get more complete view lets look at approximations of the data
+space, attribution space, and model fits side-by-side with linked
+brushing with the help of <strong>plotly</strong> and
+<strong>crosstalk</strong>. The model information is essentially the
+confusion matrix for the classification case.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/global_view.html">global_view</a></span><span class="op">(</span><span class="va">this_ls</span>, primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span>,
-            height_px <span class="op">=</span> <span class="fl">240</span>, width_px <span class="op">=</span> <span class="fl">720</span>, as_ggplot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/global_view.html">global_view</a></span><span class="op">(</span><span class="va">this_ls</span>, primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span>,</span>
+<span>            height_px <span class="op">=</span> <span class="fl">240</span>, width_px <span class="op">=</span> <span class="fl">720</span>, as_ggplot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started-with-cheem_files/figure-html/unnamed-chunk-3-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p>From this <em>global view</em> we want to identify a primary instance (PI) and optionally a comparison instance (CI) to explore. Misclassified or observations with high residuals are good targets for further exploration. One point sticks out in this case. Instance 243 (shown as *) is a Gentoo (purple) penguin, while the model predict it to be a Chinstrap penguin. Peguin 169 (shown as x) is reasonably close by and correctly predicted as Gentoo. In practice we used linked brushing and misclassification information to guide our search.</p>
+<p>From this <em>global view</em> we want to identify a primary instance
+(PI) and optionally a comparison instance (CI) to explore. Misclassified
+or observations with high residuals are good targets for further
+exploration. One point sticks out in this case. Instance 243 (shown as
+*) is a Gentoo (purple) penguin, while the model predict it to be a
+Chinstrap penguin. Peguin 169 (shown as x) is reasonably close by and
+correctly predicted as Gentoo. In practice we used linked brushing and
+misclassification information to guide our search.</p>
 </div>
 <div class="section level3">
 <h3 id="radial-tour">Radial tour<a class="anchor" aria-label="anchor" href="#radial-tour"></a>
 </h3>
-<p>There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it’s (incorrect) prediction of Chinstrap (orange) in terms of bill length (<code>bl</code>) and flipper length (<code>fl</code>). In terms of bill depth and body mass (<code>bd</code> and <code>bm</code>) it is more like its observed species Gentoo (purple). We select flipper length as the feature to manipulate.</p>
+<p>There is a lot to unpack here. The normalized distribution of all
+feature attribution from all instances are shown as parallel coordinates
+lines. The above selected PI and CI are shown here as a dashed and
+dotted line respectively. The first thing we notice is that the
+attribution of the PI is close to it’s (incorrect) prediction of
+Chinstrap (orange) in terms of bill length (<code>bl</code>) and flipper
+length (<code>fl</code>). In terms of bill depth and body mass
+(<code>bd</code> and <code>bm</code>) it is more like its observed
+species Gentoo (purple). We select flipper length as the feature to
+manipulate.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Normalized attribution basis of the PI</span>
-<span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis_attr_df.html">basis_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, rownum <span class="op">=</span> <span class="fl">243</span><span class="op">)</span>
-<span class="co">## Default to feature to manipulation; </span>
-<span class="co">#### the feature with largest separation between PI and CI attribution</span>
-<span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/manip_var_of_attr_df.html">manip_var_of_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span><span class="op">)</span>
-<span class="co">## Make the radial tour</span>
-<span class="va">ggt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/radial_cheem_tour.html">radial_cheem_tour</a></span><span class="op">(</span>
-  <span class="va">this_ls</span>, basis <span class="op">=</span> <span class="va">bas</span>, manip_var <span class="op">=</span> <span class="va">mv</span>,
-  primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span>, angle <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span>
-
-<span class="co">## Animate it</span>
-<span class="fu"><a href="https://rdrr.io/pkg/spinifex/man/animate_gganimate.html" class="external-link">animate_gganimate</a></span><span class="op">(</span><span class="va">ggt</span>, fps <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> 
-  <span class="co">#height = 2, width = 4.5, units = "in", res = 150</span>
-<span class="co">## Or as a plotly html widget</span>
-<span class="co">#animate_plotly(ggt, fps = 6)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co">## Normalized attribution basis of the PI</span></span>
+<span><span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis_attr_df.html">basis_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, rownum <span class="op">=</span> <span class="fl">243</span><span class="op">)</span></span>
+<span><span class="co">## Default to feature to manipulation; </span></span>
+<span><span class="co">#### the feature with largest separation between PI and CI attribution</span></span>
+<span><span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/manip_var_of_attr_df.html">manip_var_of_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span><span class="op">)</span></span>
+<span><span class="co">## Make the radial tour</span></span>
+<span><span class="va">ggt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/radial_cheem_tour.html">radial_cheem_tour</a></span><span class="op">(</span></span>
+<span>  <span class="va">this_ls</span>, basis <span class="op">=</span> <span class="va">bas</span>, manip_var <span class="op">=</span> <span class="va">mv</span>,</span>
+<span>  primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span>, angle <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Animate it</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/spinifex/man/animate_gganimate.html" class="external-link">animate_gganimate</a></span><span class="op">(</span><span class="va">ggt</span>, fps <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> </span>
+<span>  <span class="co">#height = 2, width = 4.5, units = "in", res = 150</span></span>
+<span><span class="co">## Or as a plotly html widget</span></span>
+<span><span class="co">#animate_plotly(ggt, fps = 6)</span></span></code></pre></div>
 <p><img src="https://github.com/nspyrison/cheem/blob/main/vignettes/tour_penguins.gif?raw=true"></p>
-<p>Starting from the attribution projection, this instance already looks more like its observed Gentoo than predicted Chinstrap. However, by frame 8, the basis has a full contribution of flipper length and does look more like the predicted Chinstrap. Looking at the parallel coordinate lines on the basis visual we can see that flipper length has a large gap between PI and CI, lets check the original variables to digest.</p>
+<p>Starting from the attribution projection, this instance already looks
+more like its observed Gentoo than predicted Chinstrap. However, by
+frame 8, the basis has a full contribution of flipper length and does
+look more like the predicted Chinstrap. Looking at the parallel
+coordinate lines on the basis visual we can see that flipper length has
+a large gap between PI and CI, lets check the original variables to
+digest.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
-
-<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">penguins_na.rm</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">bill_length_mm</span>,
-                           y <span class="op">=</span> <span class="va">flipper_length_mm</span>,
-                           colour <span class="op">=</span> <span class="va">species</span>,
-                           shape <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="co">## Highlight PI, *</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins_na.rm</span><span class="op">[</span><span class="fl">243</span>, <span class="op">]</span>, shape <span class="op">=</span> <span class="fl">8</span>, size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span>
-  <span class="co">## Theme, scaling, color, and labels</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Flipper length [mm]"</span>, x <span class="op">=</span> <span class="st">"Bill length [mm]"</span>, 
-       color <span class="op">=</span> <span class="st">"Observed species"</span>, shape <span class="op">=</span> <span class="st">"Observed species"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">penguins_na.rm</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">bill_length_mm</span>,</span>
+<span>                           y <span class="op">=</span> <span class="va">flipper_length_mm</span>,</span>
+<span>                           colour <span class="op">=</span> <span class="va">species</span>,</span>
+<span>                           shape <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co">## Highlight PI, *</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins_na.rm</span><span class="op">[</span><span class="fl">243</span>, <span class="op">]</span>, shape <span class="op">=</span> <span class="fl">8</span>, size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co">## Theme, scaling, color, and labels</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Flipper length [mm]"</span>, x <span class="op">=</span> <span class="st">"Bill length [mm]"</span>, </span>
+<span>       color <span class="op">=</span> <span class="st">"Observed species"</span>, shape <span class="op">=</span> <span class="st">"Observed species"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="getting-started-with-cheem_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;"></p>
-<p>This profile, with two features that are most distinguished between the PI and CI. This instance is nested in the in between the Chinstrap penguins. That makes this instance particularly hard for a random forest model to classify as decision tree can only make partition on one value (horizontal and vertical lines here).</p>
+<p>This profile, with two features that are most distinguished between
+the PI and CI. This instance is nested in the in between the Chinstrap
+penguins. That makes this instance particularly hard for a random forest
+model to classify as decision tree can only make partition on one value
+(horizontal and vertical lines here).</p>
 </div>
 <div class="section level3">
 <h3 id="shiny-application">Shiny application<a class="anchor" aria-label="anchor" href="#shiny-application"></a>
 </h3>
-<p>We provide an interactive <strong>shiny</strong> application. Interactive features are made possible with <strong>plotly</strong>, <strong>crosstalk</strong>, and <strong>DT</strong>. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data by saving the return of <code><a href="../reference/cheem_ls.html">cheem_ls()</a></code> as an .rds file. Follow along with the example in <code><a href="../reference/cheem_ls.html">?cheem_ls</a></code>.</p>
+<p>We provide an interactive <strong>shiny</strong> application.
+Interactive features are made possible with <strong>plotly</strong>,
+<strong>crosstalk</strong>, and <strong>DT</strong>. We have
+preprocessed simulated and modern datasets for you to explore this
+analysis with. Alternatively, bring your own data by saving the return
+of <code><a href="../reference/cheem_ls.html">cheem_ls()</a></code> as an .rds file. Follow along with the
+example in <code><a href="../reference/cheem_ls.html">?cheem_ls</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>Interpretability of black-box models is important to maintain. Local explanation extend this interpretability by approximating the feature importance in the vicinity of one instance. We purpose post-hoc analysis of these local explanations. First we explore them in a global, full instance context. Then we explore the support of the local explanation to see where it seems plausible or unreliable.</p>
+<p>Interpretability of black-box models is important to maintain. Local
+explanation extend this interpretability by approximating the feature
+importance in the vicinity of one instance. We purpose post-hoc analysis
+of these local explanations. First we explore them in a global, full
+instance context. Then we explore the support of the local explanation
+to see where it seems plausible or unreliable.</p>
 </div>
   </div>
 
@@ -221,7 +975,7 @@ https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-nani
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -51,7 +51,7 @@
   <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -99,17 +99,17 @@
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<pre><code><span class="co">## Download the package</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">## May need to restart the R session so RSudio has the correct file structure</span>
-<span class="fu">rstudioapi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rstudioapi/man/restartSession.html" class="external-link">restartSession</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">## Load cheem into session</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
-<span class="co">## Try the app</span>
-<span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co">## Processing your data; follow the examples in cheem_ls()</span>
-<span class="op">?</span><span class="va">cheem_ls</span></code></pre>
+<pre><code><span><span class="co">## Download the package</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">## May need to restart the R session so RSudio has the correct file structure</span></span>
+<span><span class="fu">rstudioapi</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/rstudioapi/reference/restartSession.html" class="external-link">restartSession</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">## Load cheem into session</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span>
+<span><span class="co">## Try the app</span></span>
+<span><span class="fu"><a href="reference/run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Processing your data; follow the examples in cheem_ls()</span></span>
+<span><span class="op">?</span><span class="va">cheem_ls</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
@@ -134,8 +134,22 @@
 <h2 id="sources">Sources<a class="anchor" aria-label="anchor" href="#sources"></a>
 </h2>
 <p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a> <a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a> <a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a> <a href="https://github.com/ModelOriented/treeshap" class="external-link">treeshap GitHub page</a></p>
-<!-- CSS change figure width to 100% -->
-<style>
+</div>
+<div class="section level2">
+<h2 id="package-build-workflow">Package build workflow<a class="anchor" aria-label="anchor" href="#package-build-workflow"></a>
+</h2>
+<ul>
+<li>Rcpp::compileAttributes() ## Rcpp changes</li>
+<li>Kmisc::registerFunctions(prefix = ““) ## Rcpp changes</li>
+<li>devtools::document() ## documentation changes</li>
+<li>pkgdown::build_site() ## packagedown site changes (docu, vignettes, readme)</li>
+<li>rstudioapi::restartSession() ## Install wants reset ?</li>
+<li>message(“Manually do: Build tab &gt; Install and Restart”) ## build package</li>
+<li>#devtools::check_rhub() ## check package</li>
+<li>devtools::check() ## check package</li>
+<li>devtools::submit_cran() ## Submit to CRAN</li>
+</ul>
+<!-- CSS change figure width to 100% --><style>
   img{width: 100%;}
 </style>
 </div>
@@ -146,6 +160,7 @@
     <div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=cheem" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/nspyrison/cheem/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/nspyrison/cheem/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -188,7 +203,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

@@ -18,7 +18,7 @@ The returned representation is easy to be interpreted by the user and ready to b
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -27,7 +27,7 @@ The returned representation is easy to be interpreted by the user and ready to b
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -65,7 +65,7 @@ The returned representation is easy to be interpreted by the user and ready to b
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ranger.unify</span><span class="op">(</span><span class="va">rng_model</span>, <span class="va">data</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ranger.unify</span><span class="op">(</span><span class="va">rng_model</span>, <span class="va">data</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="source">
@@ -77,18 +77,23 @@ The returned representation is easy to be interpreted by the user and ready to b
     <dl><dt>rng_model</dt>
 <dd><p>An object of <code>ranger</code> class. At the moment, models built on data with categorical features
 are not supported - please encode them before training.</p></dd>
+
+
 <dt>data</dt>
 <dd><p>Reference dataset. A <code>data.frame</code> or <code>matrix</code> with the same columns as in the training set of the model. Usually dataset used to train model.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a unified model representation - a <code><a href="model_unified.object.html">model_unified.object</a></code> object</p>
+    
+
+<p>a unified model representation - a <code><a href="model_unified.object.html">model_unified.object</a></code> object</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p><code><a href="unify_tree_model.html">unify_tree_model</a></code>, a wrapper function unifying these models.
 <code><a href="lightgbm.unify.html">lightgbm.unify</a></code> for <code><a href="https://rdrr.io/pkg/lightgbm/man/lightgbm.html" class="external-link">LightGBM models</a></code>
-<code><a href="gbm.unify.html">gbm.unify</a></code> for <code><a href="https://rdrr.io/pkg/gbm/man/gbm.html" class="external-link">GBM models</a></code>
+<code><a href="gbm.unify.html">gbm.unify</a></code> for <code>GBM models</code>
 <code><a href="xgboost.unify.html">xgboost.unify</a></code> for <code><a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">XGBoost models</a></code>
 <code><a href="randomForest.unify.html">randomForest.unify</a></code> for <code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest models</a></code></p></div>
     </div>
@@ -99,45 +104,47 @@ are not supported - please encode them before training.</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Regression setup:</span></span>
-<span class="r-in"><span class="va">dat</span>  <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span></span>
-<span class="r-in"><span class="va">X</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span></span>
-<span class="r-in"><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SalePrice</span></span>
-<span class="r-in"><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SubclassMS</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Fit a model:</span></span>
-<span class="r-in"><span class="va">ranger_model</span>  <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ranger/man/ranger.html" class="external-link">ranger</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">.</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span>, num.trees <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">unified_model</span> <span class="op">&lt;-</span> <span class="fu">ranger.unify</span><span class="op">(</span><span class="va">ranger_model</span>, <span class="va">X</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Calculate treeSHAP:</span></span>
-<span class="r-in"><span class="va">shaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="treeshap.html">treeshap</a></span><span class="op">(</span><span class="va">unified_model</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">shaps</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Regression setup:</span></span></span>
+<span class="r-in"><span><span class="va">dat</span>  <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span></span></span>
+<span class="r-in"><span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SalePrice</span></span></span>
+<span class="r-in"><span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SubclassMS</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Fit a model:</span></span></span>
+<span class="r-in"><span><span class="va">ranger_model</span>  <span class="op">&lt;-</span> <span class="fu">ranger</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ranger/man/ranger.html" class="external-link">ranger</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">.</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span>, num.trees <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">unified_model</span> <span class="op">&lt;-</span> <span class="fu">ranger.unify</span><span class="op">(</span><span class="va">ranger_model</span>, <span class="va">X</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Calculate treeSHAP:</span></span></span>
+<span class="r-in"><span><span class="va">shaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="treeshap.html">treeshap</a></span><span class="op">(</span><span class="va">unified_model</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |0%----|------|20%---|------|40%---|------|60%---|------|80%---|------|100%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> =---------------------------------------------------------------------- (0%)====================================----------------------------------- (50%)======================================================================= (100%)</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">shaps</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ shaps        :'data.frame':	2 obs. of  9 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 31404 -300</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 5954 -4056</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 1349 -208</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 11748 -16510</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] -860 -1112</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 700 -2214</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 895 -4987</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 2293 -39.1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 5301 1098</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 23108 -1023</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 8174 -5304</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 153.02 8.77</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 12926 -17763</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] -1391 -1094</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] -117 -1299</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 220 -2914</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 1826 -1338</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 5817 329</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ interactions : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ unified_model:List of 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ model:'data.frame':	5595 obs. of  10 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Tree         : int [1:5595] 0 0 0 0 0 0 0 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Node         : int [1:5595] 0 1 2 3 4 5 6 7 8 9 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:5595] "LotArea" "LivingArea" "GarageYrBlt" "LotArea" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ model:'data.frame':	5609 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Tree         : int [1:5609] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Node         : int [1:5609] 0 1 2 3 4 5 6 7 8 9 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:5609] "LivingArea" "OverallQual" "Bathrms" "Bedrms" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Decision.type: Factor w/ 2 levels "&lt;=","&lt;": 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:5595] 13730 1239 1959 8574 1982 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:5595] 2 4 6 8 10 12 14 16 18 20 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:5595] 3 5 7 9 11 13 15 17 19 21 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : logi [1:5595] NA NA NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:5595] NA NA NA NA NA NA NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:5595] 338 321 17 183 138 8 9 85 98 125 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:5609] 1253 4.5 2.5 2.5 1953.5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:5609] 2 4 6 8 10 12 14 16 18 20 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:5609] 3 5 7 9 11 13 15 17 19 21 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : logi [1:5609] NA NA NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:5609] NA NA NA NA NA NA NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:5609] 338 192 146 21 171 130 16 11 10 30 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ data :'data.frame':	338 obs. of  9 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ LotArea    : num [1:338] 31770 11622 14267 11160 8450 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ OverallQual: num [1:338] 6 5 6 7 5 4 5 5 5 5 ...</span>
@@ -176,7 +183,7 @@ are not supported - please encode them before training.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

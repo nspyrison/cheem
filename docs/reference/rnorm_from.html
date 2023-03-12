@@ -19,7 +19,7 @@ then assign to cluster 'b'."><!-- mathjax --><script src="https://cdnjs.cloudfla
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -28,7 +28,7 @@ then assign to cluster 'b'."><!-- mathjax --><script src="https://cdnjs.cloudfla
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -67,32 +67,41 @@ then assign to cluster 'b'.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">rnorm_from</span><span class="op">(</span>
-  <span class="va">data</span>,
-  n_obs <span class="op">=</span> <span class="fl">1</span>,
-  var_coeff <span class="op">=</span> <span class="fl">1</span>,
-  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"kendall"</span>, <span class="st">"spearman"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rnorm_from</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  n_obs <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  var_coeff <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"kendall"</span>, <span class="st">"spearman"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>data</dt>
 <dd><p>A data.frame or matrix to sample from.</p></dd>
+
+
 <dt>n_obs</dt>
 <dd><p>Number of new observations to draw. Defaults to 1.</p></dd>
+
+
 <dt>var_coeff</dt>
 <dd><p>Variance coefficient, closer to 0 make points near the
 median, above 1 makes more points further away from the median.
 Defaults to 1.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>The method of the covariance matrix. Expects "person"
 (continuous numeric), "kendall" or "spearman"
 (latter two are ranked based ordinal).</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data.frame, sampled observations given the means and covariance of
+    
+
+<p>A data.frame, sampled observations given the means and covariance of
 the data based on with column names kept.</p>
     </div>
     <div id="see-also">
@@ -112,19 +121,12 @@ the data based on with column names kept.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">sub</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="va">mtcars</span><span class="op">$</span><span class="va">cyl</span> <span class="op">==</span> <span class="fl">6</span>, <span class="op">]</span></span>
-<span class="r-in"><span class="co">## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.</span></span>
-<span class="r-in"><span class="fu">rnorm_from</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sub</span>, n_obs <span class="op">=</span> <span class="fl">3</span>, var_coeff <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mpg      cyl     disp        hp     drat       wt     qsec        vs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 18.45632 6.000001 130.9933 132.55660 4.019910 3.278467 16.83564 0.9671880</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 19.42071 6.000003 136.5414 128.09630 4.609935 2.979638 16.34245 0.4835281</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 20.05605 6.000000 183.2818  99.03091 5.121612 3.119307 18.49666 0.6188681</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          am     gear     carb</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.0328093 5.015906 6.359477</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.5164738 4.899550 6.529585</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.3811332 3.584151 3.809096</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">sub</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="va">mtcars</span><span class="op">$</span><span class="va">cyl</span> <span class="op">==</span> <span class="fl">6</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="co">## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.</span></span></span>
+<span class="r-in"><span><span class="fu">rnorm_from</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sub</span>, n_obs <span class="op">=</span> <span class="fl">3</span>, var_coeff <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lqmm’</span>
 </code></pre></div>
     </div>
   </div>
@@ -139,7 +141,7 @@ the data based on with column names kept.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

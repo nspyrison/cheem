@@ -18,7 +18,7 @@ traditional techniques for static projections of multivariate data sets."><!-- m
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -27,7 +27,7 @@ traditional techniques for static projections of multivariate data sets."><!-- m
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -65,20 +65,25 @@ traditional techniques for static projections of multivariate data sets.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">run_app</span><span class="op">(</span>app_nm <span class="op">=</span> <span class="st">"cheem_initial"</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_app</span><span class="op">(</span>app_nm <span class="op">=</span> <span class="st">"cheem_initial"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>app_nm</dt>
 <dd><p>Name of the shiny app to run. Expects "cheem_initial".</p></dd>
+
+
 <dt>...</dt>
-<dd><p>Other arguments passed into <code><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">shiny::runApp()</a></code>.
+<dd><p>Other arguments passed into <code><a href="https://shiny.rstudio.com/reference/shiny/latest/runApp.html" class="external-link">shiny::runApp()</a></code>.
 Such as display.mode = "showcase".</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Runs a locally hosted shiny app.</p>
+    
+
+<p>Runs a locally hosted shiny app.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -89,21 +94,21 @@ Such as display.mode = "showcase".</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">## Runs the app</span></span>
-<span class="r-in"><span class="fu">run_app</span><span class="op">(</span><span class="st">"cheem_initial"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">## Runs the app</span></span></span>
+<span class="r-in"><span><span class="fu">run_app</span><span class="op">(</span><span class="st">"cheem_initial"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required namespace: shinythemes</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required namespace: shinycssloaders</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> App_nm was missing or invalid. </span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> Valid app_nm : 'radial_tour'</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span>  are the only valid app_nm at the for this version.</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## Run with app code displayed</span></span>
-<span class="r-in"><span class="fu">run_app</span><span class="op">(</span>app_nm <span class="op">=</span> <span class="st">"cheem_initial"</span>, display.mode <span class="op">=</span> <span class="st">"showcase"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Run with app code displayed</span></span></span>
+<span class="r-in"><span><span class="fu">run_app</span><span class="op">(</span>app_nm <span class="op">=</span> <span class="st">"cheem_initial"</span>, display.mode <span class="op">=</span> <span class="st">"showcase"</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> App_nm was missing or invalid. </span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> Valid app_nm : 'radial_tour'</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span>  are the only valid app_nm at the for this version.</span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -118,7 +123,7 @@ Such as display.mode = "showcase".</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

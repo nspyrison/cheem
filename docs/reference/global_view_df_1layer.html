@@ -18,7 +18,7 @@ Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls."><!-- 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -27,7 +27,7 @@ Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls."><!-- 
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -65,31 +65,40 @@ Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">global_view_df_1layer</span><span class="op">(</span>
-  <span class="va">x</span>,
-  class <span class="op">=</span> <span class="cn">NULL</span>,
-  basis_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pca"</span>, <span class="st">"olda"</span><span class="op">)</span>,
-  layer_name <span class="op">=</span> <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">global_view_df_1layer</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  basis_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pca"</span>, <span class="st">"olda"</span><span class="op">)</span>,</span>
+<span>  layer_name <span class="op">=</span> <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>The explanatory variables of the model.</p></dd>
+
+
 <dt>class</dt>
 <dd><p>The variable to group points by. Originally the <em>predicted</em>
 class.</p></dd>
+
+
 <dt>basis_type</dt>
 <dd><p>The type of basis used to approximate the data and
 attribution space from. Defaults to "pca".</p></dd>
+
+
 <dt>layer_name</dt>
 <dd><p>Character layer name, typically the type of local
 attribution used. Defaults to the name of the last class of x.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data.frame, for the global linked <strong>plotly</strong> display.</p>
+    
+
+<p>A data.frame, for the global linked <strong>plotly</strong> display.</p>
     </div>
 
   </div>
@@ -104,7 +113,7 @@ attribution used. Defaults to the name of the last class of x.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
