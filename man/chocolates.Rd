@@ -69,7 +69,7 @@ this_ls <- cheem_ls(X, Y, class = clas,
 ## Visualize:
 global_view(this_ls)
 
-## Save for used with shiny app (expects .rds):
+## Save for use with shiny app (expects .rds):
 if(FALSE) ## Don't accidentally save.
   saveRDS(this_ls, "./my_cheem_ls.rds")
 }

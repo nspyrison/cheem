@@ -86,8 +86,8 @@ and attribution- spaces. Typically consumed directly by shiny app.
 library(cheem)
 
 ## Classification setup:
-X    <- spinifex::penguins_na.rm[100:300, 1:4]
-clas <- spinifex::penguins_na.rm$species[100:300]
+X    <- spinifex::penguins_na.rm[, 1:4]
+clas <- spinifex::penguins_na.rm$species
 Y    <- as.integer(clas)
 
 ## Model and tree SHAP explanation:
@@ -117,7 +117,7 @@ if(interactive()){
 
 
 ## Regression setup:
-dat  <- amesHousing2018_NorthAmes[1:100, ]
+dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS

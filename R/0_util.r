@@ -297,6 +297,13 @@ devMessage <- function(text){
   if(is.na(version4) == FALSE)
     if(version4 == 9000L)
       message(paste0("devMessage: ", text))
+  
+  ## Attempt to stop inaccurate warning (used in shiny app)
+  if(F){
+    dummy <- DT::datatable()
+    dummy <- shinycssloaders::withSpinner()
+    dummy <- shinythemes::shinytheme()
+  }
 }
 
 #' Evaluate if development

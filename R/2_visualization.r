@@ -53,7 +53,8 @@ basis_attr_df <- function(
 #' as a dashed line.
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line.
-#' @return A single number of the variable with the largest difference.
+#' @return A single number of the variable with the largest difference of 
+#' attribution (basis) variables.
 #' @export
 #' @family cheem utility
 #' @examples
@@ -323,15 +324,15 @@ proto_basis1d_distribution <- function(
 #'                      attr_df = shap_df)
 #' 
 #' ## Visualize
-#' global_view(this_ls)                   ## uses ggplot facets %>% plotly
-#' global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
-#' global_view_subplots(this_ls)          ## uses plotly::subplots
-#' 
-#' ## Different color mappings, especially for regression
-#' \donttest{
-#' global_view_subplots(this_ls, color = "residual")
-#' global_view_subplots(this_ls, color = "log_maha.data") 
-#' global_view_subplots(this_ls, color = "cor_attr_proj.y")
+#' if(interactive()){
+#'   global_view(this_ls)                   ## uses ggplot facets %>% plotly
+#'   global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
+#'   global_view_subplots(this_ls)          ## uses plotly::subplots
+#'   
+#'   ## Different color mappings, especially for regression
+#'   global_view_subplots(this_ls, color = "residual")
+#'   global_view_subplots(this_ls, color = "log_maha.data") 
+#'   global_view_subplots(this_ls, color = "cor_attr_proj.y")
 #' }
 global_view <- function(
   cheem_ls,
@@ -613,8 +614,8 @@ global_view_subplots <- function(
 #' library(cheem)
 #' 
 #' ## Classification setup:
-#' X    <- spinifex::penguins_na.rm[100:300, 1:4]
-#' clas <- spinifex::penguins_na.rm$species[100:300]
+#' X    <- spinifex::penguins_na.rm[, 1:4]
+#' clas <- spinifex::penguins_na.rm$species
 #' Y    <- as.integer(clas)
 #' 
 #' ## Model and tree SHAP explanation:
@@ -644,7 +645,7 @@ global_view_subplots <- function(
 #' 
 #' 
 #' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes[1:100, ]
+#' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS

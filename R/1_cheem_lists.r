@@ -432,8 +432,8 @@ global_view_df_1layer <- function(
 #' library(cheem)
 #' 
 #' ## Classification setup:
-#' X    <- spinifex::penguins_na.rm[100:300, 1:4]
-#' clas <- spinifex::penguins_na.rm$species[100:300]
+#' X    <- spinifex::penguins_na.rm[, 1:4]
+#' clas <- spinifex::penguins_na.rm$species
 #' Y    <- as.integer(clas)
 #' 
 #' ## Model and treeSHAP explanation:
@@ -444,7 +444,7 @@ global_view_df_1layer <- function(
 #'                      attr_df = shap_df)
 #' global_view(this_ls) ## Preview spaces
 #'
-#' ## Save for used with shiny app (expects .rds):
+#' ## Save for use with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
 #'   saveRDS(this_ls, "./my_cheem_ls.rds")
 #'   run_app() ## Select the saved .rds file from the Data dropdown.
@@ -467,7 +467,7 @@ global_view_df_1layer <- function(
 #'   global_view(this_ls) ## Preview spaces
 #' }
 #' 
-#' ## Save for used with shiny app (expects .rds):
+#' ## Save for use with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
 #'   saveRDS(this_ls, "./my_cheem_ls.rds")
 #'   run_app() ## Select the saved .rds file from the Data drop down.

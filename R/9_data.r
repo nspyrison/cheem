@@ -110,7 +110,7 @@
 #' library(cheem)
 #' 
 #' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes[1:100, ]
+#' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
@@ -122,10 +122,11 @@
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
 #' 
-#' ## Visualize:
-#' global_view(this_ls)
+#' ## Visualize
+#' if(interactive())
+#'   global_view(this_ls)
 #' 
-#' ## Save for used with shiny app (expects .rds):
+#' ## Save for use with shiny app (expects .rds):
 #' if(FALSE) ## Don't accidentally save.
 #'   saveRDS(this_ls, "./my_cheem_ls.rds")
 "amesHousing2018"
@@ -197,7 +198,7 @@
 #' ## Visualize:
 #' global_view(this_ls)
 #' 
-#' ## Save for used with shiny app (expects .rds):
+#' ## Save for use with shiny app (expects .rds):
 #' if(FALSE) ## Don't accidentally save.
 #'   saveRDS(this_ls, "./my_cheem_ls.rds")
 "chocolates"

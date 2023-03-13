@@ -73,15 +73,15 @@ this_ls <- cheem_ls(X, Y, class = clas,
                      attr_df = shap_df)
 
 ## Visualize
-global_view(this_ls)                   ## uses ggplot facets \%>\% plotly
-global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
-global_view_subplots(this_ls)          ## uses plotly::subplots
-
-## Different color mappings, especially for regression
-\donttest{
-global_view_subplots(this_ls, color = "residual")
-global_view_subplots(this_ls, color = "log_maha.data") 
-global_view_subplots(this_ls, color = "cor_attr_proj.y")
+if(interactive()){
+  global_view(this_ls)                   ## uses ggplot facets \%>\% plotly
+  global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
+  global_view_subplots(this_ls)          ## uses plotly::subplots
+  
+  ## Different color mappings, especially for regression
+  global_view_subplots(this_ls, color = "residual")
+  global_view_subplots(this_ls, color = "log_maha.data") 
+  global_view_subplots(this_ls, color = "cor_attr_proj.y")
 }
 }
 \seealso{

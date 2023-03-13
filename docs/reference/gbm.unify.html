@@ -127,28 +127,28 @@ are not supported - please encode them before training.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">shaps</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ shaps        :'data.frame':	2 obs. of  9 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 28833 -4100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 10737 -4053</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 2838 1760</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 12056 -19144</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] -81.7 -65.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 1086 -1914</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 869 -804</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 764 -649</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 3196 -303</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 24595 -2620</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 6100 -3885</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] -1277 138</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 11888 -17489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] 35.4 35.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 1047 -1445</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 131 -78.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 2025 501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 3601 1911</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ interactions : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ unified_model:List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ model:'data.frame':	650 obs. of  10 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Tree         : int [1:650] 0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Node         : int [1:650] 0 1 2 3 4 5 6 7 8 9 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:650] "LivingArea" "LivingArea" NA "YearBuild" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Decision.type: Factor w/ 2 levels "&lt;=","&lt;": 1 1 NA 1 NA 1 NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:650] 1845 1049 NA 1956 NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:650] 2 3 NA 5 NA 7 NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:650] 12 4 NA 6 NA 8 NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : int [1:650] 13 11 NA 10 NA 9 NA NA NA NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:650] NA NA 486 NA 2137 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:650] 338 312 100 212 70 142 79 63 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:650] "LivingArea" "LivingArea" "LivingArea" NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Decision.type: Factor w/ 2 levels "&lt;=","&lt;": 1 1 1 NA NA NA 1 NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:650] 1832 1258 944 NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:650] 2 3 4 NA NA NA 8 NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:650] 12 7 5 NA NA NA 9 NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : int [1:650] 13 11 6 NA NA NA 10 NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:650] NA NA NA 20.4 2086.6 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:650] 338 311 194 56 138 0 117 59 58 0 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ data :'data.frame':	338 obs. of  9 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ LotArea    : num [1:338] 31770 11622 14267 11160 8450 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ OverallQual: num [1:338] 6 5 6 7 5 4 5 5 5 5 ...</span>

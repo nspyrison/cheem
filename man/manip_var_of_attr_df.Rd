@@ -18,7 +18,8 @@ as a dashed line.}
 is highlighted as a dotted line.}
 }
 \value{
-A single number of the variable with the largest difference.
+A single number of the variable with the largest difference of
+attribution (basis) variables.
 }
 \description{
 Find the number of the variable with the largest difference between the

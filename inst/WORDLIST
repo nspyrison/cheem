@@ -2,7 +2,6 @@ Ames
 DALEX
 Kaggle
 MoSold
-SHAP
 SalePrice
 SalesPrice
 SubclassMS
@@ -99,7 +98,7 @@ RJ
 arXiv
 doi
 shaps
-SHAP
 treeSHAP
+SHAP
 
 ##Lastlineneedstobeblank
