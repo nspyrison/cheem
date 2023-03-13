@@ -140,8 +140,9 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #'     position = "top1d", group_by = clas) +
 #'   proto_basis1d(position = "bottom1d") +
 #'   proto_origin()
-#' \donttest{
-#' animate_plotly(ggt)
+#' 
+#' if(interactive()){
+#'   animate_plotly(ggt)
 #' }
 proto_basis1d_distribution <- function(
   attr_df, ## Only for distribution of bases.
@@ -610,11 +611,10 @@ global_view_subplots <- function(
 #' @family cheem consumers
 #' @examples
 #' library(cheem)
-#' library(spinifex)
 #' 
 #' ## Classification setup:
-#' X    <- penguins_na.rm[, 1:4]
-#' clas <- penguins_na.rm$species
+#' X    <- spinifex::penguins_na.rm[100:300, 1:4]
+#' clas <- spinifex::penguins_na.rm$species[100:300]
 #' Y    <- as.integer(clas)
 #' 
 #' ## Model and tree SHAP explanation:
@@ -629,20 +629,22 @@ global_view_subplots <- function(
 #' mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 #' 
 #' ## Radial tour with ggplot facets & animate
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-#' \donttest{
-#' animate_plotly(ggt)
-#' if(FALSE) ## or animate with gganimate
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv)
+#' if(interactive()){
+#'   ## As a Plotly html widget
+#'   animate_plotly(ggt)
+#'   
+#'   ## As a gganimation
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
-#' 
-#' ## Radial tour using plotly::subplots, not compatible with gganimate.
-#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
-#' animate_plotly(ggt)
+#'   
+#'   ## As an alternative Plotly html widget
+#'   ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = mv)
+#'   animate_plotly(ggt)
 #' }
 #' 
 #' 
 #' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes
+#' dat  <- amesHousing2018_NorthAmes[1:100, ]
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
@@ -659,15 +661,17 @@ global_view_subplots <- function(
 #' mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
 #' 
 #' ## Radial tour with ggplot facets & animate
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1)
-#' \donttest{
-#' animate_plotly(ggt)
-#' if(FALSE) ## or animate with gganimate
+#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv)
+#' if(interactive()){
+#'   ## As a plotly html widget
+#'   animate_plotly(ggt)
+#'   
+#'   ## As a gganimation
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
-#' 
-#' ## Radial tour using plotly::subplots, not compatible with gganimate.
-#' ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = 1)
-#' animate_plotly(ggt)
+#'   
+#'   ## As an alternative plotly html widget
+#'   ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = mv)
+#'   animate_plotly(ggt)
 #' }
 radial_cheem_tour <- function(
   cheem_ls, basis, manip_var, 

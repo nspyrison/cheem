@@ -96,7 +96,7 @@ The returned representation is easy to be interpreted by the user and ready to b
     <h2>See also</h2>
     <div class="dont-index"><p><code><a href="unify_tree_model.html">unify_tree_model</a></code>, a wrapper function unifying these models.
 <code><a href="lightgbm.unify.html">lightgbm.unify</a></code> for <code><a href="https://rdrr.io/pkg/lightgbm/man/lightgbm.html" class="external-link">LightGBM models</a></code>
-<code><a href="gbm.unify.html">gbm.unify</a></code> for <code>GBM models</code>
+<code><a href="gbm.unify.html">gbm.unify</a></code> for <code><a href="https://rdrr.io/pkg/gbm/man/gbm.html" class="external-link">GBM models</a></code>
 <code><a href="ranger.unify.html">ranger.unify</a></code> for <code><a href="https://rdrr.io/pkg/ranger/man/ranger.html" class="external-link">ranger models</a></code>
 <code><a href="randomForest.unify.html">randomForest.unify</a></code> for <code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest models</a></code></p></div>
     </div>
@@ -122,8 +122,6 @@ The returned representation is easy to be interpreted by the user and ready to b
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Calculate treeSHAP:</span></span></span>
 <span class="r-in"><span><span class="va">shaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="treeshap.html">treeshap</a></span><span class="op">(</span><span class="va">unified_model</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> |0%----|------|20%---|------|40%---|------|60%---|------|80%---|------|100%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> =---------------------------------------------------------------------- (0%)====================================----------------------------------- (50%)======================================================================= (100%)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">shaps</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ shaps        :'data.frame':	2 obs. of  9 variables:</span>

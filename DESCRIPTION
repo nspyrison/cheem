@@ -1,5 +1,5 @@
 Package: cheem
-Title: Interactively Explore the Support of Local Explanations with the Radial Tour
+Title: Interactively Explore Local Explanations with the Radial Tour
 Version: 0.2.1
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),

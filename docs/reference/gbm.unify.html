@@ -113,22 +113,66 @@ are not supported - please encode them before training.</p></dd>
 <span class="r-in"><span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SubclassMS</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Fit a model:</span></span></span>
-<span class="r-in"><span><span class="va">gbm_model</span> <span class="op">&lt;-</span> <span class="fu">gbm</span><span class="fu">::</span><span class="fu">gbm</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">gbm_model</span> <span class="op">&lt;-</span> <span class="fu">gbm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/gbm/man/gbm.html" class="external-link">gbm</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  formula <span class="op">=</span> <span class="va">Y</span> <span class="op">~</span> <span class="va">.</span>,</span></span>
 <span class="r-in"><span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  distribution <span class="op">=</span> <span class="st">"gaussian"</span>,</span></span>
 <span class="r-in"><span>  n.trees <span class="op">=</span> <span class="fl">50</span>,</span></span>
 <span class="r-in"><span>  interaction.depth <span class="op">=</span> <span class="fl">4</span>,</span></span>
 <span class="r-in"><span>  n.cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘gbm’</span>
 <span class="r-in"><span><span class="va">unified_model</span> <span class="op">&lt;-</span> <span class="fu">gbm.unify</span><span class="op">(</span><span class="va">gbm_model</span>, <span class="va">X</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in gbm.unify(gbm_model, X):</span> object 'gbm_model' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Calculate treeSHAP: </span></span></span>
 <span class="r-in"><span><span class="va">shaps</span> <span class="op">&lt;-</span> <span class="fu"><a href="treeshap.html">treeshap</a></span><span class="op">(</span><span class="va">unified_model</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>,<span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in treeshap(unified_model, X[1:2, ]):</span> object 'unified_model' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">shaps</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in str(shaps):</span> object 'shaps' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ shaps        :'data.frame':	2 obs. of  9 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 28833 -4100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 10737 -4053</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 2838 1760</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 12056 -19144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] -81.7 -65.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 1086 -1914</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 869 -804</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 764 -649</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 3196 -303</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ interactions : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ unified_model:List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ model:'data.frame':	650 obs. of  10 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Tree         : int [1:650] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Node         : int [1:650] 0 1 2 3 4 5 6 7 8 9 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Feature      : chr [1:650] "LivingArea" "LivingArea" NA "YearBuild" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Decision.type: Factor w/ 2 levels "&lt;=","&lt;": 1 1 NA 1 NA 1 NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Split        : num [1:650] 1845 1049 NA 1956 NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Yes          : int [1:650] 2 3 NA 5 NA 7 NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ No           : int [1:650] 12 4 NA 6 NA 8 NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Missing      : int [1:650] 13 11 NA 10 NA 9 NA NA NA NA ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Prediction   : num [1:650] NA NA 486 NA 2137 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Cover        : int [1:650] 338 312 100 212 70 142 79 63 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ data :'data.frame':	338 obs. of  9 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ LotArea    : num [1:338] 31770 11622 14267 11160 8450 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ OverallQual: num [1:338] 6 5 6 7 5 4 5 5 5 5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ YearBuild  : num [1:338] 1960 1961 1958 1968 1968 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ LivingArea : num [1:338] 1656 896 1329 2110 1056 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Bathrms    : num [1:338] 1 1 2 3 1 1 2 1 2 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ Bedrms     : num [1:338] 3 2 3 3 3 2 3 3 3 2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ TotRms     : num [1:338] 7 5 6 8 6 4 6 6 6 5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ GarageYrBlt: num [1:338] 1960 1961 1958 1968 1968 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ GarageArea : num [1:338] 528 730 312 522 304 525 490 504 517 240 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr "model_unified"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "missing_support")= logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "model")= chr "gbm"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ observations :'data.frame':	2 obs. of  9 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LotArea    : num [1:2] 31770 11622</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ OverallQual: num [1:2] 6 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ YearBuild  : num [1:2] 1960 1961</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ LivingArea : num [1:2] 1656 896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bathrms    : num [1:2] 1 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ Bedrms     : num [1:2] 3 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ TotRms     : num [1:2] 7 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageYrBlt: num [1:2] 1960 1961</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ GarageArea : num [1:2] 528 730</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "treeshap"</span>
 </code></pre></div>
     </div>
   </div>

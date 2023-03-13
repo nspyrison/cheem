@@ -11,7 +11,7 @@
 #' @family cheem consumers
 #' @examples
 #' ## Only run this example in interactive R sessions
-#' if (interactive()) {
+#' if(interactive()){
 #'   ## Runs the app
 #'   run_app("cheem")
 #'   

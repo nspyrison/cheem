@@ -85,8 +85,9 @@ ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
     position = "top1d", group_by = clas) +
   proto_basis1d(position = "bottom1d") +
   proto_origin()
-\donttest{
-animate_plotly(ggt)
+
+if(interactive()){
+  animate_plotly(ggt)
 }
 }
 \concept{ggtour proto}

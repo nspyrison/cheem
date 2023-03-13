@@ -51,11 +51,10 @@ Performs the preprocessing steps needs to supply the plot functions
 }
 \examples{
 library(cheem)
-library(spinifex)
 
 ## Classification setup:
-X    <- penguins_na.rm[, 1:4]
-clas <- penguins_na.rm$species
+X    <- spinifex::penguins_na.rm[100:300, 1:4]
+clas <- spinifex::penguins_na.rm$species[100:300]
 Y    <- as.integer(clas)
 
 ## Model and treeSHAP explanation:
@@ -73,7 +72,6 @@ if(FALSE){ ## Don't accidentally save.
 }
 
 
-
 ## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
@@ -82,18 +80,18 @@ clas <- dat$SubclassMS
 
 ## Model and treeSHAP explanation:
 rf_fit  <- default_rf(X, Y)
-\donttest{
 shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
 this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-global_view(this_ls) ## Preview spaces
+                    model = rf_fit,
+                    attr_df = shap_df)
+if(interactive()){
+  global_view(this_ls) ## Preview spaces
 }
 
 ## Save for used with shiny app (expects .rds):
 if(FALSE){ ## Don't accidentally save.
   saveRDS(this_ls, "./my_cheem_ls.rds")
-  run_app() ## Select the saved .rds file from the Data dropdown.
+  run_app() ## Select the saved .rds file from the Data drop down.
 }
 }
 \seealso{
