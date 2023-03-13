@@ -305,4 +305,16 @@ server <- function(input, output, session){
                 suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation
 } ## Close function, assigning server object.
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server,
+         onStart = function() {
+           ## Disable verbose and warnings in app
+           defaultW <- getOption("warn")
+           defaultV <- getOption("verbose")
+           options(warn = -1, verbose = FALSE)
+           ## Resume previous verbose and warning options
+           shiny::onStop(function() {
+             options(warn = defaultW,
+                     verbose = defaultV)
+           })
+         }
+)

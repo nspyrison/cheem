@@ -32,7 +32,8 @@ Imports:
     shinythemes,
     shinycssloaders,
     data.table,
-    DT
+    DT,
+    conflicted
 Suggests:
     gbm,
     lightgbm,

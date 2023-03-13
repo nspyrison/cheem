@@ -10,16 +10,17 @@
 #' @export
 #' @family cheem consumers
 #' @examples
-#' \donttest{
-#' ## Runs the app
-#' run_app("cheem_initial")
-#' 
-#' ## Run with app code displayed
-#' run_app(app_nm = "cheem_initial", display.mode = "showcase")
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   ## Runs the app
+#'   run_app("cheem")
+#'   
+#'   ## Run with app code displayed
+#'   run_app(app_nm = "cheem", display.mode = "showcase")
 #' }
 # For adjusting or adding more apps it may be useful to read: 
 # https://deanattali.com/2015/04/21/r-package-shiny-app/
-run_app <- function(app_nm = 'cheem_initial', ...){
+run_app <- function(app_nm = "cheem", ...){
   ### Additional dependencies for shiny app.
   shiny_depends <-  c("shinythemes", "shinycssloaders", "plotly", "DT")
   pkgs_needed <- !sapply(shiny_depends, requireNamespace)

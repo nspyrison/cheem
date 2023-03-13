@@ -4,7 +4,7 @@
 \alias{run_app}
 \title{Runs a shiny app demonstrating manual tours}
 \usage{
-run_app(app_nm = "cheem_initial", ...)
+run_app(app_nm = "cheem", ...)
 }
 \arguments{
 \item{app_nm}{Name of the shiny app to run. Expects "cheem_initial".}
@@ -20,12 +20,13 @@ Runs a local shiny app that demonstrates manual tour and comparable
 traditional techniques for static projections of multivariate data sets.
 }
 \examples{
-\donttest{
-## Runs the app
-run_app("cheem_initial")
-
-## Run with app code displayed
-run_app(app_nm = "cheem_initial", display.mode = "showcase")
+## Only run this example in interactive R sessions
+if (interactive()) {
+  ## Runs the app
+  run_app("cheem")
+  
+  ## Run with app code displayed
+  run_app(app_nm = "cheem", display.mode = "showcase")
 }
 }
 \seealso{

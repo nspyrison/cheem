@@ -5,17 +5,19 @@
 ## Dependencies -----
 # Application only, preprocessing already done.
 #### Shiny specific
-require(shiny)
-require(shinythemes) ## Themes for shiny, think preset css styling.
-require(shinycssloaders) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
-require(DT) ## For html table and buttons
+library(shiny, quietly = TRUE, verbose = FALSE)
+library(shinythemes, quietly = TRUE, verbose = FALSE) ## Themes for shiny, think preset css styling.
+library(shinycssloaders, quietly = TRUE, verbose = FALSE) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
+library(DT, quietly = TRUE, verbose = FALSE) ## For html table and buttons
 ## Dependencies
-require(cheem) ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
-require(spinifex)
-require(plotly)
-require(gganimate) ## Not in use atm
-require(magrittr)
+library(cheem, quietly = TRUE, verbose = FALSE)
+## Previously #load("./data/0local_funcs.RData", envir = globalenv())
+library(spinifex, quietly = TRUE, verbose = FALSE)
+library(plotly, quietly = TRUE, verbose = FALSE)
+#library(gganimate, quietly = TRUE, verbose = FALSE) ## Not in use atm
+library(magrittr, quietly = TRUE, verbose = FALSE)
 #options(show.error.locations = TRUE) #, error = browser)
+conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
 
 
 ## Load prepared cheem_ls() returns
