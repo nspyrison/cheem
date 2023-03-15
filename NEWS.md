@@ -1,4 +1,11 @@
 
+# v0.3.0 (CRAN )
+
+- Rebase all functions from expecting a unified treeshap::shap() to generalized
+data frame or matrix format for arbitrary attribution spaces.
+- Rework vignette and examples to reflect this change.
+
+
 # v0.2.0 (CRAN)
 
 ## App related changes
@@ -28,7 +35,7 @@
 
 # v0.1.0 (GitHub only, commit 283da4)
 
-## Primary Preprocessing functions
+## Primary preprocessing functions
 
 - `default_rf()` create a `randomForest::randomForest()` with more conservative defaults.
 - `attr_df_treeshap()` create `treeshap::treeshap()` local explanations of each observation.

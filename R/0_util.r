@@ -20,7 +20,7 @@
 is_discrete <- function(x, na.rm = TRUE){
   x <- x[is.na(x) == FALSE] ## Remove NAs
   is.factor(x) || is.character(x) || is.logical(x) ||
-    (length(unique(x)) < 25L & is.numeric(x))
+    (length(unique(x)) < 25 & is.numeric(x))
 }
 
 #' Check if a vector diverges a value
@@ -221,10 +221,10 @@ rnorm_from <- function(
 #' x <- 1:2000
 #' plot(x, sapply(x, linear_tform), col = "blue")
 linear_tform = function(
-  n, appox_max_n = 5000L, ceiling = 1, floor = .3
+  n, appox_max_n = 5000, ceiling = 1, floor = .3
 ){
-  vec <- 1L - min(n / appox_max_n, 1L)
-  ceiling * (floor + (1L - floor) * vec)
+  vec <- 1 - min(n / appox_max_n, 1)
+  ceiling * (floor + (1 - floor) * vec)
 }
 
 #' Logistic function to help set alpha opacity
@@ -253,8 +253,8 @@ linear_tform = function(
 logistic_tform = function(
   n, mid_pt = 600, k_attenuation = 5, ceiling = 1, floor = .3
 ){
-  vec <- 1L / (1L + exp(k_attenuation / 1000L * (n - mid_pt)))
-  ceiling * (floor + (1L - floor) * vec)
+  vec <- 1 / (1 + exp(k_attenuation / 1000 * (n - mid_pt)))
+  ceiling * (floor + (1 - floor) * vec)
 }
 
 
@@ -293,9 +293,9 @@ as_logical_index <- function(index, n){
 #' Send a message if the 4th chunk of the package version is 9000.
 #' @param text A character string to message() if package version is 9000.
 devMessage <- function(text){
-  version4 <-  utils::packageVersion(pkg = "cheem")[1L, 4L]
+  version4 <-  utils::packageVersion(pkg = "cheem")[1, 4]
   if(is.na(version4) == FALSE)
-    if(version4 == 9000L)
+    if(version4 == 9000)
       message(paste0("devMessage: ", text))
   
   ## Attempt to stop inaccurate warning (used in shiny app)
@@ -311,9 +311,9 @@ devMessage <- function(text){
 #' Evaluate the expression if the 4th chunk of the package version is 9000.
 #' @param expr A character string to message() if package version is 9000.
 ifDev <- function(expr){
-  version4 <- utils::packageVersion(pkg = "cheem")[1L, 4L]
+  version4 <- utils::packageVersion(pkg = "cheem")[1, 4]
   if(is.na(version4) == FALSE)
-    if(version4 == 9000L)
+    if(version4 == 9000)
       eval(expr)
 }
 

@@ -17,13 +17,9 @@
 #' 
 #' @name cheem
 #' @docType package
-#' @seealso [cheem_ls()] [run_app()]
+#' @seealso [cheem_ls()] or [run_app()] for help getting started
 NULL
 
-## usethis namespace: start
-#' @importFrom Rcpp sourceCpp
-## usethis namespace: end
-NULL
 
 ## Print message -----
 #### prints upon first attaching the package
@@ -35,6 +31,7 @@ NULL
   packageStartupMessage("--------------------------------------------------------")
   conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
 }
+
 
 ## Exports ------
 #' @importFrom magrittr %>%

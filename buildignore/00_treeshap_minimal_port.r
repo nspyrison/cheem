@@ -21,8 +21,9 @@
 #' @param unified_model Unified data.frame representation of the model created with a (model).unify function. A \code{\link{model_unified.object}} object.
 #' @param x Observations to be explained. A \code{data.frame} or \code{matrix} object with the same columns as in the training set of the model. Keep in mind that objects different than \code{data.frame} or plain \code{matrix} will cause an error or unpredictable behavior.
 #' @param interactions Whether to calculate SHAP interaction values. By default is \code{FALSE}. Basic SHAP values are always calculated.
-#' @param verbose Whether to print progress bar to the console. Should be logical. Progress bar will not be displayed on Windows.
-#'
+#' @param verbose Logical, if start time and run duration should be printed. 
+#' Defaults to getOption("verbose").
+#' #'
 #' @return A \code{\link{treeshap.object}} object. SHAP values can be accessed with \code{$shaps}. Interaction values can be accessed with \code{$interactions}.
 #' @source __treeshap__, \url{https://github.com/ModelOriented/treeshap}
 #' @author Konrad Komisarczyk, Przemyslaw Biecek, et al.

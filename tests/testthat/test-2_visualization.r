@@ -4,7 +4,7 @@
   library("spinifex")
   library("testthat")
   
-  r_idx <- 1L:100L
+  r_idx <- 1:100
   ## Classification:
   sub    <- wine[r_idx, ]
   c_X    <- sub[, 2:5]

@@ -17,7 +17,7 @@ colnames(X) <- c("bl", "bd", "fl", "bm")
 
 rf_fit  <- default_rf(X, Y)
 ## Long runtime for full datasets or complex models:
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+shap_df <- stop("REPLACE ME")
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df)

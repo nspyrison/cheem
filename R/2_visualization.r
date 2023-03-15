@@ -5,8 +5,7 @@
 #' Extract and format the 1D local attribution basis from 
 #' the provided local explanation's attribution.
 #' 
-#' @param attr_df A data frame of local explanation attributions,
-#' such as a return from `attr_df_treeshap()`.
+#' @param attr_df A data frame of local explanation attributions.
 #' @param rownum The rownumber of the observation.
 #' @return A matrix of the 1D basis.
 #' @export
@@ -22,7 +21,7 @@
 #' 
 #' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' shap_df <- stop("REPLACE ME")
 #' 
 #' ## Attribution basis of one obs:
 #' basis_attr_df(shap_df, rownum = 1)
@@ -46,8 +45,7 @@ basis_attr_df <- function(
 #' Find the number of the variable with the largest difference between the 
 #' primary and comparison observations.
 #' 
-#' @param attr_df A data frame of local explanation attributions,
-#' such as a return from `attr_df_treeshap()`.
+#' @param attr_df A data frame of local explanation attributions.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
 #' as a dashed line.
@@ -68,7 +66,7 @@ basis_attr_df <- function(
 #' 
 #' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' shap_df <- stop("REPLACE ME")
 #' 
 #' ## Suggest the number of a variable to manipulate:
 #' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
@@ -87,8 +85,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' orthonormalized row values of the specified local explanation `attr_df`. 
 #' Does not draw the basis bars; use in conjunction with `proto_basis1d()`.
 #'
-#' @param attr_df An data frame, the attributions of a local explanation, 
-#' such as a return from `attr_df_treeshap()`.
+#' @param attr_df An data frame, the attributions of a local explanation.
 #' @param group_by Vector to group densities by. Originally _predicted_ class.
 #' @param position The position for the basis, one of: c("top1d", "floor1d",
 #' "bottom1d", "off"). 
@@ -123,7 +120,7 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' 
 #' ## Model and treeSHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' shap_df <- stop("REPLACE ME")
 #' 
 #' ## Basis, manipulation var, manual tour path, & predictions to fix to y-axis
 #' bas     <- basis_attr_df(shap_df, 1)
@@ -318,7 +315,7 @@ proto_basis1d_distribution <- function(
 #' 
 #' ## Model, explanation, cheem list, global view:
 #' rf_fit <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' shap_df <- stop("REPLACE ME")
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
@@ -620,7 +617,7 @@ global_view_subplots <- function(
 #' 
 #' ## Model and tree SHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' shap_df <- stop("REPLACE ME")
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                      model = rf_fit,
 #'                      attr_df = shap_df)
@@ -652,10 +649,10 @@ global_view_subplots <- function(
 #' 
 #' ## Model and tree SHAP explanation:
 #' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' shap_df <- stop("REPLACE ME")
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                      model = rf_fit,
-#'                      attr_df = shap_df)
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' 
 #' ## Basis & suggest manipulation var
 #' bas <- basis_attr_df(shap_df, rownum = 1)

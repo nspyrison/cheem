@@ -1,15 +1,15 @@
 Package: cheem
 Title: Interactively Explore Local Explanations with the Radial Tour
-Version: 0.2.1
+Version: 0.3.0
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
     email = "spyrison@gmail.com",
     comment = c(ORCID = "https://orcid.org/0000-0002-8417-0212"))
   )
-Description: Given a tree-based model, calculate the tree SHAP 
+Description: Given a tree-based machine learning model, calculate the tree SHAP 
     <arXiv:1802.03888>; <https://github.com/ModelOriented/treeshap> 
     local explanation of every observation. View the data space, explanation 
-    space, and residual plot as ensemble graphic interactive on a shiny 
+    space, and model residuals as ensemble graphic interactive on a shiny 
     application. After an observation of interest is identified, the normalized 
     variable importance of the local explanation is used as a 1D projection
     basis. The support of the local explanation is then explored by changing
@@ -20,10 +20,7 @@ Depends:
 License: MIT + file LICENSE
 URL: https://github.com/nspyrison/cheem/
 BugReports: https://github.com/nspyrison/cheem/issues
-LinkingTo: 
-    Rcpp
 Imports:
-    Rcpp,
     spinifex (>= 0.3.3),
     ggplot2,
     plotly,
@@ -35,11 +32,6 @@ Imports:
     DT,
     conflicted
 Suggests:
-    gbm,
-    lightgbm,
-    randomForest,
-    ranger,
-    xgboost,
     methods,
     tourr,
     lqmm,
