@@ -28,55 +28,69 @@ knitr::opts_chunk$set(
 )
 ```
 
-__Gist:__ We explore local explanation of nonlinear models by varying the contributions of the explanmation with a radial tour. We fit random forest models and examine tree SHAP explanation. An interactive __shiny__ application facilitates this analysis; see `cheem::run_app()`.
+__TL;DR__, you can jump straight into the visuals and application with `cheem::run_app()`, but we suggest you read the introduction to get situated with the context first.
 
 
 # Introduction
 
-Nonlinear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.
+Non-linear models regularly result in more accurate prediction than their linear counterparts. However, the number and complexity of their terms make them more opaque to the interpretability. The our ability to understand how features (variables or predictors) influence predictions is important to a wide range of audiences. Attempts to bring interpretability to such complex models is an important aspect of eXplainable Artificial Intelligence (XAI).
 
-One part of this is with the use of _local explanations_. Local explanations approximate the feature importance in the vicinity of one instance (observation).
+_Local explanations_ are one such tool used in XAI. They attempt to approximate the feature importance in the vicinity of one instance (observation). That is to say that they give an approximation of linear terms at the position of one in-sample or out-of-sample observation.
 
-![](https://github.com/nspyrison/cheem/blob/main/inst/shiny_apps/cheem_initial/www/lime_nonlinear.png?raw=true)
+```{r limenonlinear, echo=FALSE, fig.cap="Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_"}
+knitr::include_graphics("../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png")
+```
 
->Illustration of nonlinear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. Figure from _Ribiro, M. et. all. (2017). Why should I trust you?_
+If the analyst can explore how models lead to bad predictions it can suggest insight into issues of the data or suggest models that may be more robust to misclassified or extreme residuals. An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. We purpose this sort of analysis as conducted with interactive graphics in the analysis and R package titled __cheem__.
 
-
-Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. This is the type of analysis visually explored in __cheem__.
-
-We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization _tour_ animates linear projection-embeddings over small changes in the basis. The package __spinifex__ facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the support of the features.
-
-While this framework would for any nonlinear model and compatible local explanation we'll illustrate with __randomForest__ models and the tree SHAP local explanation with __treeshap__ (available on GitHub).
 
 
 # Preprocessing
 
-The first thing we'll need are data and tree based model. We'll use a wrapper function for a __randomForest__ modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. __treeshap__ and __cheem__ are compatible with tree based models from __gbm__, __lightgbm__, __randomForest__, __ranger__, and __xgboost__.
+This framework is broadly applicable for any model and compatible local explaination. We will illustrate with __randomForest__::randomForest() model and the tree SHAP local explanation with __treeshap__::treeshap() (available on GitHub).
+
+The first things we need are data and a non-linear model. Here we createa a random forest model with modest hyperparameters. This will avoid overfitting the data and help mitigate the run time of tree SHAP.
 
 ```{r}
+## Download if not installed
+if(!require(cheem)) install.packages("cheem", dependencies = "Suggests")
+if(!require(treeshap)) devtools::install_github(
+  "ModelOriented/treeshap", dependencies = "Suggests")
+
+## Load onto session
 library(cheem)
 library(spinifex)
+library(treeshap)
 
 ## Classification case, Penguins data
 X           <- penguins_na.rm[, 1:4]
 clas        <- penguins_na.rm$species
 Y           <- as.integer(clas)
+# Variables: Bill Length, Bill Depth, Flipper Length, Body Mass
 colnames(X) <- c("bl", "bd", "fl", "bm")
 
 ## Create a random forest classifying penguin species
-rf_fit <- default_rf(X, Y, verbose = FALSE)
+peng_rf_fit <-  randomForest::randomForest(
+  X, Y, ntree = 125,
+  mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+  nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500)
+)
 
-## For other compatible tree based models see examples in:
-if(FALSE)
-  ?is_randomForest
+## Treeshap object
+peng_rf_tshap <- peng_rf_fit %>%
+  treeshap::randomForest.unify(model) %>%
+  treeshap::treeshap(x, interactions = FALSE, verbose = FALSE)$shaps
+message("Note: cheem expects an [n, p] matrix or data frame of the local explanation which can quickly become computationally heavy. See the last section for more options.")
 ```
 
-Next we need to extract the local explanation from each observation. Originally only tree SHAP is supported. Then we'll prepare the information to be consumed by the cheem visuals.
+We have created a basic random forest model predicting the species of the penguin given four variables (continuous physical measurements). Then a tree SHAP local explanation is saved for each observation.
+
+The prediction (yhat) of the model for each observation is also needed to conduct the cheem analysis. Then 
 
 ```{r}
 ## Local attribution of all observations
 #### !! This is expensive for complex models/data
-shap_df <- attr_df_treeshap(rf_fit, X, verbose = FALSE, noisy = FALSE)
+peng_rf_shap_df <- treeshap::treeshap()
 ## Extract statistics and prep for cheem consumption
 this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit, attr_df = shap_df, verbose = FALSE)
@@ -174,3 +188,92 @@ We provide an interactive __shiny__ application. Interactive features are made p
 # Conclusion
 
 Interpretability of black-box models is important to maintain. Local explanation extend this interpretability by approximating the feature importance in the vicinity of one instance. We purpose post-hoc analysis of these local explanations. First we explore them in a global, full instance context. Then we explore the support of the local explanation to see where it seems plausible or unreliable.
+
+
+# Other local explanations (& models)
+
+__cheem__ is agnostic to model or local explanation, but requires a model and local explanation. Above we illustrated using a random forest to predict penguin species. Below demonstrates using other attribution spaces from different models.
+
+
+## shapvis (& xgb)
+
+__shapvis__ is being actively maintained and is hosted on CRAN. It is compatible with H2O, lgb, and xgb models.
+
+https://github.com/mayer79/shapviz
+
+```{r}
+library(shapviz)
+library(ggplot2)
+library(xgboost)
+set.seed(3653)
+
+x <- c("carat", "cut", "color", "clarity")
+dtrain <- data.matrix(diamonds[x]) %>%
+  xgb.DMatrix(label = diamonds$price)
+
+fit <- xgb.train(
+  params = list(learning_rate = 0.1, objective = "reg:squarederror"), 
+  data = dtrain,
+  nrounds = 65L
+)
+
+dia_small <- diamonds[sample(nrow(diamonds), 2000L), ]
+
+shp <- shapviz(fit, X_pred = data.matrix(dia_small[x]), X = dia_small)
+shp$S ## Just the attr_d Are Categorical var reliable?
+```
+
+
+## treeshap (& randomForest)
+
+__treeshap__ is only available on github at the time of writing. It is compatible with many tree-based models including catboost, gbm, lbm, rf, ranger, and xgb models.
+
+https://github.com/ModelOriented/treeshap
+
+
+```{r, eval=FALSE, echo=TRUE}
+## Fit randomForest::randomForest
+.fit <- randomForest::randomForest(
+  x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree, ...)
+
+## Extract treeshap
+.tshap <- .fit %>%
+  treeshap::randomForest.unify(x)  %>%
+  treeshap::treeshap(x, interactions = FALSE, verbose = FALSE)$shaps
+```
+
+
+## DALEX (& LM)
+
+__DALEX__ is a popular and versitile XAI package available on CRAN. It is compatible with many models, but it uses the original, slower variant of SHAP local explanation. Expect long run times for sizable data or complex models.
+
+https://ema.drwhy.ai/shapley.html#SHAPRcode
+
+```{r}
+## DALEX Explianer
+library(DALEX)
+drag_lm_fit <- lm(
+  life_length ~ year_of_birth + height + weight + scars + number_of_lost_teeth,
+  data = dragons)
+
+drag_lm_exp <- explain(drag_lm_fit,
+                       data = dragons,
+                       y = dragons$year_of_birth,
+                       label = "model_lm")
+
+## SHAP via DALEX, versatile but slow
+shap_df <- dragons[1:6, ] ## init df of same structure
+for(i in 1:6){
+  pps <- predict_parts_shap(
+    drag_lm_exp, new_observation = dragons[i, ])
+  str(pps)
+  str(pps$contribution)
+  head(pps)
+  plot(pps)
+  stop("REPLACE ME")
+  shap_df[i, ] <- pps
+}
+
+
+```
+

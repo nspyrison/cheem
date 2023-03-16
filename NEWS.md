@@ -1,9 +1,10 @@
 
-# v0.3.0 (CRAN )
+# v0.3.0 (CRAN)
 
 - Rebase all functions from expecting a unified treeshap::shap() to generalized
 data frame or matrix format for arbitrary attribution spaces.
 - Rework vignette and examples to reflect this change.
+- Removed plotly subplot variations of visuals: `global_view_subplots()`, `radial_cheem_tour_subplots()`. These were development variations never used in the shiny app.
 
 
 # v0.2.0 (CRAN)

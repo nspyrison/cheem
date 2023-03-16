@@ -1,59 +1,7 @@
-# Model fits (treeshap & DALEX) -----
+# Model fits  -----
 
-#' Fast modest random forest model (via randomForest)
-#' 
-#' A wrapper function for `randomForest::randomForest` with more modest 
-#' hyperparameter defaults and arguments consistent with `cheem`. We encourage
-#' you to bring your own model and local explanation or at least adjust the
-#' hyperparameter (`hp_`) arguments to better fit the 
-#' 
-#' @param x The explanatory variables of the model.
-#' @param y The target variable of the model.
-#' @param verbose Logical, if start time and run duration should be printed. 
-#' Defaults to getOption("verbose").
-#' @param hp_ntree Hyperparameter, the number of trees to grow.
-#' @param hp_mtry Hyperparameter, the number variables randomly sampled at 
-#' each split.
-#' @param hp_nodesize Hyperparameter, the minimum size of terminal nodes. 
-#' Setting this number larger causes smaller trees to be grown (and thus take less time).
-#' @param ... Optionally, other arguments to pass to the
-#'  randomForest::ranrandomForest() call.
-#' @return A randomForest model.
-#' @export
-#' @family cheem preprocessing
-#' @examples
-#' library(cheem)
-#' 
-#' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes
-#' X    <- dat[, 1:9]
-#' Y    <- dat$SalePrice
-#' clas <- dat$SubclassMS
-#' 
-#' ## Model, treeSHAP, cheem list, visualize
-#' rf_fit <- default_rf(X, Y)
-#' 
-#' 
-#' 
-#' shap_df <- attr_df(rf_fit, X, noisy = FALSE)
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
-#' global_view(this_ls)
-default_rf <- function(
-  x, y, verbose = getOption("verbose"),
-  hp_ntree = 125,
-  hp_mtry = ifelse(is_discrete(y), sqrt(ncol(x)), ncol(x) / 3),
-  hp_nodesize = max(ifelse(is_discrete(y), 1, 5), nrow(x) / 500)
-){
-  if(verbose) tictoc::tic("default_rf")
-  suppressWarnings(## suppresses: The response has five or fewer unique values.  Are you sure?
-    .mod <- randomForest::randomForest(
-      x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree, ...)
-  )
-  if(verbose) tictoc::toc()
-  .mod
-}
+
+
 
 
 
@@ -63,10 +11,13 @@ default_rf <- function(
 #' 
 #' Internal function, used downstream in cheem_ls.
 #' 
-#' @param model A non-linear model, originally a `randomForest::randomForest`
-#' model fit, or a return from `default_rf()`.
-#' @param x Data to predict, required by ranger models.
 #' @param y Observed response, required by ranger models.
+#' @param pred A [n, 1] vector of the predicted values for each observation.
+#' Typically obtainable with `stats::predict()`. Exact syntax and arguments 
+#' may change across model types.
+#' @param label Optionally provide a character label to store reminder 
+#' text for the type of model and local explanation used. 
+#' Defaults to "label".
 #' @return A data.frame of model performance statistics.
 # #' @examples
 # #' library(cheem)
@@ -78,48 +29,40 @@ default_rf <- function(
 # #' clas <- dat$SubclassMS
 # #' 
 # #' ## Model and performance:
-# #' rf_fit <- default_rf(X, Y)
+# #' rf_fit <- randomForest::randomForest(
+# #'   X, Y, ntree = 125,
+# #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+# #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
 # #' cheem:::model_performance_df(rf_fit)
 model_performance_df <- function(
-  model, x = NULL, y = NULL
+  y, pred, label = "label",
 ){
-  tryCatch(
-    { ## Try
-      
-      #### Following the functions in {Metrics}
-      # liable to differ from the performance of the model object (due to adj values?)
-      # but at least consistent format and measures.
-      .y <- y
-      if(is.null(.y)) .y <- model$y
-      .pred   <- unify_predict(model, x)
-      .e      <- .y - .pred ## Residual
-      .se     <- .e^2
-      .sse    <- sum(.se)
-      .mse    <- mean(.se)
-      .rmse   <- sqrt(.mse)
-      .mad    <- stats::median(abs(.e))
-      .rse    <- .sse / sum((.y - mean(.y))^2)
-      .r2     <- 1 - .rse
-      .adj_r2 <- 1 - (.mse / stats::var(.y))
-      
-      ## There are a whole host of other performance measurements that  
-      ## some analysts may prefer. Hoeveer, it's Hard to unify across models 
-      ## and use cases.
-      
-      data.frame(model_type = utils::tail(class(model), 1),
-                 mse        = .mse,
-                 rmse       = .rmse,
-                 mad        = .mad,
-                 r2         = .r2,
-                 adj_r2     = .adj_r2,
-                 row.names  = NULL)
-    }, 
-    error = function(cond){
-      data.frame(model_type = utils::tail(class(model), 1),
-                 result     = "Model performance caused an erorr:",
-                 erorr      = cond)
-    }
-  )
+  tryCatch({
+    .e      <- y - pred ## Residual
+    .se     <- .e^2
+    .sse    <- sum(.se)
+    .mse    <- mean(.se)
+    .rmse   <- sqrt(.mse)
+    .mad    <- stats::median(abs(.e))
+    .rse    <- .sse / sum((y - mean(y))^2)
+    .r2     <- 1 - .rse
+    .adj_r2 <- 1 - (.mse / stats::var(y))
+    
+    ## There are a whole host of other performance measurements that  
+    ## some analysts may prefer. Hoeveer, it's Hard to unify across models 
+    ## and use cases.
+    data.frame(label     = label,
+               mse       = .mse,
+               rmse      = .rmse,
+               mad       = .mad,
+               r2        = .r2,
+               adj_r2    = .adj_r2)
+  },
+  error = function(cond){
+    data.frame(label  = label,
+               result = "model_performance_df() caused an erorr:",
+               erorr  = cond)
+  })
 }
 
 #' Create the plot data.frame for the global linked plotly display.
@@ -132,8 +75,9 @@ model_performance_df <- function(
 #'  class.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca".
-#' @param layer_name Character layer name, typically the type of local 
-#' attribution used. Defaults to the name of the last class of x.
+#' @param label Optionally provide a character label to store reminder 
+#' text for the type of model and local explanation used. 
+#' Defaults to "label".
 #' @return A data.frame, for the global linked __plotly__ display.
 # #' @examples
 # #' library(cheem)
@@ -148,12 +92,11 @@ global_view_df_1layer <- function(
   x,
   class      = NULL, ## required for olda
   basis_type = c("pca", "olda"),
-  layer_name = utils::tail(class(x), 1) ## Name of the last class _ie_ `treeshap``
+  label      = "label"
 ){
   d <- 2 ## Fixed display dimensionality
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
-
   
   ## Projection
   x_std <- spinifex::scale_01(x)
@@ -163,10 +106,9 @@ global_view_df_1layer <- function(
   proj  <- spinifex::scale_01(x_std %*% basis)
   
   ## Column bind wider
-  ret <- data.frame(basis_type, layer_name, 1:nrow(x), class, proj)
-  colnames(ret) <-
-    c("basis_type", "layer_name", "rownum", "class", paste0("V", 1:d))
-  attr(ret, paste0(basis_type, ":", layer_name)) <- basis
+  ret <- data.frame(basis_type, label, 1:nrow(x), class, proj)
+  colnames(ret) <- c("basis_type", "label", "rownum", "class", paste0("V", 1:d))
+  attr(ret, paste0(basis_type, ":", label)) <- basis
   
   ## Return
   ret
@@ -184,15 +126,14 @@ global_view_df_1layer <- function(
 #' @param attr_df A data frame or matrix of [n x p] local explanation 
 #' attributions.
 #' @param pred
-#' @param layer_name Character layer name, typically the type of local 
-#' attribution used. Defaults to the last class of the attr_df.
+#' @param label Optionally provide a character label to store reminder 
+#' text for the type of model and local explanation used. 
+#' Defaults to "label".
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Expects "pca" or "olda" (requires `clas`).
 #'  Defaults to "pca".
 #' @param verbose Logical, if start time and run duration should be printed. 
 #' Defaults to getOption("verbose").
-#' @param keep_model Logical, whether or not the heavy model object should be 
-#' kept. Defaults to FALSE.
 #' @return A list of data.frames needed for the `shiny` application.
 #' @seealso [global_view()] [radial_cheem_tour()] [radial_cheem_tour()]
 #' @export
@@ -206,11 +147,16 @@ global_view_df_1layer <- function(
 #' Y    <- as.integer(clas)
 #' 
 #' ## Model and treeSHAP explanation:
-#' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df(rf_fit, X, noisy = FALSE)
+#' rf_fit  <- randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+#' shap_df <- stop("REPLACE ME")
+#' 
+#' ## cheem visual
 #' this_ls <- cheem_ls(X, Y, class = clas,
-#'                      model = rf_fit,
-#'                      attr_df = shap_df)
+#'                     model = rf_fit,
+#'                     attr_df = shap_df)
 #' global_view(this_ls) ## Preview spaces
 #'
 #' ## Save for use with shiny app (expects .rds):
@@ -226,9 +172,14 @@ global_view_df_1layer <- function(
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and treeSHAP explanation:
-#' rf_fit  <- default_rf(X, Y)
+#' ## Model and treeSHAP:
+#' rf_fit <- randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
 #' shap_df <- stop("REPLACE ME")
+#' 
+#' ## Cheem visual:
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
@@ -246,13 +197,12 @@ cheem_ls <- function(
   attr_df,
   pred,
   basis_type = c("pca", "olda"), ## class req for olda
-  layer_name = utils::tail(class(model), 1),
-  verbose    = getOption("verbose"),
-  keep_model = FALSE
+  label = "label",
+  verbose    = getOption("verbose")
 ){
   if(any(sapply(attr_df, function(i) length(unique(i)) == 1)))
     stop(paste0(
-      "cheem_ls: ", layer_name, 
+      "cheem_ls: ", label, 
       " had at least one column with one unique level.", 
       " Eigen matrix wont be symmetric.",
       " Please review model complexity and attr_df."))
@@ -265,14 +215,15 @@ cheem_ls <- function(
   
   ## global_view_df -----
   .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data")
-  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, 
-                                      utils::tail(class(attr_df), 1))
+  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type,
+                                      ## REVIEW ME:
+                                      label = utils::tail(class(attr_df), 1))
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
   .dat_bas   <- utils::tail(attributes(.glob_dat),  1)
   .attr_bas  <- utils::tail(attributes(.glob_attr), 1)
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
-  ## log maha distance of data sapce
+  ## log maha distance of data space
   log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
   ## Calculate correlation of attr_proj
   m <- as.matrix(x)
@@ -283,17 +234,16 @@ cheem_ls <- function(
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
-  .pred <- unify_predict(model, x)
   .decode_left <- data.frame(
-    rownum = 1:nrow(x), class = class, y, prediction = .pred)
-  .decode_right <- data.frame(residual = y - .pred, cor_attr_proj.y, x)
+    rownum = 1:nrow(x), class = class, y, prediction = pred)
+  .decode_right <- data.frame(residual = y - pred, cor_attr_proj.y, x)
   ## If classification: append pred class/is_misclass
   if(is_classification){
     .pred_clas <- factor(
-      levels(class)[round(.pred)], levels = levels(class))
+      levels(class)[round(pred)], levels = levels(class))
     .is_misclass <- .pred_clas != class
     .decode_middle <- data.frame(
-      predicted_class  = .pred_clas, is_misclassified = .is_misclass)
+      predicted_class = .pred_clas, is_misclassified = .is_misclass)
     .decode_df <- cbind(.decode_left, .decode_middle, .decode_right)
   }else .decode_df <- cbind(.decode_left, .decode_right)
   ## Round numeric columns for display
@@ -301,17 +251,17 @@ cheem_ls <- function(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2) else c))
   
   if(is_classification){
-    .vec_yjitter <- stats::runif(nrow(x), -.2, .2)
-    .layer_nm    <- "model (w/ y jitter)"
+    .vec_yjitter  <- stats::runif(nrow(x), -.2, .2)
+    .y_axis_label <- "model (w/ y jitter)"
   }else{ ## Regression
-    .vec_yjitter <- 0
-    .layer_nm    <- "model"
+    .vec_yjitter  <- 0
+    .y_axis_label <- "model"
   }
   ## append yhaty to global_view_df ----
   .yhaty_df <-
     data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
     spinifex::scale_01()
-  .yhaty_df <- data.frame(basis_type = NA, layer_name = .layer_nm,
+  .yhaty_df <- data.frame(basis_type = NA, label = .y_axis_label,
                           rownum = 1:nrow(x), class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
@@ -353,8 +303,8 @@ cheem_ls <- function(
     global_view_df = .glob_view,
     global_view_basis_ls = .glob_basis_ls,
     decode_df = .decode_df)
-  if(keep_model) ret_ls <- c(ret_ls, model = model)
   if(verbose) tictoc::toc()
+  
   ret_ls
 }
 
@@ -372,7 +322,7 @@ cheem_ls <- function(
 #-- DALEX::predict_parts(prim/comp_obs, type [NOT INTEROPERABLE WITH treeshap])
 
 
-# Deprecated code from generalizing away from treeshap ----
+# Deprecated, generalizing local explanation attribution ----
 
 #' #' Unify various models/predictions to a standard format
 #' #' 
@@ -607,3 +557,116 @@ cheem_ls <- function(
 #'   if(noisy) beepr::beep(1)
 #'   ret
 #' }
+
+
+# Deprecated, model simplifers -----
+
+#' #' Modest random forest model (via randomForest)
+#' #' 
+#' #' A wrapper function for `randomForest::randomForest` with more modest 
+#' #' hyperparameter defaults and arguments consistent with `cheem`. We encourage
+#' #' you to bring your own model and local explanation or at least adjust the
+#' #' hyperparameter (`hp_`) arguments to better fit your data.
+#' #' 
+#' #' @param x The explanatory variables of the model.
+#' #' @param y The target variable of the model.
+#' #' @param verbose Logical, if start time and run duration should be printed. 
+#' #' Defaults to getOption("verbose").
+#' #' @param hp_ntree Hyperparameter, the number of trees to grow.
+#' #' @param hp_mtry Hyperparameter, the number variables randomly sampled at 
+#' #' each split.
+#' #' @param hp_nodesize Hyperparameter, the minimum size of terminal nodes. 
+#' #' Setting this number larger causes smaller trees to be grown (and thus take less time).
+#' #' @param ... Optionally, other arguments to pass to the
+#' #' `randomForest::ranrandomForest()` call.
+#' #' @return A randomForest model.
+#' #' @export
+#' #' @family cheem preprocessing
+#' #' @examples
+#' #' library(cheem)
+#' #' 
+#' #' ## Regression setup:
+#' #' dat  <- amesHousing2018_NorthAmes
+#' #' X    <- dat[, 1:9]
+#' #' Y    <- dat$SalePrice
+#' #' clas <- dat$SubclassMS
+#' #' 
+#' #' ## Model, treeSHAP
+#' #' rf_fit <- default_rf(X, Y)
+#' #' shap_df <- attr_df(rf_fit, X, noisy = FALSE)
+#' #' 
+#' #' ## cheem list, visualize
+#' #' this_ls <- cheem_ls(X, Y, class = clas,
+#' #'                     model = rf_fit,
+#' #'                     attr_df = shap_df)
+#' #' global_view(this_ls)
+#' default_rf <- function(
+#'     x, y, verbose = getOption("verbose"),
+#'     hp_ntree = 125,
+#'     hp_mtry = ifelse(is_discrete(y), sqrt(ncol(x)), ncol(x) / 3),
+#'     hp_nodesize = max(ifelse(is_discrete(y), 1, 5), nrow(x) / 500)
+#' ){
+#'   if(verbose) tictoc::tic("default_rf_treeshap")
+#'   .fit <- randomForest::randomForest(
+#'     x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree, ...)
+#'   if(verbose) tictoc::toc()
+#'   .fit
+#' }
+#' 
+#' 
+#' #' Modest random forest model (via randomForest)
+#' #' 
+#' #' A wrapper function for `randomForest::randomForest` with more modest 
+#' #' hyperparameter defaults and arguments consistent with `cheem`. We encourage
+#' #' you to bring your own model and local explanation or at least adjust the
+#' #' hyperparameter (`hp_`) arguments to better fit your data.
+#' #' 
+#' #' @param x The explanatory variables of the model.
+#' #' @param y The target variable of the model.
+#' #' @param verbose Logical, if start time and run duration should be printed. 
+#' #' Defaults to getOption("verbose").
+#' #' @param hp_ntree Hyperparameter, the number of trees to grow.
+#' #' @param hp_mtry Hyperparameter, the number variables randomly sampled at 
+#' #' each split.
+#' #' @param hp_nodesize Hyperparameter, the minimum size of terminal nodes. 
+#' #' Setting this number larger causes smaller trees to be grown (and thus take less time).
+#' #' @param ... Optionally, pass arguments into the `xgboost::xgboost()` params list() 
+#' #'  randomForest::ranrandomForest() call.
+#' #' @return A randomForest model.
+#' #' @export
+#' #' @family cheem preprocessing
+#' #' @examples
+#' #' library(cheem)
+#' #' 
+#' #' ## Regression setup:
+#' #' dat  <- amesHousing2018_NorthAmes
+#' #' X    <- dat[, 1:9]
+#' #' Y    <- dat$SalePrice
+#' #' clas <- dat$SubclassMS
+#' #' 
+#' #' ## Model, treeSHAP
+#' #' rf_fit  <- default_xgb(X, Y)
+#' #' shap_df <- stop("REPLACE ME")
+#' #' 
+#' #' ## cheem list, visualize
+#' #' this_ls <- cheem_ls(X, Y, class = clas,
+#' #'                     model = rf_fit,
+#' #'                     attr_df = shap_df)
+#' #' global_view(this_ls)
+#' default_xgb <- function(
+#'     x, y, verbose = getOption("verbose"),
+#'     hp_objective = "reg:squarederror",
+#'     hp_nrounds = 10,
+#'     hp_learn_rt = .3,
+#'     ...
+#' ){
+#'   if(verbose) tictoc::tic("default_xgb")
+#'   .dtrain <- data.matrix(x) %>% xgb.DMatrix()
+#'   .fit <- xgb.train(
+#'     params = list(learning_rate = hp_learn_rt, objective = hp_objective, ...),
+#'     data = .dtrain,
+#'     nrounds = hp_nrounds)
+#'   if(verbose) tictoc::toc()
+#'   .fit
+#' }
+

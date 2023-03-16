@@ -16,8 +16,8 @@ fit <- xgb.train(
 dia_small <- diamonds[sample(nrow(diamonds), 2000L), ]
 
 shp <- shapviz(fit, X_pred = data.matrix(dia_small[x]), X = dia_small)
-str(shp)
-shp$S
+str(shp) ## list, class: shapviz, $S is a [nxp] matrix of the shap attr.
+shp$S ## Are Categorical var reliable?
 
 
 ########## -

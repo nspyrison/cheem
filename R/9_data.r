@@ -116,8 +116,11 @@
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model, treeSHAP explanation, cheem list:
-#' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' rf_fit  <-  randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+#' shap_df <- stop("REPLACE ME")
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)
@@ -189,8 +192,11 @@
 #' clas <- chocolates$Type
 #' 
 #' ## Model, treeSHAP explanation, cheem list:
-#' rf_fit  <- default_rf(X, Y)
-#' shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
+#' rf_fit  <-  randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+#' shap_df <- stop("REPLACE ME")
 #' this_ls <- cheem_ls(X, Y, class = clas,
 #'                     model = rf_fit,
 #'                     attr_df = shap_df)

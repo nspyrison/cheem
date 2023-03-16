@@ -64,14 +64,6 @@ test_that("global_view as_ggplot", {
   expect_equal(class(r_gvgg), c("gg", "ggplot"))
 })
 
-## global_view_subplots -----
-c_gvsp <- global_view_subplots(c_chee)
-r_gvsp <- global_view_subplots(r_chee)
-test_that("global_view_subplots", {
-  expect_equal(class(c_gvsp), c("plotly", "htmlwidget"))
-  expect_equal(class(r_gvsp), c("plotly", "htmlwidget"))
-})
-
 
 ## radial_cheem_tour -----
 c_ggt <- radial_cheem_tour(c_chee, c_bas_attr, manip_var = 1L, 1L, 2L)
@@ -81,15 +73,3 @@ test_that("radial_cheem_tour", {
   expect_equal(class(r_ggt), c("gg", "ggplot"))
 })
 
-## radial_cheem_tour_subplots -----
-c_ggtsp <- radial_cheem_tour_subplots(c_chee, c_bas_attr, manip_var = 1L, 1L, 2L)
-## Plotly uses gather_ in regression case: offending line in radial_cheem_tour_subplots:
-# p3 <- plotly::ggplotly(g3) %>% plotly::layout(yaxis = list(title = "residual"))
-suppressWarnings(
-  r_ggtsp <- radial_cheem_tour_subplots(r_chee, r_bas_attr, manip_var = 1L, 1L, 2L)
-)
-
-test_that("radial_cheem_tour_subplots", {
-  expect_equal(class(c_ggtsp), c("plotly", "htmlwidget"))
-  expect_equal(class(r_ggtsp),  c("plotly", "htmlwidget"))
-})
