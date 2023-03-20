@@ -32,11 +32,11 @@ basis_attr_df <- function(
   attr_df,
   rownum
 ){
-  ## Remove last column if layer_name
+  ## Remove last column if label
   .attr_df <- attr_df[rownum,, drop = FALSE]
   ## Extract formatted basis
   LA_bas <- matrix(as.numeric(.attr_df), ncol = 1,
-                   dimnames = list(colnames(attr_df), 
+                   dimnames = list(colnames(attr_df),
                                    utils::tail(class(attr_df), 1))
   )
   ## Ensure orthonormality
@@ -346,21 +346,20 @@ global_view_legwork <- function(
     cheem_ls,
     primary_obs    = NULL,
     comparison_obs = NULL,
-    color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-    # subplot_r_ind  = NULL ## May be needed with subplots.
+    color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y")
+    #,subplot_r_ind  = NULL ## May be needed with subplots.
 ){
   ## Prevent global variable warnings:
-  V1 <- V2 <- ggtext <- projection_nm <- layer_name <- tooltip <- NULL
+  V1 <- V2 <- ggtext <- projection_nm <- label <- tooltip <- NULL
   ## Initialize
   global_view_df    <- cheem_ls$global_view_df
-  decode_df         <- cheem_ls$decode_df
   is_classification <- cheem_ls$type == "classification"
   ## Aesthetics
-  .alpha <- logistic_tform(nrow(decode_df))
+  .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
   color  <- match.arg(color)
   if(color %in% c("default", colnames(global_view_df)) == FALSE)
     stop(paste0("global_view: `color` column ", color,
-                " not in the cheem_ls. Try to reprocess that dataset."))
+                " not in the cheem_ls. Try reprocessing the dataset."))
   if(is_classification){
     ## Classification
     if(color == "default") color <- "predicted_class"
@@ -378,16 +377,12 @@ global_view_legwork <- function(
   
   ## Proto for main points
   pts_main <- list()
-  .u_nms   <- unique(global_view_df$layer_name)
+  .u_nms   <- unique(global_view_df$label)
   ## If classification: residual/obs LM line behind pts
   if(is_classification == FALSE)
     pts_main <- c(ggplot2::geom_smooth(
-      ggplot2::aes(V1, V2), subset(global_view_df, layer_name == .u_nms[3]),
+      ggplot2::aes(V1, V2), subset(global_view_df, label == .u_nms[3]),
       method = "lm", formula = y ~ x, se = FALSE), pts_main)
-  ## Add main points
-  pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
-    ggplot2::aes(color = .color, shape = .shape, tooltip = tooltip),
-    alpha = .alpha)), .col_scale)
   ## If classification circle misclassified points
   if(is_classification == TRUE){
     .rn_misclass <- which(decode_df$is_misclassified == TRUE)
@@ -397,6 +392,14 @@ global_view_legwork <- function(
         ggplot2::aes(V1, V2), data = global_view_df[.idx_misclas, ],
         color = "red", fill = NA, shape = 21, size = 3, alpha = .alpha))
   }
+  ## Highlight primary obs, if passed
+  if(is.null(primary_obs) == FALSE){
+    .idx_shap <- global_view_df$rownum == primary_obs
+    if(sum(.idx_shap) > 0)
+      pts_main <- c(pts_main, ggplot2::geom_point(
+        ggplot2::aes(V1, V2), data = global_view_df[.idx_shap, ],
+        size = 5, shape = 8, color = "black"))
+  }
   ## Highlight comparison obs, if passed
   if(is.null(comparison_obs) == FALSE){
     .idx_comp  <- global_view_df$rownum == comparison_obs
@@ -405,14 +408,10 @@ global_view_legwork <- function(
         ggplot2::aes(V1, V2), data = global_view_df[.idx_comp, ],
         size = 3, shape = 4, color = "black"))
   }
-  ## Highlight shap obs, if passed
-  if(is.null(primary_obs) == FALSE){
-    .idx_shap <- global_view_df$rownum == primary_obs
-    if(sum(.idx_shap) > 0)
-      pts_main <- c(pts_main, ggplot2::geom_point(
-        ggplot2::aes(V1, V2), data = global_view_df[.idx_shap, ],
-        size = 5, shape = 8, color = "black"))
-  }
+  ## Add main points
+  pts_main <- c(pts_main, suppressWarnings(ggplot2::geom_point(
+    ggplot2::aes(color = .color, shape = .shape, tooltip = tooltip),
+    alpha = .alpha)), .col_scale)
   
   ## Visualize
   gg <- global_view_df %>% plotly::highlight_key(~rownum) %>%
@@ -494,8 +493,8 @@ global_view <- function(
   width_px       = 1440,
   as_ggplot      = FALSE
 ){
-  gg <- global_view_legwork(cheem_ls, primary_obs, comparison_obs) +
-    ggplot2::facet_grid(cols = ggplot2::vars(layer_name))
+  gg <- global_view_legwork(cheem_ls, primary_obs, comparison_obs, color) +
+    ggplot2::facet_grid(cols = ggplot2::vars(label))
   if(as_ggplot) return(gg + ggplot2::theme(aspect.ratio = 1))
   
   ## Plotly options & box selection
@@ -619,7 +618,7 @@ radial_cheem_tour <- function(
   do_add_residual     = FALSE
 ){
   if(is.null(row_index) == FALSE)
-    if(sum(row_index) == 0L) 
+    if(sum(row_index) == 0)
       stop("radial_cheem_tour: sum of row_index was 0.")
   
   ## Initialize
@@ -658,7 +657,7 @@ radial_cheem_tour <- function(
         row_index = row_index, rug_shape = pcp_shape) +
       
       #Warning message:
-      #In Ops.factor(yscale, x[, 2L]) : '*' not meaningful for factors
+      #In Ops.factor(yscale, x[, 2]) : '*' not meaningful for factors
       ## PCP on Basis, 1D
       proto_basis1d_distribution(
         cheem_ls$attr_df,
@@ -673,11 +672,11 @@ radial_cheem_tour <- function(
       ## Highlight comparison obs
       spinifex::proto_highlight1d(
         row_index = .comp_obs, mark_initial = FALSE,
-        identity_args = list(linetype = 3L, alpha = 0.8, color = "black")) +
+        identity_args = list(linetype = 3, alpha = 0.8, color = "black")) +
       ## Highlight shap obs
       spinifex::proto_highlight1d(
         row_index = .prim_obs, mark_initial = FALSE,
-        identity_args = list(linetype = 2L, alpha = .6, size = .8, color = "black"))
+        identity_args = list(linetype = 2, alpha = .6, size = .8, color = "black"))
     
     ## return
     ggt
@@ -701,12 +700,12 @@ radial_cheem_tour <- function(
         .pts_prim_obs <- c(.prim_obs, .n + .prim_obs)
       if(is.null(.comp_obs) == FALSE)
         .pts_comp_obs <- c(.comp_obs, .n + .comp_obs)
-      if(length(.class) > 1L){.class_fore <- c(.class, .class)
+      if(length(.class) > 1){.class_fore <- c(.class, .class)
       } else .class_fore <- .class ## could be dummy factor(FALSE)
       ## Foreground:
       .dat_fore   <- rbind(.dat, .dat)
       .idx_fore   <- c(row_index, row_index)
-      .facet_fore <- factor(rep(c("observed y", "residual"), each = 2L * .n))
+      .facet_fore <- factor(rep(c("observed y", "residual"), each = 2 * .n))
       .fixed_y    <- c(.y, .resid)
     } else {
       ## not doubled up data; just fixed_observed y
@@ -725,12 +724,12 @@ radial_cheem_tour <- function(
     ## ggtour
     ggt <- spinifex::ggtour(.mt_path, .dat_fore, angle = angle,
                             do_center_frame = do_center_frame) +
-      spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1L) +
+      spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1) +
       spinifex::append_fixed_y(fixed_y = .fixed_y) +
       ## Plotly doesn't rotate text in geom_text/annotate.
       ggplot2::theme(legend.position = "off",
                      axis.title.y = ggplot2::element_text(
-                       angle = 90L, vjust = 0.5)) +
+                       angle = 90, vjust = 0.5)) +
       ## Exasperates issues with plotly & geom presence issue.
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       ## Points; 1D proj & fixed y
@@ -747,11 +746,11 @@ radial_cheem_tour <- function(
       ## Highlight comparison obs
       spinifex::proto_highlight(
         row_index = .pts_comp_obs,
-        identity_args = list(size = 3L, shape = 4L, alpha = 0.6, color = "black")) +
+        identity_args = list(size = 3, shape = 4, alpha = 0.6, color = "black")) +
       ## Highlight primary obs
       spinifex::proto_highlight(
         row_index = .pts_prim_obs,
-        identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"))
+        identity_args = list(size = 5, shape = 8, alpha = .8, color = "black"))
     if(do_add_residual){
       ggt <- ggt +
         ## Use manual geom_hline as proto_hline0 is on all facets.
@@ -787,13 +786,13 @@ radial_cheem_tour <- function(
 #'   ## Individual ggplots
 #'   g1 <- global_view_legwork(
 #'     cheem_ls, primary_obs, comparison_obs,
-#'     subplot_r_ind = global_view_df$layer_name == .u_nms[1])
+#'     subplot_r_ind = global_view_df$label == .u_nms[1])
 #'   g2 <- global_view_legwork(
 #'     cheem_ls, primary_obs, comparison_obs,
-#'     subplot_r_ind = global_view_df$layer_name == .u_nms[2])
+#'     subplot_r_ind = global_view_df$label == .u_nms[2])
 #'   g3 <- global_view_legwork(
 #'     cheem_ls, primary_obs, comparison_obs,
-#'     subplot_r_ind = global_view_df$layer_name == .u_nms[3])
+#'     subplot_r_ind = global_view_df$label == .u_nms[3])
 #'   
 #'   ## Individual plotly plots with axes titles
 #'   p1 <- plotly::ggplotly(g1) %>%
@@ -805,7 +804,7 @@ radial_cheem_tour <- function(
 #'   p3 <- plotly::ggplotly(g3) %>%
 #'     plotly::layout(xaxis = list(title = "predicted"),
 #'                    yaxis = list(title = "observed"))
-#'   sp <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L)
+#'   sp <- plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0)
 #'   
 #'   ## Plotly options & box selection
 #'   sp %>%
@@ -833,7 +832,7 @@ radial_cheem_tour <- function(
 #'     do_center_frame     = TRUE
 #' ){
 #'   if(is.null(row_index) == FALSE)
-#'     if(sum(row_index) == 0L)
+#'     if(sum(row_index) == 0)
 #'       stop("radial_cheem_tour: sum of row_index was 0.")
 #'   ## Initialize
 #'   x <- y <- NULL
@@ -898,7 +897,7 @@ radial_cheem_tour <- function(
 #'     p_dat1d <- plotly::ggplotly(ggt_dat1d)
 #'     ## Return a plotly object, animate_plotly can pass animation options to these.
 #'     ggp <- plotly::subplot(p_bas, p_dat1d, titleY = TRUE, titleX = TRUE,
-#'                            widths = c(.33, .66), margin = 0L) %>%
+#'                            widths = c(.33, .66), margin = 0) %>%
 #'       plotly::layout(showlegend = FALSE)
 #'     ## Return a plotly, pass animation options with animate_plotly()
 #'     return(ggp)
@@ -920,11 +919,11 @@ radial_cheem_tour <- function(
 #'         ## Highlight comparison obs
 #'         spinifex::proto_highlight(
 #'           row_index = .comp_obs,
-#'           identity_args = list(size = 3L, shape = 4L, alpha = 0.6, color = "black")) +
+#'           identity_args = list(size = 3, shape = 4, alpha = 0.6, color = "black")) +
 #'         ## Highlight primary obs
 #'         spinifex::proto_highlight(
 #'           row_index = .prim_obs,
-#'           identity_args = list(size = 5L, shape = 8L, alpha = .8, color = "black"))
+#'           identity_args = list(size = 5, shape = 8, alpha = .8, color = "black"))
 #'     }
 #'     
 #'     ## Doubling data to facet on obs and residual.
@@ -953,7 +952,7 @@ radial_cheem_tour <- function(
 #'     p3 <- plotly::ggplotly(g3) %>%
 #'       plotly::layout(yaxis = list(title = "residual"))
 #'     ## Return a plotly, pass animation options with animate_plotly()
-#'     plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0L) %>%
+#'     plotly::subplot(p1, p2, p3, titleY = TRUE, titleX = TRUE, margin = 0) %>%
 #'       plotly::layout(showlegend = FALSE)
 #'   }
 #' }

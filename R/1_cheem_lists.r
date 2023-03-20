@@ -35,7 +35,7 @@
 # #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
 # #' cheem:::model_performance_df(rf_fit)
 model_performance_df <- function(
-  y, pred, label = "label",
+  y, pred, label = "label"
 ){
   tryCatch({
     .e      <- y - pred ## Residual
@@ -71,10 +71,11 @@ model_performance_df <- function(
 #' Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 #' 
 #' @param x The explanatory variables of the model.
-#' @param class The variable to group points by. Originally the _predicted_
-#'  class.
 #' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca".
+#' attribution space from. Defaults to "pca". 
+#' Expects "pca" or "olda" (reqires `class`).
+#' @param class Optional, [n x 1] vector, a variable to group points by. 
+#' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
 #' text for the type of model and local explanation used. 
 #' Defaults to "label".
@@ -121,17 +122,17 @@ global_view_df_1layer <- function(
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
-#' @param class A [1 x p] vector, a variable to group points by. 
-#' This can be the same as or different from `y`, the target variable.
 #' @param attr_df A data frame or matrix of [n x p] local explanation 
 #' attributions.
-#' @param pred
+#' @param pred A [n x 1] vector, the predictions from the accosicated model.
+#' @param class Optional, [n x 1] vector, a variable to group points by. 
+#' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
 #' text for the type of model and local explanation used. 
 #' Defaults to "label".
 #' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Expects "pca" or "olda" (requires `clas`).
-#'  Defaults to "pca".
+#' attribution space from. Defaults to "pca". 
+#' Expects "pca" or "olda" (reqires `class`).
 #' @param verbose Logical, if start time and run duration should be printed. 
 #' Defaults to getOption("verbose").
 #' @return A list of data.frames needed for the `shiny` application.
@@ -142,26 +143,38 @@ global_view_df_1layer <- function(
 #' library(cheem)
 #' 
 #' ## Classification setup:
-#' X    <- spinifex::penguins_na.rm[, 1:4]
+#' X <- spinifex::penguins_na.rm[, 1:4]
 #' clas <- spinifex::penguins_na.rm$species
-#' Y    <- as.integer(clas)
+#' Y <- as.integer(clas)
 #' 
-#' ## Model and treeSHAP explanation:
-#' rf_fit  <- randomForest::randomForest(
+#' 
+#' ## Model and prediction:
+#' peng_rf_fit <- randomForest::randomForest(
 #'   X, Y, ntree = 125,
 #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
 #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
+#' peng_rf_pred <- predict(peng_rf_fit)
+#' 
+#' ## Extract treeshap
+#' peng_rf_tshap <- peng_rf_fit %>%
+#'   treeshap::randomForest.unify(X) %>%
+#'   treeshap::treeshap(X, interactions = FALSE, verbose = FALSE)
+#' ## Keep only the [n, p] attr_df
+#' peng_rf_tshap <- peng_rf_tshap$shaps
+#' 
+#' 
 #' 
 #' ## cheem visual
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
-#' global_view(this_ls) ## Preview spaces
+#' peng_rf_chm <- cheem_ls(X, Y,
+#'                         attr_df = peng_rf_tshap,
+#'                         pred = peng_rf_pred,
+#'                         class = clas,
+#'                         label = "Penguin, RF, treeshap")
+#' global_view(peng_rf_chm) ## Preview spaces
 #'
 #' ## Save for use with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(this_ls, "./my_cheem_ls.rds")
+#'   saveRDS(peng_rf_chm, "./peng_rf_tshap.rds")
 #'   run_app() ## Select the saved .rds file from the Data dropdown.
 #' }
 #' 
@@ -193,31 +206,35 @@ global_view_df_1layer <- function(
 #'   run_app() ## Select the saved .rds file from the Data drop down.
 #' }
 cheem_ls <- function(
-  x, y, class = NULL,
+  x, y,
   attr_df,
   pred,
+  class = NULL,
   basis_type = c("pca", "olda"), ## class req for olda
   label = "label",
-  verbose    = getOption("verbose")
+  verbose = getOption("verbose")
 ){
-  if(any(sapply(attr_df, function(i) length(unique(i)) == 1)))
+  ## Checks
+  if(verbose) tictoc::tic("cheem_ls")
+  x       <- data.frame(x)
+  attr_df <- data.frame(attr_df)
+  stopifnot("data.frame" %in% class(x))
+  stopifnot("data.frame" %in% class(attr_df))
+  if(any(apply(attr_df, 2, function(i) length(unique(i)) == 1)))
     stop(paste0(
-      "cheem_ls: ", label, 
-      " had at least one column with one unique level.", 
+      "cheem_ls: ", label,
+      " had at least one column with one unique level.",
       " Eigen matrix wont be symmetric.",
       " Please review model complexity and attr_df."))
-  ## Initialize 
-  if(verbose) tictoc::tic("cheem_ls")
-  d <- 2L
+  ## Initialize
+  d <- 2 ## Hard coded display dimensionality
   basis_type <- match.arg(basis_type)
   is_classification <- is_discrete(y)
   rownum <- V2 <- projection_nm <- NULL
   
   ## global_view_df -----
   .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data")
-  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type,
-                                      ## REVIEW ME:
-                                      label = utils::tail(class(attr_df), 1))
+  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, "attribution")
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
   .dat_bas   <- utils::tail(attributes(.glob_dat),  1)
@@ -228,7 +245,7 @@ cheem_ls <- function(
   ## Calculate correlation of attr_proj
   m <- as.matrix(x)
   cor_attr_proj.y <- NULL
-  .m <- sapply(1L:nrow(attr_df), function(i)
+  .m <- sapply(1:nrow(attr_df), function(i)
     cor_attr_proj.y[i] <<- stats::cor(m %*% basis_attr_df(attr_df, i), y)
   )
   
@@ -277,8 +294,8 @@ cheem_ls <- function(
       tooltip[.is_misclass],
       "\nMisclassified! predicted: ", .pred_clas[.is_misclass],
       ", observed: ", class[.is_misclass])
-    tooltip[!.is_misclass] <- paste0(
-      tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])
+    tooltip[!.is_misclass] <- paste0(tooltip[!.is_misclass], "\nclass: ", 
+                                     class[!.is_misclass])
   }else tooltip <- paste0(tooltip, "\nresidual: ", .decode_df$residual)
   
   ## Append model info to global_view
@@ -293,16 +310,16 @@ cheem_ls <- function(
   .decode_df$tooltip           <- tooltip
   ## Ensure facet order is kept.
   .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))
-  .glob_view$layer_name <- factor(.glob_view$layer_name, unique(.glob_view$layer_name))
+  .glob_view$label      <- factor(.glob_view$label, unique(.glob_view$label))
   
   ## Cleanup and return
   ret_ls <- list(
-    type = problem_type(y),
-    model_performance_df = model_performance_df(model, x, y),
-    attr_df = attr_df,
-    global_view_df = .glob_view,
+    type                 = problem_type(y),
+    model_performance_df = model_performance_df(y, pred, label),
+    attr_df              = attr_df,
+    global_view_df       = .glob_view,
     global_view_basis_ls = .glob_basis_ls,
-    decode_df = .decode_df)
+    decode_df            = .decode_df)
   if(verbose) tictoc::toc()
   
   ret_ls
@@ -368,7 +385,7 @@ cheem_ls <- function(
 #'   ret <- lightgbm.unify(model, x) ## treeshap:: ported function
 #' }else
 #'   stop("unify_tree_model: wasn't a treeshap supported model.") ## Need dev for DALEX supported packages
-#' if(nrow(ret[[1L]]) == 0L)
+#' if(nrow(ret[[1]]) == 0)
 #'   stop("unify_tree_model: treeshap unified model has 0 rows, model may not be supported.")
 #' ## Return
 #' ret

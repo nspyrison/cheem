@@ -184,7 +184,7 @@ does_contain_nonnumeric <- function(x){
 rnorm_from <- function(
   data, n_obs = 1, var_coeff = 1, method = c("pearson", "kendall", "spearman")
 ){
-  .mns <- apply(data, 2L, stats::median)
+  .mns <- apply(data, 2, stats::median)
   .cov <- stats::cov(data, method = match.arg(method))
   diag(.cov) <- var_coeff * diag(.cov) ## Decrease univariate variance if needed.
   ## person numeric, not spearman ranked/ordinal

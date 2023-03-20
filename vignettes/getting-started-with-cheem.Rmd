@@ -15,7 +15,8 @@ knitr::opts_chunk$set(
   echo       = TRUE,   # code
   include    = TRUE,   # plots
   results    = "show", # text: "hide", "show"
-  eval       = TRUE,   # chunk
+  ## stop("REPLACE ME"):
+  eval       = FALSE,   # chunk code
   message    = FALSE,
   warning    = FALSE,
   error      = FALSE,
@@ -38,7 +39,7 @@ Non-linear models regularly result in more accurate prediction than their linear
 _Local explanations_ are one such tool used in XAI. They attempt to approximate the feature importance in the vicinity of one instance (observation). That is to say that they give an approximation of linear terms at the position of one in-sample or out-of-sample observation.
 
 ```{r limenonlinear, echo=FALSE, fig.cap="Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_"}
-knitr::include_graphics("../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png")
+knitr::include_graphics("../inst/shiny_apps/cheem/www/lime_nonlinear.png")
 ```
 
 If the analyst can explore how models lead to bad predictions it can suggest insight into issues of the data or suggest models that may be more robust to misclassified or extreme residuals. An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. We purpose this sort of analysis as conducted with interactive graphics in the analysis and R package titled __cheem__.
@@ -47,56 +48,50 @@ If the analyst can explore how models lead to bad predictions it can suggest ins
 
 # Preprocessing
 
-This framework is broadly applicable for any model and compatible local explaination. We will illustrate with __randomForest__::randomForest() model and the tree SHAP local explanation with __treeshap__::treeshap() (available on GitHub).
+This framework is broadly applicable for any model and compatible local explanation. We will illustrate with __xgboost__::xgboost() model (xgb) and the tree SHAP local explanation with __shapviz__::shapviz(). The model attempts to predict housing sales price from 11 predictors for 338 sale events from one neighborhood in the 2018 Ames data.
 
-The first things we need are data and a non-linear model. Here we createa a random forest model with modest hyperparameters. This will avoid overfitting the data and help mitigate the run time of tree SHAP.
+The first things we need are the prediction and a local explanation (or other embedded space). Here we create a xgb model, create predictions, and find the SHAP values of each observation.
 
 ```{r}
 ## Download if not installed
 if(!require(cheem)) install.packages("cheem", dependencies = "Suggests")
-if(!require(treeshap)) devtools::install_github(
-  "ModelOriented/treeshap", dependencies = "Suggests")
-
+if(!require(treeshap)) devtools::install_github("ModelOriented/treeshap")
 ## Load onto session
 library(cheem)
 library(spinifex)
 library(treeshap)
 
-## Classification case, Penguins data
-X           <- penguins_na.rm[, 1:4]
-clas        <- penguins_na.rm$species
-Y           <- as.integer(clas)
-# Variables: Bill Length, Bill Depth, Flipper Length, Body Mass
-colnames(X) <- c("bl", "bd", "fl", "bm")
+## Setup
+X    <- cheem::amesHousing2018_NorthAmes[, 1:9]
+Y    <- cheem::amesHousing2018_NorthAmes$SalePrice
+clas <- cheem::amesHousing2018_NorthAmes$SubclassMS
 
-## Create a random forest classifying penguin species
-peng_rf_fit <-  randomForest::randomForest(
-  X, Y, ntree = 125,
-  mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-  nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500)
-)
+## Model and predict
+ames_train    <- data.matrix(X) %>%
+  xgb.DMatrix(label = Y)
+ames_xgb_fit  <- xgboost(data = ames_train, max.depth = 3, nrounds = 25)
+ames_xgb_pred <- predict(ames_xgb_fit, newdata = ames_train)
+ames_xgb_pred %>% head()
 
-## Treeshap object
-peng_rf_tshap <- peng_rf_fit %>%
-  treeshap::randomForest.unify(model) %>%
-  treeshap::treeshap(x, interactions = FALSE, verbose = FALSE)$shaps
-message("Note: cheem expects an [n, p] matrix or data frame of the local explanation which can quickly become computationally heavy. See the last section for more options.")
+## SHAP values
+shp <- shapviz(ames_xgb_fit, X_pred = ames_train, X = X)
+## Keep just the [n, p] local explanations
+ames_xgb_shap <- shp$S
+ames_xgb_shap %>% head()
 ```
 
-We have created a basic random forest model predicting the species of the penguin given four variables (continuous physical measurements). Then a tree SHAP local explanation is saved for each observation.
-
-The prediction (yhat) of the model for each observation is also needed to conduct the cheem analysis. Then 
+Note that the choice of the model, prediction, and local explanation (or other embedding) is choice of the analyst and not facilitated by __cheem__. Now let's prepare for the visualization of these spaces with a `cheem::cheem_ls()` call before we start our analysis.
 
 ```{r}
-## Local attribution of all observations
-#### !! This is expensive for complex models/data
-peng_rf_shap_df <- treeshap::treeshap()
-## Extract statistics and prep for cheem consumption
-this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit, attr_df = shap_df, verbose = FALSE)
+## Preprocessing for cheem analysis
+ames_chm <- cheem_ls(X, Y,
+                     class      = clas,
+                     attr_df    = ames_xgb_shap,
+                     pred       = ames_xgb_pred,
+                     basis_type = c("pca"),
+                     label      = "Ames, xgb, shap")
+names(ames_chm)
 ```
-
-Now we are done with all of the leg work, let's turn our attention towards the visuals and analysis.
 
 
 # Cheem viewer
@@ -109,8 +104,9 @@ We have extracted tree SHAP, an feature importance measure in the vicinity of ea
 To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of __plotly__ and __crosstalk__. The model information is essentially the confusion matrix for the classification case.
 
 ```{r, out.width="100%"}
-global_view(this_ls, primary_obs = 243, comparison_obs = 169,
-            height_px = 240, width_px = 720, as_ggplot = TRUE)
+global_view(ames_chm, primary_obs = 1, comparison_obs = 17,
+            height_px = 240, width_px = 720, 
+            as_ggplot = TRUE, color = "log_maha.data")
 ```
 
 From this _global view_ we want to identify a primary instance (PI) and optionally a comparison instance (CI) to explore. Misclassified or observations with high residuals are good targets for further exploration. One point sticks out in this case. Instance 243 (shown as *) is a Gentoo (purple) penguin, while the model predict it to be a Chinstrap penguin. Peguin 169 (shown as x) is reasonably close by and correctly predicted as Gentoo. In practice we used linked brushing and misclassification information to guide our search.
@@ -190,41 +186,43 @@ We provide an interactive __shiny__ application. Interactive features are made p
 Interpretability of black-box models is important to maintain. Local explanation extend this interpretability by approximating the feature importance in the vicinity of one instance. We purpose post-hoc analysis of these local explanations. First we explore them in a global, full instance context. Then we explore the support of the local explanation to see where it seems plausible or unreliable.
 
 
-# Other local explanations (& models)
+# Other local explanations, (models & predictions)
 
 __cheem__ is agnostic to model or local explanation, but requires a model and local explanation. Above we illustrated using a random forest to predict penguin species. Below demonstrates using other attribution spaces from different models.
 
 
-## shapvis (& xgb)
+## shapvis (& xgb classification)
 
 __shapvis__ is being actively maintained and is hosted on CRAN. It is compatible with H2O, lgb, and xgb models.
 
 https://github.com/mayer79/shapviz
 
-```{r}
+```{r, eval=FALSE, echo=TRUE}
+if(!require(shapviz)) install.packages("shapviz")
+if(!require(xgboost)) install.packages("xgboost")
 library(shapviz)
-library(ggplot2)
 library(xgboost)
 set.seed(3653)
 
-x <- c("carat", "cut", "color", "clarity")
-dtrain <- data.matrix(diamonds[x]) %>%
-  xgb.DMatrix(label = diamonds$price)
+## Setup
+X    <- DALEX::apartments[, -1]
+Y    <- DALEX::apartments$m2.price
+clas <- DALEX::apartments$district
 
-fit <- xgb.train(
-  params = list(learning_rate = 0.1, objective = "reg:squarederror"), 
-  data = dtrain,
-  nrounds = 65L
-)
+## Model and predict
+apt_train    <- data.matrix(X) %>%
+  xgb.DMatrix(label = Y)
+apt_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
+apt_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
 
-dia_small <- diamonds[sample(nrow(diamonds), 2000L), ]
-
-shp <- shapviz(fit, X_pred = data.matrix(dia_small[x]), X = dia_small)
-shp$S ## Just the attr_d Are Categorical var reliable?
+## SHAP
+shp <- shapviz(peng_xgb_fit, X_pred = peng_train, X = X)
+## Keep just the [n, p] local explanations
+peng_xgb_shap <- shp$S
 ```
 
 
-## treeshap (& randomForest)
+## treeshap (& randomForest regression)
 
 __treeshap__ is only available on github at the time of writing. It is compatible with many tree-based models including catboost, gbm, lbm, rf, ranger, and xgb models.
 
@@ -232,48 +230,62 @@ https://github.com/ModelOriented/treeshap
 
 
 ```{r, eval=FALSE, echo=TRUE}
-## Fit randomForest::randomForest
-.fit <- randomForest::randomForest(
-  x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree, ...)
+if(!require(treeshap)) devtools::install_github("ModelOriented/treeshap")
+if(!require(randomForest)) install.packages("randomForest")
+library(treeshap)
+library(randomForest)
 
-## Extract treeshap
-.tshap <- .fit %>%
-  treeshap::randomForest.unify(x)  %>%
-  treeshap::treeshap(x, interactions = FALSE, verbose = FALSE)$shaps
+## SETUP
+X    <- spinifex::wine[, -2]
+Y    <- spinifex::wine$Alcohol
+clas <- spinifex::wine$Type
+  
+## Fit randomForest::randomForest
+wine_rf_fit  <- randomForest::randomForest(
+  X, Y, ntree = 125,
+  mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+  nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+wine_rf_pred <- predict(pid_rf_fit)
+
+## treeshap::treeshap()
+wine_rf_tshap <- pid_rf_fit %>%
+  treeshap::randomForest.unify(x) %>%
+  treeshap::treeshap(x, interactions = FALSE, verbose = FALSE)
+## Keep just the [n, p] local explanations
+wine_rf_tshap <- wine_rf_tshap$shaps
 ```
 
 
-## DALEX (& LM)
+## DALEX (& LM regresssion)
 
-__DALEX__ is a popular and versitile XAI package available on CRAN. It is compatible with many models, but it uses the original, slower variant of SHAP local explanation. Expect long run times for sizable data or complex models.
+__DALEX__ is a popular and versatile XAI package available on CRAN. It is compatible with many models, but it uses the original, slower variant of SHAP local explanation. Expect long run times for sizable data or complex models.
 
 https://ema.drwhy.ai/shapley.html#SHAPRcode
 
-```{r}
-## DALEX Explianer
+```{r, eval=FALSE, echo=TRUE}
+if(!require(DALEX)) install.packages("DALEX")
 library(DALEX)
-drag_lm_fit <- lm(
-  life_length ~ year_of_birth + height + weight + scars + number_of_lost_teeth,
-  data = dragons)
 
-drag_lm_exp <- explain(drag_lm_fit,
-                       data = dragons,
-                       y = dragons$year_of_birth,
-                       label = "model_lm")
+## Setup
+X    <- dragons[, c(1:4, 6)]
+Y    <- dragons$life_length
+clas <- dragons$colour
+
+## Model and predict
+drag_lm_fit  <- lm(data = data.frame(Y, X), Y ~ .)
+drag_lm_pred <- predict(drag_lm_fit)
 
 ## SHAP via DALEX, versatile but slow
-shap_df <- dragons[1:6, ] ## init df of same structure
+drag_lm_exp <- explain(drag_lm_fit,
+                       data = X,
+                       y = Y,
+                       label = "Dragons, LM, SHAP")
+## Note that cheem expects a full [n, p] attribution space
+drag_lm_shap <- X[1:6, ] ## init a df of the same structure
 for(i in 1:6){
-  pps <- predict_parts_shap(
-    drag_lm_exp, new_observation = dragons[i, ])
-  str(pps)
-  str(pps$contribution)
-  head(pps)
-  plot(pps)
-  stop("REPLACE ME")
-  shap_df[i, ] <- pps
+  pps <- predict_parts_shap(drag_lm_exp, new_observation = dragons[i, ])
+  ## Keep just the [n, p] local explanations
+  drag_lm_shap[i, ] <- tapply(pps$contribution, pps$variable, mean, na.rm = TRUE)
 }
-
-
 ```
 
