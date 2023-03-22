@@ -16,7 +16,7 @@ this_ls <- cheem_ls(X, Y, class = clas,
                     model = rf_fit,
                     attr_df = shap_df); Sys.sleep(.01);
 
-bas <- basis_attr_df(shap_df, rownum = 1)
+bas <- sug_basis(shap_df, rownum = 1)
 # Error in paste(group, frame, sep = "-") : object 'group' not found
 #debugonce(radial_cheem_tour)
 ggt <- radial_cheem_tour(

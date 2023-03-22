@@ -25,7 +25,7 @@ profvis(
                         model = rf_fit,
                         attr_df = shap_df)
     
-    bas <- basis_attr_df(shap_df, rownum = 1)
+    bas <- sug_basis(shap_df, rownum = 1)
     ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1,
                              primary_obs = 1, comparison_obs = 2)
     animate_plotly(ggt)
@@ -45,7 +45,7 @@ profvis(
                         model = rf_fit,
                         attr_df = shap_df)
     
-    bas <- basis_attr_df(shap_df, rownum = 1)
+    bas <- sug_basis(shap_df, rownum = 1)
     ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = 1, angle = .25)
     
     animate_plotly(ggt)

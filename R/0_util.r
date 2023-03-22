@@ -132,6 +132,7 @@ color_scale_of <- function(x, mid_pt = 0, limits = NULL, ...){
 #' problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
 #' problem_type(letters)
 problem_type <- function(y){
+  if(all(is.null(y) | is.na(y)))  return("No y provided")
   if(is_discrete(y) == TRUE) return("classification")
   if(is.numeric(y)  == TRUE) return("regression")
   stop("y was expected as a with less than 25 unique values, or continuous numeric; indicating a classification or regression problem respectivly.")

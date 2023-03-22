@@ -1,34 +1,40 @@
 ## Utilities -----
 
-#' Basis matrix, 1D, of the local attribution basis
+#' Suggest a 1D Basis
 #' 
-#' Extract and format the 1D local attribution basis from 
-#' the provided local explanation's attribution.
+#' Extract and formats the 1D attribution basis from 
+#' the provided local explanation.
 #' 
 #' @param attr_df A data frame of local explanation attributions.
-#' @param rownum The rownumber of the observation.
+#' @param rownum The rownumber of the observation. 
+#' Typically primary or comparison observations.
 #' @return A matrix of the 1D basis.
 #' @family cheem utility
-# #' @export
-# #' @examples
-# #' library(cheem)
-# #' 
-# #' ## Regression setup:
-# #' dat  <- amesHousing2018_NorthAmes
-# #' X    <- dat[, 1:9]
-# #' Y    <- dat$SalePrice
-# #' clas <- dat$SubclassMS
-# #' 
-# #' ## Model and treeSHAP explanation:
-# #' rf_fit  <-  randomForest::randomForest(
-# #'   X, Y, ntree = 125,
-# #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-# #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-# #' shap_df <- stop("REPLACE ME")
-# #' 
-# #' ## Attribution basis of one obs:
-# #' basis_attr_df(shap_df, rownum = 1)
-basis_attr_df <- function(
+#' @seealso [radial_cheem_tour()]
+#' @export
+#' @examples
+#' library(cheem)
+#'
+#' ## Regression setup
+#' dat  <- amesHousing2018_NorthAmes
+#' X    <- dat[, 1:9]
+#' Y    <- dat$SalePrice
+#' clas <- dat$SubclassMS
+#'
+#' ## Model and treeSHAP explanation
+#' rf_fit  <-  randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
+#'
+#' ## Attribution basis of one obs
+#' sug_basis(rf_shap, rownum = 1)
+#' ## This can be used to find a basis to start the radial tour.
+#' # ?radial_cheem_tour
+sug_basis <- function(
   attr_df,
   rownum
 ){
@@ -44,10 +50,10 @@ basis_attr_df <- function(
 }
 
 
-#' Find the manip var from a given attr_df
+#' Suggest a manipulation variable
 #' 
-#' Find the number of the variable with the largest difference between the 
-#' primary and comparison observations.
+#' Suggest the number of the variable with the largest difference in attribution
+#' between the primary and comparison observations.
 #' 
 #' @param attr_df A data frame of local explanation attributions.
 #' @param primary_obs The rownumber of the primary observation. Its local
@@ -57,29 +63,34 @@ basis_attr_df <- function(
 #' is highlighted as a dotted line.
 #' @return A single number of the variable with the largest difference of 
 #' attribution (basis) variables.
+#' @seealso [radial_cheem_tour()]
 #' @export
 #' @family cheem utility
 #' @examples
 #' library(cheem)
 #' 
-#' ## Regression setup:
+#' ## Regression setup
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and treeSHAP explanation:
+#' ## Model and treeSHAP explanation
 #' rf_fit  <-  randomForest::randomForest(
 #'   X, Y, ntree = 125,
 #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
 #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
-#' 
-#' ## Suggest the number of a variable to manipulate:
-#' manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
-manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
-  .prim <- basis_attr_df(attr_df, rownum = primary_obs)
-  .comp <- basis_attr_df(attr_df, rownum = comparison_obs)
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
+#'
+#' ## Suggest the number of a variable to manipulate
+#' sug_manip_var(shap_df, primary_obs = 1, comparison_obs = 2)
+#' ## This can be used to find a basis to start the radial tour.
+#' # ?radial_cheem_tour
+sug_manip_var <- function(attr_df, primary_obs, comparison_obs){
+  .prim <- sug_basis(attr_df, rownum = primary_obs)
+  .comp <- sug_basis(attr_df, rownum = comparison_obs)
   .diff <- abs(.prim - .comp)
   which(.diff == max(.diff)) ## Number of the variable with the largest difference
 }
@@ -114,33 +125,39 @@ manip_var_of_attr_df <- function(attr_df, primary_obs, comparison_obs){
 #' @return A `ggplot` object of the the distribution of the local explanation's
 #' attributions.
 #' @family ggtour proto
+#' @seealso [radial_cheem_tour()]
 #' @export
 #' @examples
 #' library(cheem)
-#' library(spinifex)
 #' 
-#' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes
+#' ## Regression setup
+#' dat  <- spinifex::amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and treeSHAP explanation:
-#' rf_fit  <- stop("REPLACE ME")
-#' shap_df <- stop("REPLACE ME")
+#' ## Model and treeSHAP explanation
+#' rf_fit <- randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+#' rf_pred <- predict(rf_fit, X)
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
 #' 
 #' ## Basis, manipulation var, manual tour path, & predictions to fix to y-axis
-#' bas     <- basis_attr_df(shap_df, 1)
-#' mv      <- manip_var_of_attr_df(shap_df, 1, 2)
+#' bas     <- sug_basis(rf_shap, 1)
+#' mv      <- sug_manip_var(rf_shap, 1, 2)
 #' mt_path <- manual_tour(bas, mv)
-#' pred    <- stop("REPLACE ME")
+#' ## Also consumed by: ?radial_cheem_tour()
 #' 
 #' ## Compose and animate the tour
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-#'   append_fixed_y(fixed_y = scale_sd(pred)) +
+#'   append_fixed_y(fixed_y = scale_sd(rf_pred)) +
 #'   proto_point(list(color = clas, shape = clas)) +
 #'   proto_basis1d_distribution(
-#'     attr_df = shap_df,
+#'     attr_df = rf_shap,
 #'     primary_obs = 1, comparison_obs = 2,
 #'     position = "top1d", group_by = clas) +
 #'   proto_basis1d(position = "bottom1d") +
@@ -187,7 +204,7 @@ proto_basis1d_distribution <- function(
   
   ## Orthonormalize each row.
   .m <- sapply(1:.n, function(i){
-    attr_df[i, ] <<- basis_attr_df(attr_df, i)
+    attr_df[i, ] <<- sug_basis(attr_df, i)
   })
   
   ## Pivot the attr values (columns) longer to rows.
@@ -297,51 +314,51 @@ proto_basis1d_distribution <- function(
 #' as a dashed line. Defaults to NULL, no highlighting applied.
 #' @param comparison_obs The rownumber of the comparison observation. Point
 #' is highlighted as a dotted line. Defaults to NULL, no highlighting applied.
-#' @param height_px The height in pixels of the returned `plotly` plot.
-#' Defaults to 480.
-#' @param width_px The width in pixels of the returned `plotly` plot.
-#' Defaults to 1440.
 #' @param color The name of the column in cheem_ls$global_view_df to map to 
 #' color. Expects c("default", "residual", "log_maha.data", "cor_attr_proj.y").
 #' Defaults to "default"; predicted_class for classification, dummy class 
 #' for regression.
-#' @param as_ggplot Logical, if TRUE returns the plots before being passed to
-#' `plotly` functions.
 #' @return a `ggplot2` object, waiting to be rended with `global_view` or 
 #' `global_view_subplots`.
 #' @family cheem consumers
-#' @examples
-#' library(cheem)
-#' 
-#' ## Regression setup:
-#' dat  <- amesHousing2018_NorthAmes
-#' X    <- dat[, 1:9]
-#' Y    <- dat$SalePrice
-#' clas <- dat$SubclassMS
-#' 
-#' ## Model, explanation, cheem list, global view:
-#' rf_fit <-  randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
-#' 
-#' 
-#' ## Visualize
-#' if(interactive()){
-#'   global_view_legwork(this_ls)
-#'   
-#'   global_view(this_ls)                   ## uses ggplot facets %>% plotly
-#'   global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
-#'   
-#'   ## Different color mappings, especially for regression
-#'   global_view(this_ls, color = "residual")
-#'   global_view(this_ls, color = "log_maha.data") 
-#'   global_view(this_ls, color = "cor_attr_proj.y")
-#' }
+# #' @export
+# #' @examples
+# #' library(cheem)
+# #' 
+# #' ## Regression setup
+# #' dat  <- amesHousing2018_NorthAmes
+# #' X    <- dat[, 1:9]
+# #' Y    <- dat$SalePrice
+# #' clas <- dat$SubclassMS
+# #' 
+# #' ## Model, explanation, cheem list, global view
+# #' rf_fit <- randomForest::randomForest(
+# #'   X, Y, ntree = 125,
+# #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+# #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+# #' rf_pred <- predict(rf_fit, X)
+# #' rf_shap <- treeshap::treeshap(
+# #'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+# #' rf_shap <- rf_shap$shaps
+# #' 
+# #' ## Cheem visual
+# #' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+# #'                    label = "North Ames, RF, SHAP")
+# #' if(interactive()){
+# #'   global_view(rf_chm) ## Preview spaces
+# #' }
+# #' 
+# #' ## Other global_view() options
+# #' if(interactive()){
+# #'   global_view_legwork(rf_chm) ## most of the way there
+# #'   global_view(rf_chm, as_ggplot = TRUE) ## early return of ggplot
+# #'   global_view(rf_chm) ## uses ggplot facets %>% plotly
+# #' 
+# #'   ## Different color mappings, especially for regression
+# #'   global_view(rf_chm, color = "residual")
+# #'   global_view(rf_chm, color = "log_maha.data")
+# #'   global_view(rf_chm, color = "cor_attr_proj.y")
+# #' }
 global_view_legwork <- function(
     cheem_ls,
     primary_obs    = NULL,
@@ -351,22 +368,24 @@ global_view_legwork <- function(
 ){
   ## Prevent global variable warnings:
   V1 <- V2 <- ggtext <- projection_nm <- label <- tooltip <- NULL
+  height_px <- width_px <- 
   ## Initialize
-  global_view_df    <- cheem_ls$global_view_df
-  is_classification <- cheem_ls$type == "classification"
+  global_view_df <- cheem_ls$global_view_df
+  prob_type      <- cheem_ls$type
   ## Aesthetics
   .alpha <- logistic_tform(nrow(cheem_ls$decode_df))
   color  <- match.arg(color)
   if(color %in% c("default", colnames(global_view_df)) == FALSE)
     stop(paste0("global_view: `color` column ", color,
                 " not in the cheem_ls. Try reprocessing the dataset."))
-  if(is_classification){
-    ## Classification
+  ## Classification
+  if(prob_type == "classification"){
     if(color == "default") color <- "predicted_class"
     .color <- global_view_df[, color]
     .shape <- global_view_df[, "predicted_class"]
-  }else{
-    ## Regression
+  }
+  ## Regression or non-linear embedding
+  if(prob_type %in% c("regression", "No y provided")){
     if(color == "default"){
       .color <- factor(FALSE)
     }else .color <- global_view_df[, color]
@@ -379,13 +398,13 @@ global_view_legwork <- function(
   pts_main <- list()
   .u_nms   <- unique(global_view_df$label)
   ## If classification: residual/obs LM line behind pts
-  if(is_classification == FALSE)
+  if(prob_type == "regression")
     pts_main <- c(ggplot2::geom_smooth(
       ggplot2::aes(V1, V2), subset(global_view_df, label == .u_nms[3]),
       method = "lm", formula = y ~ x, se = FALSE), pts_main)
   ## If classification circle misclassified points
-  if(is_classification == TRUE){
-    .rn_misclass <- which(decode_df$is_misclassified == TRUE)
+  if(prob_type == "classification"){
+    .rn_misclass <- which(cheem_ls$decode_df$is_misclassified == TRUE)
     .idx_misclas <- global_view_df$rownum %in% .rn_misclass
     if(sum(.idx_misclas) > 0)
       pts_main <- c(pts_main, ggplot2::geom_point(
@@ -453,6 +472,7 @@ global_view_legwork <- function(
 #' `plotly` functions.
 #' @return A `plotly` plot, an interactive html widget of the global view, 
 #' first two components of the basis of the data- and attribution- spaces.
+#' @seealso [run_app()]
 #' @export
 #' @family cheem consumers
 #' @examples
@@ -465,25 +485,30 @@ global_view_legwork <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' ## Model, explanation, cheem list, global view:
-#' rf_fit <-  randomForest::randomForest(
+#' #' ## Model, explanation, cheem list, global view
+#' rf_fit <- randomForest::randomForest(
 #'   X, Y, ntree = 125,
 #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
 #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#' rf_pred <- predict(rf_fit, X)
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
 #' 
-#' ## Visualize
+#' ## global_view()
+#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+#'                    label = "North Ames, RF, SHAP")
 #' if(interactive()){
-#'   global_view(this_ls)                   ## uses ggplot facets %>% plotly
-#'   global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
-#'   
+#'   global_view_legwork(rf_chm) ## most of the way there
+#'   global_view(rf_chm, as_ggplot = TRUE) ## early return of ggplot
+#'   global_view(rf_chm) ## uses ggplot facets %>% plotly
+#' 
 #'   ## Different color mappings, especially for regression
-#'   global_view(this_ls, color = "residual")
-#'   global_view(this_ls, color = "log_maha.data") 
-#'   global_view(this_ls, color = "cor_attr_proj.y")
+#'   global_view(rf_chm, color = "residual")
+#'   global_view(rf_chm, color = "log_maha.data")
+#'   global_view(rf_chm, color = "cor_attr_proj.y")
 #' }
+#' ## Also consumed by: ?run_app()
 global_view <- function(
   cheem_ls,
   primary_obs    = NULL,
@@ -493,8 +518,15 @@ global_view <- function(
   width_px       = 1440,
   as_ggplot      = FALSE
 ){
+  label <- NULL ## get in from of global variable NOTE
   gg <- global_view_legwork(cheem_ls, primary_obs, comparison_obs, color) +
     ggplot2::facet_grid(cols = ggplot2::vars(label))
+  ## adding facet_grid causes: 
+  # Error in ggplot2::geom_smooth(ggplot2::aes(V1, V2), subset(global_view_df,  : 
+  # Problem while computing stat.
+  # ℹ Error occurred in the 1st layer.
+  # Caused by error in `seq_len()`:
+  #   ! argument must be coercible to non-negative integer
   if(as_ggplot) return(gg + ggplot2::theme(aspect.ratio = 1))
   
   ## Plotly options & box selection
@@ -515,7 +547,7 @@ global_view <- function(
 #' 
 #' @param cheem_ls A return from `cheem_ls()`, a list of data frames.
 #' @param basis A 1D projection basis, typically a return of 
-#' `basis_attr_df()`.
+#' `sug_basis()`.
 #' @param manip_var The , _number_ of the manipulation variable.
 #' @param primary_obs The rownumber of the primary observation. Its local
 #' attribution becomes the 1d projection basis, and the point it highlighted 
@@ -542,42 +574,11 @@ global_view <- function(
 #' @return ggtour (`ggplot2` object with frame info) animation frames of a 
 #' radial tour manipulating the contribution of a selected tour. Animated with 
 #' `spinifex::animate_*` functions.
-#' @export
+#' @seealso [run_app()]
 #' @family cheem consumers
+#' @export
 #' @examples
 #' library(cheem)
-#' 
-#' ## Classification setup:
-#' X    <- spinifex::penguins_na.rm[, 1:4]
-#' clas <- spinifex::penguins_na.rm$species
-#' Y    <- as.integer(clas)
-#' 
-#' ## Model and treeSHAP explanation:
-#' rf_fit  <-  randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
-#' 
-#' ## Cheeem list
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
-#' 
-#' ## Basis & suggest manipulation var
-#' bas <- basis_attr_df(shap_df, rownum = 1)
-#' mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
-#' 
-#' ## Radial tour with ggplot facets & animate
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv)
-#' if(interactive()){
-#'   ## As a Plotly html widget
-#'   animate_plotly(ggt)
-#'   
-#'   ## As a gganimation
-#'   animate_gganimate(ggt, render = gganimate::av_renderer())
-#' }
-#' 
 #' 
 #' ## Regression setup:
 #' dat  <- amesHousing2018_NorthAmes
@@ -585,19 +586,22 @@ global_view <- function(
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and tree SHAP explanation:
-#' rf_fit  <- default_rf(X, Y)
-#' shap_df <- stop("REPLACE ME")
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#' ## Model and tree SHAP explanation
+#' rf_fit <- randomForest::randomForest(
+#'   X, Y, ntree = 125,
+#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
+#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
+#' rf_pred <- predict(rf_fit, X)
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
 #' 
-#' ## Basis & suggest manipulation var
-#' bas <- basis_attr_df(shap_df, rownum = 1)
-#' mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
-#' 
-#' ## Radial tour with ggplot facets & animate
-#' ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv)
+#' ## radial_cheem_tour()
+#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+#'                    label = "North Ames, RF, SHAP")
+#' bas <- sug_basis(rf_shap, 1)
+#' mv  <- sug_manip_var(rf_shap, 1, 2)
+#' ggt <- radial_cheem_tour(rf_chm, basis = bas, manip_var = mv)
 #' if(interactive()){
 #'   ## As a plotly html widget
 #'   animate_plotly(ggt)
@@ -605,6 +609,7 @@ global_view <- function(
 #'   ## As a gganimation
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
+#' ## Also consumed by: ?run_app()
 radial_cheem_tour <- function(
   cheem_ls, basis, manip_var, 
   primary_obs         = NULL,

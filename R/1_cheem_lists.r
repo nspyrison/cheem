@@ -12,7 +12,7 @@
 #' Internal function, used downstream in cheem_ls.
 #' 
 #' @param y Observed response, required by ranger models.
-#' @param pred A [n, 1] vector of the predicted values for each observation.
+#' @param pred A (n, 1) vector of the predicted values for each observation.
 #' Typically obtainable with `stats::predict()`. Exact syntax and arguments 
 #' may change across model types.
 #' @param label Optionally provide a character label to store reminder 
@@ -74,7 +74,7 @@ model_performance_df <- function(
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca". 
 #' Expects "pca" or "olda" (reqires `class`).
-#' @param class Optional, [n x 1] vector, a variable to group points by. 
+#' @param class Optional, (n, 1) vector, a variable to group points by. 
 #' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
 #' text for the type of model and local explanation used. 
@@ -99,10 +99,11 @@ global_view_df_1layer <- function(
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
   
+  
   ## Projection
   x_std <- spinifex::scale_01(x)
   basis <- switch(basis_type,
-                  pca  = spinifex::basis_pca(x_std, d),
+                  pca  = stats::prcomp(x_std)$rotation[, 1:d],
                   olda = spinifex::basis_olda(x_std, class, d))
   proj  <- spinifex::scale_01(x_std %*% basis)
   
@@ -122,10 +123,10 @@ global_view_df_1layer <- function(
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
-#' @param attr_df A data frame or matrix of [n x p] local explanation 
+#' @param attr_df A data frame or matrix of (n, p) local explanation 
 #' attributions.
-#' @param pred A [n x 1] vector, the predictions from the accosicated model.
-#' @param class Optional, [n x 1] vector, a variable to group points by. 
+#' @param pred A (n, 1) vector, the predictions from the accosicated model.
+#' @param class Optional, (n, 1) vector, a variable to group points by. 
 #' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
 #' text for the type of model and local explanation used. 
@@ -142,73 +143,81 @@ global_view_df_1layer <- function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Classification setup:
-#' X <- spinifex::penguins_na.rm[, 1:4]
+#' ## Classification setup
+#' X    <- spinifex::penguins_na.rm[, 1:4]
+#' Y    <- spinifex::penguins_na.rm$species
 #' clas <- spinifex::penguins_na.rm$species
-#' Y <- as.integer(clas)
 #' 
+#' ## Model and predict
+#' peng_train    <- data.matrix(X) %>%
+#'   xgb.DMatrix(label = Y)
+#' peng_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
+#' peng_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
 #' 
-#' ## Model and prediction:
-#' peng_rf_fit <- randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' peng_rf_pred <- predict(peng_rf_fit)
+#' ## shapviz
+#' peng_xgb_shap <- shapviz(peng_xgb_fit, X_pred = peng_train, X = X)
+#' peng_xgb_shap <- peng_xgb_shap$S
 #' 
-#' ## Extract treeshap
-#' peng_rf_tshap <- peng_rf_fit %>%
-#'   treeshap::randomForest.unify(X) %>%
-#'   treeshap::treeshap(X, interactions = FALSE, verbose = FALSE)
-#' ## Keep only the [n, p] attr_df
-#' peng_rf_tshap <- peng_rf_tshap$shaps
+#' ## Cheem
+#' peng_chm <- cheem_ls(X, Y, peng_xgb_fit, peng_xgb_pred, clas,
+#'                      label = "Penguins, xgb, shapviz")
+#' ## Cheem visuals
+#' if(interactive()){
+#'   prim <- 1
+#'   comp <- 2
+#'   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
+#'   bas <- sug_basis(peng_xgb_shap, prim, comp)
+#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2
+#'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
+#'   animate_plotly(ggt)
+#' }
 #' 
-#' 
-#' 
-#' ## cheem visual
-#' peng_rf_chm <- cheem_ls(X, Y,
-#'                         attr_df = peng_rf_tshap,
-#'                         pred = peng_rf_pred,
-#'                         class = clas,
-#'                         label = "Penguin, RF, treeshap")
-#' global_view(peng_rf_chm) ## Preview spaces
-#'
 #' ## Save for use with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(peng_rf_chm, "./peng_rf_tshap.rds")
+#'   saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
 #'   run_app() ## Select the saved .rds file from the Data dropdown.
 #' }
 #' 
 #' 
-#' ## Regression setup:
+#' ## Regression setup
 #' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and treeSHAP:
+#' ## Model and treeSHAP
 #' rf_fit <- randomForest::randomForest(
 #'   X, Y, ntree = 125,
 #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
 #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
+#' rf_pred <- predict(rf_fit, X)
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
 #' 
-#' ## Cheem visual:
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#' ## Cheem list
+#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+#'                    label = "North Ames, RF, SHAP")
+#' ## Cheem visuals
 #' if(interactive()){
-#'   global_view(this_ls) ## Preview spaces
+#'   prim <- 1
+#'   comp <- 2
+#'   global_view(rf_chm, primary_obs = prim, comparison_obs = comp)
+#'   bas <- sug_basis(rf_shap, prim, comp)
+#'   mv  <- sug_manip_var(rf_shap, primary_obs = 1, comparison_obs = 2)
+#'   ggt <- radial_cheem_tour(rf_chm, basis = bas, manip_var = mv)
+#'   animate_plotly(ggt)
 #' }
 #' 
 #' ## Save for use with shiny app (expects .rds):
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(this_ls, "./my_cheem_ls.rds")
+#'   saveRDS(rf_chm, "./NAmes_rf_tshap.rds")
 #'   run_app() ## Select the saved .rds file from the Data drop down.
 #' }
 cheem_ls <- function(
-  x, y,
+  x, y = NULL,
   attr_df,
-  pred,
+  pred = NULL,
   class = NULL,
   basis_type = c("pca", "olda"), ## class req for olda
   label = "label",
@@ -245,14 +254,18 @@ cheem_ls <- function(
   ## Calculate correlation of attr_proj
   m <- as.matrix(x)
   cor_attr_proj.y <- NULL
-  .m <- sapply(1:nrow(attr_df), function(i)
-    cor_attr_proj.y[i] <<- stats::cor(m %*% basis_attr_df(attr_df, i), y)
-  )
+  if(!is.null(y))
+    .m <- sapply(1:nrow(attr_df), function(i)
+      cor_attr_proj.y[i] <<- stats::cor(m %*% sug_basis(attr_df, i), y)
+    )
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
+  if(is.null(y))     y <- NA
+  if(is.null(pred))  pred <- NA
   .decode_left <- data.frame(
-    rownum = 1:nrow(x), class = class, y, prediction = pred)
+    rownum = 1:nrow(x), class, y, prediction = pred)
+  if(is.null(cor_attr_proj.y)) cor_attr_proj.y <- NA
   .decode_right <- data.frame(residual = y - pred, cor_attr_proj.y, x)
   ## If classification: append pred class/is_misclass
   if(is_classification){
@@ -270,10 +283,17 @@ cheem_ls <- function(
   if(is_classification){
     .vec_yjitter  <- stats::runif(nrow(x), -.2, .2)
     .y_axis_label <- "model (w/ y jitter)"
-  }else{ ## Regression
+  }
+  if(all(is.na(y) | is.null(y))){
+    ## No y/pred
+    .vec_yjitter  <- 0
+    .y_axis_label <- "No y/model provided"
+  }else{
+    ## Regression
     .vec_yjitter  <- 0
     .y_axis_label <- "model"
   }
+  
   ## append yhaty to global_view_df ----
   .yhaty_df <-
     data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
@@ -294,8 +314,8 @@ cheem_ls <- function(
       tooltip[.is_misclass],
       "\nMisclassified! predicted: ", .pred_clas[.is_misclass],
       ", observed: ", class[.is_misclass])
-    tooltip[!.is_misclass] <- paste0(tooltip[!.is_misclass], "\nclass: ", 
-                                     class[!.is_misclass])
+    tooltip[!.is_misclass] <- paste0(
+      tooltip[!.is_misclass], "\nclass: ", class[!.is_misclass])
   }else tooltip <- paste0(tooltip, "\nresidual: ", .decode_df$residual)
   
   ## Append model info to global_view

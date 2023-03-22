@@ -12,7 +12,6 @@ library(DT, quietly = TRUE, verbose = FALSE) ## For html table and buttons
 ## Dependencies
 library(cheem, quietly = TRUE, verbose = FALSE)
 ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
-library(spinifex, quietly = TRUE, verbose = FALSE)
 library(plotly, quietly = TRUE, verbose = FALSE)
 #library(gganimate, quietly = TRUE, verbose = FALSE) ## Not in use atm
 library(magrittr, quietly = TRUE, verbose = FALSE)

@@ -38,11 +38,11 @@ server <- function(input, output, session){
     # updateNumericInput(
     #   session, "primary_inst",
     #   label = "Primary instance rownum, ('*' point):",
-    #   min = 1L, max = 1e6L, step = 1L, value = prim_inst)
+    #   min = 1, max = 1e6, step = 1, value = prim_inst)
     # updateNumericInput(
     #   session, "comparison_inst",
     #   label = "Comparison instance rownum, ('x' point):",
-    #   min = 1L, max = 1e6L, step = 1L, value = comp_inst)
+    #   min = 1, max = 1e6, step = 1, value = comp_inst)
     # ## SIDE EFFECT: Update inclusion feature names
     # feat_nms <- colnames(ret$attr_df)
     # updateCheckboxGroupInput(session, "inc_feat_nms", label = "features to include:",
@@ -65,7 +65,7 @@ server <- function(input, output, session){
       cheem:::devMessage("bas(): bas tried to react before inc_feat_nms updated...")
       return()
     }
-    basis_attr_df(attr_df[, inc_feat_nms, drop = FALSE], prim_inst)
+    sug_basis(attr_df[, inc_feat_nms, drop = FALSE], prim_inst)
   })
   
   ### sel_rownums ----
@@ -100,7 +100,7 @@ server <- function(input, output, session){
       return()
     }
     mv <- which(rownames(bas) == mv_nm)
-    radial_cheem_tour_subplots(
+    radial_cheem_tour(
       cheem_ls, bas, mv, prim_inst, comp_inst, do_add_pcp_segments = add_pcp,
       angle = .15, row_index = idx_rownum, inc_var_nms = inc_feat_nms)
   }) %>%
@@ -120,39 +120,39 @@ server <- function(input, output, session){
       prim_inst <- 36L
       comp_inst <- 23L
     }else if(dat == "penguins classification"){
-      prim_inst <- 243L ## Presubmission seminar looked at 124, 86
-      comp_inst <- 169L
+      prim_inst <- 243 ## Presubmission seminar looked at 124, 86
+      comp_inst <- 169
     }else if(dat == "chocolates classification"){
-      prim_inst <- 22L
-      comp_inst <- 7L
+      prim_inst <- 22
+      comp_inst <- 7
     }else if(dat == "toy quad regression"){
-      prim_inst <- 11L
-      comp_inst <- 121L
+      prim_inst <- 11
+      comp_inst <- 121
     }else if(dat == "toy trig regression"){
-      prim_inst <- 87L
-      comp_inst <- 102L
+      prim_inst <- 87
+      comp_inst <- 102
     }else if(dat == "toy mixture model regression"){
-      prim_inst <- 23L
-      comp_inst <- 130L
+      prim_inst <- 23
+      comp_inst <- 130
     }else if(dat == "fifa regression"){
-      prim_inst <- 1L
-      comp_inst <- 8L
+      prim_inst <- 1
+      comp_inst <- 8
     }else if(dat == "ames housing 2018 regression"){
-      prim_inst <- 74L
-      comp_inst <- 192L
+      prim_inst <- 74
+      comp_inst <- 192
     }else{ ## _ie._ user loaded data; no priors of good instance to pick.
-      prim_inst <- 1L
-      comp_inst <- 2L
+      prim_inst <- 1
+      comp_inst <- 2
     }
     
     updateNumericInput(
       session, "primary_inst",
       label = "Primary instance ('*', dashed line below):",
-      min = 1L, max = 1e6L, step = 1L, value = prim_inst)
+      min = 1, max = 1e6, step = 1, value = prim_inst)
     updateNumericInput(
       session, "comparison_inst",
       label = "Comparison instance ('x', dotted line below):",
-      min = 1L, max = 1e6L, step = 1L, value = comp_inst)
+      min = 1, max = 1e6, step = 1, value = comp_inst)
     ## SIDE EFFECT: Update inclusion feature names
   })
   
@@ -179,13 +179,13 @@ server <- function(input, output, session){
     }
     
     inc_attr_df <- attr_df[, .inc_nms]
-    bas         <- basis_attr_df(inc_attr_df, .prim_inst) %>%
+    bas         <- sug_basis(inc_attr_df, .prim_inst) %>%
       tourr::orthonormalise()
     mv          <- manip_var_of(bas)
     mv_nm       <- colnames(inc_attr_df)[mv]
     updateSelectInput(session, "manip_feat_nm", label = "Manipulation feature:",
                       choices = .inc_nms, selected = mv_nm)
-  }, priority = 150L)
+  }, priority = 150)
   
   ## Outputs -----
   output$desc_rows <- renderText({
@@ -242,7 +242,7 @@ server <- function(input, output, session){
     HTML(paste(he, l1))
   })
   outputOptions(output, "desc_rows",
-                suspendWhenHidden = FALSE, priority = 90L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = 90) ## Eager evaluation
   
   ### GLOBAL VIEW PLOTLY
   glob_view <- reactive({
@@ -258,7 +258,7 @@ server <- function(input, output, session){
     }
     
     global_view(cheem_ls, .prim_inst, .comp_inst, color = .col,
-                height_px = 540L, width_px = 1440L)
+                height_px = 540, width_px = 1440)
   }) %>%
     bindCache(load_ls(), input$primary_inst, input$comparison_inst,
               input$glob_view_col) %>%
@@ -274,7 +274,7 @@ server <- function(input, output, session){
     ggt <- req(cheem_ggtour())
     
     .anim <- ggt %>%
-      spinifex::animate_plotly(fps = 4L) %>%
+      spinifex::animate_plotly(fps = 4) %>%
       plotly::layout(showlegend = FALSE) %>%
       plotly::style(hoverinfo = "none")
     ## the following hasn't helped:
@@ -287,10 +287,10 @@ server <- function(input, output, session){
   
   output$perf_df <- renderTable({
     df <- req(load_ls()$model_performance_df)
-    df %>% dplyr::mutate_if(is.numeric, round, digits = 2L)
+    df %>% dplyr::mutate_if(is.numeric, round, digits = 2)
   })
   outputOptions(output, "perf_df",
-                suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = 10) ## Eager evaluation
   
   ### DT table of selected data
   output$selected_df <- DT::renderDT({ ## Original data of selection
@@ -298,21 +298,21 @@ server <- function(input, output, session){
     if(is.null(idx_rownum)) return(NULL)
     .df <- req(load_ls())$decode_df
     .df_r <- data.frame(lapply(
-      .df, function(c) if(is.numeric(c)) round(c, 2L) else c))
+      .df, function(c) if(is.numeric(c)) round(c, 2) else c))
     DT::datatable(.df_r[idx_rownum,, drop = FALSE], rownames = FALSE)
   })
   outputOptions(output, "selected_df",
-                suspendWhenHidden = FALSE, priority = 10L) ## Eager evaluation
+                suspendWhenHidden = FALSE, priority = 10) ## Eager evaluation
 } ## Close function, assigning server object.
 
 shinyApp(ui = ui, server = server,
-         onStart = function() {
+         onStart = function(){
            ## Disable verbose and warnings in app
            defaultW <- getOption("warn")
            defaultV <- getOption("verbose")
            options(warn = -1, verbose = FALSE)
            ## Resume previous verbose and warning options
-           shiny::onStop(function() {
+           shiny::onStop(function(){
              options(warn = defaultW,
                      verbose = defaultV)
            })

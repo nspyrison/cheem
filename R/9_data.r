@@ -120,18 +120,30 @@
 #'   X, Y, ntree = 125,
 #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
 #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#' rf_pred <- predict(rf_fit, X)
+#' rf_shap <- treeshap::treeshap(
+#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
+#' rf_shap <- rf_shap$shaps
 #' 
-#' ## Visualize
-#' if(interactive())
-#'   global_view(this_ls)
+#' ## Cheem list
+#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+#'                    label = "North Ames, RF, SHAP")
+#' ## Cheem visuals
+#' if(interactive()){
+#'   prim <- 1
+#'   comp <- 2
+#'   global_view(rf_chm, primary_obs = prim, comparison_obs = comp)
+#'   bas <- sug_basis(rf_shap, prim, comp)
+#'   mv  <- sug_manip_var(rf_shap, primary_obs = 1, comparison_obs = 2)
+#'   ggt <- radial_cheem_tour(rf_chm, basis = bas, manip_var = mv)
+#'   animate_plotly(ggt)
+#' }
 #' 
 #' ## Save for use with shiny app (expects .rds):
-#' if(FALSE) ## Don't accidentally save.
-#'   saveRDS(this_ls, "./my_cheem_ls.rds")
+#' if(FALSE){ ## Don't accidentally save.
+#'   saveRDS(rf_chm, "./NAmes_rf_tshap.rds")
+#'   run_app() ## Select the saved .rds file from the Data drop down.
+#' }
 "amesHousing2018"
 
 #' @rdname amesHousing2018
@@ -185,26 +197,41 @@
 #' ```
 #' @examples
 #' library(cheem)
+#' library(xgboost)
+#' library(shapviz)
 #' 
-#' ## Classification setup:
+#' ## Classification setup
 #' X    <- chocolates[, 5:14]
-#' Y    <- as.integer(chocolates$Type)
+#' Y    <- chocolates$Type
 #' clas <- chocolates$Type
 #' 
-#' ## Model, treeSHAP explanation, cheem list:
-#' rf_fit  <-  randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' shap_df <- stop("REPLACE ME")
-#' this_ls <- cheem_ls(X, Y, class = clas,
-#'                     model = rf_fit,
-#'                     attr_df = shap_df)
+#' ## Model and predict
+#' peng_train    <- data.matrix(X) %>%
+#'   xgb.DMatrix(label = Y)
+#' peng_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
+#' peng_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
 #' 
-#' ## Visualize:
-#' global_view(this_ls)
+#' ## shapviz
+#' peng_xgb_shap <- shapviz(peng_xgb_fit, X_pred = peng_train, X = X)
+#' peng_xgb_shap <- peng_xgb_shap$S
+#' 
+#' ## Cheem
+#' peng_chm <- cheem_ls(X, Y, peng_xgb_shap, peng_xgb_pred, clas,
+#'                      label = "Penguins, xgb, shapviz")
+#' ## Cheem visuals
+#' if(interactive()){
+#'   prim <- 1
+#'   comp <- 2
+#'   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
+#'   bas <- sug_basis(peng_xgb_shap, prim, comp)
+#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2
+#'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
+#'   animate_plotly(ggt)
+#' }
 #' 
 #' ## Save for use with shiny app (expects .rds):
-#' if(FALSE) ## Don't accidentally save.
-#'   saveRDS(this_ls, "./my_cheem_ls.rds")
+#' if(FALSE){ ## Don't accidentally save.
+#'   saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
+#'   run_app() ## Select the saved .rds file from the Data dropdown.
+#' }
 "chocolates"
