@@ -49,14 +49,14 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----
   fluidRow(
     fluidRow(
-      column(3L, selectInput("dat_char", "Data:",
-                             choices  = expected_data_char,
-                             selected = "penguins classification")),
-      column(3L, conditionalPanel(
+      column(3, selectInput("dat_char", "Data:",
+                            choices  = expected_data_char,
+                            selected = "penguins classification")),
+      column(3, conditionalPanel(
         "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
         fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
                   multiple = FALSE, accept = c("text/rds", ".rds")))),
-      column(6L, tableOutput("perf_df"))
+      column(6, tableOutput("perf_df"))
     ),
     htmlOutput("desc_rows"),
     p("- fit a modest randomForest model, ")
@@ -67,19 +67,19 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   h4("Global view:"),
   #p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
   fluidRow(
-    column(3L, numericInput(
+    column(3, numericInput(
       "primary_inst", "Primary instance ('*', dashed line below):", NULL)),
-    column(3L, numericInput(
+    column(3, numericInput(
       "comparison_inst", "Comparison instance ('x', dotted line below):", NULL)),
-    column(3L, selectInput(
+    column(3, selectInput(
       "glob_view_col", "Global view point color",
       c("default", "log_maha.data", "cor_attr_proj.y", "residual"))),
-    column(3L)
+    column(3)
   ),
   ## Container display dim
   ## Also see plot dim in: ggplotly(p, height, width)
   plotly::plotlyOutput("global_view", width = "100%", height = "544px") %>%
-    shinycssloaders::withSpinner(type = 8L),
+    shinycssloaders::withSpinner(type = 8),
   h5("Selected data:"),
   DT::DTOutput("selected_df")),
   tags$hr(style = "border-color: grey;"),
@@ -87,22 +87,22 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Cheem tour ----
   h4("Cheem tour"),
   fluidRow(
-    column(width = 3L,
+    column(width = 3,
            checkboxGroupInput("inc_feat_nms", label = "Features to include:",
                               choices = NULL, selected = NULL, inline = TRUE)),
-    column(width = 3L,
+    column(width = 3,
            selectInput("manip_feat_nm", "Manipulation feature:",  NULL)),
-    column(width = 3L, 
+    column(width = 3, 
            selectInput("do_add_pcp_segments", "Draw PCP lines on the basis distribution?",
                        c("yes" = TRUE, "no" = FALSE))),
-    column(3L)
+    column(3)
   ),
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
   ## plotly tour
   #### Sometimes this behaves like iframe and others like object itself. 
   plotly::plotlyOutput("cheem_tour_plotly", width = "1440px", height = "620px") %>%
-    shinycssloaders::withSpinner(type = 8L),
+    shinycssloaders::withSpinner(type = 8),
   br(), br(), br()
 ) ## Assign tab1_cheem
 

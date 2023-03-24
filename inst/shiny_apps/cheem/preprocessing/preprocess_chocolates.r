@@ -1,36 +1,39 @@
-## Dependencies ------
 {
-  require(cheem)
-  s <- function(sec = .01)Sys.sleep(sec)
-  
-  ## Create the data & shap layer_ls -----
-  if(F){
-    chocolates <- readr::read_csv('https://iml.numbat.space/data/chocolates.csv')
-    saveRDS(chocolates,
-            file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/chocolates_raw.rds")
-  }
   clas <- factor(chocolates$Type, levels = rev(unique(chocolates$Type)))
   lvls <- levels(clas)
   X <- chocolates[, 5:14] %>% as.data.frame() ## X's not scaled.
   colnames(X) <- gsub("\\_.*", "", colnames(X))
   nm_imc <- paste(chocolates$Name, chocolates$MFR, chocolates$Country, sep = ", ")
-  r_idx <- which(nm_imc == "85% Cocoa Dark French Chocolate, Thorntons, UK")[2L]
+  r_idx <- which(nm_imc == "85% Cocoa Dark French Chocolate, Thorntons, UK")[2]
   nm_imc[r_idx] <- paste0(nm_imc[r_idx], " (2nd)")
   row.names(X) <- nm_imc
   Y <- as.integer(clas)
-  
-  rf_fit  <- default_rf(X, Y)
-  ## Long runtime for full datasets:
-  shap_df <- attr_df_treeshap(rf_fit, X, verbose = TRUE, noisy = FALSE)
-  this_ls <- cheem_ls(
-    x = X, y = Y, class = clas,
-    model = rf_fit, attr_df = shap_df)
 }
 
-## EXPORT OBJECTS ----
-saveRDS(this_ls,
-        file = "~/R/cheem/inst/shiny_apps/cheem_initial/data/preprocess_chocolates.rds")
-cat("Saved.\n")
-if(F) ## Not run, load this_ls
-  this_ls <- readRDS("./inst/shiny_apps/cheem_initial/data/preprocess_chocolates.rds")
+## Model and predict
+train    <- data.matrix(X) %>% xgb.DMatrix(label = Y)
+xgb_fit  <- xgboost(data = train, max.depth = 3, nrounds = 25)
+xgb_pred <- predict(xgb_fit, newdata = train)
 
+## shapviz
+xgb_shap <- shapviz(xgb_fit, X_pred = train, X = X)
+xgb_shap <- xgb_shap$S
+
+## Cheem
+chm <- cheem_ls(X, Y, xgb_shap, xgb_pred, clas,
+                label = "Chocolates, xgb, shapviz")
+
+## Export ----
+NM <- "preprocess_chocolates.rds"
+saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+cat("Saved", NM, "\n")
+
+if(F){
+  ## Don't run load cheem list
+  chm <- readRDS(paste0("./inst/shiny_apps/cheem/data/", NM))
+  lapply(chm, object.size)
+  
+  ## Don't run manual check
+  names(chm)
+  global_view(chm)
+}

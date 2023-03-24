@@ -105,9 +105,9 @@ server <- function(input, output, session){
       angle = .15, row_index = idx_rownum, inc_var_nms = inc_feat_nms)
   }) %>%
     ## Leaving load_ls out; only load when all are ready
-    bindCache(bas(), input$primary_inst, input$comparison_inst,
+    bindCache(bas, input$primary_inst, input$comparison_inst,
               input$manip_feat_nm, input$do_add_pcp_segments) %>%
-    bindEvent(bas(), input$primary_inst, input$comparison_inst,
+    bindEvent(bas, input$primary_inst, input$comparison_inst,
               input$manip_feat_nm, input$do_add_pcp_segments) #%>% debounce(millis = 500L)
   
   
@@ -117,8 +117,8 @@ server <- function(input, output, session){
   observeEvent(req(input$dat_char), {
     dat <- req(input$dat_char)
     if(dat == "toy classification"){
-      prim_inst <- 36L
-      comp_inst <- 23L
+      prim_inst <- 36
+      comp_inst <- 23
     }else if(dat == "penguins classification"){
       prim_inst <- 243 ## Presubmission seminar looked at 124, 86
       comp_inst <- 169
@@ -181,7 +181,7 @@ server <- function(input, output, session){
     inc_attr_df <- attr_df[, .inc_nms]
     bas         <- sug_basis(inc_attr_df, .prim_inst) %>%
       tourr::orthonormalise()
-    mv          <- manip_var_of(bas)
+    mv          <- sug_manip_var(bas)
     mv_nm       <- colnames(inc_attr_df)[mv]
     updateSelectInput(session, "manip_feat_nm", label = "Manipulation feature:",
                       choices = .inc_nms, selected = mv_nm)
@@ -264,7 +264,7 @@ server <- function(input, output, session){
               input$glob_view_col) %>%
     bindEvent(load_ls(), input$primary_inst, input$comparison_inst,
               input$glob_view_col)# %>%
-    #debounce(millis = 200L)
+    #debounce(millis = 200)
   ## Lazy eval, heavy work, let the other stuff calculate first.
   output$global_view <- plotly::renderPlotly(suppressWarnings(glob_view()))
   
@@ -286,7 +286,7 @@ server <- function(input, output, session){
   ## Lazy eval, heavy work, let the other stuff calculate first.
   
   output$perf_df <- renderTable({
-    df <- req(load_ls()$model_performance_df)
+    df <- req(load_ls()$model_performance)
     df %>% dplyr::mutate_if(is.numeric, round, digits = 2)
   })
   outputOptions(output, "perf_df",
@@ -308,13 +308,10 @@ server <- function(input, output, session){
 shinyApp(ui = ui, server = server,
          onStart = function(){
            ## Disable verbose and warnings in app
-           defaultW <- getOption("warn")
-           defaultV <- getOption("verbose")
+           prevW <- getOption("warn")
+           prevV <- getOption("verbose")
            options(warn = -1, verbose = FALSE)
            ## Resume previous verbose and warning options
-           shiny::onStop(function(){
-             options(warn = defaultW,
-                     verbose = defaultV)
-           })
+           shiny::onStop(function() options(warn = prevW, verbose = prevV))
          }
 )
