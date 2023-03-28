@@ -58,17 +58,16 @@ if(!require(cheem)) install.packages("cheem", dependencies = "Suggests")
 if(!require(treeshap)) devtools::install_github("ModelOriented/treeshap")
 ## Load onto session
 library(cheem)
-library(spinifex)
-library(treeshap)
+library(xgboost)
+library(shapviz)
 
 ## Setup
-X    <- cheem::amesHousing2018_NorthAmes[, 1:9]
-Y    <- cheem::amesHousing2018_NorthAmes$SalePrice
-clas <- cheem::amesHousing2018_NorthAmes$SubclassMS
+X    <- amesHousing2018_NorthAmes[, 1:9]
+Y    <- amesHousing2018_NorthAmes$SalePrice
+clas <- amesHousing2018_NorthAmes$SubclassMS
 
 ## Model and predict
-ames_train    <- data.matrix(X) %>%
-  xgb.DMatrix(label = Y)
+ames_train    <- data.matrix(X) %>% xgb.DMatrix(label = Y)
 ames_xgb_fit  <- xgboost(data = ames_train, max.depth = 3, nrounds = 25)
 ames_xgb_pred <- predict(ames_xgb_fit, newdata = ames_train)
 ames_xgb_pred %>% head()
@@ -101,15 +100,19 @@ We have extracted tree SHAP, an feature importance measure in the vicinity of ea
 
 ## Global view
 
-To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of __plotly__ and __crosstalk__. The model information is essentially the confusion matrix for the classification case.
+To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of __plotly__ and __crosstalk__. We have identified an observation with a large Mahalanobis distance (in data sapce) and the closest neighbor in attribution space.
+
+<!-- The model information is essentially the confusion matrix for the classification case. -->
 
 ```{r, out.width="100%"}
-global_view(ames_chm, primary_obs = 1, comparison_obs = 17,
-            height_px = 240, width_px = 720, 
+prim <- 1
+comp <- 17
+global_view(ames_chm, primary_obs = prim, comparison_obs = comp,
+            height_px = 240, width_px = 720,
             as_ggplot = TRUE, color = "log_maha.data")
 ```
 
-From this _global view_ we want to identify a primary instance (PI) and optionally a comparison instance (CI) to explore. Misclassified or observations with high residuals are good targets for further exploration. One point sticks out in this case. Instance 243 (shown as *) is a Gentoo (purple) penguin, while the model predict it to be a Chinstrap penguin. Peguin 169 (shown as x) is reasonably close by and correctly predicted as Gentoo. In practice we used linked brushing and misclassification information to guide our search.
+From this _global view_ we want to identify a primary instance (PI) and optionally a comparison instance (CI) to explore. Misclassified or observations with high residuals are good targets for further exploration. One point sticks out in this case. Instance 243 (shown as *) is a Gentoo (purple) penguin, while the model predict it to be a Chinstrap penguin. Penguin 169 (shown as x) is reasonably close by and correctly predicted as Gentoo. In practice we used linked brushing and misclassification information to guide our search.
 
 
 ## Radial tour
@@ -118,32 +121,37 @@ There is a lot to unpack here. The normalized distribution of all feature attrib
 
 ```{r, out.width="100%", eval = FALSE}
 ## Normalized attribution basis of the PI
-bas <- basis_attr_df(shap_df, rownum = 243)
-## Default to feature to manipulation; 
+bas <- sug_basis(ames_xgb_shap, rownum = prim)
+## Default feature to manipulate:
 #### the feature with largest separation between PI and CI attribution
-mv  <- manip_var_of_attr_df(shap_df, primary_obs = 243, comparison_obs = 169)
+mv  <- sug_manip_var(
+  ames_xgb_shap, primary_obs = prim, comparison_obs = comp)
 ## Make the radial tour
 ggt <- radial_cheem_tour(
-  this_ls, basis = bas, manip_var = mv,
-  primary_obs = 243, comparison_obs = 169, angle = .25)
+  ames_chm, basis = bas, manip_var = mv,
+  primary_obs = prim, comparison_obs = comp, angle = .15)
 
 ## Animate it
-animate_gganimate(ggt, fps = 6) 
+animate_gganimate(ggt, fps = 6)
   #height = 2, width = 4.5, units = "in", res = 150
 ## Or as a plotly html widget
 #animate_plotly(ggt, fps = 6)
 ```
 ```{r, echo=FALSE, out.width="100%"}
-if(FALSE){ ## To mitigate file size (CRAN note) create a gif and include that
-  bas <- basis_attr_df(shap_df, rownum = 243)
-  mv  <- manip_var_of_attr_df(shap_df, primary_obs = 243, comparison_obs = 169)
+## To mitigate file size (CRAN note) and run time create a gif and include that instead of executing code to make inline.
+if(FALSE){
+  prim <- 1
+  comp <- 17
+  bas <- sug_basis(shap_df, rownum = prim)
+  mv  <- sug_manip_var(
+    shap_df, primary_obs = prim, comparison_obs = comp)
   ggt <- radial_cheem_tour(
     this_ls, basis = bas, manip_var = mv,
-    primary_obs = 243, comparison_obs = 169, angle = .25)
+    primary_obs = prim, comparison_obs = comp, angle = .15)
   
   #### .gif is about .2 Mb saved, while HTML widget was about 7 Mb.
-  anim <- animate_gganimate(ggt, fps = 6,
-                            height = 2, width = 4.5, units = "in", res = 150)
+  anim <- animate_gganimate(
+    ggt, fps = 6, height = 2, width = 4.5, units = "in", res = 150)
   gganimate::anim_save("tour_penguins.gif", animation = anim)#, path = "./vignettes")
   beepr::beep()
 }
@@ -157,6 +165,7 @@ Starting from the attribution projection, this instance already looks more like 
 
 ```{r}
 library(ggplot2)
+prim <- 1
 
 ggplot(penguins_na.rm, aes(x = bill_length_mm,
                            y = flipper_length_mm,
@@ -164,12 +173,13 @@ ggplot(penguins_na.rm, aes(x = bill_length_mm,
                            shape = species)) +
   geom_point() +
   ## Highlight PI, *
-  geom_point(data = penguins_na.rm[243, ], shape = 8, size = 5, alpha = 0.8) +
+  geom_point(data = penguins_na.rm[prim, ],
+             shape = 8, size = 5, alpha = 0.8) +
   ## Theme, scaling, color, and labels
   theme_bw() +
   theme(aspect.ratio = 1) +
   scale_color_brewer(palette = "Dark2") +
-  labs(y = "Flipper length [mm]", x = "Bill length [mm]", 
+  labs(y = "Flipper length [mm]", x = "Bill length [mm]",
        color = "Observed species", shape = "Observed species")
 ```
 
@@ -178,7 +188,7 @@ This profile, with two features that are most distinguished between the PI and C
 
 ## Shiny application
 
-We provide an interactive __shiny__ application. Interactive features are made possible with __plotly__, __crosstalk__, and __DT__. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data by saving the return of `cheem_ls()` as an .rds file. Follow along with the example in `?cheem_ls`.
+We provide an interactive __shiny__ application. Interactive features are made possible with __plotly__, __crosstalk__, and __DT__. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data by saving the return of `cheem_ls()` as an rds file. Follow along with the example in `?cheem_ls`.
 
 
 # Conclusion
@@ -186,7 +196,7 @@ We provide an interactive __shiny__ application. Interactive features are made p
 Interpretability of black-box models is important to maintain. Local explanation extend this interpretability by approximating the feature importance in the vicinity of one instance. We purpose post-hoc analysis of these local explanations. First we explore them in a global, full instance context. Then we explore the support of the local explanation to see where it seems plausible or unreliable.
 
 
-# Other local explanations, (models & predictions)
+# Other local explanations (& models)
 
 __cheem__ is agnostic to model or local explanation, but requires a model and local explanation. Above we illustrated using a random forest to predict penguin species. Below demonstrates using other attribution spaces from different models.
 
@@ -205,20 +215,20 @@ library(xgboost)
 set.seed(3653)
 
 ## Setup
-X    <- DALEX::apartments[, -1]
-Y    <- DALEX::apartments$m2.price
-clas <- DALEX::apartments$district
+X    <- spinifex::penguins_na.rm[, 1:4]
+Y    <- spinifex::penguins_na.rm$species
+clas <- spinifex::penguins_na.rm$species
 
 ## Model and predict
-apt_train    <- data.matrix(X) %>%
+peng_train    <- data.matrix(X) %>%
   xgb.DMatrix(label = Y)
-apt_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
-apt_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
+peng_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
+peng_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
 
 ## SHAP
-shp <- shapviz(peng_xgb_fit, X_pred = peng_train, X = X)
+peng_xgb_shap <- shapviz(peng_xgb_fit, X_pred = peng_train, X = X)
 ## Keep just the [n, p] local explanations
-peng_xgb_shap <- shp$S
+peng_xgb_shap <- peng_xgb_shap$S
 ```
 
 
@@ -235,8 +245,8 @@ if(!require(randomForest)) install.packages("randomForest")
 library(treeshap)
 library(randomForest)
 
-## SETUP
-X    <- spinifex::wine[, -2]
+## Setup
+X    <- spinifex::wine[, -1:2]
 Y    <- spinifex::wine$Alcohol
 clas <- spinifex::wine$Type
   
@@ -276,16 +286,40 @@ drag_lm_fit  <- lm(data = data.frame(Y, X), Y ~ .)
 drag_lm_pred <- predict(drag_lm_fit)
 
 ## SHAP via DALEX, versatile but slow
-drag_lm_exp <- explain(drag_lm_fit,
-                       data = X,
-                       y = Y,
+drag_lm_exp <- explain(drag_lm_fit, data = X, y = Y,
                        label = "Dragons, LM, SHAP")
 ## Note that cheem expects a full [n, p] attribution space
-drag_lm_shap <- X[1:6, ] ## init a df of the same structure
-for(i in 1:6){
-  pps <- predict_parts_shap(drag_lm_exp, new_observation = dragons[i, ])
+drag_lm_shap <- matrix(NA, nrow(X), ncol(X))
+sapply(1:nrow(X), function(i){
+  pps <- predict_parts_shap(choc_lm_exp, new_observation = X[i, ])
   ## Keep just the [n, p] local explanations
-  drag_lm_shap[i, ] <- tapply(pps$contribution, pps$variable, mean, na.rm = TRUE)
-}
+  drag_lm_shap[i, ] <<- tapply(
+    pps$contribution, pps$variable, mean, na.rm = TRUE) %>% as.vector()
+})
 ```
+
+<!-- # Use with non-linear embedding spaces -->
+
+<!-- Instead of creating a non-linear model with predictions The global view could compare data space and non-linear embedded space, though the radial tour isn't well defined as there isn't nescicarily a y variable to be the y-axis for the tour. -->
+
+<!-- ```{r, eval=FALSE, echo=TRUE} -->
+<!-- if(!require(umap)) install.packages("umap") -->
+<!-- library(umap) -->
+<!-- library(cheem) -->
+
+<!-- X <- spinifex::penguins_na.rm[, 1:4] -->
+<!-- ## 2d umap embedding of 4d data space. No non-linear model or predictions. -->
+<!-- peng_umap2 <- umap::umap(X) -->
+<!-- peng_umap2 <- peng_umap2$layout -->
+
+<!-- peng_umap_chm <- cheem_ls(X, y = NULL, class = NULL, -->
+<!--                           attr_df    = peng_umap2, -->
+<!--                           pred       = NULL, -->
+<!--                           basis_type = c("pca"), -->
+<!--                           label      = "Penguin, umap2") -->
+
+<!-- global_view(peng_umap_chm, primary_obs = 115, comparison_obs = 296, -->
+<!--             height_px = 240, width_px = 720, as_ggplot = FALSE) -->
+<!-- ## Note that the radial tour isn't really applicable, as there is no y(/y axis). -->
+<!-- ``` -->
 

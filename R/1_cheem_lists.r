@@ -33,8 +33,8 @@
 # #'   X, Y, ntree = 125,
 # #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
 # #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-# #' cheem:::model_performance_df(rf_fit)
-model_performance_df <- function(
+# #' cheem:::model_performance(rf_fit)
+model_performance <- function(
   y, pred, label = "label"
 ){
   tryCatch({
@@ -60,7 +60,7 @@ model_performance_df <- function(
   },
   error = function(cond){
     data.frame(label  = label,
-               result = "model_performance_df() caused an erorr:",
+               result = "model_performance() caused an erorr:",
                erorr  = cond)
   })
 }
@@ -99,9 +99,10 @@ global_view_df_1layer <- function(
   basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
   
-  
   ## Projection
   x_std <- spinifex::scale_01(x)
+  if(basis_type == "olda" & is.null(class))
+    stop("Basis type was olda without a class, a class must be provided for olda.")
   basis <- switch(basis_type,
                   pca  = stats::prcomp(x_std)$rotation[, 1:d],
                   olda = spinifex::basis_olda(x_std, class, d))
@@ -148,36 +149,29 @@ global_view_df_1layer <- function(
 #' Y    <- spinifex::penguins_na.rm$species
 #' clas <- spinifex::penguins_na.rm$species
 #' 
-#' ## Model and predict
-#' peng_train    <- data.matrix(X) %>%
-#'   xgb.DMatrix(label = Y)
-#' peng_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
-#' peng_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
-#' 
-#' ## shapviz
-#' peng_xgb_shap <- shapviz(peng_xgb_fit, X_pred = peng_train, X = X)
-#' peng_xgb_shap <- peng_xgb_shap$S
-#' 
 #' ## Cheem
-#' peng_chm <- cheem_ls(X, Y, peng_xgb_fit, peng_xgb_pred, clas,
+#' peng_chm <- cheem_ls(X, as.integer(Y), penguin_xgb_shap, penguin_xgb_pred, clas,
 #'                      label = "Penguins, xgb, shapviz")
+#' 
+#' ## Save for use with shiny app (expects an rds file)
+#' if(FALSE){ ## Don't accidentally save.
+#'   saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
+#'   run_app() ## Select the saved rds file from the data dropdown.
+#' }
+#' 
 #' ## Cheem visuals
 #' if(interactive()){
 #'   prim <- 1
 #'   comp <- 2
 #'   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
 #'   bas <- sug_basis(peng_xgb_shap, prim, comp)
-#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2
+#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2)
 #'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }
 #' 
-#' ## Save for use with shiny app (expects .rds):
-#' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
-#'   run_app() ## Select the saved .rds file from the Data dropdown.
-#' }
-#' 
+#' ## Regression example
+#' library(cheem)
 #' 
 #' ## Regression setup
 #' dat  <- amesHousing2018_NorthAmes
@@ -185,34 +179,25 @@ global_view_df_1layer <- function(
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and treeSHAP
-#' rf_fit <- randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' rf_pred <- predict(rf_fit, X)
-#' rf_shap <- treeshap::treeshap(
-#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-#' rf_shap <- rf_shap$shaps
-#' 
 #' ## Cheem list
-#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
-#'                    label = "North Ames, RF, SHAP")
+#' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+#'                         label = "North Ames, RF, treeshap")
+#' 
+#' ## Save for use with shiny app (expects an rds file)
+#' if(FALSE){ ## Don't accidentally save.
+#'   saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
+#'   run_app() ## Select the saved rds file from the data drop down.
+#' }
+#' 
 #' ## Cheem visuals
 #' if(interactive()){
 #'   prim <- 1
 #'   comp <- 2
-#'   global_view(rf_chm, primary_obs = prim, comparison_obs = comp)
-#'   bas <- sug_basis(rf_shap, prim, comp)
-#'   mv  <- sug_manip_var(rf_shap, primary_obs = 1, comparison_obs = 2)
-#'   ggt <- radial_cheem_tour(rf_chm, basis = bas, manip_var = mv)
+#'   global_view(ames_rf_chm, primary_obs = prim, comparison_obs = comp)
+#'   bas <- sug_basis(ames_rf_shap, prim, comp)
+#'   mv  <- sug_manip_var(ames_rf_shap, primary_obs = 1, comparison_obs = 2)
+#'   ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
-#' }
-#' 
-#' ## Save for use with shiny app (expects .rds):
-#' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(rf_chm, "./NAmes_rf_tshap.rds")
-#'   run_app() ## Select the saved .rds file from the Data drop down.
 #' }
 cheem_ls <- function(
   x, y = NULL,
@@ -261,8 +246,8 @@ cheem_ls <- function(
   
   ## decode_df ----
   if(is.null(class)) class <- factor(FALSE) ## dummy factor
-  if(is.null(y))     y <- NA
-  if(is.null(pred))  pred <- NA
+  if(is.null(y))     y     <- NA
+  if(is.null(pred))  pred  <- NA
   .decode_left <- data.frame(
     rownum = 1:nrow(x), class, y, prediction = pred)
   if(is.null(cor_attr_proj.y)) cor_attr_proj.y <- NA
@@ -306,7 +291,7 @@ cheem_ls <- function(
   tooltip <- paste0("row: ", 1:nrow(x)) ## Base tooltip
   if(is.null(rownames(x)) == FALSE)
     ### Character rownames?
-    if(does_contain_nonnumeric(rownames(x)))
+    if(contains_nonnumeric(rownames(x)))
       tooltip <- paste0(tooltip, ", ", rownames(x))
   if(is_classification){
     ### Classification tooltip
@@ -335,7 +320,7 @@ cheem_ls <- function(
   ## Cleanup and return
   ret_ls <- list(
     type                 = problem_type(y),
-    model_performance_df = model_performance_df(y, pred, label),
+    model_performance    = model_performance(y, pred, label),
     attr_df              = attr_df,
     global_view_df       = .glob_view,
     global_view_basis_ls = .glob_basis_ls,
@@ -346,6 +331,45 @@ cheem_ls <- function(
 }
 
 
+#' Subset a cheem list
+#' 
+#' Given a numerical index of rownumbers of the original data, subset the
+#' correct elements of a cheem list.
+#' 
+#' @param cheem_ls The return of a `cheem_ls()` call.
+#' @param rownumbers A vector of the numeric index of rownumbers to keep. 
+#' To use a logical index, pass it to `which()`, 
+#' eg. `idx <- which(mtcars$mpg > 30)`.
+#' @return A subset of the supplied cheem_ls.
+#' @seealso [cheem_ls()]
+#' @export
+#' @family cheem preprocessing
+#' @examples
+#' library(cheem)
+#' 
+#' ## Classification setup
+#' X    <- spinifex::penguins_na.rm[, 1:4]
+#' Y    <- spinifex::penguins_na.rm$species
+#' clas <- spinifex::penguins_na.rm$species
+#' 
+#' ## Cheem
+#' peng_chm <- cheem_ls(X, as.integer(Y), penguin_xgb_shap, penguin_xgb_pred, clas,
+#'                      label = "Penguins, xgb, shapviz")
+#' lapply(peng_chm, NROW)
+#' 
+#' ## subset a cheem list
+#' num_idx <- which(spinifex::penguins_na.rm$flipper_length_mm > 185)
+#' peng_chm_sub <- subset_cheem(peng_chm, num_idx)
+#' lapply(peng_chm_sub, NROW)
+#' ## Notice that $global_view_df and $decode_df have fewer rows.
+subset_cheem <- function(cheem_ls, rownumbers = 1:500){
+  cheem_ls$global_view_df <-
+    cheem_ls$global_view_df[cheem_ls$global_view_df$rownum %in% rownumbers,]
+  cheem_ls$decode_df <-
+    cheem_ls$decode_df[cheem_ls$decode_df$rownum %in% rownumbers,]
+  cheem_ls$attr_df <- cheem_ls$attr_df[rownumbers,]
+  cheem_ls
+}
 
 
 
@@ -357,6 +381,7 @@ cheem_ls <- function(
 #-- Probably now; good for illustrating shap, not really 1:1 with treeshap
 #-- DALEX::explain(model) %>%
 #-- DALEX::predict_parts(prim/comp_obs, type [NOT INTEROPERABLE WITH treeshap])
+
 
 
 # Deprecated, generalizing local explanation attribution ----
@@ -410,6 +435,7 @@ cheem_ls <- function(
 #' ## Return
 #' ret
 #' }
+
 
 
 #' ## Condition handling model types ----

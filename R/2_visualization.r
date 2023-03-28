@@ -21,17 +21,8 @@
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #'
-#' ## Model and treeSHAP explanation
-#' rf_fit  <-  randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' rf_shap <- treeshap::treeshap(
-#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-#' rf_shap <- rf_shap$shaps
-#'
 #' ## Attribution basis of one obs
-#' sug_basis(rf_shap, rownum = 1)
+#' sug_basis(ames_rf_shap, rownum = 1)
 #' ## This can be used to find a basis to start the radial tour.
 #' # ?radial_cheem_tour
 sug_basis <- function(
@@ -74,18 +65,9 @@ sug_basis <- function(
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
-#' 
-#' ## Model and treeSHAP explanation
-#' rf_fit  <-  randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' rf_shap <- treeshap::treeshap(
-#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-#' rf_shap <- rf_shap$shaps
 #'
 #' ## Suggest the number of a variable to manipulate
-#' sug_manip_var(shap_df, primary_obs = 1, comparison_obs = 2)
+#' sug_manip_var(ames_rf_shap, primary_obs = 1, comparison_obs = 2)
 #' ## This can be used to find a basis to start the radial tour.
 #' # ?radial_cheem_tour
 sug_manip_var <- function(attr_df, primary_obs, comparison_obs){
@@ -136,19 +118,9 @@ sug_manip_var <- function(attr_df, primary_obs, comparison_obs){
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and treeSHAP explanation
-#' rf_fit <- randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' rf_pred <- predict(rf_fit, X)
-#' rf_shap <- treeshap::treeshap(
-#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-#' rf_shap <- rf_shap$shaps
-#' 
 #' ## Basis, manipulation var, manual tour path, & predictions to fix to y-axis
-#' bas     <- sug_basis(rf_shap, 1)
-#' mv      <- sug_manip_var(rf_shap, 1, 2)
+#' bas     <- sug_basis(ames_rf_shap, 1)
+#' mv      <- sug_manip_var(ames_rf_shap, 1, 2)
 #' mt_path <- manual_tour(bas, mv)
 #' ## Also consumed by: ?radial_cheem_tour()
 #' 
@@ -177,12 +149,11 @@ proto_basis1d_distribution <- function(
   inc_var_nms         = NULL,
   row_index           = NULL
 ){
-  if(is.matrix(attr_df) & ncol(attr_df) < 3)
-    stop("proto_basis1d_distribution: attr_df was matrix and less than 3 columns, was the basis of the attr_df used?")
   ## Prevent global variable warnings:
   rownum <- contribution <- var_name <- .is_faceted <- .map_to <-
     .d <-.df_zero <- var_num <- x <- y <- xend <- yend <- NULL
   ## Initialize
+  attr_df <- as.data.frame(attr_df)
   eval(spinifex::.init4proto)
   position <- match.arg(position)
   if(position == "off") return()
@@ -331,18 +302,8 @@ proto_basis1d_distribution <- function(
 # #' Y    <- dat$SalePrice
 # #' clas <- dat$SubclassMS
 # #' 
-# #' ## Model, explanation, cheem list, global view
-# #' rf_fit <- randomForest::randomForest(
-# #'   X, Y, ntree = 125,
-# #'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-# #'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-# #' rf_pred <- predict(rf_fit, X)
-# #' rf_shap <- treeshap::treeshap(
-# #'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-# #' rf_shap <- rf_shap$shaps
-# #' 
 # #' ## Cheem visual
-# #' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+# #' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
 # #'                    label = "North Ames, RF, SHAP")
 # #' if(interactive()){
 # #'   global_view(rf_chm) ## Preview spaces
@@ -484,19 +445,8 @@ global_view_legwork <- function(
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model, explanation, cheem list, global view:
-#' #' ## Model, explanation, cheem list, global view
-#' rf_fit <- randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' rf_pred <- predict(rf_fit, X)
-#' rf_shap <- treeshap::treeshap(
-#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-#' rf_shap <- rf_shap$shaps
-#' 
 #' ## global_view()
-#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+#' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
 #'                    label = "North Ames, RF, SHAP")
 #' if(interactive()){
 #'   global_view_legwork(rf_chm) ## most of the way there
@@ -535,7 +485,12 @@ global_view <- function(
     plotly::config(displayModeBar = FALSE) %>%                  ## Remove html buttons
     plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
     plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
-    plotly::highlight(on = "plotly_selected", off = "plotly_deselect")
+    plotly::highlight(on = "plotly_selected", off = "plotly_deselect") %>%
+    suppressWarnings() 
+  ## attempt to suppress:
+  #Warning: The following aesthetics were dropped during statistical transformation: x_plotlyDomain, y_plotlyDomain
+  #??? This can happen when ggplot fails to infer the correct grouping structure in the data.
+  #??? Did you forget to specify a `group` aesthetic or to convert a numerical variable into a factor?
 }
 
 
@@ -586,18 +541,8 @@ global_view <- function(
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Model and tree SHAP explanation
-#' rf_fit <- randomForest::randomForest(
-#'   X, Y, ntree = 125,
-#'   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
-#'   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-#' rf_pred <- predict(rf_fit, X)
-#' rf_shap <- treeshap::treeshap(
-#'   treeshap::randomForest.unify(rf_fit, X), X, FALSE, FALSE)
-#' rf_shap <- rf_shap$shaps
-#' 
 #' ## radial_cheem_tour()
-#' rf_chm <- cheem_ls(r_X, r_Y, rf_shap, rf_pred, clas,
+#' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
 #'                    label = "North Ames, RF, SHAP")
 #' bas <- sug_basis(rf_shap, 1)
 #' mv  <- sug_manip_var(rf_shap, 1, 2)
@@ -609,7 +554,7 @@ global_view <- function(
 #'   ## As a gganimation
 #'   animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
-#' ## Also consumed by: ?run_app()
+#' ## Also used in: ?run_app()
 radial_cheem_tour <- function(
   cheem_ls, basis, manip_var, 
   primary_obs         = NULL,

@@ -151,10 +151,10 @@ problem_type <- function(y){
 #' @examples
 #' library(cheem)
 #' 
-#' does_contain_nonnumeric(mtcars$mpg)
-#' does_contain_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
-#' does_contain_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in tooltip
-does_contain_nonnumeric <- function(x){
+#' contains_nonnumeric(mtcars$mpg)
+#' contains_nonnumeric(rownames(mtcars)) ## Meaningful info to use in tooltip
+#' contains_nonnumeric(rownames(cars)) ## Assume no meaningful info to use in tooltip
+contains_nonnumeric <- function(x){
   suppressWarnings(any(is.na(as.numeric(as.character(x)))))
 }
 
@@ -274,8 +274,11 @@ logistic_tform = function(
 #' @examples
 #' library(cheem)
 #' 
-#' ## Coerce a numeric index to logical:
+#' ## Coerce a numeric index to logical
 #' as_logical_index(c(1, 4:10, 15), nrow(mtcars))
+#' 
+#' ## Logical indexs are unchanged
+#' as_logical_index(mtcars$mpg > 30, nrow(mtcars))
 as_logical_index <- function(index, n){
   if(is.logical(index) & length(index) != n)
     stop("as_logical_index: `index` was logical, but not of length `n`.")

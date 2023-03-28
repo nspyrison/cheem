@@ -1,39 +1,34 @@
 ## Setup -----
 {
-  library("cheem")
   library("spinifex")
+  library("cheem")
   library("testthat")
   
-  r_idx <- 1:100
   ## Classification:
-  sub    <- wine[r_idx, ]
-  c_X    <- sub[, 2:5]
-  c_clas <- sub$Type
+  c_X    <- penguins_na.rm[, 1:4]
+  c_clas <- penguins_na.rm$species
   c_Y    <- as.integer(c_clas)
-  c_rf   <- default_rf(c_X, c_Y)
-  c_attr <- attr_df_treeshap(c_rf, x = c_X, noisy = FALSE)
-  c_chee <- cheem_ls(x = c_X, y = c_Y, class = c_clas, c_rf, c_attr)
   ## Regression:
-  sub    <- amesHousing2018_NorthAmes[r_idx, ]
-  r_X    <- sub[, 1:5]
-  r_clas <- sub$SubclassMS[r_idx]
-  r_Y    <- sub$SalePrice[r_idx]
-  r_rf   <- default_rf(r_X, r_Y, verbose = FALSE)
-  r_attr <- attr_df_treeshap(r_rf, x = r_X, noisy = FALSE, verbose = FALSE)
-  r_chee <- cheem_ls(x = r_X, y = r_Y, class = r_clas, r_rf, r_attr, verbose = FALSE)
+  r_X    <- amesHousing2018_NorthAmes[, 1:9]
+  r_clas <- amesHousing2018_NorthAmes$SubclassMS
+  r_Y    <- amesHousing2018_NorthAmes$SalePrice
   
-  
-  ## basis_attr -----
-  c_bas_attr <- basis_attr_df(attr_df = c_attr, 1)
-  r_bas_attr <- basis_attr_df(attr_df = r_attr, 2)
-  
-  test_that("basis_attr", {
-    expect_equal(class(c_bas_attr), c("matrix", "array"))
-    expect_equal(class(r_bas_attr), c("matrix", "array"))
-  })
-  
-  
+  r_pred <- ames_rf_pred
+  c_pred <- penguin_xgb_pred
+  r_attr <- ames_rf_shap
+  c_attr <- penguin_xgb_shap
+  c_chee <- cheem_ls(c_X, c_Y, c_attr, c_pred, c_clas, "pca", "label", FALSE)
+  r_chee <- cheem_ls(r_X, r_Y, r_attr, r_pred, r_clas, "pca", "label", FALSE)
 }
+
+## basis_attr -----
+c_bas_attr <- sug_basis(c_attr, 1)
+r_bas_attr <- sug_basis(r_attr, 2)
+
+test_that("basis_attr", {
+  expect_equal(class(c_bas_attr), c("matrix", "array"))
+  expect_equal(class(r_bas_attr), c("matrix", "array"))
+})
 
 ## proto_basis1d_distribution -----
 c_ggt <- ggtour(c_bas_attr, scale_sd(c_X), angle = .3) +
@@ -50,26 +45,24 @@ test_that("proto_basis1d_distribution", {
 
 ## global_view -----
 c_gv <- global_view(c_chee)
-r_gv <- global_view(r_chee)
+r_gv <- global_view(r_chee) |> suppressWarnings()
 test_that("global_view", {
   expect_equal(class(c_gv), c("plotly", "htmlwidget"))
   expect_equal(class(r_gv), c("plotly", "htmlwidget"))
 })
 
 ## global_view as ggplot ----
-c_gvgg <- global_view(c_chee, as_ggplot = TRUE)
-r_gvgg <- global_view(r_chee, as_ggplot = TRUE)
+c_gv <- global_view(c_chee, as_ggplot = TRUE)
+r_gv <- global_view(r_chee, as_ggplot = TRUE)
 test_that("global_view as_ggplot", {
-  expect_equal(class(c_gvgg), c("gg", "ggplot"))
-  expect_equal(class(r_gvgg), c("gg", "ggplot"))
+  expect_equal(class(c_gv), c("gg", "ggplot"))
+  expect_equal(class(r_gv), c("gg", "ggplot"))
 })
 
-
 ## radial_cheem_tour -----
-c_ggt <- radial_cheem_tour(c_chee, c_bas_attr, manip_var = 1L, 1L, 2L)
-r_ggt <- radial_cheem_tour(r_chee, r_bas_attr, manip_var = 1L, 1L, 2L)
+c_ggt <- radial_cheem_tour(c_chee, c_bas_attr, 1, 1, 2)
+r_ggt <- radial_cheem_tour(r_chee, r_bas_attr, 1, 1, 2)
 test_that("radial_cheem_tour", {
   expect_equal(class(c_ggt), c("gg", "ggplot"))
   expect_equal(class(r_ggt), c("gg", "ggplot"))
 })
-
