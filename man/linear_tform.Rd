@@ -4,7 +4,7 @@
 \alias{linear_tform}
 \title{Linear function to help set alpha opacity}
 \usage{
-linear_tform(n, appox_max_n = 5000L, ceiling = 1, floor = 0.3)
+linear_tform(n, appox_max_n = 5000, ceiling = 1, floor = 0.3)
 }
 \arguments{
 \item{n}{Number of observations to plot.}
@@ -35,14 +35,14 @@ plot(x, sapply(x, linear_tform), col = "blue")
 \seealso{
 Other cheem utility: 
 \code{\link{as_logical_index}()},
-\code{\link{basis_attr_df}()},
 \code{\link{color_scale_of}()},
-\code{\link{does_contain_nonnumeric}()},
+\code{\link{contains_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
 \code{\link{logistic_tform}()},
-\code{\link{manip_var_of_attr_df}()},
 \code{\link{problem_type}()},
-\code{\link{rnorm_from}()}
+\code{\link{rnorm_from}()},
+\code{\link{sug_basis}()},
+\code{\link{sug_manip_var}()}
 }
 \concept{cheem utility}

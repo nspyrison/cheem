@@ -73,7 +73,7 @@ model_performance <- function(
 #' @param x The explanatory variables of the model.
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca". 
-#' Expects "pca" or "olda" (reqires `class`).
+#' Expects "pca" or "olda" (requires `class`).
 #' @param class Optional, (n, 1) vector, a variable to group points by. 
 #' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
@@ -126,7 +126,7 @@ global_view_df_1layer <- function(
 #' @param y The target variable of the model.
 #' @param attr_df A data frame or matrix of (n, p) local explanation 
 #' attributions.
-#' @param pred A (n, 1) vector, the predictions from the accosicated model.
+#' @param pred A (n, 1) vector, the predictions from the associated model.
 #' @param class Optional, (n, 1) vector, a variable to group points by. 
 #' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
@@ -134,7 +134,7 @@ global_view_df_1layer <- function(
 #' Defaults to "label".
 #' @param basis_type The type of basis used to approximate the data and 
 #' attribution space from. Defaults to "pca". 
-#' Expects "pca" or "olda" (reqires `class`).
+#' Expects "pca" or "olda" (requires `class`).
 #' @param verbose Logical, if start time and run duration should be printed. 
 #' Defaults to getOption("verbose").
 #' @return A list of data.frames needed for the `shiny` application.
@@ -150,7 +150,7 @@ global_view_df_1layer <- function(
 #' clas <- spinifex::penguins_na.rm$species
 #' 
 #' ## Cheem
-#' peng_chm <- cheem_ls(X, as.integer(Y), penguin_xgb_shap, penguin_xgb_pred, clas,
+#' peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
 #'                      label = "Penguins, xgb, shapviz")
 #' 
 #' ## Save for use with shiny app (expects an rds file)
@@ -208,9 +208,15 @@ cheem_ls <- function(
   label = "label",
   verbose = getOption("verbose")
 ){
+  rownum <- V2 <- projection_nm <- NULL
   ## Checks
   if(verbose) tictoc::tic("cheem_ls")
+  d <- 2 ## Hard coded display dimensionality
+  basis_type <- match.arg(basis_type)
+  is_classification <- is_discrete(y)
   x       <- data.frame(x)
+  y       <- as.numeric(y)
+  pred    <- as.numeric(pred)
   attr_df <- data.frame(attr_df)
   stopifnot("data.frame" %in% class(x))
   stopifnot("data.frame" %in% class(attr_df))
@@ -220,12 +226,7 @@ cheem_ls <- function(
       " had at least one column with one unique level.",
       " Eigen matrix wont be symmetric.",
       " Please review model complexity and attr_df."))
-  ## Initialize
-  d <- 2 ## Hard coded display dimensionality
-  basis_type <- match.arg(basis_type)
-  is_classification <- is_discrete(y)
-  rownum <- V2 <- projection_nm <- NULL
-  
+
   ## global_view_df -----
   .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data")
   .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, "attribution")
@@ -241,7 +242,8 @@ cheem_ls <- function(
   cor_attr_proj.y <- NULL
   if(!is.null(y))
     .m <- sapply(1:nrow(attr_df), function(i)
-      cor_attr_proj.y[i] <<- stats::cor(m %*% sug_basis(attr_df, i), y)
+      cor_attr_proj.y[i] <<- stats::cor(
+        m %*% sug_basis(attr_df, i), as.numeric(y))
     )
   
   ## decode_df ----
@@ -251,11 +253,12 @@ cheem_ls <- function(
   .decode_left <- data.frame(
     rownum = 1:nrow(x), class, y, prediction = pred)
   if(is.null(cor_attr_proj.y)) cor_attr_proj.y <- NA
-  .decode_right <- data.frame(residual = y - pred, cor_attr_proj.y, x)
+  .decode_right <- data.frame(
+    residual = as.numeric(y) - pred, cor_attr_proj.y, x)
   ## If classification: append pred class/is_misclass
   if(is_classification){
     .pred_clas <- factor(
-      levels(class)[round(pred)], levels = levels(class))
+      levels(class)[round(as.numeric(pred))], levels = levels(class))
     .is_misclass <- .pred_clas != class
     .decode_middle <- data.frame(
       predicted_class = .pred_clas, is_misclassified = .is_misclass)
@@ -281,7 +284,8 @@ cheem_ls <- function(
   
   ## append yhaty to global_view_df ----
   .yhaty_df <-
-    data.frame(V1 = .decode_df$prediction, V2 = .decode_df$y + .vec_yjitter) %>%
+    data.frame(V1 = .decode_df$prediction, 
+               V2 = as.numeric(.decode_df$y) + .vec_yjitter) %>%
     spinifex::scale_01()
   .yhaty_df <- data.frame(basis_type = NA, label = .y_axis_label,
                           rownum = 1:nrow(x), class = .decode_df$class, .yhaty_df)
@@ -353,7 +357,7 @@ cheem_ls <- function(
 #' clas <- spinifex::penguins_na.rm$species
 #' 
 #' ## Cheem
-#' peng_chm <- cheem_ls(X, as.integer(Y), penguin_xgb_shap, penguin_xgb_pred, clas,
+#' peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
 #'                      label = "Penguins, xgb, shapviz")
 #' lapply(peng_chm, NROW)
 #' 

@@ -4,9 +4,8 @@
   library("testthat")
   
   ## Classification:
-  c_X    <- spinifex::penguins_na.rm[, 1:4]
-  c_clas <- spinifex::penguins_na.rm$species
-  c_Y    <- as.integer(c_clas)
+  c_X <- spinifex::penguins_na.rm[, 1:4]
+  c_Y <- c_clas <- spinifex::penguins_na.rm$species
   ## Regression:
   r_X    <- amesHousing2018_NorthAmes[, 1:9]
   r_clas <- amesHousing2018_NorthAmes$SubclassMS
@@ -21,7 +20,7 @@
 
 ### model_performance_df ----
 r_mp <- cheem:::model_performance(r_Y, r_pred)
-c_mp <- cheem:::model_performance(c_Y, c_pred)
+c_mp <- cheem:::model_performance(c_Y |> as.integer(), c_pred)
 
 test_that(":::model_performance class", {
   expect_equal(class(r_mp), "data.frame")
@@ -45,3 +44,4 @@ test_that("cheem_ls", {
   expect_equal(class(r_chm), "list")
   expect_equal(class(c_chm), "list")
 })
+

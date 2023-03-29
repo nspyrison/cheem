@@ -19,8 +19,7 @@
   }
   
   X <- sim_EEE_p4
-  clas <- attr(sim_EEE_p4, "cluster")
-  Y <- as.integer(clas)
+  Y <- clas <- attr(sim_EEE_p4, "cluster")
 }
 
 ## Model and predict

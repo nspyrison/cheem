@@ -5,7 +5,7 @@
 #' classifying penguin species.
 #' 
 #' @format `penguin_xgb_pred` is a n=333 length vector of the prediction of an
-#' xgb model predicing the number of the factor level of the species of penguin.
+#' xgb model predicting the number of the factor level of the species of penguin.
 #' `penguin_xgb_shap` is a (333 x 4) data frame of the shapviz SHAP attribution of
 #' the xgb model for each observation.
 #' 
@@ -51,7 +51,7 @@
 #' str(penguin_xgb_shap)
 #' 
 #' ## Cheem
-#' peng_chm <- cheem_ls(X, as.integer(Y), penguin_xgb_shap, penguin_xgb_pred, clas,
+#' peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
 #'                      label = "Penguins, xgb, shapviz")
 #' 
 #' ## Save for use with shiny app (expects an rds file)
@@ -76,21 +76,21 @@
 "penguin_xgb_shap"
 
 
-## chocolate_lm_: pred, shap -----
-#' Chocolate lm model predictions and shap values
+## chocolate_svm_: pred, shap -----
+#' Chocolate svm model predictions and shap values
 #' 
-#' Predictions and DALEX shap attribution of an lm model of Chocolate data 
+#' Predictions and DALEX shap attribution of an svm model of Chocolate data 
 #' classifying type of chocolate (light/dark).
 #' 
-#' @format `chocolate_lm_pred` is a n=88 length vector of the prediction of an
-#' svm model predicing the number of the factor level of the species of penguin.
-#' `chocolate_lm_shap` is a (88 x 10) data frame of the DALEX SHAP attribution 
-#' of the lm model for each observation.
+#' @format `chocolate_svm_pred` is a n=88 length vector of the prediction of an
+#' svm model predicting the number of the factor level of the species of penguin.
+#' `chocolate_svm_shap` is a (88 x 10) data frame of the DALEX SHAP attribution 
+#' of the svm model for each observation.
 #' 
 #' __Replicating__
 #' ```
 #' library(cheem)
-#' library(VGAM)
+#' library(e1071)
 #' library(DALEX)
 #' 
 #' ## Classification setup
@@ -99,28 +99,31 @@
 #' clas <- chocolates$Type
 #' 
 #' ## Model and predict
-#' choc_lm <- vglm(Y~., family = multinomial, data = data.frame(Y, X))
-#' chocolates_lm_pred <- predict(choc_lm, newdata = X)
+#' choc_svm_fit <- svm(
+#'   formula = Y ~ ., data = data.frame(Y, X),
+#'   type = 'C-classification', kernel = 'linear', probability = TRUE)
+#' chocolates_svm_pred <- predict(choc_svm_fit, data.frame(Y, X))
 #' 
 #' ## SHAP via DALEX, versatile but slow
-#' choc_lm_exp <- explain(choc_lm, data = X, y = Y,
-#'                        label = "Chocolates, lm")
+#' choc_svm_exp <- explain(choc_svm_fit, data = X, y = Y,
+#'                         label = "Chocolates, svm")
 #' ## Note that cheem expects a full [n, p] attribution space
-#' chocolates_lm_shap <- matrix(NA, nrow(X), ncol(X)) ## init a df of the same structure
-#' tictoc::tic("choc lm DALEX shap")
+#' chocolates_svm_shap <- matrix(NA, nrow(X), ncol(X)) ## init a df of the same structure
+#' tictoc::tic("choc svm DALEX shap")
 #' sapply(1:nrow(X), function(i){
-#'   pps <- predict_parts_shap(choc_lm_exp, new_observation = X[i, ])
+#'   pps <- predict_parts_shap(choc_svm_exp, new_observation = X[i, ])
 #'   ## Keep just the [n, p] local explanations
-#'   chocolates_lm_shap[i, ] <<- tapply(
+#'   chocolates_svm_shap[i, ] <<- tapply(
 #'     pps$contribution, pps$variable, mean, na.rm = TRUE) %>% as.vector()
 #' })
-#' tictoc::toc() ## ~31 sec
+#' chocolates_svm_shap <- as.data.frame(chocolates_svm_shap)
+#' tictoc::toc() ## ~35-40 sec for me
 #' 
 #' if(F){ ## Don't accidentally save
-#'   save(chocolates_lm_pred, file = "./data/chocolates_lm_pred.rda")
-#'   save(chocolates_lm_shap, file = "./data/chocolates_lm_shap.rda")
-#'   #usethis::use_data(chocolates_lm_pred)
-#'   #usethis::use_data(chocolates_lm_shap)
+#'   save(chocolates_svm_pred, file = "./data/chocolates_svm_pred.rda")
+#'   save(chocolates_svm_shap, file = "./data/chocolates_svm_shap.rda")
+#'   #usethis::use_data(chocolates_svm_pred)
+#'   #usethis::use_data(chocolates_svm_shap)
 #' }
 #' ```
 #' @keywords datasets
@@ -132,18 +135,18 @@
 #' Y    <- chocolates$Type
 #' clas <- chocolates$Type
 #' 
-#' ## Precomputed predictions and shap attribtion
-#' str(chocolates_lm_pred)
-#' str(chocolates_lm_shap)
+#' ## Precomputed predictions and shap attribution
+#' str(chocolates_svm_pred)
+#' str(chocolates_svm_shap)
 #' 
 #' ## Cheem
-#' choc_chm <- cheem_ls(X, as.integer(Y), chocolates_lm_pred,
-#'                      as.data.frame(chocolates_lm_shap), clas,
-#'                      label = "Chocolates, LM, shap")
+#' choc_chm <- cheem_ls(X, Y, chocolates_svm_shap,
+#'                      chocolates_svm_pred, clas,
+#'                      label = "Chocolates, SVM, shap")
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(choc_chm, "./chocolates_lm_shap.rds")
+#'   saveRDS(choc_chm, "./chocolates_svm_shap.rds")
 #'   run_app() ## Select the saved rds file from the data dropdown.
 #' }
 #' 
@@ -157,16 +160,16 @@
 #'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }
-"chocolates_lm_pred"
+"chocolates_svm_pred"
 
-#' @rdname chocolates_lm_pred
-"chocolates_lm_shap"
+#' @rdname chocolates_svm_pred
+"chocolates_svm_shap"
 
 
 ## ames_rf_: pred, shap -----
 #' Ames random forest model predictions and shap values
 #' 
-#' Predictions and treeshap attribution of a rando forest model of North Ames 
+#' Predictions and treeshap attribution of a random forest model of North Ames 
 #' house sales data regressing Sales Price from house and lot variables.
 #' 
 #' @format `ames_rf_pred` is a n=338 length vector of the prediction of an
@@ -213,7 +216,7 @@
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
 #' 
-#' ## Precomputed predictions and shap attribtion
+#' ## Precomputed predictions and shap attribution
 #' str(ames_rf_pred)
 #' str(ames_rf_shap)
 #' 

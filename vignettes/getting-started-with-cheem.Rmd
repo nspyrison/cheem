@@ -100,7 +100,7 @@ We have extracted tree SHAP, an feature importance measure in the vicinity of ea
 
 ## Global view
 
-To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of __plotly__ and __crosstalk__. We have identified an observation with a large Mahalanobis distance (in data sapce) and the closest neighbor in attribution space.
+To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of __plotly__ and __crosstalk__. We have identified an observation with a large Mahalanobis distance (in data space) and the closest neighbor in attribution space.
 
 <!-- The model information is essentially the confusion matrix for the classification case. -->
 
@@ -201,9 +201,9 @@ Interpretability of black-box models is important to maintain. Local explanation
 __cheem__ is agnostic to model or local explanation, but requires a model and local explanation. Above we illustrated using a random forest to predict penguin species. Below demonstrates using other attribution spaces from different models.
 
 
-## shapvis (& xgb classification)
+## shapviz (& xgb classification)
 
-__shapvis__ is being actively maintained and is hosted on CRAN. It is compatible with H2O, lgb, and xgb models.
+__shapviz__ is being actively maintained and is hosted on CRAN. It is compatible with H2O, lgb, and xgb models.
 
 https://github.com/mayer79/shapviz
 
@@ -266,7 +266,7 @@ wine_rf_tshap <- wine_rf_tshap$shaps
 ```
 
 
-## DALEX (& LM regresssion)
+## DALEX (& LM regression)
 
 __DALEX__ is a popular and versatile XAI package available on CRAN. It is compatible with many models, but it uses the original, slower variant of SHAP local explanation. Expect long run times for sizable data or complex models.
 
@@ -291,11 +291,12 @@ drag_lm_exp <- explain(drag_lm_fit, data = X, y = Y,
 ## Note that cheem expects a full [n, p] attribution space
 drag_lm_shap <- matrix(NA, nrow(X), ncol(X))
 sapply(1:nrow(X), function(i){
-  pps <- predict_parts_shap(choc_lm_exp, new_observation = X[i, ])
+  pps <- predict_parts_shap(drag_lm_exp, new_observation = X[i, ])
   ## Keep just the [n, p] local explanations
   drag_lm_shap[i, ] <<- tapply(
     pps$contribution, pps$variable, mean, na.rm = TRUE) %>% as.vector()
 })
+drag_lm_shap <- as.data.frame(drag_lm_shap)
 ```
 
 <!-- # Use with non-linear embedding spaces -->

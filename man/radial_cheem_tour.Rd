@@ -2,7 +2,6 @@
 % Please edit documentation in R/2_visualization.r
 \name{radial_cheem_tour}
 \alias{radial_cheem_tour}
-\alias{radial_cheem_tour_subplots}
 \title{Cheem tour; 1D manual tour on the selected attribution}
 \usage{
 radial_cheem_tour(
@@ -19,26 +18,12 @@ radial_cheem_tour(
   do_center_frame = TRUE,
   do_add_residual = FALSE
 )
-
-radial_cheem_tour_subplots(
-  cheem_ls,
-  basis,
-  manip_var,
-  primary_obs = NULL,
-  comparison_obs = NULL,
-  do_add_pcp_segments = TRUE,
-  pcp_shape = c(3, 142, 124),
-  angle = 0.15,
-  row_index = NULL,
-  inc_var_nms = NULL,
-  do_center_frame = TRUE
-)
 }
 \arguments{
 \item{cheem_ls}{A return from \code{cheem_ls()}, a list of data frames.}
 
 \item{basis}{A 1D projection basis, typically a return of
-\code{basis_attr_df()}.}
+\code{sug_basis()}.}
 
 \item{manip_var}{The , \emph{number} of the manipulation variable.}
 
@@ -85,70 +70,32 @@ and attribution- spaces. Typically consumed directly by shiny app.
 \examples{
 library(cheem)
 
-## Classification setup:
-X    <- spinifex::penguins_na.rm[, 1:4]
-clas <- spinifex::penguins_na.rm$species
-Y    <- as.integer(clas)
-
-## Model and tree SHAP explanation:
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-
-## Basis & suggest manipulation var
-bas <- basis_attr_df(shap_df, rownum = 1)
-mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
-
-## Radial tour with ggplot facets & animate
-ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv)
-if(interactive()){
-  ## As a Plotly html widget
-  animate_plotly(ggt)
-  
-  ## As a gganimation
-  animate_gganimate(ggt, render = gganimate::av_renderer())
-  
-  ## As an alternative Plotly html widget
-  ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = mv)
-  animate_plotly(ggt)
-}
-
-
 ## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
-## Model and tree SHAP explanation:
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-
-## Basis & suggest manipulation var
-bas <- basis_attr_df(shap_df, rownum = 1)
-mv  <- manip_var_of_attr_df(shap_df, primary_obs = 1, comparison_obs = 2)
-
-## Radial tour with ggplot facets & animate
-ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv)
+## radial_cheem_tour()
+ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+                        label = "North Ames, RF, SHAP")
+bas <- sug_basis(ames_rf_shap, 1)
+mv  <- sug_manip_var(ames_rf_shap, 1, 2)
+ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
 if(interactive()){
   ## As a plotly html widget
-  animate_plotly(ggt)
+  spinifex::animate_plotly(ggt)
   
   ## As a gganimation
-  animate_gganimate(ggt, render = gganimate::av_renderer())
-  
-  ## As an alternative plotly html widget
-  ggt <- radial_cheem_tour_subplots(this_ls, basis = bas, manip_var = mv)
-  animate_plotly(ggt)
+  spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
 }
+## Also used in: ?run_app()
 }
 \seealso{
+\code{\link[=run_app]{run_app()}}
+
 Other cheem consumers: 
+\code{\link{global_view_legwork}()},
 \code{\link{global_view}()},
 \code{\link{run_app}()}
 }

@@ -75,7 +75,8 @@ amesHousing2018_NorthAmes <- amesHousing2018_thin[r_idx, ]
 amesHousing2018_NorthAmes$SubclassMS <- factor(
   amesHousing2018_NorthAmes$SubclassMS,
   unique(amesHousing2018_NorthAmes$SubclassMS))
-## save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
+if(F)\{ ## Don't accidentally save
+  save(amesHousing2018_NorthAmes, file = "./data/amesHousing2018_NorthAmes.rda")
 }\if{html}{\out{</div>}}
 }
 \usage{
@@ -137,19 +138,24 @@ X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
-## Model, treeSHAP explanation, cheem list:
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+## Cheem list
+ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+                        label = "North Ames, RF, SHAP")
+## Cheem visuals
+if(interactive()){
+  prim <- 1
+  comp <- 2
+  global_view(ames_rf_chm, primary_obs = prim, comparison_obs = comp)
+  bas <- sug_basis(ames_rf_chm, prim, comp)
+  mv  <- sug_manip_var(ames_rf_chm, primary_obs = 1, comparison_obs = 2)
+  ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
+  animate_plotly(ggt)
+}
 
-## Visualize
-if(interactive())
-  global_view(this_ls)
-
-## Save for use with shiny app (expects .rds):
-if(FALSE) ## Don't accidentally save.
-  saveRDS(this_ls, "./my_cheem_ls.rds")
+## Save for use with shiny app (expects an rds file)
+if(FALSE){ ## Don't accidentally save.
+  saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
+  run_app() ## Select the saved rds file from the data drop down.
+}
 }
 \keyword{datasets}

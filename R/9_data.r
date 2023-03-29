@@ -117,22 +117,22 @@
 #' clas <- dat$SubclassMS
 #' 
 #' ## Cheem list
-#' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
-#'                    label = "North Ames, RF, SHAP")
+#' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+#'                         label = "North Ames, RF, SHAP")
 #' ## Cheem visuals
 #' if(interactive()){
 #'   prim <- 1
 #'   comp <- 2
-#'   global_view(rf_chm, primary_obs = prim, comparison_obs = comp)
-#'   bas <- sug_basis(rf_shap, prim, comp)
-#'   mv  <- sug_manip_var(rf_shap, primary_obs = 1, comparison_obs = 2)
-#'   ggt <- radial_cheem_tour(rf_chm, basis = bas, manip_var = mv)
+#'   global_view(ames_rf_chm, primary_obs = prim, comparison_obs = comp)
+#'   bas <- sug_basis(ames_rf_chm, prim, comp)
+#'   mv  <- sug_manip_var(ames_rf_chm, primary_obs = 1, comparison_obs = 2)
+#'   ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(rf_chm, "./NAmes_rf_tshap.rds")
+#'   saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
 #'   run_app() ## Select the saved rds file from the data drop down.
 #' }
 "amesHousing2018"
@@ -196,12 +196,12 @@
 #' clas <- chocolates$Type
 #' 
 #' ## Cheem
-#' choc_chm <- cheem_ls(X, Y, chocolates_lm_pred, chocolates_lm_shap, clas,
+#' choc_chm <- cheem_ls(X, Y, chocolates_svm_shap, chocolates_svm_pred, clas,
 #'                      label = "Chocolates, LM, shap")
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(choc_chm, "./chocolates_lm_shap.rds")
+#'   saveRDS(choc_chm, "./chocolates_svm_shap.rds")
 #'   run_app() ## Select the saved rds file from the data dropdown.
 #' }
 #' 

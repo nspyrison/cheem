@@ -12,8 +12,8 @@
   tic("Preprocess all")
   wd <- getwd()
   fp <- "./inst/shiny_apps/cheem/preprocessing/"
-  if(substr(wd, nchar(wd) - 4, nchar(wd)) != "cheem")
-    warning("work directory is not set to cheem!")
+  if(substr(wd, nchar(wd) - 6, nchar(wd)) != "R/cheem")
+    warning("work directory is not set to cheem package root!")
   if(F) 
     dir("./inst/shiny_apps/cheem/preprocessing")
   

@@ -2,12 +2,18 @@
 #' @author Nicholas Spyrison
 #' Aug 2021
 source("ui.r", local = TRUE, encoding = "utf-8")
+do_dev_cat <- TRUE
+dev_cat <- function(msg, verbose = do_dev_cat){
+  if(do_dev_cat)
+    cat(paste0(msg, "\n"))
+}
 
 server <- function(input, output, session){
   ## Reactives ----
   
   ### load_ls ----
   load_ls <- reactive({
+    dev_cat("top of load_ls")
     dat <- req(input$dat_char)
     if(dat %in% expected_data_char == FALSE)
       stop("data string not matched.")
@@ -56,6 +62,7 @@ server <- function(input, output, session){
   
   ### bas ----
   bas <- reactive({
+    dev_cat("top of bas")
     isolate(attr_df <- req(load_ls()$attr_df))
     ## isolated, not eager to eval twice, as prim_inst also updated as 
     #### prim/comp_inst also update as side effects of load_ls()
@@ -70,6 +77,7 @@ server <- function(input, output, session){
   
   ### sel_rownums ----
   sel_rownums <- reactive({
+    dev_cat("top of sel_rownums")
     ## Row NUMBER index of data selected in linked global view
     .d <- plotly::event_data("plotly_selected")
     if(is.null(.d)) return(NULL)
@@ -80,6 +88,7 @@ server <- function(input, output, session){
 
   ### cheem_ggtour -----
   cheem_ggtour <- reactive({
+    dev_cat("top of cheem_ggtour")
     cheem_ls     <- req(load_ls())
     bas          <- req(bas())
     prim_inst    <- req(input$primary_inst)
@@ -89,7 +98,7 @@ server <- function(input, output, session){
     inc_feat_nms <- req(input$inc_feat_nms)
     idx_rownum   <- sel_rownums() ## NULL is no selection; all points
     #idx_rownum   <- NULL ## all points
-    ## sel_rownums() is Leading to a hard to explore plotly method error:
+    ## sel_rownums() is leading to a hard to explore plotly method error:
     # Error: object 'x' not found
     ## abandoning and defaulting to full selection.
     
@@ -115,6 +124,7 @@ server <- function(input, output, session){
   
   ### update prim/comp_inst ----
   observeEvent(req(input$dat_char), {
+    dev_cat("top of observeEvent(req(input$dat_char)")
     dat <- req(input$dat_char)
     if(dat == "toy classification"){
       prim_inst <- 36
@@ -158,6 +168,7 @@ server <- function(input, output, session){
   
   ### update inc_feat_nms -----
   observeEvent(req(load_ls()), {
+    dev_cat("top of observeEvent(req(load_ls())")
     feat_nms <- colnames(req(load_ls())$attr_df)
     updateCheckboxGroupInput(session, "inc_feat_nms", label = "Featurtes to include:",
                              choices = feat_nms, selected = feat_nms, inline = TRUE)
@@ -169,6 +180,7 @@ server <- function(input, output, session){
     input$comparison_inst
     input$inc_feat_nms
   }, {
+    dev_cat("top of observeEvent({input$primary_inst...")
     attr_df    <- req(load_ls())$attr_df
     .prim_inst <- req(input$primary_inst)
     .comp_inst <- req(input$comparison_inst)
@@ -181,7 +193,7 @@ server <- function(input, output, session){
     inc_attr_df <- attr_df[, .inc_nms]
     bas         <- sug_basis(inc_attr_df, .prim_inst) %>%
       tourr::orthonormalise()
-    mv          <- sug_manip_var(bas)
+    mv          <- sug_manip_var(inc_attr_df, .prim_inst, .comp_inst)
     mv_nm       <- colnames(inc_attr_df)[mv]
     updateSelectInput(session, "manip_feat_nm", label = "Manipulation feature:",
                       choices = .inc_nms, selected = mv_nm)

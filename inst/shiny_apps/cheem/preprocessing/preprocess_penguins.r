@@ -1,11 +1,9 @@
 ## Setup ------
 {
   raw <- spinifex::penguins_na.rm
-  clas <- raw$species
-  lvls <- levels(clas)
   X <- raw[, 1:4] %>% as.data.frame()
+  Y <- clas <- raw$species
   colnames(X) <- c("bl", "bd", "fl", "bm")
-  Y <- as.integer(raw$species)
 }
 
 ## Model and predict

@@ -58,7 +58,7 @@ We started by looking at the model-agnostic local explanation _tree SHAP_  appli
 - Rcpp::compileAttributes() ## Rcpp changes
 - Kmisc::registerFunctions(prefix = "") ## Rcpp changes
 - devtools::document() ## documentation changes
-- pkgdown::build_site() ## packagedown site changes (docu, vignettes, readme)
+- pkgdown::build_site() ## packagedown site changes (documentation, vignettes, readme)
 - rstudioapi::restartSession() ## Install wants reset ?
 - message("Manually do: Build tab > Install and Restart") ## build package
 - #devtools::check_rhub() ## check package

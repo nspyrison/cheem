@@ -6,14 +6,13 @@
 \usage{
 cheem_ls(
   x,
-  y,
-  class = NULL,
-  model,
+  y = NULL,
   attr_df,
+  pred = NULL,
+  class = NULL,
   basis_type = c("pca", "olda"),
-  layer_name = utils::tail(class(model), 1),
-  verbose = getOption("verbose"),
-  keep_model = FALSE
+  label = "label",
+  verbose = getOption("verbose")
 )
 }
 \arguments{
@@ -21,26 +20,24 @@ cheem_ls(
 
 \item{y}{The target variable of the model.}
 
-\item{class}{The variable to group points by. Originally the \emph{predicted}
-class.}
+\item{attr_df}{A data frame or matrix of (n, p) local explanation
+attributions.}
 
-\item{model}{A non-linear model, originally a \code{randomForest::randomForest}
-model fit, or a return from \code{default_rf()}.}
+\item{pred}{A (n, 1) vector, the predictions from the associated model.}
 
-\item{attr_df}{A data frame of local explanation attributions,
-such as a return from \code{attr_df_treeshap()}.}
+\item{class}{Optional, (n, 1) vector, a variable to group points by.
+This can be the same as or different from \code{y}, the target variable.}
 
 \item{basis_type}{The type of basis used to approximate the data and
-attribution space from. Expects "pca" or "olda" (requires \code{clas}).
-Defaults to "pca".}
+attribution space from. Defaults to "pca".
+Expects "pca" or "olda" (requires \code{class}).}
 
-\item{layer_name}{Character layer name, typically the type of local
-attribution used. Defaults to the last class of the model.}
+\item{label}{Optionally provide a character label to store reminder
+text for the type of model and local explanation used.
+Defaults to "label".}
 
-\item{verbose}{Logical, if runtime should be printed. Defaults to TRUE.}
-
-\item{keep_model}{Logical, whether or not the heavy model object should be
-kept. Defaults to FALSE.}
+\item{verbose}{Logical, if start time and run duration should be printed.
+Defaults to getOption("verbose").}
 }
 \value{
 A list of data.frames needed for the \code{shiny} application.
@@ -52,53 +49,66 @@ Performs the preprocessing steps needs to supply the plot functions
 \examples{
 library(cheem)
 
-## Classification setup:
+## Classification setup
 X    <- spinifex::penguins_na.rm[, 1:4]
+Y    <- spinifex::penguins_na.rm$species
 clas <- spinifex::penguins_na.rm$species
-Y    <- as.integer(clas)
 
-## Model and treeSHAP explanation:
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-global_view(this_ls) ## Preview spaces
+## Cheem
+peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
+                     label = "Penguins, xgb, shapviz")
 
-## Save for use with shiny app (expects .rds):
+## Save for use with shiny app (expects an rds file)
 if(FALSE){ ## Don't accidentally save.
-  saveRDS(this_ls, "./my_cheem_ls.rds")
-  run_app() ## Select the saved .rds file from the Data dropdown.
+  saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
+  run_app() ## Select the saved rds file from the data dropdown.
 }
 
+## Cheem visuals
+if(interactive()){
+  prim <- 1
+  comp <- 2
+  global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
+  bas <- sug_basis(peng_xgb_shap, prim, comp)
+  mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2)
+  ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
+  animate_plotly(ggt)
+}
 
-## Regression setup:
+## Regression example
+library(cheem)
+
+## Regression setup
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
-## Model and treeSHAP explanation:
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
-if(interactive()){
-  global_view(this_ls) ## Preview spaces
+## Cheem list
+ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+                        label = "North Ames, RF, treeshap")
+
+## Save for use with shiny app (expects an rds file)
+if(FALSE){ ## Don't accidentally save.
+  saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
+  run_app() ## Select the saved rds file from the data drop down.
 }
 
-## Save for use with shiny app (expects .rds):
-if(FALSE){ ## Don't accidentally save.
-  saveRDS(this_ls, "./my_cheem_ls.rds")
-  run_app() ## Select the saved .rds file from the Data drop down.
+## Cheem visuals
+if(interactive()){
+  prim <- 1
+  comp <- 2
+  global_view(ames_rf_chm, primary_obs = prim, comparison_obs = comp)
+  bas <- sug_basis(ames_rf_shap, prim, comp)
+  mv  <- sug_manip_var(ames_rf_shap, primary_obs = 1, comparison_obs = 2)
+  ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
+  animate_plotly(ggt)
 }
 }
 \seealso{
 \code{\link[=global_view]{global_view()}} \code{\link[=radial_cheem_tour]{radial_cheem_tour()}} \code{\link[=radial_cheem_tour]{radial_cheem_tour()}}
 
 Other cheem preprocessing: 
-\code{\link{attr_df_treeshap}()},
-\code{\link{default_rf}()}
+\code{\link{subset_cheem}()}
 }
 \concept{cheem preprocessing}

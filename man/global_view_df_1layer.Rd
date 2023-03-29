@@ -8,20 +8,22 @@ global_view_df_1layer(
   x,
   class = NULL,
   basis_type = c("pca", "olda"),
-  layer_name = utils::tail(class(x), 1)
+  label = "label"
 )
 }
 \arguments{
 \item{x}{The explanatory variables of the model.}
 
-\item{class}{The variable to group points by. Originally the \emph{predicted}
-class.}
+\item{class}{Optional, (n, 1) vector, a variable to group points by.
+This can be the same as or different from \code{y}, the target variable.}
 
 \item{basis_type}{The type of basis used to approximate the data and
-attribution space from. Defaults to "pca".}
+attribution space from. Defaults to "pca".
+Expects "pca" or "olda" (requires \code{class}).}
 
-\item{layer_name}{Character layer name, typically the type of local
-attribution used. Defaults to the name of the last class of x.}
+\item{label}{Optionally provide a character label to store reminder
+text for the type of model and local explanation used.
+Defaults to "label".}
 }
 \value{
 A data.frame, for the global linked \strong{plotly} display.

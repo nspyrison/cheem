@@ -111,9 +111,10 @@ sug_manip_var <- function(attr_df, primary_obs, comparison_obs){
 #' @export
 #' @examples
 #' library(cheem)
+#' library(spinifex)
 #' 
 #' ## Regression setup
-#' dat  <- spinifex::amesHousing2018_NorthAmes
+#' dat  <- amesHousing2018_NorthAmes
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
@@ -126,10 +127,10 @@ sug_manip_var <- function(attr_df, primary_obs, comparison_obs){
 #' 
 #' ## Compose and animate the tour
 #' ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-#'   append_fixed_y(fixed_y = scale_sd(rf_pred)) +
+#'   append_fixed_y(fixed_y = scale_sd(Y)) +
 #'   proto_point(list(color = clas, shape = clas)) +
 #'   proto_basis1d_distribution(
-#'     attr_df = rf_shap,
+#'     attr_df = ames_rf_shap,
 #'     primary_obs = 1, comparison_obs = 2,
 #'     position = "top1d", group_by = clas) +
 #'   proto_basis1d(position = "bottom1d") +
@@ -289,7 +290,7 @@ proto_basis1d_distribution <- function(
 #' color. Expects c("default", "residual", "log_maha.data", "cor_attr_proj.y").
 #' Defaults to "default"; predicted_class for classification, dummy class 
 #' for regression.
-#' @return a `ggplot2` object, waiting to be rended with `global_view` or 
+#' @return a `ggplot2` object, waiting to be rendered with `global_view` or 
 #' `global_view_subplots`.
 #' @family cheem consumers
 # #' @export
@@ -303,22 +304,22 @@ proto_basis1d_distribution <- function(
 # #' clas <- dat$SubclassMS
 # #' 
 # #' ## Cheem visual
-# #' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
-# #'                    label = "North Ames, RF, SHAP")
+# #' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+# #'                         label = "North Ames, RF, SHAP")
 # #' if(interactive()){
-# #'   global_view(rf_chm) ## Preview spaces
+# #'   global_view(ames_rf_chm) ## Preview spaces
 # #' }
 # #' 
 # #' ## Other global_view() options
 # #' if(interactive()){
-# #'   global_view_legwork(rf_chm) ## most of the way there
-# #'   global_view(rf_chm, as_ggplot = TRUE) ## early return of ggplot
-# #'   global_view(rf_chm) ## uses ggplot facets %>% plotly
+# #'   global_view_legwork(ames_rf_chm) ## most of the way there
+# #'   global_view(ames_rf_chm, as_ggplot = TRUE) ## early return of ggplot
+# #'   global_view(ames_rf_chm) ## uses ggplot facets %>% plotly
 # #' 
 # #'   ## Different color mappings, especially for regression
-# #'   global_view(rf_chm, color = "residual")
-# #'   global_view(rf_chm, color = "log_maha.data")
-# #'   global_view(rf_chm, color = "cor_attr_proj.y")
+# #'   global_view(ames_rf_chm, color = "residual")
+# #'   global_view(ames_rf_chm, color = "log_maha.data")
+# #'   global_view(ames_rf_chm, color = "cor_attr_proj.y")
 # #' }
 global_view_legwork <- function(
     cheem_ls,
@@ -446,17 +447,17 @@ global_view_legwork <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' ## global_view()
-#' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
-#'                    label = "North Ames, RF, SHAP")
+#' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+#'                         label = "North Ames, RF, SHAP")
 #' if(interactive()){
-#'   global_view_legwork(rf_chm) ## most of the way there
-#'   global_view(rf_chm, as_ggplot = TRUE) ## early return of ggplot
-#'   global_view(rf_chm) ## uses ggplot facets %>% plotly
+#'   cheem:::global_view_legwork(ames_rf_chm) ## most of the way there
+#'   global_view(ames_rf_chm, as_ggplot = TRUE) ## early return of ggplot
+#'   global_view(ames_rf_chm) ## uses ggplot facets %>% plotly
 #' 
 #'   ## Different color mappings, especially for regression
-#'   global_view(rf_chm, color = "residual")
-#'   global_view(rf_chm, color = "log_maha.data")
-#'   global_view(rf_chm, color = "cor_attr_proj.y")
+#'   global_view(ames_rf_chm, color = "residual")
+#'   global_view(ames_rf_chm, color = "log_maha.data")
+#'   global_view(ames_rf_chm, color = "cor_attr_proj.y")
 #' }
 #' ## Also consumed by: ?run_app()
 global_view <- function(
@@ -542,17 +543,17 @@ global_view <- function(
 #' clas <- dat$SubclassMS
 #' 
 #' ## radial_cheem_tour()
-#' rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
-#'                    label = "North Ames, RF, SHAP")
-#' bas <- sug_basis(rf_shap, 1)
-#' mv  <- sug_manip_var(rf_shap, 1, 2)
-#' ggt <- radial_cheem_tour(rf_chm, basis = bas, manip_var = mv)
+#' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+#'                         label = "North Ames, RF, SHAP")
+#' bas <- sug_basis(ames_rf_shap, 1)
+#' mv  <- sug_manip_var(ames_rf_shap, 1, 2)
+#' ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
 #' if(interactive()){
 #'   ## As a plotly html widget
-#'   animate_plotly(ggt)
+#'   spinifex::animate_plotly(ggt)
 #'   
 #'   ## As a gganimation
-#'   animate_gganimate(ggt, render = gganimate::av_renderer())
+#'   spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
 #' }
 #' ## Also used in: ?run_app()
 radial_cheem_tour <- function(
@@ -677,9 +678,12 @@ radial_cheem_tour <- function(
       spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1) +
       spinifex::append_fixed_y(fixed_y = .fixed_y) +
       ## Plotly doesn't rotate text in geom_text/annotate.
-      ggplot2::theme(legend.position = "off",
-                     axis.title.y = ggplot2::element_text(
-                       angle = 90, vjust = 0.5)) +
+      ggplot2::theme(
+        legend.position = "off",
+        axis.title.y = ggplot2::element_text(
+          angle = 90, vjust = 0.5),
+        panel.spacing = ggplot2::unit(2, "points"), ## Facet spacing
+      ) +
       ## Exasperates issues with plotly & geom presence issue.
       #spinifex::proto_frame_cor2(row_index = .idx_fore, position = c(.5, 1.1)) +
       ## Points; 1D proj & fixed y

@@ -21,5 +21,5 @@ residual.
 GitHub: \url{https://github.com/nspyrison/cheem}
 }
 \seealso{
-\code{\link[=cheem_ls]{cheem_ls()}} \code{\link[=run_app]{run_app()}}
+\code{\link[=cheem_ls]{cheem_ls()}} or \code{\link[=run_app]{run_app()}} for help getting started
 }

@@ -5,9 +5,8 @@
   library("testthat")
   
   ## Classification:
-  c_X    <- penguins_na.rm[, 1:4]
-  c_clas <- penguins_na.rm$species
-  c_Y    <- as.integer(c_clas)
+  c_X <- penguins_na.rm[, 1:4]
+  c_Y <- c_clas <- penguins_na.rm$species
   ## Regression:
   r_X    <- amesHousing2018_NorthAmes[, 1:9]
   r_clas <- amesHousing2018_NorthAmes$SubclassMS
@@ -66,3 +65,4 @@ test_that("radial_cheem_tour", {
   expect_equal(class(c_ggt), c("gg", "ggplot"))
   expect_equal(class(r_ggt), c("gg", "ggplot"))
 })
+

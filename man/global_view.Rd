@@ -2,7 +2,6 @@
 % Please edit documentation in R/2_visualization.r
 \name{global_view}
 \alias{global_view}
-\alias{global_view_subplots}
 \title{Linked \code{plotly} display, global view of data and attribution space.}
 \usage{
 global_view(
@@ -13,15 +12,6 @@ global_view(
   height_px = 480,
   width_px = 1440,
   as_ggplot = FALSE
-)
-
-global_view_subplots(
-  cheem_ls,
-  primary_obs = NULL,
-  comparison_obs = NULL,
-  color = c("default", "residual", "log_maha.data", "cor_attr_proj.y"),
-  height_px = 480,
-  width_px = 1440
 )
 }
 \arguments{
@@ -40,10 +30,10 @@ Defaults to "default"; predicted_class for classification, dummy class
 for regression.}
 
 \item{height_px}{The height in pixels of the returned \code{plotly} plot.
-Defaults to 480.}
+Defaults to 480, does nothing when \code{as_ggplot} is TRUE.}
 
 \item{width_px}{The width in pixels of the returned \code{plotly} plot.
-Defaults to 1440.}
+Defaults to 1440, does nothing when \code{as_ggplot} is TRUE.}
 
 \item{as_ggplot}{Logical, if TRUE returns the plots before being passed to
 \code{plotly} functions.}
@@ -65,27 +55,26 @@ X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
-## Model, explanation, cheem list, global view:
-rf_fit <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-this_ls <- cheem_ls(X, Y, class = clas,
-                     model = rf_fit,
-                     attr_df = shap_df)
-
-## Visualize
+## global_view()
+ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+                        label = "North Ames, RF, SHAP")
 if(interactive()){
-  global_view(this_ls)                   ## uses ggplot facets \%>\% plotly
-  global_view(this_ls, as_ggplot = TRUE) ## early return of ggplot
-  global_view_subplots(this_ls)          ## uses plotly::subplots
-  
+  cheem:::global_view_legwork(ames_rf_chm) ## most of the way there
+  global_view(ames_rf_chm, as_ggplot = TRUE) ## early return of ggplot
+  global_view(ames_rf_chm) ## uses ggplot facets \%>\% plotly
+
   ## Different color mappings, especially for regression
-  global_view_subplots(this_ls, color = "residual")
-  global_view_subplots(this_ls, color = "log_maha.data") 
-  global_view_subplots(this_ls, color = "cor_attr_proj.y")
+  global_view(ames_rf_chm, color = "residual")
+  global_view(ames_rf_chm, color = "log_maha.data")
+  global_view(ames_rf_chm, color = "cor_attr_proj.y")
 }
+## Also consumed by: ?run_app()
 }
 \seealso{
+\code{\link[=run_app]{run_app()}}
+
 Other cheem consumers: 
+\code{\link{global_view_legwork}()},
 \code{\link{radial_cheem_tour}()},
 \code{\link{run_app}()}
 }

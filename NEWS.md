@@ -4,7 +4,8 @@
 - Rebase all functions from expecting a unified treeshap::shap() to generalized
 data frame or matrix format for arbitrary attribution spaces.
 - Rework vignette and examples to reflect this change.
-- Add `subset_cheem()` A convience function for subseting cheem lists after construction.
+- Added precomputed predictions and attributions for the Ames, Chocolates, and Penguins datasets. This allows users to run attribution-agnostic functions without dependencies.
+- Add `subset_cheem()`, a convenience function for subsetting cheem lists after construction.
 - Removed plotly subplot variations of visuals: `global_view_subplots()`, `radial_cheem_tour_subplots()`. These were development variations never used in the shiny app.
 - Minor function renames for parsimony and consistency.
 

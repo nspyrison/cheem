@@ -1,13 +1,11 @@
 {
-  clas <- factor(chocolates$Type, levels = rev(unique(chocolates$Type)))
-  lvls <- levels(clas)
-  X <- chocolates[, 5:14] %>% as.data.frame() ## X's not scaled.
+  X <- chocolates[, 5:14] %>% as.data.frame()
+  Y <- clas <- chocolates$Type
   colnames(X) <- gsub("\\_.*", "", colnames(X))
   nm_imc <- paste(chocolates$Name, chocolates$MFR, chocolates$Country, sep = ", ")
   r_idx <- which(nm_imc == "85% Cocoa Dark French Chocolate, Thorntons, UK")[2]
   nm_imc[r_idx] <- paste0(nm_imc[r_idx], " (2nd)")
   row.names(X) <- nm_imc
-  Y <- as.integer(clas)
 }
 
 ## Model and predict

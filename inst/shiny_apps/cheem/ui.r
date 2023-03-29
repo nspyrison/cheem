@@ -44,7 +44,7 @@ expected_data_char <- c(
   "toy classification", "penguins classification", "chocolates classification",
   "toy quad regression", "toy trig regression", "toy mixture model regression", 
   "fifa regression", "ames housing 2018 regression",
-  "<Upload saved cheem_ls (.rds only)>")
+  "<Upload saved cheem_ls (rds only)>")
 tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   #### Top text description -----
   fluidRow(
@@ -53,8 +53,8 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
                             choices  = expected_data_char,
                             selected = "penguins classification")),
       column(3, conditionalPanel(
-        "input.dat_char == '<Upload saved cheem_ls (.rds only)>'",
-        fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to .rds)",
+        "input.dat_char == '<Upload saved cheem_ls (rds only)>'",
+        fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to rds)",
                   multiple = FALSE, accept = c("text/rds", ".rds")))),
       column(6, tableOutput("perf_df"))
     ),

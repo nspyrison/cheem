@@ -31,6 +31,7 @@ if(interactive()){
 }
 \seealso{
 Other cheem consumers: 
+\code{\link{global_view_legwork}()},
 \code{\link{global_view}()},
 \code{\link{radial_cheem_tour}()}
 }

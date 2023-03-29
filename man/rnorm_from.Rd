@@ -43,14 +43,14 @@ rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
 \seealso{
 Other cheem utility: 
 \code{\link{as_logical_index}()},
-\code{\link{basis_attr_df}()},
 \code{\link{color_scale_of}()},
-\code{\link{does_contain_nonnumeric}()},
+\code{\link{contains_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
-\code{\link{manip_var_of_attr_df}()},
-\code{\link{problem_type}()}
+\code{\link{problem_type}()},
+\code{\link{sug_basis}()},
+\code{\link{sug_manip_var}()}
 }
 \concept{cheem utility}

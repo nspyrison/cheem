@@ -17,8 +17,7 @@ proto_basis1d_distribution(
 )
 }
 \arguments{
-\item{attr_df}{An data frame, the attributions of a local explanation,
-such as a return from \code{attr_df_treeshap()}.}
+\item{attr_df}{An data frame, the attributions of a local explanation.}
 
 \item{primary_obs}{The rownumber of the primary observation. Its local
 attribution becomes the 1d projection basis, and the point it highlighted
@@ -59,28 +58,24 @@ Does not draw the basis bars; use in conjunction with \code{proto_basis1d()}.
 library(cheem)
 library(spinifex)
 
-## Regression setup:
+## Regression setup
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
-## Model and treeSHAP explanation:
-rf_fit  <- default_rf(X, Y)
-shap_df <- attr_df_treeshap(rf_fit, X, noisy = FALSE)
-
 ## Basis, manipulation var, manual tour path, & predictions to fix to y-axis
-bas     <- basis_attr_df(shap_df, 1)
-mv      <- manip_var_of_attr_df(shap_df, 1, 2)
+bas     <- sug_basis(ames_rf_shap, 1)
+mv      <- sug_manip_var(ames_rf_shap, 1, 2)
 mt_path <- manual_tour(bas, mv)
-pred    <- unify_predict(rf_fit, X)
+## Also consumed by: ?radial_cheem_tour()
 
 ## Compose and animate the tour
 ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
-  append_fixed_y(fixed_y = scale_sd(pred)) +
+  append_fixed_y(fixed_y = scale_sd(Y)) +
   proto_point(list(color = clas, shape = clas)) +
   proto_basis1d_distribution(
-    attr_df = shap_df,
+    attr_df = ames_rf_shap,
     primary_obs = 1, comparison_obs = 2,
     position = "top1d", group_by = clas) +
   proto_basis1d(position = "bottom1d") +
@@ -89,5 +84,8 @@ ggt <- ggtour(mt_path, scale_sd(X), angle = .3) +
 if(interactive()){
   animate_plotly(ggt)
 }
+}
+\seealso{
+\code{\link[=radial_cheem_tour]{radial_cheem_tour()}}
 }
 \concept{ggtour proto}

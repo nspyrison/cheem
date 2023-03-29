@@ -23,20 +23,23 @@ observation.
 \examples{
 library(cheem)
 
-## Coerce a numeric index to logical:
+## Coerce a numeric index to logical
 as_logical_index(c(1, 4:10, 15), nrow(mtcars))
+
+## Logical indexs are unchanged
+as_logical_index(mtcars$mpg > 30, nrow(mtcars))
 }
 \seealso{
 Other cheem utility: 
-\code{\link{basis_attr_df}()},
 \code{\link{color_scale_of}()},
-\code{\link{does_contain_nonnumeric}()},
+\code{\link{contains_nonnumeric}()},
 \code{\link{is_discrete}()},
 \code{\link{is_diverging}()},
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
-\code{\link{manip_var_of_attr_df}()},
 \code{\link{problem_type}()},
-\code{\link{rnorm_from}()}
+\code{\link{rnorm_from}()},
+\code{\link{sug_basis}()},
+\code{\link{sug_manip_var}()}
 }
 \concept{cheem utility}
