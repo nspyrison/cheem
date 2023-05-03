@@ -19,7 +19,7 @@ then assign to cluster 'b'."><!-- mathjax --><script src="https://cdnjs.cloudfla
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -108,15 +108,15 @@ the data based on with column names kept.</p>
     <h2>See also</h2>
     <div class="dont-index"><p>Other cheem utility: 
 <code><a href="as_logical_index.html">as_logical_index</a>()</code>,
-<code><a href="basis_attr_df.html">basis_attr_df</a>()</code>,
 <code><a href="color_scale_of.html">color_scale_of</a>()</code>,
-<code><a href="does_contain_nonnumeric.html">does_contain_nonnumeric</a>()</code>,
+<code><a href="contains_nonnumeric.html">contains_nonnumeric</a>()</code>,
 <code><a href="is_discrete.html">is_discrete</a>()</code>,
 <code><a href="is_diverging.html">is_diverging</a>()</code>,
 <code><a href="linear_tform.html">linear_tform</a>()</code>,
 <code><a href="logistic_tform.html">logistic_tform</a>()</code>,
-<code><a href="manip_var_of_attr_df.html">manip_var_of_attr_df</a>()</code>,
-<code><a href="problem_type.html">problem_type</a>()</code></p></div>
+<code><a href="problem_type.html">problem_type</a>()</code>,
+<code><a href="sug_basis.html">sug_basis</a>()</code>,
+<code><a href="sug_manip_var.html">sug_manip_var</a>()</code></p></div>
     </div>
 
     <div id="ref-examples">
@@ -126,14 +126,14 @@ the data based on with column names kept.</p>
 <span class="r-in"><span><span class="va">sub</span> <span class="op">&lt;-</span> <span class="va">mtcars</span><span class="op">[</span><span class="va">mtcars</span><span class="op">$</span><span class="va">cyl</span> <span class="op">==</span> <span class="fl">6</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="co">## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.</span></span></span>
 <span class="r-in"><span><span class="fu">rnorm_from</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sub</span>, n_obs <span class="op">=</span> <span class="fl">3</span>, var_coeff <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mpg      cyl     disp        hp     drat       wt     qsec       vs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 19.58558 6.000002 194.8060  92.61001 4.844497 3.379092 19.56865 1.015485</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 19.56685 6.000001 169.4454 109.91126 3.022096 3.353188 18.85639 1.382750</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 20.80468 6.000001 207.7104  86.17607 3.067737 3.289110 20.35202 1.377369</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           am     gear      carb</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -0.0154893 3.231171 2.7706322</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -0.3827502 3.925085 3.2694407</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.3773724 2.864488 0.9071218</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        mpg      cyl     disp       hp     drat       wt     qsec        vs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 19.03169 6.000000 119.0557 139.4817 4.017500 3.010677 15.79479 0.6295336</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 20.12029 5.999999 167.4833 110.7368 3.104020 3.164535 18.37902 1.1378033</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 19.92875 6.000001 143.3224 124.2525 4.158406 2.925977 16.62985 0.5468932</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           am     gear     carb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  0.3704679 5.378724 7.256326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -0.1378005 4.001483 3.544209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.4531090 4.712025 5.850481</span>
 </code></pre></div>
     </div>
   </div>
@@ -148,7 +148,7 @@ the data based on with column names kept.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
