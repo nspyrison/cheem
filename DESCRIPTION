@@ -42,7 +42,6 @@ Suggests:
     beepr,
     knitr,
     testthat (>= 3.0.0),
-    spelling,
     rmarkdown
 VignetteBuilder: knitr
 Encoding: UTF-8
