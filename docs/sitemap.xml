@@ -4,6 +4,9 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/LICENSE-text.html</loc>
+  </url>
+  <url>
     <loc>/articles/getting-started-with-cheem.html</loc>
   </url>
   <url>
@@ -16,13 +19,13 @@
     <loc>/index.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
     <loc>/news/index.html</loc>
   </url>
   <url>
     <loc>/reference/amesHousing2018.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ames_rf_pred.html</loc>
   </url>
   <url>
     <loc>/reference/as_logical_index.html</loc>
@@ -43,7 +46,13 @@
     <loc>/reference/chocolates.html</loc>
   </url>
   <url>
+    <loc>/reference/chocolates_svm_pred.html</loc>
+  </url>
+  <url>
     <loc>/reference/color_scale_of.html</loc>
+  </url>
+  <url>
+    <loc>/reference/contains_nonnumeric.html</loc>
   </url>
   <url>
     <loc>/reference/default_rf.html</loc>
@@ -62,6 +71,9 @@
   </url>
   <url>
     <loc>/reference/global_view_df_1layer.html</loc>
+  </url>
+  <url>
+    <loc>/reference/global_view_legwork.html</loc>
   </url>
   <url>
     <loc>/reference/ifDev.html</loc>
@@ -94,10 +106,16 @@
     <loc>/reference/manip_var_of_attr_df.html</loc>
   </url>
   <url>
+    <loc>/reference/model_performance.html</loc>
+  </url>
+  <url>
     <loc>/reference/model_performance_df.html</loc>
   </url>
   <url>
     <loc>/reference/model_unified.object.html</loc>
+  </url>
+  <url>
+    <loc>/reference/penguin_xgb_pred.html</loc>
   </url>
   <url>
     <loc>/reference/print.model_unified.html</loc>
@@ -131,6 +149,15 @@
   </url>
   <url>
     <loc>/reference/set_reference_dataset.html</loc>
+  </url>
+  <url>
+    <loc>/reference/subset_cheem.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sug_basis.html</loc>
+  </url>
+  <url>
+    <loc>/reference/sug_manip_var.html</loc>
   </url>
   <url>
     <loc>/reference/treeshap.html</loc>

@@ -39,7 +39,15 @@ vignettes/*.pdf
 .Renviron
 
 /doc/
+/docs/
 /Meta/
+doc/
+docs/
+Meta/
+doc/*
+docs/*
+Meta/*
+
 *.model
 lightgbm.model
 

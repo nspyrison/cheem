@@ -18,7 +18,7 @@ and attribution- spaces. Typically consumed directly by shiny app."><!-- mathjax
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -73,15 +73,6 @@ and attribution- spaces. Typically consumed directly by shiny app.</p>
 <span>  height_px <span class="op">=</span> <span class="fl">480</span>,</span>
 <span>  width_px <span class="op">=</span> <span class="fl">1440</span>,</span>
 <span>  as_ggplot <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">global_view_subplots</span><span class="op">(</span></span>
-<span>  <span class="va">cheem_ls</span>,</span>
-<span>  primary_obs <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  comparison_obs <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"default"</span>, <span class="st">"residual"</span>, <span class="st">"log_maha.data"</span>, <span class="st">"cor_attr_proj.y"</span><span class="op">)</span>,</span>
-<span>  height_px <span class="op">=</span> <span class="fl">480</span>,</span>
-<span>  width_px <span class="op">=</span> <span class="fl">1440</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -111,12 +102,12 @@ for regression.</p></dd>
 
 <dt>height_px</dt>
 <dd><p>The height in pixels of the returned <code>plotly</code> plot.
-Defaults to 480.</p></dd>
+Defaults to 480, does nothing when <code>as_ggplot</code> is TRUE.</p></dd>
 
 
 <dt>width_px</dt>
 <dd><p>The width in pixels of the returned <code>plotly</code> plot.
-Defaults to 1440.</p></dd>
+Defaults to 1440, does nothing when <code>as_ggplot</code> is TRUE.</p></dd>
 
 
 <dt>as_ggplot</dt>
@@ -133,7 +124,9 @@ first two components of the basis of the data- and attribution- spaces.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>Other cheem consumers: 
+    <div class="dont-index"><p><code><a href="run_app.html">run_app()</a></code></p>
+<p>Other cheem consumers: 
+<code><a href="global_view_legwork.html">global_view_legwork</a>()</code>,
 <code><a href="radial_cheem_tour.html">radial_cheem_tour</a>()</code>,
 <code><a href="run_app.html">run_app</a>()</code></p></div>
     </div>
@@ -148,24 +141,20 @@ first two components of the basis of the data- and attribution- spaces.</p>
 <span class="r-in"><span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SalePrice</span></span></span>
 <span class="r-in"><span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">SubclassMS</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Model, explanation, cheem list, global view:</span></span></span>
-<span class="r-in"><span><span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="default_rf.html">default_rf</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">shap_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="attr_df_treeshap.html">attr_df_treeshap</a></span><span class="op">(</span><span class="va">rf_fit</span>, <span class="va">X</span>, noisy <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">this_ls</span> <span class="op">&lt;-</span> <span class="fu"><a href="cheem_ls.html">cheem_ls</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, class <span class="op">=</span> <span class="va">clas</span>,</span></span>
-<span class="r-in"><span>                     model <span class="op">=</span> <span class="va">rf_fit</span>,</span></span>
-<span class="r-in"><span>                     attr_df <span class="op">=</span> <span class="va">shap_df</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Visualize</span></span></span>
+<span class="r-in"><span><span class="co">## global_view()</span></span></span>
+<span class="r-in"><span><span class="va">ames_rf_chm</span> <span class="op">&lt;-</span> <span class="fu"><a href="cheem_ls.html">cheem_ls</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">ames_rf_shap</span>, <span class="va">ames_rf_pred</span>, <span class="va">clas</span>,</span></span>
+<span class="r-in"><span>                        label <span class="op">=</span> <span class="st">"North Ames, RF, SHAP"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">this_ls</span><span class="op">)</span>                   <span class="co">## uses ggplot facets %&gt;% plotly</span></span></span>
-<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">this_ls</span>, as_ggplot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co">## early return of ggplot</span></span></span>
-<span class="r-in"><span>  <span class="fu">global_view_subplots</span><span class="op">(</span><span class="va">this_ls</span><span class="op">)</span>          <span class="co">## uses plotly::subplots</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span>  <span class="fu">cheem</span><span class="fu">:::</span><span class="fu"><a href="global_view_legwork.html">global_view_legwork</a></span><span class="op">(</span><span class="va">ames_rf_chm</span><span class="op">)</span> <span class="co">## most of the way there</span></span></span>
+<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">ames_rf_chm</span>, as_ggplot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co">## early return of ggplot</span></span></span>
+<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">ames_rf_chm</span><span class="op">)</span> <span class="co">## uses ggplot facets %&gt;% plotly</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co">## Different color mappings, especially for regression</span></span></span>
-<span class="r-in"><span>  <span class="fu">global_view_subplots</span><span class="op">(</span><span class="va">this_ls</span>, color <span class="op">=</span> <span class="st">"residual"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu">global_view_subplots</span><span class="op">(</span><span class="va">this_ls</span>, color <span class="op">=</span> <span class="st">"log_maha.data"</span><span class="op">)</span> </span></span>
-<span class="r-in"><span>  <span class="fu">global_view_subplots</span><span class="op">(</span><span class="va">this_ls</span>, color <span class="op">=</span> <span class="st">"cor_attr_proj.y"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">ames_rf_chm</span>, color <span class="op">=</span> <span class="st">"residual"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">ames_rf_chm</span>, color <span class="op">=</span> <span class="st">"log_maha.data"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">global_view</span><span class="op">(</span><span class="va">ames_rf_chm</span>, color <span class="op">=</span> <span class="st">"cor_attr_proj.y"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co">## Also consumed by: ?run_app()</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -180,7 +169,7 @@ first two components of the basis of the data- and attribution- spaces.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
