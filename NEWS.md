@@ -1,7 +1,7 @@
 
 # v0.3.0 (CRAN)
 
-- Rebase all functions from expecting a unified treeshap::shap() to generalized
+- Rebase all functions from expecting a unified `treeshap::shap()` to generalized
 data frame or matrix format for arbitrary attribution spaces.
 - Rework vignette and examples to reflect this change.
 - Added precomputed predictions and attributions for the Ames, Chocolates, and Penguins datasets. This allows users to run attribution-agnostic functions without dependencies.

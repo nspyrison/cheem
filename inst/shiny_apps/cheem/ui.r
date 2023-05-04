@@ -32,7 +32,7 @@ chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
 ## Create contextLine; App name, version, and sys date.
 .wd         <- getwd()
 .regex      <- regexpr("\\/[^\\/]*$", .wd)
-.local_path <- gsub("_", " ", substr(.wd, .regex + 1L, nchar(.wd)))
+.local_path <- gsub("_", " ", substr(.wd, .regex + 1, nchar(.wd)))
 .title      <- paste0("cheem --- ", .local_path)
 contextLine <- paste0(.local_path, " app, ",
                       " --- cheem (v", packageVersion("cheem"), ")",
@@ -59,7 +59,6 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
       column(6, tableOutput("perf_df"))
     ),
     htmlOutput("desc_rows"),
-    p("- fit a modest randomForest model, ")
   ),
   tags$hr(style = "border-color: grey;"),
   

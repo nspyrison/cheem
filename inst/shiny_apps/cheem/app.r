@@ -2,7 +2,7 @@
 #' @author Nicholas Spyrison
 #' Aug 2021
 source("ui.r", local = TRUE, encoding = "utf-8")
-do_dev_cat <- TRUE
+do_dev_cat <- FALSE
 dev_cat <- function(msg, verbose = do_dev_cat){
   if(do_dev_cat)
     cat(paste0(msg, "\n"))
