@@ -55,14 +55,10 @@ We started by looking at the model-agnostic local explanation _tree SHAP_  appli
 
 ## Package build workflow
 
-- Rcpp::compileAttributes() ## Rcpp changes
-- Kmisc::registerFunctions(prefix = "") ## Rcpp changes
 - devtools::document() ## documentation changes
 - pkgdown::build_site() ## packagedown site changes (documentation, vignettes, readme)
-- rstudioapi::restartSession() ## Install wants reset ?
 - message("Manually do: Build tab > Install and Restart") ## build package
-- #devtools::check_rhub() ## check package
-- devtools::check() ## check package
+- rhub::check_for_cran() ## check package
 - devtools::submit_cran() ## Submit to CRAN
 
 

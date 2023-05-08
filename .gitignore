@@ -46,3 +46,5 @@ Meta
 lightgbm.model
 
 inst/shiny_apps/cheem_initial/rsconnect/*
+/doc/
+/Meta/
