@@ -205,7 +205,7 @@ __cheem__ is agnostic to model or local explanation, but requires a model and lo
 
 __shapviz__ is being actively maintained and is hosted on CRAN. It is compatible with H2O, lgb, and xgb models.
 
-https://github.com/mayer79/shapviz
+https://github.com/ModelOriented/shapviz
 
 ```{r, eval=FALSE, echo=TRUE}
 if(!require(shapviz)) install.packages("shapviz")
