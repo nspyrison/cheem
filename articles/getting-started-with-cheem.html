@@ -4,900 +4,427 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="cheem">
 <title>Getting started with cheem • cheem</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
-<script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Getting started with cheem">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting started with cheem">
 <meta property="og:description" content="cheem">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-<body data-spy="scroll" data-target="#toc">
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <div class="container template-article">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
-      </span>
-    </div>
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">cheem</a>
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="../reference/index.html">Reference</a>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
+
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item">
+  <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/getting-started-with-cheem.html">Getting started with cheem</a>
-    </li>
-  </ul>
-</li>
-<li>
-  <a href="../news/index.html">Changelog</a>
-</li>
-      </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/nspyrison/cheem/" class="external-link">
-    <span class="fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
-      </ul>
-</div>
-<!--/.nav-collapse -->
+<li class="active nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/getting-started-with-cheem.html">Getting started with cheem</a>
   </div>
-<!--/.container -->
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
+</li>
+      </ul>
+<form class="form-inline my-2 my-lg-0" role="search">
+        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
+</form>
+
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/nspyrison/cheem/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
-<!--/.navbar -->
 
-      
+    
+  </div>
+</nav><div class="container template-article">
 
-      </header><script src="getting-started-with-cheem_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Getting started with cheem</h1>
-                        <h4 data-toc-skip class="author">Nicholas Spyrison</h4>
+
+
+
+<div class="row">
+  <main id="main" class="col-md-9"><div class="page-header">
+      <img src="" class="logo" alt=""><h1>Getting started with cheem</h1>
+                        <h4 data-toc-skip class="author">Nicholas
+Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2022-02-27</h4>
+            <h4 data-toc-skip class="date">2023-10-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
-      <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
-
+      <div class="d-none name"><code>getting-started-with-cheem.Rmd</code></div>
     </div>
 
     
     
 <!-- #Example vignette: 
 https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-naniar.Rmd -->
-<p><strong>TL;DR</strong>, you can jump straight into the visuals and application with <code><a href="../reference/run_app.html">cheem::run_app()</a></code>, but we suggest you read the introduction to get situated with the context first.</p>
+<p><strong>TL;DR</strong>, you can jump straight into the visuals and
+application with <code><a href="../reference/run_app.html">cheem::run_app()</a></code>, but we suggest you read
+the introduction to get situated with the context first.</p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Non-linear models regularly result in more accurate prediction than their linear counterparts. However the number and complexity of the terms in the model make them more opaque to the interpretability of the terms and correspondingly our ability to understand how features (variables or predictors) influence predictions. The emergence of eXplainable Artificial Intelligence (XAI) attempts to bring interpretability back to models.</p>
-<p>One part of this is with the use of <em>local explanations</em>. Local explanations approximate the feature importance in the vicinity of one instance (observation).</p>
-<div class="figure" style="text-align: center">
-<img src="../inst/shiny_apps/cheem_initial/www/lime_nonlinear.png" alt="Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From _Ribiro, M. et. all. (2017). Why should I trust you?_"><p class="caption">
-Illustration of non-linear classification boundary. The use of local explanations approximates the feature importance in the vicinity of one instance. This allow us to understand a change in which features would result in a red plus being classified as a blue circle. From <em>Ribiro, M. et. all. (2017). Why should I trust you?</em>
-</p>
-</div>
-<p>Should we trust the purposed feature importance in the vicinity of a misclassified or an extreme residual? An analyst may want to explore the support feature contributions where the explanations makes sense or may be completely unreliable. This is the type of analysis visually explored in <strong>cheem</strong>.</p>
-<p>We use the normalized linear-feature attribution as a basis and explore the support of features that confirm this explanation what under which contributions this explanation does not hold. A data visualization <em>tour</em> animates linear projection-embeddings over small changes in the basis. The package <strong>spinifex</strong> facilitates radial, manual tours which vary the contribution of a select feature. By using a radial tour we test the support of the features.</p>
-<p>While this framework would for any non-linear model and compatible local explanation we’ll illustrate with <strong>randomForest</strong> models and the tree SHAP local explanation with <strong>treeshap</strong> (available on GitHub).</p>
+<p>Non-linear models regularly result in more accurate prediction than
+their linear counterparts. However, the number and complexity of their
+terms make them more opaque to the interpretability. The our ability to
+understand how features (variables or predictors) influence predictions
+is important to a wide range of audiences. Attempts to bring
+interpretability to such complex models is an important aspect of
+eXplainable Artificial Intelligence (XAI).</p>
+<p><em>Local explanations</em> are one such tool used in XAI. They
+attempt to approximate the feature importance in the vicinity of one
+instance (observation). That is to say that they give an approximation
+of linear terms at the position of one in-sample or out-of-sample
+observation.</p>
+<p>If the analyst can explore how models lead to bad predictions it can
+suggest insight into issues of the data or suggest models that may be
+more robust to misclassified or extreme residuals. An analyst may want
+to explore the support feature contributions where the explanations
+makes sense or may be completely unreliable. We purpose this sort of
+analysis as conducted with interactive graphics in the analysis and R
+package titled <strong>cheem</strong>.</p>
 </div>
 <div class="section level2">
 <h2 id="preprocessing">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing"></a>
 </h2>
-<p>The first thing we’ll need are data and tree based model. We’ll use a wrapper function for a <strong>randomForest</strong> modest with modest hyperparameters. This will avoid overfitting and help mitigate the runtime of tree SHAP. <strong>treeshap</strong> and <strong>cheem</strong> are compatible with tree based models from <strong>gbm</strong>, <strong>lightgbm</strong>, <strong>randomForest</strong>, <strong>ranger</strong>, and <strong>xgboost</strong>.</p>
+<p>This framework is broadly applicable for any model and compatible
+local explanation. We will illustrate with
+<strong>xgboost</strong>::xgboost() model (xgb) and the tree SHAP local
+explanation with <strong>shapviz</strong>::shapviz(). The model attempts
+to predict housing sales price from 11 predictors for 338 sale events
+from one neighborhood in the 2018 Ames data.</p>
+<p>The first things we need are the prediction and a local explanation
+(or other embedded space). Here we create a xgb model, create
+predictions, and find the SHAP values of each observation.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/spinifex/" class="external-link">spinifex</a></span><span class="op">)</span>
-
-<span class="co">## Classification case, Penguins data</span>
-<span class="va">X</span>           <span class="op">&lt;-</span> <span class="va">penguins_na.rm</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>
-<span class="va">clas</span>        <span class="op">&lt;-</span> <span class="va">penguins_na.rm</span><span class="op">$</span><span class="va">species</span>
-<span class="va">Y</span>           <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">clas</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bl"</span>, <span class="st">"bd"</span>, <span class="st">"fl"</span>, <span class="st">"bm"</span><span class="op">)</span>
-
-<span class="co">## Create a random forest classifying penguin species</span>
-<span class="va">rf_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/default_rf.html">default_rf</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="co">## For other compatible tree based models see examples in:</span>
-<span class="kw">if</span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>
-  <span class="op">?</span><span class="va">is_randomForest</span></code></pre></div>
-<p>Next we need to extract the local explanation from each observation. Originally only tree SHAP is supported. Then we’ll prepare the information to be consumed by the cheem visuals.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">## Local attribution of all observations</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="co">#### !! This is expensive for complex models/data</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a>shap_df &lt;-<span class="st"> </span><span class="kw">attr_df_treeshap</span>(rf_fit, X, <span class="dt">verbose =</span> <span class="ot">FALSE</span>, <span class="dt">noisy =</span> <span class="ot">FALSE</span>)</span>
-<span id="cb2-4"><a href="#cb2-4"></a><span class="co">#&gt; </span></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="op">|</span><span class="dv">0</span><span class="op">%----|------|20%---</span><span class="er">|</span><span class="op">------</span><span class="er">|</span><span class="dv">40</span><span class="op">%---|------|60%---</span><span class="er">|</span><span class="op">------</span><span class="er">|</span><span class="dv">80</span><span class="op">%---|------|100%</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="co">#&gt; =---------------------------------------------------------------------- (0%)</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a></span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="er">=</span><span class="op">----------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">0</span>%)</span>
-<span id="cb2-9"><a href="#cb2-9"></a></span>
-<span id="cb2-10"><a href="#cb2-10"></a>=<span class="op">----------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">0</span>%)</span>
-<span id="cb2-11"><a href="#cb2-11"></a></span>
-<span id="cb2-12"><a href="#cb2-12"></a>=<span class="op">----------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">0</span>%)</span>
-<span id="cb2-13"><a href="#cb2-13"></a></span>
-<span id="cb2-14"><a href="#cb2-14"></a>=<span class="op">----------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">1</span>%)</span>
-<span id="cb2-15"><a href="#cb2-15"></a></span>
-<span id="cb2-16"><a href="#cb2-16"></a><span class="op">==---------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">1</span>%)</span>
-<span id="cb2-17"><a href="#cb2-17"></a></span>
-<span id="cb2-18"><a href="#cb2-18"></a><span class="op">==---------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">1</span>%)</span>
-<span id="cb2-19"><a href="#cb2-19"></a></span>
-<span id="cb2-20"><a href="#cb2-20"></a><span class="op">==---------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">2</span>%)</span>
-<span id="cb2-21"><a href="#cb2-21"></a></span>
-<span id="cb2-22"><a href="#cb2-22"></a><span class="op">==---------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">2</span>%)</span>
-<span id="cb2-23"><a href="#cb2-23"></a></span>
-<span id="cb2-24"><a href="#cb2-24"></a><span class="op">==---------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">2</span>%)</span>
-<span id="cb2-25"><a href="#cb2-25"></a></span>
-<span id="cb2-26"><a href="#cb2-26"></a><span class="op">==</span><span class="er">=</span><span class="op">--------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">3</span>%)</span>
-<span id="cb2-27"><a href="#cb2-27"></a></span>
-<span id="cb2-28"><a href="#cb2-28"></a><span class="op">==</span><span class="er">=</span><span class="op">--------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">3</span>%)</span>
-<span id="cb2-29"><a href="#cb2-29"></a></span>
-<span id="cb2-30"><a href="#cb2-30"></a><span class="op">==</span><span class="er">=</span><span class="op">--------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">3</span>%)</span>
-<span id="cb2-31"><a href="#cb2-31"></a></span>
-<span id="cb2-32"><a href="#cb2-32"></a><span class="op">==</span><span class="er">=</span><span class="op">--------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">3</span>%)</span>
-<span id="cb2-33"><a href="#cb2-33"></a></span>
-<span id="cb2-34"><a href="#cb2-34"></a><span class="op">==</span><span class="er">=</span><span class="op">--------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">4</span>%)</span>
-<span id="cb2-35"><a href="#cb2-35"></a></span>
-<span id="cb2-36"><a href="#cb2-36"></a><span class="op">==</span><span class="er">==</span><span class="op">-------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">4</span>%)</span>
-<span id="cb2-37"><a href="#cb2-37"></a></span>
-<span id="cb2-38"><a href="#cb2-38"></a><span class="op">==</span><span class="er">==</span><span class="op">-------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">4</span>%)</span>
-<span id="cb2-39"><a href="#cb2-39"></a></span>
-<span id="cb2-40"><a href="#cb2-40"></a><span class="op">==</span><span class="er">==</span><span class="op">-------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">5</span>%)</span>
-<span id="cb2-41"><a href="#cb2-41"></a></span>
-<span id="cb2-42"><a href="#cb2-42"></a><span class="op">==</span><span class="er">==</span><span class="op">-------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">5</span>%)</span>
-<span id="cb2-43"><a href="#cb2-43"></a></span>
-<span id="cb2-44"><a href="#cb2-44"></a><span class="op">==</span><span class="er">==</span><span class="op">-------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">5</span>%)</span>
-<span id="cb2-45"><a href="#cb2-45"></a></span>
-<span id="cb2-46"><a href="#cb2-46"></a><span class="op">==</span><span class="er">===</span><span class="op">------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">6</span>%)</span>
-<span id="cb2-47"><a href="#cb2-47"></a></span>
-<span id="cb2-48"><a href="#cb2-48"></a><span class="op">==</span><span class="er">===</span><span class="op">------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">6</span>%)</span>
-<span id="cb2-49"><a href="#cb2-49"></a></span>
-<span id="cb2-50"><a href="#cb2-50"></a><span class="op">==</span><span class="er">===</span><span class="op">------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">6</span>%)</span>
-<span id="cb2-51"><a href="#cb2-51"></a></span>
-<span id="cb2-52"><a href="#cb2-52"></a><span class="op">==</span><span class="er">===</span><span class="op">------------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">6</span>%)</span>
-<span id="cb2-53"><a href="#cb2-53"></a></span>
-<span id="cb2-54"><a href="#cb2-54"></a><span class="op">==</span><span class="er">====</span><span class="op">-----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">7</span>%)</span>
-<span id="cb2-55"><a href="#cb2-55"></a></span>
-<span id="cb2-56"><a href="#cb2-56"></a><span class="op">==</span><span class="er">====</span><span class="op">-----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">7</span>%)</span>
-<span id="cb2-57"><a href="#cb2-57"></a></span>
-<span id="cb2-58"><a href="#cb2-58"></a><span class="op">==</span><span class="er">====</span><span class="op">-----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">7</span>%)</span>
-<span id="cb2-59"><a href="#cb2-59"></a></span>
-<span id="cb2-60"><a href="#cb2-60"></a><span class="op">==</span><span class="er">====</span><span class="op">-----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">8</span>%)</span>
-<span id="cb2-61"><a href="#cb2-61"></a></span>
-<span id="cb2-62"><a href="#cb2-62"></a><span class="op">==</span><span class="er">====</span><span class="op">-----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">8</span>%)</span>
-<span id="cb2-63"><a href="#cb2-63"></a></span>
-<span id="cb2-64"><a href="#cb2-64"></a><span class="op">==</span><span class="er">=====</span><span class="op">----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">8</span>%)</span>
-<span id="cb2-65"><a href="#cb2-65"></a></span>
-<span id="cb2-66"><a href="#cb2-66"></a><span class="op">==</span><span class="er">=====</span><span class="op">----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">9</span>%)</span>
-<span id="cb2-67"><a href="#cb2-67"></a></span>
-<span id="cb2-68"><a href="#cb2-68"></a><span class="op">==</span><span class="er">=====</span><span class="op">----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">9</span>%)</span>
-<span id="cb2-69"><a href="#cb2-69"></a></span>
-<span id="cb2-70"><a href="#cb2-70"></a><span class="op">==</span><span class="er">=====</span><span class="op">----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">9</span>%)</span>
-<span id="cb2-71"><a href="#cb2-71"></a></span>
-<span id="cb2-72"><a href="#cb2-72"></a><span class="op">==</span><span class="er">=====</span><span class="op">----------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">9</span>%)</span>
-<span id="cb2-73"><a href="#cb2-73"></a></span>
-<span id="cb2-74"><a href="#cb2-74"></a><span class="op">==</span><span class="er">======</span><span class="op">---------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">10</span>%)</span>
-<span id="cb2-75"><a href="#cb2-75"></a></span>
-<span id="cb2-76"><a href="#cb2-76"></a><span class="op">==</span><span class="er">======</span><span class="op">---------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">10</span>%)</span>
-<span id="cb2-77"><a href="#cb2-77"></a></span>
-<span id="cb2-78"><a href="#cb2-78"></a><span class="op">==</span><span class="er">======</span><span class="op">---------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">10</span>%)</span>
-<span id="cb2-79"><a href="#cb2-79"></a></span>
-<span id="cb2-80"><a href="#cb2-80"></a><span class="op">==</span><span class="er">======</span><span class="op">---------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">11</span>%)</span>
-<span id="cb2-81"><a href="#cb2-81"></a></span>
-<span id="cb2-82"><a href="#cb2-82"></a><span class="op">==</span><span class="er">======</span><span class="op">---------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">11</span>%)</span>
-<span id="cb2-83"><a href="#cb2-83"></a></span>
-<span id="cb2-84"><a href="#cb2-84"></a><span class="op">==</span><span class="er">=======</span><span class="op">--------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">11</span>%)</span>
-<span id="cb2-85"><a href="#cb2-85"></a></span>
-<span id="cb2-86"><a href="#cb2-86"></a><span class="op">==</span><span class="er">=======</span><span class="op">--------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">12</span>%)</span>
-<span id="cb2-87"><a href="#cb2-87"></a></span>
-<span id="cb2-88"><a href="#cb2-88"></a><span class="op">==</span><span class="er">=======</span><span class="op">--------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">12</span>%)</span>
-<span id="cb2-89"><a href="#cb2-89"></a></span>
-<span id="cb2-90"><a href="#cb2-90"></a><span class="op">==</span><span class="er">=======</span><span class="op">--------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">12</span>%)</span>
-<span id="cb2-91"><a href="#cb2-91"></a></span>
-<span id="cb2-92"><a href="#cb2-92"></a><span class="op">==</span><span class="er">========</span><span class="op">-------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">12</span>%)</span>
-<span id="cb2-93"><a href="#cb2-93"></a></span>
-<span id="cb2-94"><a href="#cb2-94"></a><span class="op">==</span><span class="er">========</span><span class="op">-------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">13</span>%)</span>
-<span id="cb2-95"><a href="#cb2-95"></a></span>
-<span id="cb2-96"><a href="#cb2-96"></a><span class="op">==</span><span class="er">========</span><span class="op">-------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">13</span>%)</span>
-<span id="cb2-97"><a href="#cb2-97"></a></span>
-<span id="cb2-98"><a href="#cb2-98"></a><span class="op">==</span><span class="er">========</span><span class="op">-------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">13</span>%)</span>
-<span id="cb2-99"><a href="#cb2-99"></a></span>
-<span id="cb2-100"><a href="#cb2-100"></a><span class="op">==</span><span class="er">========</span><span class="op">-------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">14</span>%)</span>
-<span id="cb2-101"><a href="#cb2-101"></a></span>
-<span id="cb2-102"><a href="#cb2-102"></a><span class="op">==</span><span class="er">=========</span><span class="op">------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">14</span>%)</span>
-<span id="cb2-103"><a href="#cb2-103"></a></span>
-<span id="cb2-104"><a href="#cb2-104"></a><span class="op">==</span><span class="er">=========</span><span class="op">------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">14</span>%)</span>
-<span id="cb2-105"><a href="#cb2-105"></a></span>
-<span id="cb2-106"><a href="#cb2-106"></a><span class="op">==</span><span class="er">=========</span><span class="op">------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">15</span>%)</span>
-<span id="cb2-107"><a href="#cb2-107"></a></span>
-<span id="cb2-108"><a href="#cb2-108"></a><span class="op">==</span><span class="er">=========</span><span class="op">------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">15</span>%)</span>
-<span id="cb2-109"><a href="#cb2-109"></a></span>
-<span id="cb2-110"><a href="#cb2-110"></a><span class="op">==</span><span class="er">=========</span><span class="op">------------------------------------------------------------</span><span class="st"> </span>(<span class="dv">15</span>%)</span>
-<span id="cb2-111"><a href="#cb2-111"></a></span>
-<span id="cb2-112"><a href="#cb2-112"></a><span class="op">==</span><span class="er">==========</span><span class="op">-----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">15</span>%)</span>
-<span id="cb2-113"><a href="#cb2-113"></a></span>
-<span id="cb2-114"><a href="#cb2-114"></a><span class="op">==</span><span class="er">==========</span><span class="op">-----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">16</span>%)</span>
-<span id="cb2-115"><a href="#cb2-115"></a></span>
-<span id="cb2-116"><a href="#cb2-116"></a><span class="op">==</span><span class="er">==========</span><span class="op">-----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">16</span>%)</span>
-<span id="cb2-117"><a href="#cb2-117"></a></span>
-<span id="cb2-118"><a href="#cb2-118"></a><span class="op">==</span><span class="er">==========</span><span class="op">-----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">16</span>%)</span>
-<span id="cb2-119"><a href="#cb2-119"></a></span>
-<span id="cb2-120"><a href="#cb2-120"></a><span class="op">==</span><span class="er">==========</span><span class="op">-----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">17</span>%)</span>
-<span id="cb2-121"><a href="#cb2-121"></a></span>
-<span id="cb2-122"><a href="#cb2-122"></a><span class="op">==</span><span class="er">===========</span><span class="op">----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">17</span>%)</span>
-<span id="cb2-123"><a href="#cb2-123"></a></span>
-<span id="cb2-124"><a href="#cb2-124"></a><span class="op">==</span><span class="er">===========</span><span class="op">----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">17</span>%)</span>
-<span id="cb2-125"><a href="#cb2-125"></a></span>
-<span id="cb2-126"><a href="#cb2-126"></a><span class="op">==</span><span class="er">===========</span><span class="op">----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">18</span>%)</span>
-<span id="cb2-127"><a href="#cb2-127"></a></span>
-<span id="cb2-128"><a href="#cb2-128"></a><span class="op">==</span><span class="er">===========</span><span class="op">----------------------------------------------------------</span><span class="st"> </span>(<span class="dv">18</span>%)</span>
-<span id="cb2-129"><a href="#cb2-129"></a></span>
-<span id="cb2-130"><a href="#cb2-130"></a><span class="op">==</span><span class="er">============</span><span class="op">---------------------------------------------------------</span><span class="st"> </span>(<span class="dv">18</span>%)</span>
-<span id="cb2-131"><a href="#cb2-131"></a></span>
-<span id="cb2-132"><a href="#cb2-132"></a><span class="op">==</span><span class="er">============</span><span class="op">---------------------------------------------------------</span><span class="st"> </span>(<span class="dv">18</span>%)</span>
-<span id="cb2-133"><a href="#cb2-133"></a></span>
-<span id="cb2-134"><a href="#cb2-134"></a><span class="op">==</span><span class="er">============</span><span class="op">---------------------------------------------------------</span><span class="st"> </span>(<span class="dv">19</span>%)</span>
-<span id="cb2-135"><a href="#cb2-135"></a></span>
-<span id="cb2-136"><a href="#cb2-136"></a><span class="op">==</span><span class="er">============</span><span class="op">---------------------------------------------------------</span><span class="st"> </span>(<span class="dv">19</span>%)</span>
-<span id="cb2-137"><a href="#cb2-137"></a></span>
-<span id="cb2-138"><a href="#cb2-138"></a><span class="op">==</span><span class="er">============</span><span class="op">---------------------------------------------------------</span><span class="st"> </span>(<span class="dv">19</span>%)</span>
-<span id="cb2-139"><a href="#cb2-139"></a></span>
-<span id="cb2-140"><a href="#cb2-140"></a><span class="op">==</span><span class="er">=============</span><span class="op">--------------------------------------------------------</span><span class="st"> </span>(<span class="dv">20</span>%)</span>
-<span id="cb2-141"><a href="#cb2-141"></a></span>
-<span id="cb2-142"><a href="#cb2-142"></a><span class="op">==</span><span class="er">=============</span><span class="op">--------------------------------------------------------</span><span class="st"> </span>(<span class="dv">20</span>%)</span>
-<span id="cb2-143"><a href="#cb2-143"></a></span>
-<span id="cb2-144"><a href="#cb2-144"></a><span class="op">==</span><span class="er">=============</span><span class="op">--------------------------------------------------------</span><span class="st"> </span>(<span class="dv">20</span>%)</span>
-<span id="cb2-145"><a href="#cb2-145"></a></span>
-<span id="cb2-146"><a href="#cb2-146"></a><span class="op">==</span><span class="er">=============</span><span class="op">--------------------------------------------------------</span><span class="st"> </span>(<span class="dv">21</span>%)</span>
-<span id="cb2-147"><a href="#cb2-147"></a></span>
-<span id="cb2-148"><a href="#cb2-148"></a><span class="op">==</span><span class="er">=============</span><span class="op">--------------------------------------------------------</span><span class="st"> </span>(<span class="dv">21</span>%)</span>
-<span id="cb2-149"><a href="#cb2-149"></a></span>
-<span id="cb2-150"><a href="#cb2-150"></a><span class="op">==</span><span class="er">==============</span><span class="op">-------------------------------------------------------</span><span class="st"> </span>(<span class="dv">21</span>%)</span>
-<span id="cb2-151"><a href="#cb2-151"></a></span>
-<span id="cb2-152"><a href="#cb2-152"></a><span class="op">==</span><span class="er">==============</span><span class="op">-------------------------------------------------------</span><span class="st"> </span>(<span class="dv">21</span>%)</span>
-<span id="cb2-153"><a href="#cb2-153"></a></span>
-<span id="cb2-154"><a href="#cb2-154"></a><span class="op">==</span><span class="er">==============</span><span class="op">-------------------------------------------------------</span><span class="st"> </span>(<span class="dv">22</span>%)</span>
-<span id="cb2-155"><a href="#cb2-155"></a></span>
-<span id="cb2-156"><a href="#cb2-156"></a><span class="op">==</span><span class="er">==============</span><span class="op">-------------------------------------------------------</span><span class="st"> </span>(<span class="dv">22</span>%)</span>
-<span id="cb2-157"><a href="#cb2-157"></a></span>
-<span id="cb2-158"><a href="#cb2-158"></a><span class="op">==</span><span class="er">==============</span><span class="op">-------------------------------------------------------</span><span class="st"> </span>(<span class="dv">22</span>%)</span>
-<span id="cb2-159"><a href="#cb2-159"></a></span>
-<span id="cb2-160"><a href="#cb2-160"></a><span class="op">==</span><span class="er">===============</span><span class="op">------------------------------------------------------</span><span class="st"> </span>(<span class="dv">23</span>%)</span>
-<span id="cb2-161"><a href="#cb2-161"></a></span>
-<span id="cb2-162"><a href="#cb2-162"></a><span class="op">==</span><span class="er">===============</span><span class="op">------------------------------------------------------</span><span class="st"> </span>(<span class="dv">23</span>%)</span>
-<span id="cb2-163"><a href="#cb2-163"></a></span>
-<span id="cb2-164"><a href="#cb2-164"></a><span class="op">==</span><span class="er">===============</span><span class="op">------------------------------------------------------</span><span class="st"> </span>(<span class="dv">23</span>%)</span>
-<span id="cb2-165"><a href="#cb2-165"></a></span>
-<span id="cb2-166"><a href="#cb2-166"></a><span class="op">==</span><span class="er">===============</span><span class="op">------------------------------------------------------</span><span class="st"> </span>(<span class="dv">24</span>%)</span>
-<span id="cb2-167"><a href="#cb2-167"></a></span>
-<span id="cb2-168"><a href="#cb2-168"></a><span class="op">==</span><span class="er">================</span><span class="op">-----------------------------------------------------</span><span class="st"> </span>(<span class="dv">24</span>%)</span>
-<span id="cb2-169"><a href="#cb2-169"></a></span>
-<span id="cb2-170"><a href="#cb2-170"></a><span class="op">==</span><span class="er">================</span><span class="op">-----------------------------------------------------</span><span class="st"> </span>(<span class="dv">24</span>%)</span>
-<span id="cb2-171"><a href="#cb2-171"></a></span>
-<span id="cb2-172"><a href="#cb2-172"></a><span class="op">==</span><span class="er">================</span><span class="op">-----------------------------------------------------</span><span class="st"> </span>(<span class="dv">24</span>%)</span>
-<span id="cb2-173"><a href="#cb2-173"></a></span>
-<span id="cb2-174"><a href="#cb2-174"></a><span class="op">==</span><span class="er">================</span><span class="op">-----------------------------------------------------</span><span class="st"> </span>(<span class="dv">25</span>%)</span>
-<span id="cb2-175"><a href="#cb2-175"></a></span>
-<span id="cb2-176"><a href="#cb2-176"></a><span class="op">==</span><span class="er">================</span><span class="op">-----------------------------------------------------</span><span class="st"> </span>(<span class="dv">25</span>%)</span>
-<span id="cb2-177"><a href="#cb2-177"></a></span>
-<span id="cb2-178"><a href="#cb2-178"></a><span class="op">==</span><span class="er">=================</span><span class="op">----------------------------------------------------</span><span class="st"> </span>(<span class="dv">25</span>%)</span>
-<span id="cb2-179"><a href="#cb2-179"></a></span>
-<span id="cb2-180"><a href="#cb2-180"></a><span class="op">==</span><span class="er">=================</span><span class="op">----------------------------------------------------</span><span class="st"> </span>(<span class="dv">26</span>%)</span>
-<span id="cb2-181"><a href="#cb2-181"></a></span>
-<span id="cb2-182"><a href="#cb2-182"></a><span class="op">==</span><span class="er">=================</span><span class="op">----------------------------------------------------</span><span class="st"> </span>(<span class="dv">26</span>%)</span>
-<span id="cb2-183"><a href="#cb2-183"></a></span>
-<span id="cb2-184"><a href="#cb2-184"></a><span class="op">==</span><span class="er">=================</span><span class="op">----------------------------------------------------</span><span class="st"> </span>(<span class="dv">26</span>%)</span>
-<span id="cb2-185"><a href="#cb2-185"></a></span>
-<span id="cb2-186"><a href="#cb2-186"></a><span class="op">==</span><span class="er">=================</span><span class="op">----------------------------------------------------</span><span class="st"> </span>(<span class="dv">27</span>%)</span>
-<span id="cb2-187"><a href="#cb2-187"></a></span>
-<span id="cb2-188"><a href="#cb2-188"></a><span class="op">==</span><span class="er">==================</span><span class="op">---------------------------------------------------</span><span class="st"> </span>(<span class="dv">27</span>%)</span>
-<span id="cb2-189"><a href="#cb2-189"></a></span>
-<span id="cb2-190"><a href="#cb2-190"></a><span class="op">==</span><span class="er">==================</span><span class="op">---------------------------------------------------</span><span class="st"> </span>(<span class="dv">27</span>%)</span>
-<span id="cb2-191"><a href="#cb2-191"></a></span>
-<span id="cb2-192"><a href="#cb2-192"></a><span class="op">==</span><span class="er">==================</span><span class="op">---------------------------------------------------</span><span class="st"> </span>(<span class="dv">27</span>%)</span>
-<span id="cb2-193"><a href="#cb2-193"></a></span>
-<span id="cb2-194"><a href="#cb2-194"></a><span class="op">==</span><span class="er">==================</span><span class="op">---------------------------------------------------</span><span class="st"> </span>(<span class="dv">28</span>%)</span>
-<span id="cb2-195"><a href="#cb2-195"></a></span>
-<span id="cb2-196"><a href="#cb2-196"></a><span class="op">==</span><span class="er">==================</span><span class="op">---------------------------------------------------</span><span class="st"> </span>(<span class="dv">28</span>%)</span>
-<span id="cb2-197"><a href="#cb2-197"></a></span>
-<span id="cb2-198"><a href="#cb2-198"></a><span class="op">==</span><span class="er">===================</span><span class="op">--------------------------------------------------</span><span class="st"> </span>(<span class="dv">28</span>%)</span>
-<span id="cb2-199"><a href="#cb2-199"></a></span>
-<span id="cb2-200"><a href="#cb2-200"></a><span class="op">==</span><span class="er">===================</span><span class="op">--------------------------------------------------</span><span class="st"> </span>(<span class="dv">29</span>%)</span>
-<span id="cb2-201"><a href="#cb2-201"></a></span>
-<span id="cb2-202"><a href="#cb2-202"></a><span class="op">==</span><span class="er">===================</span><span class="op">--------------------------------------------------</span><span class="st"> </span>(<span class="dv">29</span>%)</span>
-<span id="cb2-203"><a href="#cb2-203"></a></span>
-<span id="cb2-204"><a href="#cb2-204"></a><span class="op">==</span><span class="er">===================</span><span class="op">--------------------------------------------------</span><span class="st"> </span>(<span class="dv">29</span>%)</span>
-<span id="cb2-205"><a href="#cb2-205"></a></span>
-<span id="cb2-206"><a href="#cb2-206"></a><span class="op">==</span><span class="er">====================</span><span class="op">-------------------------------------------------</span><span class="st"> </span>(<span class="dv">30</span>%)</span>
-<span id="cb2-207"><a href="#cb2-207"></a></span>
-<span id="cb2-208"><a href="#cb2-208"></a><span class="op">==</span><span class="er">====================</span><span class="op">-------------------------------------------------</span><span class="st"> </span>(<span class="dv">30</span>%)</span>
-<span id="cb2-209"><a href="#cb2-209"></a></span>
-<span id="cb2-210"><a href="#cb2-210"></a><span class="op">==</span><span class="er">====================</span><span class="op">-------------------------------------------------</span><span class="st"> </span>(<span class="dv">30</span>%)</span>
-<span id="cb2-211"><a href="#cb2-211"></a></span>
-<span id="cb2-212"><a href="#cb2-212"></a><span class="op">==</span><span class="er">====================</span><span class="op">-------------------------------------------------</span><span class="st"> </span>(<span class="dv">30</span>%)</span>
-<span id="cb2-213"><a href="#cb2-213"></a></span>
-<span id="cb2-214"><a href="#cb2-214"></a><span class="op">==</span><span class="er">====================</span><span class="op">-------------------------------------------------</span><span class="st"> </span>(<span class="dv">31</span>%)</span>
-<span id="cb2-215"><a href="#cb2-215"></a></span>
-<span id="cb2-216"><a href="#cb2-216"></a><span class="op">==</span><span class="er">=====================</span><span class="op">------------------------------------------------</span><span class="st"> </span>(<span class="dv">31</span>%)</span>
-<span id="cb2-217"><a href="#cb2-217"></a></span>
-<span id="cb2-218"><a href="#cb2-218"></a><span class="op">==</span><span class="er">=====================</span><span class="op">------------------------------------------------</span><span class="st"> </span>(<span class="dv">31</span>%)</span>
-<span id="cb2-219"><a href="#cb2-219"></a></span>
-<span id="cb2-220"><a href="#cb2-220"></a><span class="op">==</span><span class="er">=====================</span><span class="op">------------------------------------------------</span><span class="st"> </span>(<span class="dv">32</span>%)</span>
-<span id="cb2-221"><a href="#cb2-221"></a></span>
-<span id="cb2-222"><a href="#cb2-222"></a><span class="op">==</span><span class="er">=====================</span><span class="op">------------------------------------------------</span><span class="st"> </span>(<span class="dv">32</span>%)</span>
-<span id="cb2-223"><a href="#cb2-223"></a></span>
-<span id="cb2-224"><a href="#cb2-224"></a><span class="op">==</span><span class="er">=====================</span><span class="op">------------------------------------------------</span><span class="st"> </span>(<span class="dv">32</span>%)</span>
-<span id="cb2-225"><a href="#cb2-225"></a></span>
-<span id="cb2-226"><a href="#cb2-226"></a><span class="op">==</span><span class="er">======================</span><span class="op">-----------------------------------------------</span><span class="st"> </span>(<span class="dv">33</span>%)</span>
-<span id="cb2-227"><a href="#cb2-227"></a></span>
-<span id="cb2-228"><a href="#cb2-228"></a><span class="op">==</span><span class="er">======================</span><span class="op">-----------------------------------------------</span><span class="st"> </span>(<span class="dv">33</span>%)</span>
-<span id="cb2-229"><a href="#cb2-229"></a></span>
-<span id="cb2-230"><a href="#cb2-230"></a><span class="op">==</span><span class="er">======================</span><span class="op">-----------------------------------------------</span><span class="st"> </span>(<span class="dv">33</span>%)</span>
-<span id="cb2-231"><a href="#cb2-231"></a></span>
-<span id="cb2-232"><a href="#cb2-232"></a><span class="op">==</span><span class="er">======================</span><span class="op">-----------------------------------------------</span><span class="st"> </span>(<span class="dv">33</span>%)</span>
-<span id="cb2-233"><a href="#cb2-233"></a></span>
-<span id="cb2-234"><a href="#cb2-234"></a><span class="op">==</span><span class="er">======================</span><span class="op">-----------------------------------------------</span><span class="st"> </span>(<span class="dv">34</span>%)</span>
-<span id="cb2-235"><a href="#cb2-235"></a></span>
-<span id="cb2-236"><a href="#cb2-236"></a><span class="op">==</span><span class="er">=======================</span><span class="op">----------------------------------------------</span><span class="st"> </span>(<span class="dv">34</span>%)</span>
-<span id="cb2-237"><a href="#cb2-237"></a></span>
-<span id="cb2-238"><a href="#cb2-238"></a><span class="op">==</span><span class="er">=======================</span><span class="op">----------------------------------------------</span><span class="st"> </span>(<span class="dv">34</span>%)</span>
-<span id="cb2-239"><a href="#cb2-239"></a></span>
-<span id="cb2-240"><a href="#cb2-240"></a><span class="op">==</span><span class="er">=======================</span><span class="op">----------------------------------------------</span><span class="st"> </span>(<span class="dv">35</span>%)</span>
-<span id="cb2-241"><a href="#cb2-241"></a></span>
-<span id="cb2-242"><a href="#cb2-242"></a><span class="op">==</span><span class="er">=======================</span><span class="op">----------------------------------------------</span><span class="st"> </span>(<span class="dv">35</span>%)</span>
-<span id="cb2-243"><a href="#cb2-243"></a></span>
-<span id="cb2-244"><a href="#cb2-244"></a><span class="op">==</span><span class="er">========================</span><span class="op">---------------------------------------------</span><span class="st"> </span>(<span class="dv">35</span>%)</span>
-<span id="cb2-245"><a href="#cb2-245"></a></span>
-<span id="cb2-246"><a href="#cb2-246"></a><span class="op">==</span><span class="er">========================</span><span class="op">---------------------------------------------</span><span class="st"> </span>(<span class="dv">36</span>%)</span>
-<span id="cb2-247"><a href="#cb2-247"></a></span>
-<span id="cb2-248"><a href="#cb2-248"></a><span class="op">==</span><span class="er">========================</span><span class="op">---------------------------------------------</span><span class="st"> </span>(<span class="dv">36</span>%)</span>
-<span id="cb2-249"><a href="#cb2-249"></a></span>
-<span id="cb2-250"><a href="#cb2-250"></a><span class="op">==</span><span class="er">========================</span><span class="op">---------------------------------------------</span><span class="st"> </span>(<span class="dv">36</span>%)</span>
-<span id="cb2-251"><a href="#cb2-251"></a></span>
-<span id="cb2-252"><a href="#cb2-252"></a><span class="op">==</span><span class="er">========================</span><span class="op">---------------------------------------------</span><span class="st"> </span>(<span class="dv">36</span>%)</span>
-<span id="cb2-253"><a href="#cb2-253"></a></span>
-<span id="cb2-254"><a href="#cb2-254"></a><span class="op">==</span><span class="er">=========================</span><span class="op">--------------------------------------------</span><span class="st"> </span>(<span class="dv">37</span>%)</span>
-<span id="cb2-255"><a href="#cb2-255"></a></span>
-<span id="cb2-256"><a href="#cb2-256"></a><span class="op">==</span><span class="er">=========================</span><span class="op">--------------------------------------------</span><span class="st"> </span>(<span class="dv">37</span>%)</span>
-<span id="cb2-257"><a href="#cb2-257"></a></span>
-<span id="cb2-258"><a href="#cb2-258"></a><span class="op">==</span><span class="er">=========================</span><span class="op">--------------------------------------------</span><span class="st"> </span>(<span class="dv">37</span>%)</span>
-<span id="cb2-259"><a href="#cb2-259"></a></span>
-<span id="cb2-260"><a href="#cb2-260"></a><span class="op">==</span><span class="er">=========================</span><span class="op">--------------------------------------------</span><span class="st"> </span>(<span class="dv">38</span>%)</span>
-<span id="cb2-261"><a href="#cb2-261"></a></span>
-<span id="cb2-262"><a href="#cb2-262"></a><span class="op">==</span><span class="er">=========================</span><span class="op">--------------------------------------------</span><span class="st"> </span>(<span class="dv">38</span>%)</span>
-<span id="cb2-263"><a href="#cb2-263"></a></span>
-<span id="cb2-264"><a href="#cb2-264"></a><span class="op">==</span><span class="er">==========================</span><span class="op">-------------------------------------------</span><span class="st"> </span>(<span class="dv">38</span>%)</span>
-<span id="cb2-265"><a href="#cb2-265"></a></span>
-<span id="cb2-266"><a href="#cb2-266"></a><span class="op">==</span><span class="er">==========================</span><span class="op">-------------------------------------------</span><span class="st"> </span>(<span class="dv">39</span>%)</span>
-<span id="cb2-267"><a href="#cb2-267"></a></span>
-<span id="cb2-268"><a href="#cb2-268"></a><span class="op">==</span><span class="er">==========================</span><span class="op">-------------------------------------------</span><span class="st"> </span>(<span class="dv">39</span>%)</span>
-<span id="cb2-269"><a href="#cb2-269"></a></span>
-<span id="cb2-270"><a href="#cb2-270"></a><span class="op">==</span><span class="er">==========================</span><span class="op">-------------------------------------------</span><span class="st"> </span>(<span class="dv">39</span>%)</span>
-<span id="cb2-271"><a href="#cb2-271"></a></span>
-<span id="cb2-272"><a href="#cb2-272"></a><span class="op">==</span><span class="er">==========================</span><span class="op">-------------------------------------------</span><span class="st"> </span>(<span class="dv">39</span>%)</span>
-<span id="cb2-273"><a href="#cb2-273"></a></span>
-<span id="cb2-274"><a href="#cb2-274"></a><span class="op">==</span><span class="er">===========================</span><span class="op">------------------------------------------</span><span class="st"> </span>(<span class="dv">40</span>%)</span>
-<span id="cb2-275"><a href="#cb2-275"></a></span>
-<span id="cb2-276"><a href="#cb2-276"></a><span class="op">==</span><span class="er">===========================</span><span class="op">------------------------------------------</span><span class="st"> </span>(<span class="dv">40</span>%)</span>
-<span id="cb2-277"><a href="#cb2-277"></a></span>
-<span id="cb2-278"><a href="#cb2-278"></a><span class="op">==</span><span class="er">===========================</span><span class="op">------------------------------------------</span><span class="st"> </span>(<span class="dv">40</span>%)</span>
-<span id="cb2-279"><a href="#cb2-279"></a></span>
-<span id="cb2-280"><a href="#cb2-280"></a><span class="op">==</span><span class="er">===========================</span><span class="op">------------------------------------------</span><span class="st"> </span>(<span class="dv">41</span>%)</span>
-<span id="cb2-281"><a href="#cb2-281"></a></span>
-<span id="cb2-282"><a href="#cb2-282"></a><span class="op">==</span><span class="er">============================</span><span class="op">-----------------------------------------</span><span class="st"> </span>(<span class="dv">41</span>%)</span>
-<span id="cb2-283"><a href="#cb2-283"></a></span>
-<span id="cb2-284"><a href="#cb2-284"></a><span class="op">==</span><span class="er">============================</span><span class="op">-----------------------------------------</span><span class="st"> </span>(<span class="dv">41</span>%)</span>
-<span id="cb2-285"><a href="#cb2-285"></a></span>
-<span id="cb2-286"><a href="#cb2-286"></a><span class="op">==</span><span class="er">============================</span><span class="op">-----------------------------------------</span><span class="st"> </span>(<span class="dv">42</span>%)</span>
-<span id="cb2-287"><a href="#cb2-287"></a></span>
-<span id="cb2-288"><a href="#cb2-288"></a><span class="op">==</span><span class="er">============================</span><span class="op">-----------------------------------------</span><span class="st"> </span>(<span class="dv">42</span>%)</span>
-<span id="cb2-289"><a href="#cb2-289"></a></span>
-<span id="cb2-290"><a href="#cb2-290"></a><span class="op">==</span><span class="er">============================</span><span class="op">-----------------------------------------</span><span class="st"> </span>(<span class="dv">42</span>%)</span>
-<span id="cb2-291"><a href="#cb2-291"></a></span>
-<span id="cb2-292"><a href="#cb2-292"></a><span class="op">==</span><span class="er">=============================</span><span class="op">----------------------------------------</span><span class="st"> </span>(<span class="dv">42</span>%)</span>
-<span id="cb2-293"><a href="#cb2-293"></a></span>
-<span id="cb2-294"><a href="#cb2-294"></a><span class="op">==</span><span class="er">=============================</span><span class="op">----------------------------------------</span><span class="st"> </span>(<span class="dv">43</span>%)</span>
-<span id="cb2-295"><a href="#cb2-295"></a></span>
-<span id="cb2-296"><a href="#cb2-296"></a><span class="op">==</span><span class="er">=============================</span><span class="op">----------------------------------------</span><span class="st"> </span>(<span class="dv">43</span>%)</span>
-<span id="cb2-297"><a href="#cb2-297"></a></span>
-<span id="cb2-298"><a href="#cb2-298"></a><span class="op">==</span><span class="er">=============================</span><span class="op">----------------------------------------</span><span class="st"> </span>(<span class="dv">43</span>%)</span>
-<span id="cb2-299"><a href="#cb2-299"></a></span>
-<span id="cb2-300"><a href="#cb2-300"></a><span class="op">==</span><span class="er">=============================</span><span class="op">----------------------------------------</span><span class="st"> </span>(<span class="dv">44</span>%)</span>
-<span id="cb2-301"><a href="#cb2-301"></a></span>
-<span id="cb2-302"><a href="#cb2-302"></a><span class="op">==</span><span class="er">==============================</span><span class="op">---------------------------------------</span><span class="st"> </span>(<span class="dv">44</span>%)</span>
-<span id="cb2-303"><a href="#cb2-303"></a></span>
-<span id="cb2-304"><a href="#cb2-304"></a><span class="op">==</span><span class="er">==============================</span><span class="op">---------------------------------------</span><span class="st"> </span>(<span class="dv">44</span>%)</span>
-<span id="cb2-305"><a href="#cb2-305"></a></span>
-<span id="cb2-306"><a href="#cb2-306"></a><span class="op">==</span><span class="er">==============================</span><span class="op">---------------------------------------</span><span class="st"> </span>(<span class="dv">45</span>%)</span>
-<span id="cb2-307"><a href="#cb2-307"></a></span>
-<span id="cb2-308"><a href="#cb2-308"></a><span class="op">==</span><span class="er">==============================</span><span class="op">---------------------------------------</span><span class="st"> </span>(<span class="dv">45</span>%)</span>
-<span id="cb2-309"><a href="#cb2-309"></a></span>
-<span id="cb2-310"><a href="#cb2-310"></a><span class="op">==</span><span class="er">==============================</span><span class="op">---------------------------------------</span><span class="st"> </span>(<span class="dv">45</span>%)</span>
-<span id="cb2-311"><a href="#cb2-311"></a></span>
-<span id="cb2-312"><a href="#cb2-312"></a><span class="op">==</span><span class="er">===============================</span><span class="op">--------------------------------------</span><span class="st"> </span>(<span class="dv">45</span>%)</span>
-<span id="cb2-313"><a href="#cb2-313"></a></span>
-<span id="cb2-314"><a href="#cb2-314"></a><span class="op">==</span><span class="er">===============================</span><span class="op">--------------------------------------</span><span class="st"> </span>(<span class="dv">46</span>%)</span>
-<span id="cb2-315"><a href="#cb2-315"></a></span>
-<span id="cb2-316"><a href="#cb2-316"></a><span class="op">==</span><span class="er">===============================</span><span class="op">--------------------------------------</span><span class="st"> </span>(<span class="dv">46</span>%)</span>
-<span id="cb2-317"><a href="#cb2-317"></a></span>
-<span id="cb2-318"><a href="#cb2-318"></a><span class="op">==</span><span class="er">===============================</span><span class="op">--------------------------------------</span><span class="st"> </span>(<span class="dv">46</span>%)</span>
-<span id="cb2-319"><a href="#cb2-319"></a></span>
-<span id="cb2-320"><a href="#cb2-320"></a><span class="op">==</span><span class="er">================================</span><span class="op">-------------------------------------</span><span class="st"> </span>(<span class="dv">47</span>%)</span>
-<span id="cb2-321"><a href="#cb2-321"></a></span>
-<span id="cb2-322"><a href="#cb2-322"></a><span class="op">==</span><span class="er">================================</span><span class="op">-------------------------------------</span><span class="st"> </span>(<span class="dv">47</span>%)</span>
-<span id="cb2-323"><a href="#cb2-323"></a></span>
-<span id="cb2-324"><a href="#cb2-324"></a><span class="op">==</span><span class="er">================================</span><span class="op">-------------------------------------</span><span class="st"> </span>(<span class="dv">47</span>%)</span>
-<span id="cb2-325"><a href="#cb2-325"></a></span>
-<span id="cb2-326"><a href="#cb2-326"></a><span class="op">==</span><span class="er">================================</span><span class="op">-------------------------------------</span><span class="st"> </span>(<span class="dv">48</span>%)</span>
-<span id="cb2-327"><a href="#cb2-327"></a></span>
-<span id="cb2-328"><a href="#cb2-328"></a><span class="op">==</span><span class="er">================================</span><span class="op">-------------------------------------</span><span class="st"> </span>(<span class="dv">48</span>%)</span>
-<span id="cb2-329"><a href="#cb2-329"></a></span>
-<span id="cb2-330"><a href="#cb2-330"></a><span class="op">==</span><span class="er">=================================</span><span class="op">------------------------------------</span><span class="st"> </span>(<span class="dv">48</span>%)</span>
-<span id="cb2-331"><a href="#cb2-331"></a></span>
-<span id="cb2-332"><a href="#cb2-332"></a><span class="op">==</span><span class="er">=================================</span><span class="op">------------------------------------</span><span class="st"> </span>(<span class="dv">48</span>%)</span>
-<span id="cb2-333"><a href="#cb2-333"></a></span>
-<span id="cb2-334"><a href="#cb2-334"></a><span class="op">==</span><span class="er">=================================</span><span class="op">------------------------------------</span><span class="st"> </span>(<span class="dv">49</span>%)</span>
-<span id="cb2-335"><a href="#cb2-335"></a></span>
-<span id="cb2-336"><a href="#cb2-336"></a><span class="op">==</span><span class="er">=================================</span><span class="op">------------------------------------</span><span class="st"> </span>(<span class="dv">49</span>%)</span>
-<span id="cb2-337"><a href="#cb2-337"></a></span>
-<span id="cb2-338"><a href="#cb2-338"></a><span class="op">==</span><span class="er">=================================</span><span class="op">------------------------------------</span><span class="st"> </span>(<span class="dv">49</span>%)</span>
-<span id="cb2-339"><a href="#cb2-339"></a></span>
-<span id="cb2-340"><a href="#cb2-340"></a><span class="op">==</span><span class="er">==================================</span><span class="op">-----------------------------------</span><span class="st"> </span>(<span class="dv">50</span>%)</span>
-<span id="cb2-341"><a href="#cb2-341"></a></span>
-<span id="cb2-342"><a href="#cb2-342"></a><span class="op">==</span><span class="er">==================================</span><span class="op">-----------------------------------</span><span class="st"> </span>(<span class="dv">50</span>%)</span>
-<span id="cb2-343"><a href="#cb2-343"></a></span>
-<span id="cb2-344"><a href="#cb2-344"></a><span class="op">==</span><span class="er">==================================</span><span class="op">-----------------------------------</span><span class="st"> </span>(<span class="dv">50</span>%)</span>
-<span id="cb2-345"><a href="#cb2-345"></a></span>
-<span id="cb2-346"><a href="#cb2-346"></a><span class="op">==</span><span class="er">==================================</span><span class="op">-----------------------------------</span><span class="st"> </span>(<span class="dv">51</span>%)</span>
-<span id="cb2-347"><a href="#cb2-347"></a></span>
-<span id="cb2-348"><a href="#cb2-348"></a><span class="op">==</span><span class="er">==================================</span><span class="op">-----------------------------------</span><span class="st"> </span>(<span class="dv">51</span>%)</span>
-<span id="cb2-349"><a href="#cb2-349"></a></span>
-<span id="cb2-350"><a href="#cb2-350"></a><span class="op">==</span><span class="er">===================================</span><span class="op">----------------------------------</span><span class="st"> </span>(<span class="dv">51</span>%)</span>
-<span id="cb2-351"><a href="#cb2-351"></a></span>
-<span id="cb2-352"><a href="#cb2-352"></a><span class="op">==</span><span class="er">===================================</span><span class="op">----------------------------------</span><span class="st"> </span>(<span class="dv">51</span>%)</span>
-<span id="cb2-353"><a href="#cb2-353"></a></span>
-<span id="cb2-354"><a href="#cb2-354"></a><span class="op">==</span><span class="er">===================================</span><span class="op">----------------------------------</span><span class="st"> </span>(<span class="dv">52</span>%)</span>
-<span id="cb2-355"><a href="#cb2-355"></a></span>
-<span id="cb2-356"><a href="#cb2-356"></a><span class="op">==</span><span class="er">===================================</span><span class="op">----------------------------------</span><span class="st"> </span>(<span class="dv">52</span>%)</span>
-<span id="cb2-357"><a href="#cb2-357"></a></span>
-<span id="cb2-358"><a href="#cb2-358"></a><span class="op">==</span><span class="er">===================================</span><span class="op">----------------------------------</span><span class="st"> </span>(<span class="dv">52</span>%)</span>
-<span id="cb2-359"><a href="#cb2-359"></a></span>
-<span id="cb2-360"><a href="#cb2-360"></a><span class="op">==</span><span class="er">====================================</span><span class="op">---------------------------------</span><span class="st"> </span>(<span class="dv">53</span>%)</span>
-<span id="cb2-361"><a href="#cb2-361"></a></span>
-<span id="cb2-362"><a href="#cb2-362"></a><span class="op">==</span><span class="er">====================================</span><span class="op">---------------------------------</span><span class="st"> </span>(<span class="dv">53</span>%)</span>
-<span id="cb2-363"><a href="#cb2-363"></a></span>
-<span id="cb2-364"><a href="#cb2-364"></a><span class="op">==</span><span class="er">====================================</span><span class="op">---------------------------------</span><span class="st"> </span>(<span class="dv">53</span>%)</span>
-<span id="cb2-365"><a href="#cb2-365"></a></span>
-<span id="cb2-366"><a href="#cb2-366"></a><span class="op">==</span><span class="er">====================================</span><span class="op">---------------------------------</span><span class="st"> </span>(<span class="dv">54</span>%)</span>
-<span id="cb2-367"><a href="#cb2-367"></a></span>
-<span id="cb2-368"><a href="#cb2-368"></a><span class="op">==</span><span class="er">=====================================</span><span class="op">--------------------------------</span><span class="st"> </span>(<span class="dv">54</span>%)</span>
-<span id="cb2-369"><a href="#cb2-369"></a></span>
-<span id="cb2-370"><a href="#cb2-370"></a><span class="op">==</span><span class="er">=====================================</span><span class="op">--------------------------------</span><span class="st"> </span>(<span class="dv">54</span>%)</span>
-<span id="cb2-371"><a href="#cb2-371"></a></span>
-<span id="cb2-372"><a href="#cb2-372"></a><span class="op">==</span><span class="er">=====================================</span><span class="op">--------------------------------</span><span class="st"> </span>(<span class="dv">54</span>%)</span>
-<span id="cb2-373"><a href="#cb2-373"></a></span>
-<span id="cb2-374"><a href="#cb2-374"></a><span class="op">==</span><span class="er">=====================================</span><span class="op">--------------------------------</span><span class="st"> </span>(<span class="dv">55</span>%)</span>
-<span id="cb2-375"><a href="#cb2-375"></a></span>
-<span id="cb2-376"><a href="#cb2-376"></a><span class="op">==</span><span class="er">=====================================</span><span class="op">--------------------------------</span><span class="st"> </span>(<span class="dv">55</span>%)</span>
-<span id="cb2-377"><a href="#cb2-377"></a></span>
-<span id="cb2-378"><a href="#cb2-378"></a><span class="op">==</span><span class="er">======================================</span><span class="op">-------------------------------</span><span class="st"> </span>(<span class="dv">55</span>%)</span>
-<span id="cb2-379"><a href="#cb2-379"></a></span>
-<span id="cb2-380"><a href="#cb2-380"></a><span class="op">==</span><span class="er">======================================</span><span class="op">-------------------------------</span><span class="st"> </span>(<span class="dv">56</span>%)</span>
-<span id="cb2-381"><a href="#cb2-381"></a></span>
-<span id="cb2-382"><a href="#cb2-382"></a><span class="op">==</span><span class="er">======================================</span><span class="op">-------------------------------</span><span class="st"> </span>(<span class="dv">56</span>%)</span>
-<span id="cb2-383"><a href="#cb2-383"></a></span>
-<span id="cb2-384"><a href="#cb2-384"></a><span class="op">==</span><span class="er">======================================</span><span class="op">-------------------------------</span><span class="st"> </span>(<span class="dv">56</span>%)</span>
-<span id="cb2-385"><a href="#cb2-385"></a></span>
-<span id="cb2-386"><a href="#cb2-386"></a><span class="op">==</span><span class="er">======================================</span><span class="op">-------------------------------</span><span class="st"> </span>(<span class="dv">57</span>%)</span>
-<span id="cb2-387"><a href="#cb2-387"></a></span>
-<span id="cb2-388"><a href="#cb2-388"></a><span class="op">==</span><span class="er">=======================================</span><span class="op">------------------------------</span><span class="st"> </span>(<span class="dv">57</span>%)</span>
-<span id="cb2-389"><a href="#cb2-389"></a></span>
-<span id="cb2-390"><a href="#cb2-390"></a><span class="op">==</span><span class="er">=======================================</span><span class="op">------------------------------</span><span class="st"> </span>(<span class="dv">57</span>%)</span>
-<span id="cb2-391"><a href="#cb2-391"></a></span>
-<span id="cb2-392"><a href="#cb2-392"></a><span class="op">==</span><span class="er">=======================================</span><span class="op">------------------------------</span><span class="st"> </span>(<span class="dv">57</span>%)</span>
-<span id="cb2-393"><a href="#cb2-393"></a></span>
-<span id="cb2-394"><a href="#cb2-394"></a><span class="op">==</span><span class="er">=======================================</span><span class="op">------------------------------</span><span class="st"> </span>(<span class="dv">58</span>%)</span>
-<span id="cb2-395"><a href="#cb2-395"></a></span>
-<span id="cb2-396"><a href="#cb2-396"></a><span class="op">==</span><span class="er">=======================================</span><span class="op">------------------------------</span><span class="st"> </span>(<span class="dv">58</span>%)</span>
-<span id="cb2-397"><a href="#cb2-397"></a></span>
-<span id="cb2-398"><a href="#cb2-398"></a><span class="op">==</span><span class="er">========================================</span><span class="op">-----------------------------</span><span class="st"> </span>(<span class="dv">58</span>%)</span>
-<span id="cb2-399"><a href="#cb2-399"></a></span>
-<span id="cb2-400"><a href="#cb2-400"></a><span class="op">==</span><span class="er">========================================</span><span class="op">-----------------------------</span><span class="st"> </span>(<span class="dv">59</span>%)</span>
-<span id="cb2-401"><a href="#cb2-401"></a></span>
-<span id="cb2-402"><a href="#cb2-402"></a><span class="op">==</span><span class="er">========================================</span><span class="op">-----------------------------</span><span class="st"> </span>(<span class="dv">59</span>%)</span>
-<span id="cb2-403"><a href="#cb2-403"></a></span>
-<span id="cb2-404"><a href="#cb2-404"></a><span class="op">==</span><span class="er">========================================</span><span class="op">-----------------------------</span><span class="st"> </span>(<span class="dv">59</span>%)</span>
-<span id="cb2-405"><a href="#cb2-405"></a></span>
-<span id="cb2-406"><a href="#cb2-406"></a><span class="op">==</span><span class="er">=========================================</span><span class="op">----------------------------</span><span class="st"> </span>(<span class="dv">60</span>%)</span>
-<span id="cb2-407"><a href="#cb2-407"></a></span>
-<span id="cb2-408"><a href="#cb2-408"></a><span class="op">==</span><span class="er">=========================================</span><span class="op">----------------------------</span><span class="st"> </span>(<span class="dv">60</span>%)</span>
-<span id="cb2-409"><a href="#cb2-409"></a></span>
-<span id="cb2-410"><a href="#cb2-410"></a><span class="op">==</span><span class="er">=========================================</span><span class="op">----------------------------</span><span class="st"> </span>(<span class="dv">60</span>%)</span>
-<span id="cb2-411"><a href="#cb2-411"></a></span>
-<span id="cb2-412"><a href="#cb2-412"></a><span class="op">==</span><span class="er">=========================================</span><span class="op">----------------------------</span><span class="st"> </span>(<span class="dv">60</span>%)</span>
-<span id="cb2-413"><a href="#cb2-413"></a></span>
-<span id="cb2-414"><a href="#cb2-414"></a><span class="op">==</span><span class="er">=========================================</span><span class="op">----------------------------</span><span class="st"> </span>(<span class="dv">61</span>%)</span>
-<span id="cb2-415"><a href="#cb2-415"></a></span>
-<span id="cb2-416"><a href="#cb2-416"></a><span class="op">==</span><span class="er">==========================================</span><span class="op">---------------------------</span><span class="st"> </span>(<span class="dv">61</span>%)</span>
-<span id="cb2-417"><a href="#cb2-417"></a></span>
-<span id="cb2-418"><a href="#cb2-418"></a><span class="op">==</span><span class="er">==========================================</span><span class="op">---------------------------</span><span class="st"> </span>(<span class="dv">61</span>%)</span>
-<span id="cb2-419"><a href="#cb2-419"></a></span>
-<span id="cb2-420"><a href="#cb2-420"></a><span class="op">==</span><span class="er">==========================================</span><span class="op">---------------------------</span><span class="st"> </span>(<span class="dv">62</span>%)</span>
-<span id="cb2-421"><a href="#cb2-421"></a></span>
-<span id="cb2-422"><a href="#cb2-422"></a><span class="op">==</span><span class="er">==========================================</span><span class="op">---------------------------</span><span class="st"> </span>(<span class="dv">62</span>%)</span>
-<span id="cb2-423"><a href="#cb2-423"></a></span>
-<span id="cb2-424"><a href="#cb2-424"></a><span class="op">==</span><span class="er">==========================================</span><span class="op">---------------------------</span><span class="st"> </span>(<span class="dv">62</span>%)</span>
-<span id="cb2-425"><a href="#cb2-425"></a></span>
-<span id="cb2-426"><a href="#cb2-426"></a><span class="op">==</span><span class="er">===========================================</span><span class="op">--------------------------</span><span class="st"> </span>(<span class="dv">63</span>%)</span>
-<span id="cb2-427"><a href="#cb2-427"></a></span>
-<span id="cb2-428"><a href="#cb2-428"></a><span class="op">==</span><span class="er">===========================================</span><span class="op">--------------------------</span><span class="st"> </span>(<span class="dv">63</span>%)</span>
-<span id="cb2-429"><a href="#cb2-429"></a></span>
-<span id="cb2-430"><a href="#cb2-430"></a><span class="op">==</span><span class="er">===========================================</span><span class="op">--------------------------</span><span class="st"> </span>(<span class="dv">63</span>%)</span>
-<span id="cb2-431"><a href="#cb2-431"></a></span>
-<span id="cb2-432"><a href="#cb2-432"></a><span class="op">==</span><span class="er">===========================================</span><span class="op">--------------------------</span><span class="st"> </span>(<span class="dv">63</span>%)</span>
-<span id="cb2-433"><a href="#cb2-433"></a></span>
-<span id="cb2-434"><a href="#cb2-434"></a><span class="op">==</span><span class="er">===========================================</span><span class="op">--------------------------</span><span class="st"> </span>(<span class="dv">64</span>%)</span>
-<span id="cb2-435"><a href="#cb2-435"></a></span>
-<span id="cb2-436"><a href="#cb2-436"></a><span class="op">==</span><span class="er">============================================</span><span class="op">-------------------------</span><span class="st"> </span>(<span class="dv">64</span>%)</span>
-<span id="cb2-437"><a href="#cb2-437"></a></span>
-<span id="cb2-438"><a href="#cb2-438"></a><span class="op">==</span><span class="er">============================================</span><span class="op">-------------------------</span><span class="st"> </span>(<span class="dv">64</span>%)</span>
-<span id="cb2-439"><a href="#cb2-439"></a></span>
-<span id="cb2-440"><a href="#cb2-440"></a><span class="op">==</span><span class="er">============================================</span><span class="op">-------------------------</span><span class="st"> </span>(<span class="dv">65</span>%)</span>
-<span id="cb2-441"><a href="#cb2-441"></a></span>
-<span id="cb2-442"><a href="#cb2-442"></a><span class="op">==</span><span class="er">============================================</span><span class="op">-------------------------</span><span class="st"> </span>(<span class="dv">65</span>%)</span>
-<span id="cb2-443"><a href="#cb2-443"></a></span>
-<span id="cb2-444"><a href="#cb2-444"></a><span class="op">==</span><span class="er">=============================================</span><span class="op">------------------------</span><span class="st"> </span>(<span class="dv">65</span>%)</span>
-<span id="cb2-445"><a href="#cb2-445"></a></span>
-<span id="cb2-446"><a href="#cb2-446"></a><span class="op">==</span><span class="er">=============================================</span><span class="op">------------------------</span><span class="st"> </span>(<span class="dv">66</span>%)</span>
-<span id="cb2-447"><a href="#cb2-447"></a></span>
-<span id="cb2-448"><a href="#cb2-448"></a><span class="op">==</span><span class="er">=============================================</span><span class="op">------------------------</span><span class="st"> </span>(<span class="dv">66</span>%)</span>
-<span id="cb2-449"><a href="#cb2-449"></a></span>
-<span id="cb2-450"><a href="#cb2-450"></a><span class="op">==</span><span class="er">=============================================</span><span class="op">------------------------</span><span class="st"> </span>(<span class="dv">66</span>%)</span>
-<span id="cb2-451"><a href="#cb2-451"></a></span>
-<span id="cb2-452"><a href="#cb2-452"></a><span class="op">==</span><span class="er">=============================================</span><span class="op">------------------------</span><span class="st"> </span>(<span class="dv">66</span>%)</span>
-<span id="cb2-453"><a href="#cb2-453"></a></span>
-<span id="cb2-454"><a href="#cb2-454"></a><span class="op">==</span><span class="er">==============================================</span><span class="op">-----------------------</span><span class="st"> </span>(<span class="dv">67</span>%)</span>
-<span id="cb2-455"><a href="#cb2-455"></a></span>
-<span id="cb2-456"><a href="#cb2-456"></a><span class="op">==</span><span class="er">==============================================</span><span class="op">-----------------------</span><span class="st"> </span>(<span class="dv">67</span>%)</span>
-<span id="cb2-457"><a href="#cb2-457"></a></span>
-<span id="cb2-458"><a href="#cb2-458"></a><span class="op">==</span><span class="er">==============================================</span><span class="op">-----------------------</span><span class="st"> </span>(<span class="dv">67</span>%)</span>
-<span id="cb2-459"><a href="#cb2-459"></a></span>
-<span id="cb2-460"><a href="#cb2-460"></a><span class="op">==</span><span class="er">==============================================</span><span class="op">-----------------------</span><span class="st"> </span>(<span class="dv">68</span>%)</span>
-<span id="cb2-461"><a href="#cb2-461"></a></span>
-<span id="cb2-462"><a href="#cb2-462"></a><span class="op">==</span><span class="er">==============================================</span><span class="op">-----------------------</span><span class="st"> </span>(<span class="dv">68</span>%)</span>
-<span id="cb2-463"><a href="#cb2-463"></a></span>
-<span id="cb2-464"><a href="#cb2-464"></a><span class="op">==</span><span class="er">===============================================</span><span class="op">----------------------</span><span class="st"> </span>(<span class="dv">68</span>%)</span>
-<span id="cb2-465"><a href="#cb2-465"></a></span>
-<span id="cb2-466"><a href="#cb2-466"></a><span class="op">==</span><span class="er">===============================================</span><span class="op">----------------------</span><span class="st"> </span>(<span class="dv">69</span>%)</span>
-<span id="cb2-467"><a href="#cb2-467"></a></span>
-<span id="cb2-468"><a href="#cb2-468"></a><span class="op">==</span><span class="er">===============================================</span><span class="op">----------------------</span><span class="st"> </span>(<span class="dv">69</span>%)</span>
-<span id="cb2-469"><a href="#cb2-469"></a></span>
-<span id="cb2-470"><a href="#cb2-470"></a><span class="op">==</span><span class="er">===============================================</span><span class="op">----------------------</span><span class="st"> </span>(<span class="dv">69</span>%)</span>
-<span id="cb2-471"><a href="#cb2-471"></a></span>
-<span id="cb2-472"><a href="#cb2-472"></a><span class="op">==</span><span class="er">===============================================</span><span class="op">----------------------</span><span class="st"> </span>(<span class="dv">69</span>%)</span>
-<span id="cb2-473"><a href="#cb2-473"></a></span>
-<span id="cb2-474"><a href="#cb2-474"></a><span class="op">==</span><span class="er">================================================</span><span class="op">---------------------</span><span class="st"> </span>(<span class="dv">70</span>%)</span>
-<span id="cb2-475"><a href="#cb2-475"></a></span>
-<span id="cb2-476"><a href="#cb2-476"></a><span class="op">==</span><span class="er">================================================</span><span class="op">---------------------</span><span class="st"> </span>(<span class="dv">70</span>%)</span>
-<span id="cb2-477"><a href="#cb2-477"></a></span>
-<span id="cb2-478"><a href="#cb2-478"></a><span class="op">==</span><span class="er">================================================</span><span class="op">---------------------</span><span class="st"> </span>(<span class="dv">70</span>%)</span>
-<span id="cb2-479"><a href="#cb2-479"></a></span>
-<span id="cb2-480"><a href="#cb2-480"></a><span class="op">==</span><span class="er">================================================</span><span class="op">---------------------</span><span class="st"> </span>(<span class="dv">71</span>%)</span>
-<span id="cb2-481"><a href="#cb2-481"></a></span>
-<span id="cb2-482"><a href="#cb2-482"></a><span class="op">==</span><span class="er">=================================================</span><span class="op">--------------------</span><span class="st"> </span>(<span class="dv">71</span>%)</span>
-<span id="cb2-483"><a href="#cb2-483"></a></span>
-<span id="cb2-484"><a href="#cb2-484"></a><span class="op">==</span><span class="er">=================================================</span><span class="op">--------------------</span><span class="st"> </span>(<span class="dv">71</span>%)</span>
-<span id="cb2-485"><a href="#cb2-485"></a></span>
-<span id="cb2-486"><a href="#cb2-486"></a><span class="op">==</span><span class="er">=================================================</span><span class="op">--------------------</span><span class="st"> </span>(<span class="dv">72</span>%)</span>
-<span id="cb2-487"><a href="#cb2-487"></a></span>
-<span id="cb2-488"><a href="#cb2-488"></a><span class="op">==</span><span class="er">=================================================</span><span class="op">--------------------</span><span class="st"> </span>(<span class="dv">72</span>%)</span>
-<span id="cb2-489"><a href="#cb2-489"></a></span>
-<span id="cb2-490"><a href="#cb2-490"></a><span class="op">==</span><span class="er">=================================================</span><span class="op">--------------------</span><span class="st"> </span>(<span class="dv">72</span>%)</span>
-<span id="cb2-491"><a href="#cb2-491"></a></span>
-<span id="cb2-492"><a href="#cb2-492"></a><span class="op">==</span><span class="er">==================================================</span><span class="op">-------------------</span><span class="st"> </span>(<span class="dv">72</span>%)</span>
-<span id="cb2-493"><a href="#cb2-493"></a></span>
-<span id="cb2-494"><a href="#cb2-494"></a><span class="op">==</span><span class="er">==================================================</span><span class="op">-------------------</span><span class="st"> </span>(<span class="dv">73</span>%)</span>
-<span id="cb2-495"><a href="#cb2-495"></a></span>
-<span id="cb2-496"><a href="#cb2-496"></a><span class="op">==</span><span class="er">==================================================</span><span class="op">-------------------</span><span class="st"> </span>(<span class="dv">73</span>%)</span>
-<span id="cb2-497"><a href="#cb2-497"></a></span>
-<span id="cb2-498"><a href="#cb2-498"></a><span class="op">==</span><span class="er">==================================================</span><span class="op">-------------------</span><span class="st"> </span>(<span class="dv">73</span>%)</span>
-<span id="cb2-499"><a href="#cb2-499"></a></span>
-<span id="cb2-500"><a href="#cb2-500"></a><span class="op">==</span><span class="er">==================================================</span><span class="op">-------------------</span><span class="st"> </span>(<span class="dv">74</span>%)</span>
-<span id="cb2-501"><a href="#cb2-501"></a></span>
-<span id="cb2-502"><a href="#cb2-502"></a><span class="op">==</span><span class="er">===================================================</span><span class="op">------------------</span><span class="st"> </span>(<span class="dv">74</span>%)</span>
-<span id="cb2-503"><a href="#cb2-503"></a></span>
-<span id="cb2-504"><a href="#cb2-504"></a><span class="op">==</span><span class="er">===================================================</span><span class="op">------------------</span><span class="st"> </span>(<span class="dv">74</span>%)</span>
-<span id="cb2-505"><a href="#cb2-505"></a></span>
-<span id="cb2-506"><a href="#cb2-506"></a><span class="op">==</span><span class="er">===================================================</span><span class="op">------------------</span><span class="st"> </span>(<span class="dv">75</span>%)</span>
-<span id="cb2-507"><a href="#cb2-507"></a></span>
-<span id="cb2-508"><a href="#cb2-508"></a><span class="op">==</span><span class="er">===================================================</span><span class="op">------------------</span><span class="st"> </span>(<span class="dv">75</span>%)</span>
-<span id="cb2-509"><a href="#cb2-509"></a></span>
-<span id="cb2-510"><a href="#cb2-510"></a><span class="op">==</span><span class="er">===================================================</span><span class="op">------------------</span><span class="st"> </span>(<span class="dv">75</span>%)</span>
-<span id="cb2-511"><a href="#cb2-511"></a></span>
-<span id="cb2-512"><a href="#cb2-512"></a><span class="op">==</span><span class="er">====================================================</span><span class="op">-----------------</span><span class="st"> </span>(<span class="dv">75</span>%)</span>
-<span id="cb2-513"><a href="#cb2-513"></a></span>
-<span id="cb2-514"><a href="#cb2-514"></a><span class="op">==</span><span class="er">====================================================</span><span class="op">-----------------</span><span class="st"> </span>(<span class="dv">76</span>%)</span>
-<span id="cb2-515"><a href="#cb2-515"></a></span>
-<span id="cb2-516"><a href="#cb2-516"></a><span class="op">==</span><span class="er">====================================================</span><span class="op">-----------------</span><span class="st"> </span>(<span class="dv">76</span>%)</span>
-<span id="cb2-517"><a href="#cb2-517"></a></span>
-<span id="cb2-518"><a href="#cb2-518"></a><span class="op">==</span><span class="er">====================================================</span><span class="op">-----------------</span><span class="st"> </span>(<span class="dv">76</span>%)</span>
-<span id="cb2-519"><a href="#cb2-519"></a></span>
-<span id="cb2-520"><a href="#cb2-520"></a><span class="op">==</span><span class="er">=====================================================</span><span class="op">----------------</span><span class="st"> </span>(<span class="dv">77</span>%)</span>
-<span id="cb2-521"><a href="#cb2-521"></a></span>
-<span id="cb2-522"><a href="#cb2-522"></a><span class="op">==</span><span class="er">=====================================================</span><span class="op">----------------</span><span class="st"> </span>(<span class="dv">77</span>%)</span>
-<span id="cb2-523"><a href="#cb2-523"></a></span>
-<span id="cb2-524"><a href="#cb2-524"></a><span class="op">==</span><span class="er">=====================================================</span><span class="op">----------------</span><span class="st"> </span>(<span class="dv">77</span>%)</span>
-<span id="cb2-525"><a href="#cb2-525"></a></span>
-<span id="cb2-526"><a href="#cb2-526"></a><span class="op">==</span><span class="er">=====================================================</span><span class="op">----------------</span><span class="st"> </span>(<span class="dv">78</span>%)</span>
-<span id="cb2-527"><a href="#cb2-527"></a></span>
-<span id="cb2-528"><a href="#cb2-528"></a><span class="op">==</span><span class="er">=====================================================</span><span class="op">----------------</span><span class="st"> </span>(<span class="dv">78</span>%)</span>
-<span id="cb2-529"><a href="#cb2-529"></a></span>
-<span id="cb2-530"><a href="#cb2-530"></a><span class="op">==</span><span class="er">======================================================</span><span class="op">---------------</span><span class="st"> </span>(<span class="dv">78</span>%)</span>
-<span id="cb2-531"><a href="#cb2-531"></a></span>
-<span id="cb2-532"><a href="#cb2-532"></a><span class="op">==</span><span class="er">======================================================</span><span class="op">---------------</span><span class="st"> </span>(<span class="dv">78</span>%)</span>
-<span id="cb2-533"><a href="#cb2-533"></a></span>
-<span id="cb2-534"><a href="#cb2-534"></a><span class="op">==</span><span class="er">======================================================</span><span class="op">---------------</span><span class="st"> </span>(<span class="dv">79</span>%)</span>
-<span id="cb2-535"><a href="#cb2-535"></a></span>
-<span id="cb2-536"><a href="#cb2-536"></a><span class="op">==</span><span class="er">======================================================</span><span class="op">---------------</span><span class="st"> </span>(<span class="dv">79</span>%)</span>
-<span id="cb2-537"><a href="#cb2-537"></a></span>
-<span id="cb2-538"><a href="#cb2-538"></a><span class="op">==</span><span class="er">======================================================</span><span class="op">---------------</span><span class="st"> </span>(<span class="dv">79</span>%)</span>
-<span id="cb2-539"><a href="#cb2-539"></a></span>
-<span id="cb2-540"><a href="#cb2-540"></a><span class="op">==</span><span class="er">=======================================================</span><span class="op">--------------</span><span class="st"> </span>(<span class="dv">80</span>%)</span>
-<span id="cb2-541"><a href="#cb2-541"></a></span>
-<span id="cb2-542"><a href="#cb2-542"></a><span class="op">==</span><span class="er">=======================================================</span><span class="op">--------------</span><span class="st"> </span>(<span class="dv">80</span>%)</span>
-<span id="cb2-543"><a href="#cb2-543"></a></span>
-<span id="cb2-544"><a href="#cb2-544"></a><span class="op">==</span><span class="er">=======================================================</span><span class="op">--------------</span><span class="st"> </span>(<span class="dv">80</span>%)</span>
-<span id="cb2-545"><a href="#cb2-545"></a></span>
-<span id="cb2-546"><a href="#cb2-546"></a><span class="op">==</span><span class="er">=======================================================</span><span class="op">--------------</span><span class="st"> </span>(<span class="dv">81</span>%)</span>
-<span id="cb2-547"><a href="#cb2-547"></a></span>
-<span id="cb2-548"><a href="#cb2-548"></a><span class="op">==</span><span class="er">=======================================================</span><span class="op">--------------</span><span class="st"> </span>(<span class="dv">81</span>%)</span>
-<span id="cb2-549"><a href="#cb2-549"></a></span>
-<span id="cb2-550"><a href="#cb2-550"></a><span class="op">==</span><span class="er">========================================================</span><span class="op">-------------</span><span class="st"> </span>(<span class="dv">81</span>%)</span>
-<span id="cb2-551"><a href="#cb2-551"></a></span>
-<span id="cb2-552"><a href="#cb2-552"></a><span class="op">==</span><span class="er">========================================================</span><span class="op">-------------</span><span class="st"> </span>(<span class="dv">81</span>%)</span>
-<span id="cb2-553"><a href="#cb2-553"></a></span>
-<span id="cb2-554"><a href="#cb2-554"></a><span class="op">==</span><span class="er">========================================================</span><span class="op">-------------</span><span class="st"> </span>(<span class="dv">82</span>%)</span>
-<span id="cb2-555"><a href="#cb2-555"></a></span>
-<span id="cb2-556"><a href="#cb2-556"></a><span class="op">==</span><span class="er">========================================================</span><span class="op">-------------</span><span class="st"> </span>(<span class="dv">82</span>%)</span>
-<span id="cb2-557"><a href="#cb2-557"></a></span>
-<span id="cb2-558"><a href="#cb2-558"></a><span class="op">==</span><span class="er">=========================================================</span><span class="op">------------</span><span class="st"> </span>(<span class="dv">82</span>%)</span>
-<span id="cb2-559"><a href="#cb2-559"></a></span>
-<span id="cb2-560"><a href="#cb2-560"></a><span class="op">==</span><span class="er">=========================================================</span><span class="op">------------</span><span class="st"> </span>(<span class="dv">83</span>%)</span>
-<span id="cb2-561"><a href="#cb2-561"></a></span>
-<span id="cb2-562"><a href="#cb2-562"></a><span class="op">==</span><span class="er">=========================================================</span><span class="op">------------</span><span class="st"> </span>(<span class="dv">83</span>%)</span>
-<span id="cb2-563"><a href="#cb2-563"></a></span>
-<span id="cb2-564"><a href="#cb2-564"></a><span class="op">==</span><span class="er">=========================================================</span><span class="op">------------</span><span class="st"> </span>(<span class="dv">83</span>%)</span>
-<span id="cb2-565"><a href="#cb2-565"></a></span>
-<span id="cb2-566"><a href="#cb2-566"></a><span class="op">==</span><span class="er">=========================================================</span><span class="op">------------</span><span class="st"> </span>(<span class="dv">84</span>%)</span>
-<span id="cb2-567"><a href="#cb2-567"></a></span>
-<span id="cb2-568"><a href="#cb2-568"></a><span class="op">==</span><span class="er">==========================================================</span><span class="op">-----------</span><span class="st"> </span>(<span class="dv">84</span>%)</span>
-<span id="cb2-569"><a href="#cb2-569"></a></span>
-<span id="cb2-570"><a href="#cb2-570"></a><span class="op">==</span><span class="er">==========================================================</span><span class="op">-----------</span><span class="st"> </span>(<span class="dv">84</span>%)</span>
-<span id="cb2-571"><a href="#cb2-571"></a></span>
-<span id="cb2-572"><a href="#cb2-572"></a><span class="op">==</span><span class="er">==========================================================</span><span class="op">-----------</span><span class="st"> </span>(<span class="dv">84</span>%)</span>
-<span id="cb2-573"><a href="#cb2-573"></a></span>
-<span id="cb2-574"><a href="#cb2-574"></a><span class="op">==</span><span class="er">==========================================================</span><span class="op">-----------</span><span class="st"> </span>(<span class="dv">85</span>%)</span>
-<span id="cb2-575"><a href="#cb2-575"></a></span>
-<span id="cb2-576"><a href="#cb2-576"></a><span class="op">==</span><span class="er">==========================================================</span><span class="op">-----------</span><span class="st"> </span>(<span class="dv">85</span>%)</span>
-<span id="cb2-577"><a href="#cb2-577"></a></span>
-<span id="cb2-578"><a href="#cb2-578"></a><span class="op">==</span><span class="er">===========================================================</span><span class="op">----------</span><span class="st"> </span>(<span class="dv">85</span>%)</span>
-<span id="cb2-579"><a href="#cb2-579"></a></span>
-<span id="cb2-580"><a href="#cb2-580"></a><span class="op">==</span><span class="er">===========================================================</span><span class="op">----------</span><span class="st"> </span>(<span class="dv">86</span>%)</span>
-<span id="cb2-581"><a href="#cb2-581"></a></span>
-<span id="cb2-582"><a href="#cb2-582"></a><span class="op">==</span><span class="er">===========================================================</span><span class="op">----------</span><span class="st"> </span>(<span class="dv">86</span>%)</span>
-<span id="cb2-583"><a href="#cb2-583"></a></span>
-<span id="cb2-584"><a href="#cb2-584"></a><span class="op">==</span><span class="er">===========================================================</span><span class="op">----------</span><span class="st"> </span>(<span class="dv">86</span>%)</span>
-<span id="cb2-585"><a href="#cb2-585"></a></span>
-<span id="cb2-586"><a href="#cb2-586"></a><span class="op">==</span><span class="er">===========================================================</span><span class="op">----------</span><span class="st"> </span>(<span class="dv">87</span>%)</span>
-<span id="cb2-587"><a href="#cb2-587"></a></span>
-<span id="cb2-588"><a href="#cb2-588"></a><span class="op">==</span><span class="er">============================================================</span><span class="op">---------</span><span class="st"> </span>(<span class="dv">87</span>%)</span>
-<span id="cb2-589"><a href="#cb2-589"></a></span>
-<span id="cb2-590"><a href="#cb2-590"></a><span class="op">==</span><span class="er">============================================================</span><span class="op">---------</span><span class="st"> </span>(<span class="dv">87</span>%)</span>
-<span id="cb2-591"><a href="#cb2-591"></a></span>
-<span id="cb2-592"><a href="#cb2-592"></a><span class="op">==</span><span class="er">============================================================</span><span class="op">---------</span><span class="st"> </span>(<span class="dv">87</span>%)</span>
-<span id="cb2-593"><a href="#cb2-593"></a></span>
-<span id="cb2-594"><a href="#cb2-594"></a><span class="op">==</span><span class="er">============================================================</span><span class="op">---------</span><span class="st"> </span>(<span class="dv">88</span>%)</span>
-<span id="cb2-595"><a href="#cb2-595"></a></span>
-<span id="cb2-596"><a href="#cb2-596"></a><span class="op">==</span><span class="er">=============================================================</span><span class="op">--------</span><span class="st"> </span>(<span class="dv">88</span>%)</span>
-<span id="cb2-597"><a href="#cb2-597"></a></span>
-<span id="cb2-598"><a href="#cb2-598"></a><span class="op">==</span><span class="er">=============================================================</span><span class="op">--------</span><span class="st"> </span>(<span class="dv">88</span>%)</span>
-<span id="cb2-599"><a href="#cb2-599"></a></span>
-<span id="cb2-600"><a href="#cb2-600"></a><span class="op">==</span><span class="er">=============================================================</span><span class="op">--------</span><span class="st"> </span>(<span class="dv">89</span>%)</span>
-<span id="cb2-601"><a href="#cb2-601"></a></span>
-<span id="cb2-602"><a href="#cb2-602"></a><span class="op">==</span><span class="er">=============================================================</span><span class="op">--------</span><span class="st"> </span>(<span class="dv">89</span>%)</span>
-<span id="cb2-603"><a href="#cb2-603"></a></span>
-<span id="cb2-604"><a href="#cb2-604"></a><span class="op">==</span><span class="er">=============================================================</span><span class="op">--------</span><span class="st"> </span>(<span class="dv">89</span>%)</span>
-<span id="cb2-605"><a href="#cb2-605"></a></span>
-<span id="cb2-606"><a href="#cb2-606"></a><span class="op">==</span><span class="er">==============================================================</span><span class="op">-------</span><span class="st"> </span>(<span class="dv">90</span>%)</span>
-<span id="cb2-607"><a href="#cb2-607"></a></span>
-<span id="cb2-608"><a href="#cb2-608"></a><span class="op">==</span><span class="er">==============================================================</span><span class="op">-------</span><span class="st"> </span>(<span class="dv">90</span>%)</span>
-<span id="cb2-609"><a href="#cb2-609"></a></span>
-<span id="cb2-610"><a href="#cb2-610"></a><span class="op">==</span><span class="er">==============================================================</span><span class="op">-------</span><span class="st"> </span>(<span class="dv">90</span>%)</span>
-<span id="cb2-611"><a href="#cb2-611"></a></span>
-<span id="cb2-612"><a href="#cb2-612"></a><span class="op">==</span><span class="er">==============================================================</span><span class="op">-------</span><span class="st"> </span>(<span class="dv">90</span>%)</span>
-<span id="cb2-613"><a href="#cb2-613"></a></span>
-<span id="cb2-614"><a href="#cb2-614"></a><span class="op">==</span><span class="er">==============================================================</span><span class="op">-------</span><span class="st"> </span>(<span class="dv">91</span>%)</span>
-<span id="cb2-615"><a href="#cb2-615"></a></span>
-<span id="cb2-616"><a href="#cb2-616"></a><span class="op">==</span><span class="er">===============================================================</span><span class="op">------</span><span class="st"> </span>(<span class="dv">91</span>%)</span>
-<span id="cb2-617"><a href="#cb2-617"></a></span>
-<span id="cb2-618"><a href="#cb2-618"></a><span class="op">==</span><span class="er">===============================================================</span><span class="op">------</span><span class="st"> </span>(<span class="dv">91</span>%)</span>
-<span id="cb2-619"><a href="#cb2-619"></a></span>
-<span id="cb2-620"><a href="#cb2-620"></a><span class="op">==</span><span class="er">===============================================================</span><span class="op">------</span><span class="st"> </span>(<span class="dv">92</span>%)</span>
-<span id="cb2-621"><a href="#cb2-621"></a></span>
-<span id="cb2-622"><a href="#cb2-622"></a><span class="op">==</span><span class="er">===============================================================</span><span class="op">------</span><span class="st"> </span>(<span class="dv">92</span>%)</span>
-<span id="cb2-623"><a href="#cb2-623"></a></span>
-<span id="cb2-624"><a href="#cb2-624"></a><span class="op">==</span><span class="er">===============================================================</span><span class="op">------</span><span class="st"> </span>(<span class="dv">92</span>%)</span>
-<span id="cb2-625"><a href="#cb2-625"></a></span>
-<span id="cb2-626"><a href="#cb2-626"></a><span class="op">==</span><span class="er">================================================================</span><span class="op">-----</span><span class="st"> </span>(<span class="dv">93</span>%)</span>
-<span id="cb2-627"><a href="#cb2-627"></a></span>
-<span id="cb2-628"><a href="#cb2-628"></a><span class="op">==</span><span class="er">================================================================</span><span class="op">-----</span><span class="st"> </span>(<span class="dv">93</span>%)</span>
-<span id="cb2-629"><a href="#cb2-629"></a></span>
-<span id="cb2-630"><a href="#cb2-630"></a><span class="op">==</span><span class="er">================================================================</span><span class="op">-----</span><span class="st"> </span>(<span class="dv">93</span>%)</span>
-<span id="cb2-631"><a href="#cb2-631"></a></span>
-<span id="cb2-632"><a href="#cb2-632"></a><span class="op">==</span><span class="er">================================================================</span><span class="op">-----</span><span class="st"> </span>(<span class="dv">93</span>%)</span>
-<span id="cb2-633"><a href="#cb2-633"></a></span>
-<span id="cb2-634"><a href="#cb2-634"></a><span class="op">==</span><span class="er">=================================================================</span><span class="op">----</span><span class="st"> </span>(<span class="dv">94</span>%)</span>
-<span id="cb2-635"><a href="#cb2-635"></a></span>
-<span id="cb2-636"><a href="#cb2-636"></a><span class="op">==</span><span class="er">=================================================================</span><span class="op">----</span><span class="st"> </span>(<span class="dv">94</span>%)</span>
-<span id="cb2-637"><a href="#cb2-637"></a></span>
-<span id="cb2-638"><a href="#cb2-638"></a><span class="op">==</span><span class="er">=================================================================</span><span class="op">----</span><span class="st"> </span>(<span class="dv">94</span>%)</span>
-<span id="cb2-639"><a href="#cb2-639"></a></span>
-<span id="cb2-640"><a href="#cb2-640"></a><span class="op">==</span><span class="er">=================================================================</span><span class="op">----</span><span class="st"> </span>(<span class="dv">95</span>%)</span>
-<span id="cb2-641"><a href="#cb2-641"></a></span>
-<span id="cb2-642"><a href="#cb2-642"></a><span class="op">==</span><span class="er">=================================================================</span><span class="op">----</span><span class="st"> </span>(<span class="dv">95</span>%)</span>
-<span id="cb2-643"><a href="#cb2-643"></a></span>
-<span id="cb2-644"><a href="#cb2-644"></a><span class="op">==</span><span class="er">==================================================================</span><span class="op">---</span><span class="st"> </span>(<span class="dv">95</span>%)</span>
-<span id="cb2-645"><a href="#cb2-645"></a></span>
-<span id="cb2-646"><a href="#cb2-646"></a><span class="op">==</span><span class="er">==================================================================</span><span class="op">---</span><span class="st"> </span>(<span class="dv">96</span>%)</span>
-<span id="cb2-647"><a href="#cb2-647"></a></span>
-<span id="cb2-648"><a href="#cb2-648"></a><span class="op">==</span><span class="er">==================================================================</span><span class="op">---</span><span class="st"> </span>(<span class="dv">96</span>%)</span>
-<span id="cb2-649"><a href="#cb2-649"></a></span>
-<span id="cb2-650"><a href="#cb2-650"></a><span class="op">==</span><span class="er">==================================================================</span><span class="op">---</span><span class="st"> </span>(<span class="dv">96</span>%)</span>
-<span id="cb2-651"><a href="#cb2-651"></a></span>
-<span id="cb2-652"><a href="#cb2-652"></a><span class="op">==</span><span class="er">==================================================================</span><span class="op">---</span><span class="st"> </span>(<span class="dv">96</span>%)</span>
-<span id="cb2-653"><a href="#cb2-653"></a></span>
-<span id="cb2-654"><a href="#cb2-654"></a><span class="op">==</span><span class="er">===================================================================</span><span class="op">--</span><span class="st"> </span>(<span class="dv">97</span>%)</span>
-<span id="cb2-655"><a href="#cb2-655"></a></span>
-<span id="cb2-656"><a href="#cb2-656"></a><span class="op">==</span><span class="er">===================================================================</span><span class="op">--</span><span class="st"> </span>(<span class="dv">97</span>%)</span>
-<span id="cb2-657"><a href="#cb2-657"></a></span>
-<span id="cb2-658"><a href="#cb2-658"></a><span class="op">==</span><span class="er">===================================================================</span><span class="op">--</span><span class="st"> </span>(<span class="dv">97</span>%)</span>
-<span id="cb2-659"><a href="#cb2-659"></a></span>
-<span id="cb2-660"><a href="#cb2-660"></a><span class="op">==</span><span class="er">===================================================================</span><span class="op">--</span><span class="st"> </span>(<span class="dv">98</span>%)</span>
-<span id="cb2-661"><a href="#cb2-661"></a></span>
-<span id="cb2-662"><a href="#cb2-662"></a><span class="op">==</span><span class="er">===================================================================</span><span class="op">--</span><span class="st"> </span>(<span class="dv">98</span>%)</span>
-<span id="cb2-663"><a href="#cb2-663"></a></span>
-<span id="cb2-664"><a href="#cb2-664"></a><span class="op">==</span><span class="er">====================================================================</span><span class="op">-</span><span class="st"> </span>(<span class="dv">98</span>%)</span>
-<span id="cb2-665"><a href="#cb2-665"></a></span>
-<span id="cb2-666"><a href="#cb2-666"></a><span class="op">==</span><span class="er">====================================================================</span><span class="op">-</span><span class="st"> </span>(<span class="dv">99</span>%)</span>
-<span id="cb2-667"><a href="#cb2-667"></a></span>
-<span id="cb2-668"><a href="#cb2-668"></a><span class="op">==</span><span class="er">====================================================================</span><span class="op">-</span><span class="st"> </span>(<span class="dv">99</span>%)</span>
-<span id="cb2-669"><a href="#cb2-669"></a></span>
-<span id="cb2-670"><a href="#cb2-670"></a><span class="op">==</span><span class="er">====================================================================</span><span class="op">-</span><span class="st"> </span>(<span class="dv">99</span>%)</span>
-<span id="cb2-671"><a href="#cb2-671"></a></span>
-<span id="cb2-672"><a href="#cb2-672"></a><span class="op">==</span><span class="er">=====================================================================</span><span class="st"> </span>(<span class="dv">100</span>%)</span>
-<span id="cb2-673"><a href="#cb2-673"></a><span class="co">## Extract statistics and prep for cheem consumption</span></span>
-<span id="cb2-674"><a href="#cb2-674"></a>this_ls &lt;-<span class="st"> </span><span class="kw">cheem_ls</span>(X, Y, <span class="dt">class =</span> clas,</span>
-<span id="cb2-675"><a href="#cb2-675"></a>                    <span class="dt">model =</span> rf_fit, <span class="dt">attr_df =</span> shap_df, <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
-<p>Now we are done with all of the leg work, let’s turn our attention towards the visuals and analysis.</p>
+<code class="sourceCode R"><span><span class="co">## Download if not installed</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span><span class="op">)</span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/treeshap/" class="external-link">treeshap</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"treeshap"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz" class="external-link">shapviz</a></span><span class="op">)</span><span class="op">)</span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"shapviz"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">## Load onto session</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz" class="external-link">shapviz</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Setup</span></span>
+<span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">]</span></span>
+<span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span><span class="op">$</span><span class="va">SalePrice</span></span>
+<span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span><span class="op">$</span><span class="va">SubclassMS</span></span>
+<span></span>
+<span><span class="co">## Model and predict</span></span>
+<span><span class="va">ames_train</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">xgb.DMatrix</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Y</span><span class="op">)</span></span>
+<span><span class="va">ames_xgb_fit</span>  <span class="op">&lt;-</span> <span class="fu">xgboost</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ames_train</span>, max.depth <span class="op">=</span> <span class="fl">3</span>, nrounds <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span><span class="va">ames_xgb_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">ames_xgb_fit</span>, newdata <span class="op">=</span> <span class="va">ames_train</span><span class="op">)</span></span>
+<span><span class="va">ames_xgb_pred</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## SHAP values</span></span>
+<span><span class="va">shp</span> <span class="op">&lt;-</span> <span class="fu">shapviz</span><span class="op">(</span><span class="va">ames_xgb_fit</span>, X_pred <span class="op">=</span> <span class="va">ames_train</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
+<span><span class="co">## Keep just the [n, p] local explanations</span></span>
+<span><span class="va">ames_xgb_shap</span> <span class="op">&lt;-</span> <span class="va">shp</span><span class="op">$</span><span class="va">S</span></span>
+<span><span class="va">ames_xgb_shap</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Note that the choice of the model, prediction, and local explanation
+(or other embedding) is choice of the analyst and not facilitated by
+<strong>cheem</strong>. Now let’s prepare for the visualization of these
+spaces with a <code><a href="../reference/cheem_ls.html">cheem::cheem_ls()</a></code> call before we start our
+analysis.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## Preprocessing for cheem analysis</span></span>
+<span><span class="va">ames_chm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cheem_ls.html">cheem_ls</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>,</span>
+<span>                     class      <span class="op">=</span> <span class="va">clas</span>,</span>
+<span>                     attr_df    <span class="op">=</span> <span class="va">ames_xgb_shap</span>,</span>
+<span>                     pred       <span class="op">=</span> <span class="va">ames_xgb_pred</span>,</span>
+<span>                     basis_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pca"</span><span class="op">)</span>,</span>
+<span>                     label      <span class="op">=</span> <span class="st">"Ames, xgb, shap"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ames_chm</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="cheem-viewer">Cheem viewer<a class="anchor" aria-label="anchor" href="#cheem-viewer"></a>
 </h2>
-<p>We have extracted tree SHAP, an feature importance measure in the vicinity of each observation. We need to identify an instance of interest to explore; we do so with the linked brushing available in the <em>global view</em>. Then we will vary contributions from different features to test the support an explanation in a <em>radial tour</em></p>
+<p>We have extracted tree SHAP, an feature importance measure in the
+vicinity of each observation. We need to identify an instance of
+interest to explore; we do so with the linked brushing available in the
+<em>global view</em>. Then we will vary contributions from different
+features to test the support an explanation in a <em>radial
+tour</em></p>
 <div class="section level3">
 <h3 id="global-view">Global view<a class="anchor" aria-label="anchor" href="#global-view"></a>
 </h3>
-<p>To get more complete view lets look at approximations of the data space, attribution space, and model fits side-by-side with linked brushing with the help of <strong>plotly</strong> and <strong>crosstalk</strong>. The model information is essentially the confusion matrix for the classification case.</p>
+<p>To get more complete view lets look at approximations of the data
+space, attribution space, and model fits side-by-side with linked
+brushing with the help of <strong>plotly</strong> and
+<strong>crosstalk</strong>. We have identified an observation with a
+large Mahalanobis distance (in data space) and the closest neighbor in
+attribution space.</p>
+<!-- The model information is essentially the confusion matrix for the classification case. -->
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/global_view.html">global_view</a></span><span class="op">(</span><span class="va">this_ls</span>, primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span>,
-            height_px <span class="op">=</span> <span class="fl">240</span>, width_px <span class="op">=</span> <span class="fl">720</span>, as_ggplot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="getting-started-with-cheem_files/figure-html/unnamed-chunk-3-1.png" width="100%" style="display: block; margin: auto;"></p>
-<p>From this <em>global view</em> we want to identify a primary instance (PI) and optionally a comparison instance (CI) to explore. Misclassified or observations with high residuals are good targets for further exploration. One point sticks out in this case. Instance 243 (shown as *) is a Gentoo (purple) penguin, while the model predict it to be a Chinstrap penguin. Peguin 169 (shown as x) is reasonably close by and correctly predicted as Gentoo. In practice we used linked brushing and misclassification information to guide our search.</p>
+<code class="sourceCode R"><span><span class="va">prim</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fl">17</span></span>
+<span><span class="fu"><a href="../reference/global_view.html">global_view</a></span><span class="op">(</span><span class="va">ames_chm</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, comparison_obs <span class="op">=</span> <span class="va">comp</span>,</span>
+<span>            height_px <span class="op">=</span> <span class="fl">240</span>, width_px <span class="op">=</span> <span class="fl">720</span>,</span>
+<span>            as_ggplot <span class="op">=</span> <span class="cn">TRUE</span>, color <span class="op">=</span> <span class="st">"log_maha.data"</span><span class="op">)</span></span></code></pre></div>
+<p>From this <em>global view</em> we want to identify a primary instance
+(PI) and optionally a comparison instance (CI) to explore. Misclassified
+or observations with high residuals are good targets for further
+exploration. One point sticks out in this case. Instance 243 (shown as
+*) is a Gentoo (purple) penguin, while the model predict it to be a
+Chinstrap penguin. Penguin 169 (shown as x) is reasonably close by and
+correctly predicted as Gentoo. In practice we used linked brushing and
+misclassification information to guide our search.</p>
 </div>
 <div class="section level3">
 <h3 id="radial-tour">Radial tour<a class="anchor" aria-label="anchor" href="#radial-tour"></a>
 </h3>
-<p>There is a lot to unpack here. The normalized distribution of all feature attribution from all instances are shown as parallel coordinates lines. The above selected PI and CI are shown here as a dashed and dotted line respectively. The first thing we notice is that the attribution of the PI is close to it’s (incorrect) prediction of Chinstrap (orange) in terms of bill length (<code>bl</code>) and flipper length (<code>fl</code>). In terms of bill depth and body mass (<code>bd</code> and <code>bm</code>) it is more like its observed species Gentoo (purple). We select flipper length as the feature to manipulate.</p>
+<p>There is a lot to unpack here. The normalized distribution of all
+feature attribution from all instances are shown as parallel coordinates
+lines. The above selected PI and CI are shown here as a dashed and
+dotted line respectively. The first thing we notice is that the
+attribution of the PI is close to it’s (incorrect) prediction of
+Chinstrap (orange) in terms of bill length (<code>bl</code>) and flipper
+length (<code>fl</code>). In terms of bill depth and body mass
+(<code>bd</code> and <code>bm</code>) it is more like its observed
+species Gentoo (purple). We select flipper length as the feature to
+manipulate.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Normalized attribution basis of the PI</span>
-<span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/basis_attr_df.html">basis_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, rownum <span class="op">=</span> <span class="fl">243</span><span class="op">)</span>
-<span class="co">## Default to feature to manipulation; </span>
-<span class="co">#### the feature with largest separation between PI and CI attribution</span>
-<span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/manip_var_of_attr_df.html">manip_var_of_attr_df</a></span><span class="op">(</span><span class="va">shap_df</span>, primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span><span class="op">)</span>
-<span class="co">## Make the radial tour</span>
-<span class="va">ggt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/radial_cheem_tour.html">radial_cheem_tour</a></span><span class="op">(</span>
-  <span class="va">this_ls</span>, basis <span class="op">=</span> <span class="va">bas</span>, manip_var <span class="op">=</span> <span class="va">mv</span>,
-  primary_obs <span class="op">=</span> <span class="fl">243</span>, comparison_obs <span class="op">=</span> <span class="fl">169</span>, angle <span class="op">=</span> <span class="fl">.25</span><span class="op">)</span>
-
-<span class="co">## Animate it</span>
-<span class="fu"><a href="https://rdrr.io/pkg/spinifex/man/animate_gganimate.html" class="external-link">animate_gganimate</a></span><span class="op">(</span><span class="va">ggt</span>, fps <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> 
-  <span class="co">#height = 2, width = 4.5, units = "in", res = 150</span>
-<span class="co">## Or as a plotly html widget</span>
-<span class="co">#animate_plotly(ggt, fps = 6)</span></code></pre></div>
-<p><img src="tour_penguins.gif" width="100%" style="display: block; margin: auto;"></p>
-<p>Starting from the attribution projection, this instance already looks more like its observed Gentoo than predicted Chinstrap. However, by frame 8, the basis has a full contribution of flipper length and does look more like the predicted Chinstrap. Looking at the parallel coordinate lines on the basis visual we can see that flipper length has a large gap between PI and CI, lets check the original variables to digest.</p>
+<code class="sourceCode R"><span><span class="co">## Normalized attribution basis of the PI</span></span>
+<span><span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sug_basis.html">sug_basis</a></span><span class="op">(</span><span class="va">ames_xgb_shap</span>, rownum <span class="op">=</span> <span class="va">prim</span><span class="op">)</span></span>
+<span><span class="co">## Default feature to manipulate:</span></span>
+<span><span class="co">#### the feature with largest separation between PI and CI attribution</span></span>
+<span><span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sug_manip_var.html">sug_manip_var</a></span><span class="op">(</span></span>
+<span>  <span class="va">ames_xgb_shap</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, comparison_obs <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span>
+<span><span class="co">## Make the radial tour</span></span>
+<span><span class="va">ggt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/radial_cheem_tour.html">radial_cheem_tour</a></span><span class="op">(</span></span>
+<span>  <span class="va">ames_chm</span>, basis <span class="op">=</span> <span class="va">bas</span>, manip_var <span class="op">=</span> <span class="va">mv</span>,</span>
+<span>  primary_obs <span class="op">=</span> <span class="va">prim</span>, comparison_obs <span class="op">=</span> <span class="va">comp</span>, angle <span class="op">=</span> <span class="fl">.15</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Animate it</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/spinifex/man/animate_gganimate.html" class="external-link">animate_gganimate</a></span><span class="op">(</span><span class="va">ggt</span>, fps <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span>  <span class="co">#height = 2, width = 4.5, units = "in", res = 150</span></span>
+<span><span class="co">## Or as a plotly html widget</span></span>
+<span><span class="co">#animate_plotly(ggt, fps = 6)</span></span></code></pre></div>
+<p><img src="https://github.com/nspyrison/cheem/blob/main/vignettes/tour_penguins.gif?raw=true"></p>
+<p>Starting from the attribution projection, this instance already looks
+more like its observed Gentoo than predicted Chinstrap. However, by
+frame 8, the basis has a full contribution of flipper length and does
+look more like the predicted Chinstrap. Looking at the parallel
+coordinate lines on the basis visual we can see that flipper length has
+a large gap between PI and CI, lets check the original variables to
+digest.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
-
-<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">penguins_na.rm</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">bill_length_mm</span>,
-                           y <span class="op">=</span> <span class="va">flipper_length_mm</span>,
-                           colour <span class="op">=</span> <span class="va">species</span>,
-                           shape <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="co">## Highlight PI, *</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins_na.rm</span><span class="op">[</span><span class="fl">243</span>, <span class="op">]</span>, shape <span class="op">=</span> <span class="fl">8</span>, size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span>
-  <span class="co">## Theme, scaling, color, and labels</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Flipper length [mm]"</span>, x <span class="op">=</span> <span class="st">"Bill length [mm]"</span>, 
-       color <span class="op">=</span> <span class="st">"Observed species"</span>, shape <span class="op">=</span> <span class="st">"Observed species"</span><span class="op">)</span></code></pre></div>
-<p><img src="getting-started-with-cheem_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;"></p>
-<p>This profile, with two features that are most distinguished between the PI and CI. This instance is nested in the in between the Chinstrap penguins. That makes this instance particularly hard for a random forest model to classify as decision tree can only make partition on one value (horizontal and vertical lines here).</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="va">prim</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">penguins_na.rm</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">bill_length_mm</span>,</span>
+<span>                           y <span class="op">=</span> <span class="va">flipper_length_mm</span>,</span>
+<span>                           colour <span class="op">=</span> <span class="va">species</span>,</span>
+<span>                           shape <span class="op">=</span> <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co">## Highlight PI, *</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">penguins_na.rm</span><span class="op">[</span><span class="va">prim</span>, <span class="op">]</span>,</span>
+<span>             shape <span class="op">=</span> <span class="fl">8</span>, size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co">## Theme, scaling, color, and labels</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>aspect.ratio <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Flipper length [mm]"</span>, x <span class="op">=</span> <span class="st">"Bill length [mm]"</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">"Observed species"</span>, shape <span class="op">=</span> <span class="st">"Observed species"</span><span class="op">)</span></span></code></pre></div>
+<p>This profile, with two features that are most distinguished between
+the PI and CI. This instance is nested in the in between the Chinstrap
+penguins. That makes this instance particularly hard for a random forest
+model to classify as decision tree can only make partition on one value
+(horizontal and vertical lines here).</p>
 </div>
 <div class="section level3">
 <h3 id="shiny-application">Shiny application<a class="anchor" aria-label="anchor" href="#shiny-application"></a>
 </h3>
-<p>We provide an interactive <strong>shiny</strong> application. Interactive features are made possible with <strong>plotly</strong>, <strong>crosstalk</strong>, and <strong>DT</strong>. We have preprocessed simulated and modern datasets for you to explore this analysis with. Alternatively, bring your own data by saving the return of <code><a href="../reference/cheem_ls.html">cheem_ls()</a></code> as an .rds file. Follow along with the example in <code><a href="../reference/cheem_ls.html">?cheem_ls</a></code>.</p>
+<p>We provide an interactive <strong>shiny</strong> application.
+Interactive features are made possible with <strong>plotly</strong>,
+<strong>crosstalk</strong>, and <strong>DT</strong>. We have
+preprocessed simulated and modern datasets for you to explore this
+analysis with. Alternatively, bring your own data by saving the return
+of <code><a href="../reference/cheem_ls.html">cheem_ls()</a></code> as an rds file. Follow along with the example
+in <code><a href="../reference/cheem_ls.html">?cheem_ls</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>Interpretability of black-box models is important to maintain. Local explanation extend this interpretability by approximating the feature importance in the vicinity of one instance. We purpose post-hoc analysis of these local explanations. First we explore them in a global, full instance context. Then we explore the support of the local explanation to see where it seems plausible or unreliable.</p>
+<p>Interpretability of black-box models is important to maintain. Local
+explanation extend this interpretability by approximating the feature
+importance in the vicinity of one instance. We purpose post-hoc analysis
+of these local explanations. First we explore them in a global, full
+instance context. Then we explore the support of the local explanation
+to see where it seems plausible or unreliable.</p>
 </div>
-  </div>
-
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
+<div class="section level2">
+<h2 id="other-local-explanations-models">Other local explanations (&amp; models)<a class="anchor" aria-label="anchor" href="#other-local-explanations-models"></a>
+</h2>
+<p><strong>cheem</strong> is agnostic to model or local explanation, but
+requires a model and local explanation. Above we illustrated using a
+random forest to predict penguin species. Below demonstrates using other
+attribution spaces from different models.</p>
+<div class="section level3">
+<h3 id="shapviz-xgb-classification">shapviz (&amp; xgb classification)<a class="anchor" aria-label="anchor" href="#shapviz-xgb-classification"></a>
+</h3>
+<p><strong>shapviz</strong> is being actively maintained and is hosted
+on CRAN. It is compatible with H2O, lgb, and xgb models.</p>
+<p><a href="https://github.com/ModelOriented/shapviz" class="external-link uri">https://github.com/ModelOriented/shapviz</a></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz" class="external-link">shapviz</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"shapviz"</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"xgboost"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz" class="external-link">shapviz</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3653</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Setup</span></span>
+<span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="fu">spinifex</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/spinifex/man/penguins_na.rm.html" class="external-link">penguins_na.rm</a></span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="fu">spinifex</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/spinifex/man/penguins_na.rm.html" class="external-link">penguins_na.rm</a></span><span class="op">$</span><span class="va">species</span></span>
+<span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="fu">spinifex</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/spinifex/man/penguins_na.rm.html" class="external-link">penguins_na.rm</a></span><span class="op">$</span><span class="va">species</span></span>
+<span></span>
+<span><span class="co">## Model and predict</span></span>
+<span><span class="va">peng_train</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">xgb.DMatrix</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Y</span><span class="op">)</span></span>
+<span><span class="va">peng_xgb_fit</span>  <span class="op">&lt;-</span> <span class="fu">xgboost</span><span class="op">(</span>data <span class="op">=</span> <span class="va">peng_train</span>, max.depth <span class="op">=</span> <span class="fl">3</span>, nrounds <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span><span class="va">peng_xgb_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">peng_xgb_fit</span>, newdata <span class="op">=</span> <span class="va">peng_train</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## SHAP</span></span>
+<span><span class="va">peng_xgb_shap</span> <span class="op">&lt;-</span> <span class="fu">shapviz</span><span class="op">(</span><span class="va">peng_xgb_fit</span>, X_pred <span class="op">=</span> <span class="va">peng_train</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
+<span><span class="co">## Keep just the [n, p] local explanations</span></span>
+<span><span class="va">peng_xgb_shap</span> <span class="op">&lt;-</span> <span class="va">peng_xgb_shap</span><span class="op">$</span><span class="va">S</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="treeshap-randomforest-regression">treeshap (&amp; randomForest regression)<a class="anchor" aria-label="anchor" href="#treeshap-randomforest-regression"></a>
+</h3>
+<p><strong>treeshap</strong> is only available on CRAN. It is compatible
+with many tree-based models including gbm, lbm, rf, ranger, and xgb
+models.</p>
+<p><a href="https://github.com/ModelOriented/treeshap" class="external-link uri">https://github.com/ModelOriented/treeshap</a></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/treeshap/" class="external-link">treeshap</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"treeshap"</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/" class="external-link">randomForest</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/treeshap/" class="external-link">treeshap</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/" class="external-link">randomForest</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Setup</span></span>
+<span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="fu">spinifex</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/spinifex/man/wine.html" class="external-link">wine</a></span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
+<span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="fu">spinifex</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/spinifex/man/wine.html" class="external-link">wine</a></span><span class="op">$</span><span class="va">Alcohol</span></span>
+<span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="fu">spinifex</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/spinifex/man/wine.html" class="external-link">wine</a></span><span class="op">$</span><span class="va">Type</span></span>
+<span>  </span>
+<span><span class="co">## Fit randomForest::randomForest</span></span>
+<span><span class="va">wine_rf_fit</span>  <span class="op">&lt;-</span> <span class="fu">randomForest</span><span class="fu">::</span><span class="fu">randomForest</span><span class="op">(</span></span>
+<span>  <span class="va">X</span>, <span class="va">Y</span>, ntree <span class="op">=</span> <span class="fl">125</span>,</span>
+<span>  mtry <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="../reference/is_discrete.html">is_discrete</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">/</span> <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  nodesize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="../reference/is_discrete.html">is_discrete</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">/</span> <span class="fl">500</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">wine_rf_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wine_rf_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## treeshap::treeshap()</span></span>
+<span><span class="va">wine_rf_tshap</span> <span class="op">&lt;-</span> <span class="va">wine_rf_fit</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">treeshap</span><span class="fu">::</span><span class="fu">randomForest.unify</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">treeshap</span><span class="fu">::</span><span class="fu">treeshap</span><span class="op">(</span><span class="va">X</span>, interactions <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">## Keep just the [n, p] local explanations</span></span>
+<span><span class="va">wine_rf_tshap</span> <span class="op">&lt;-</span> <span class="va">wine_rf_tshap</span><span class="op">$</span><span class="va">shaps</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="dalex-lm-regression">DALEX (&amp; LM regression)<a class="anchor" aria-label="anchor" href="#dalex-lm-regression"></a>
+</h3>
+<p><strong>DALEX</strong> is a popular and versatile XAI package
+available on CRAN. It is compatible with many models, but it uses the
+original, slower variant of SHAP local explanation. Expect long run
+times for sizable data or complex models.</p>
+<p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link uri">https://ema.drwhy.ai/shapley.html#SHAPRcode</a></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/DALEX/" class="external-link">DALEX</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"DALEX"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/DALEX/" class="external-link">DALEX</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## Setup</span></span>
+<span><span class="va">X</span>    <span class="op">&lt;-</span> <span class="va">dragons</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">6</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">Y</span>    <span class="op">&lt;-</span> <span class="va">dragons</span><span class="op">$</span><span class="va">life_length</span></span>
+<span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">dragons</span><span class="op">$</span><span class="va">colour</span></span>
+<span></span>
+<span><span class="co">## Model and predict</span></span>
+<span><span class="va">drag_lm_fit</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">Y</span>, <span class="va">X</span><span class="op">)</span>, <span class="va">Y</span> <span class="op">~</span> <span class="va">.</span><span class="op">)</span></span>
+<span><span class="va">drag_lm_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">drag_lm_fit</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## SHAP via DALEX, versatile but slow</span></span>
+<span><span class="va">drag_lm_exp</span> <span class="op">&lt;-</span> <span class="fu">explain</span><span class="op">(</span><span class="va">drag_lm_fit</span>, data <span class="op">=</span> <span class="va">X</span>, y <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>                       label <span class="op">=</span> <span class="st">"Dragons, LM, SHAP"</span><span class="op">)</span></span>
+<span><span class="co">## DALEX::predict_parts_shap is flexible, but slow and one row at a time</span></span>
+<span><span class="va">drag_lm_shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">pps</span> <span class="op">&lt;-</span> <span class="fu">predict_parts_shap</span><span class="op">(</span><span class="va">drag_lm_exp</span>, new_observation <span class="op">=</span> <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="co">## Keep just the [n, p] local explanations</span></span>
+<span>  <span class="va">drag_lm_shap</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span></span>
+<span>    <span class="va">pps</span><span class="op">$</span><span class="va">contribution</span>, <span class="va">pps</span><span class="op">$</span><span class="va">variable</span>, <span class="va">mean</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">drag_lm_shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">drag_lm_shap</span><span class="op">)</span></span></code></pre></div>
+<!-- # EXPERIMENTAL: Use with non-linear embedding spaces -->
+<!-- Instead of creating a non-linear model with predictions The global view could compare data space and non-linear embedded space, though the radial tour isn't well defined as there isn't necessarily a y variable to be the y-axis for the tour. -->
+<!-- ```{r, eval=FALSE, echo=TRUE} -->
+<!-- ## NOTE: This is not supported. embedding are [n, d<p], and y axis of the tour is gone; closer to classification tour -->
+<!-- if(!require(umap)) install.packages("umap") -->
+<!-- library(umap) -->
+<!-- library(cheem) -->
+<!-- X <- spinifex::penguins_na.rm[, 1:4] -->
+<!-- ## 2d umap embedding of 4d data space. No non-linear model or predictions. -->
+<!-- peng_umap2 <- umap::umap(X, d = 4) -->
+<!-- peng_umap2 <- peng_umap2$layout -->
+<!-- peng_umap_chm <- cheem_ls(X, y = NULL, class = NULL, -->
+<!--                           attr_df    = peng_umap2, -->
+<!--                           pred       = NULL, -->
+<!--                           basis_type = c("pca"), -->
+<!--                           label      = "Penguin, umap2") -->
+<!-- global_view(peng_umap_chm, primary_obs = 115, comparison_obs = 296, -->
+<!--             height_px = 240, width_px = 720, as_ggplot = FALSE) -->
+<!-- ## Note that the radial tour isn't really applicable, as there is no y(/y axis). -->
+<!-- ``` -->
+</div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
-</div>
 
 
-
-      <footer><div class="copyright">
+    <footer><div class="pkgdown-footer-left">
   <p></p>
 <p>Developed by Nicholas Spyrison.</p>
 </div>
 
-<div class="pkgdown">
+<div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
 
   
-
 
   
 

@@ -4,6 +4,9 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/LICENSE-text.html</loc>
+  </url>
+  <url>
     <loc>/articles/getting-started-with-cheem.html</loc>
   </url>
   <url>
@@ -22,13 +25,10 @@
     <loc>/reference/amesHousing2018.html</loc>
   </url>
   <url>
+    <loc>/reference/ames_rf_pred.html</loc>
+  </url>
+  <url>
     <loc>/reference/as_logical_index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/attr_df_treeshap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/basis_attr_df.html</loc>
   </url>
   <url>
     <loc>/reference/cheem.html</loc>
@@ -40,19 +40,16 @@
     <loc>/reference/chocolates.html</loc>
   </url>
   <url>
+    <loc>/reference/chocolates_svm_pred.html</loc>
+  </url>
+  <url>
     <loc>/reference/color_scale_of.html</loc>
   </url>
   <url>
-    <loc>/reference/default_rf.html</loc>
+    <loc>/reference/contains_nonnumeric.html</loc>
   </url>
   <url>
     <loc>/reference/devMessage.html</loc>
-  </url>
-  <url>
-    <loc>/reference/does_contain_nonnumeric.html</loc>
-  </url>
-  <url>
-    <loc>/reference/gbm.unify.html</loc>
   </url>
   <url>
     <loc>/reference/global_view.html</loc>
@@ -61,13 +58,13 @@
     <loc>/reference/global_view_df_1layer.html</loc>
   </url>
   <url>
+    <loc>/reference/global_view_legwork.html</loc>
+  </url>
+  <url>
     <loc>/reference/ifDev.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/is.model_unified.html</loc>
   </url>
   <url>
     <loc>/reference/is_discrete.html</loc>
@@ -76,31 +73,16 @@
     <loc>/reference/is_diverging.html</loc>
   </url>
   <url>
-    <loc>/reference/is_randomForest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/lightgbm.unify.html</loc>
-  </url>
-  <url>
     <loc>/reference/linear_tform.html</loc>
   </url>
   <url>
     <loc>/reference/logistic_tform.html</loc>
   </url>
   <url>
-    <loc>/reference/manip_var_of_attr_df.html</loc>
+    <loc>/reference/model_performance.html</loc>
   </url>
   <url>
-    <loc>/reference/model_performance_df.html</loc>
-  </url>
-  <url>
-    <loc>/reference/model_unified.object.html</loc>
-  </url>
-  <url>
-    <loc>/reference/print.model_unified.html</loc>
-  </url>
-  <url>
-    <loc>/reference/print.treeshap.html</loc>
+    <loc>/reference/penguin_xgb_pred.html</loc>
   </url>
   <url>
     <loc>/reference/problem_type.html</loc>
@@ -112,12 +94,6 @@
     <loc>/reference/radial_cheem_tour.html</loc>
   </url>
   <url>
-    <loc>/reference/randomForest.unify.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ranger.unify.html</loc>
-  </url>
-  <url>
     <loc>/reference/reexports.html</loc>
   </url>
   <url>
@@ -127,18 +103,12 @@
     <loc>/reference/run_app.html</loc>
   </url>
   <url>
-    <loc>/reference/set_reference_dataset.html</loc>
+    <loc>/reference/subset_cheem.html</loc>
   </url>
   <url>
-    <loc>/reference/treeshap.html</loc>
+    <loc>/reference/sug_basis.html</loc>
   </url>
   <url>
-    <loc>/reference/treeshap.object.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unify_tree_model.html</loc>
-  </url>
-  <url>
-    <loc>/reference/xgboost.unify.html</loc>
+    <loc>/reference/sug_manip_var.html</loc>
   </url>
 </urlset>
