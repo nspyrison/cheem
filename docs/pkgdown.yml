@@ -3,5 +3,8 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   getting-started-with-cheem: getting-started-with-cheem.html
-last_built: 2023-10-26T19:03Z
+last_built: 2023-10-26T19:46Z
+urls:
+  reference: https://nspyrison.github.io/cheem/reference
+  article: https://nspyrison.github.io/cheem/articles
 

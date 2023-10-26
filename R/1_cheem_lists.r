@@ -151,7 +151,7 @@ global_view_df_1layer <- function(
 #' clas <- spinifex::penguins_na.rm$species
 #' 
 #' ## Bring your own attributions and predictions, 
-#' ## for help review the vignette or packdown
+#' ## for help review the vignette nspyrison.github.io/cheem/
 #' if(FALSE)
 #'   vignette("getting-started-with-cheem")
 #' 

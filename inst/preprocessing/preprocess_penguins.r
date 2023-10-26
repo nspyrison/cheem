@@ -87,3 +87,10 @@ test_set <- sample(seq_len(nrow(biopsy)), 4)
 prediction <- biopsy$class
 biopsy$class <- NULL
 model <- lda(biopsy[-test_set, ], prediction[-test_set])
+
+pred <- predict(model)
+sum(prediction != pred$class)
+explainer <- lime(biopsy[-test_set,], model, bin_continuous = TRUE, quantile_bins = FALSE)
+
+chm <- cheem_ls(X, Y, xgb_shap, xgb_pred, clas,
+                label = "Penguins, xgb, shapviz")

@@ -1,177 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://nspyrison.github.io/cheem/404.html</loc>
   </url>
   <url>
-    <loc>/articles/getting-started-with-cheem.html</loc>
+    <loc>https://nspyrison.github.io/cheem/articles/getting-started-with-cheem.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://nspyrison.github.io/cheem/articles/index.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://nspyrison.github.io/cheem/authors.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://nspyrison.github.io/cheem/index.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
+    <loc>https://nspyrison.github.io/cheem/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>/news/index.html</loc>
+    <loc>https://nspyrison.github.io/cheem/news/index.html</loc>
   </url>
   <url>
-    <loc>/reference/amesHousing2018.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/amesHousing2018.html</loc>
   </url>
   <url>
-    <loc>/reference/ames_rf_pred.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/ames_rf_pred.html</loc>
   </url>
   <url>
-    <loc>/reference/as_logical_index.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/as_logical_index.html</loc>
   </url>
   <url>
-    <loc>/reference/attr_df_treeshap.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/cheem.html</loc>
   </url>
   <url>
-    <loc>/reference/basis_attr_df.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/cheem_ls.html</loc>
   </url>
   <url>
-    <loc>/reference/cheem.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/chocolates.html</loc>
   </url>
   <url>
-    <loc>/reference/cheem_ls.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/chocolates_svm_pred.html</loc>
   </url>
   <url>
-    <loc>/reference/chocolates.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/color_scale_of.html</loc>
   </url>
   <url>
-    <loc>/reference/chocolates_svm_pred.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/contains_nonnumeric.html</loc>
   </url>
   <url>
-    <loc>/reference/color_scale_of.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/devMessage.html</loc>
   </url>
   <url>
-    <loc>/reference/contains_nonnumeric.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/global_view.html</loc>
   </url>
   <url>
-    <loc>/reference/default_rf.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/global_view_df_1layer.html</loc>
   </url>
   <url>
-    <loc>/reference/devMessage.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/global_view_legwork.html</loc>
   </url>
   <url>
-    <loc>/reference/does_contain_nonnumeric.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/ifDev.html</loc>
   </url>
   <url>
-    <loc>/reference/gbm.unify.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/global_view.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/is_discrete.html</loc>
   </url>
   <url>
-    <loc>/reference/global_view_df_1layer.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/is_diverging.html</loc>
   </url>
   <url>
-    <loc>/reference/global_view_legwork.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/linear_tform.html</loc>
   </url>
   <url>
-    <loc>/reference/ifDev.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/logistic_tform.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/model_performance.html</loc>
   </url>
   <url>
-    <loc>/reference/is.model_unified.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/penguin_xgb_pred.html</loc>
   </url>
   <url>
-    <loc>/reference/is_discrete.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/problem_type.html</loc>
   </url>
   <url>
-    <loc>/reference/is_diverging.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/proto_basis1d_distribution.html</loc>
   </url>
   <url>
-    <loc>/reference/is_randomForest.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/radial_cheem_tour.html</loc>
   </url>
   <url>
-    <loc>/reference/lightgbm.unify.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/reexports.html</loc>
   </url>
   <url>
-    <loc>/reference/linear_tform.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/rnorm_from.html</loc>
   </url>
   <url>
-    <loc>/reference/logistic_tform.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/run_app.html</loc>
   </url>
   <url>
-    <loc>/reference/manip_var_of_attr_df.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/subset_cheem.html</loc>
   </url>
   <url>
-    <loc>/reference/model_performance.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/sug_basis.html</loc>
   </url>
   <url>
-    <loc>/reference/model_performance_df.html</loc>
-  </url>
-  <url>
-    <loc>/reference/model_unified.object.html</loc>
-  </url>
-  <url>
-    <loc>/reference/penguin_xgb_pred.html</loc>
-  </url>
-  <url>
-    <loc>/reference/print.model_unified.html</loc>
-  </url>
-  <url>
-    <loc>/reference/print.treeshap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/problem_type.html</loc>
-  </url>
-  <url>
-    <loc>/reference/proto_basis1d_distribution.html</loc>
-  </url>
-  <url>
-    <loc>/reference/radial_cheem_tour.html</loc>
-  </url>
-  <url>
-    <loc>/reference/randomForest.unify.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ranger.unify.html</loc>
-  </url>
-  <url>
-    <loc>/reference/reexports.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rnorm_from.html</loc>
-  </url>
-  <url>
-    <loc>/reference/run_app.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_reference_dataset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/subset_cheem.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sug_basis.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sug_manip_var.html</loc>
-  </url>
-  <url>
-    <loc>/reference/treeshap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/treeshap.object.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unify_predict.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unify_tree_model.html</loc>
-  </url>
-  <url>
-    <loc>/reference/xgboost.unify.html</loc>
+    <loc>https://nspyrison.github.io/cheem/reference/sug_manip_var.html</loc>
   </url>
 </urlset>
