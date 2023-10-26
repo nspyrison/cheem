@@ -306,13 +306,10 @@ proto_basis1d_distribution <- function(
 # #' ## Cheem visual
 # #' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
 # #'                         label = "North Ames, RF, SHAP")
-# #' if(interactive()){
-# #'   global_view(ames_rf_chm) ## Preview spaces
-# #' }
 # #' 
 # #' ## Other global_view() options
 # #' if(interactive()){
-# #'   global_view_legwork(ames_rf_chm) ## most of the way there
+# #'   cheem:::global_view_legwork(ames_rf_chm) ## most of the way there
 # #'   global_view(ames_rf_chm, as_ggplot = TRUE) ## early return of ggplot
 # #'   global_view(ames_rf_chm) ## uses ggplot facets %>% plotly
 # #' 
@@ -326,11 +323,10 @@ global_view_legwork <- function(
     primary_obs    = NULL,
     comparison_obs = NULL,
     color          = c("default", "residual", "log_maha.data", "cor_attr_proj.y")
-    #,subplot_r_ind  = NULL ## May be needed with subplots.
 ){
   ## Prevent global variable warnings:
-  V1 <- V2 <- ggtext <- projection_nm <- label <- tooltip <- NULL
-  height_px <- width_px <- 
+  V1 <- V2 <- ggtext <- projection_nm <- label <- tooltip <-
+    height_px <- width_px <- NULL
   ## Initialize
   global_view_df <- cheem_ls$global_view_df
   prob_type      <- cheem_ls$type
@@ -450,7 +446,6 @@ global_view_legwork <- function(
 #' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
 #'                         label = "North Ames, RF, SHAP")
 #' if(interactive()){
-#'   cheem:::global_view_legwork(ames_rf_chm) ## most of the way there
 #'   global_view(ames_rf_chm, as_ggplot = TRUE) ## early return of ggplot
 #'   global_view(ames_rf_chm) ## uses ggplot facets %>% plotly
 #' 
@@ -469,15 +464,9 @@ global_view <- function(
   width_px       = 1440,
   as_ggplot      = FALSE
 ){
-  label <- NULL ## get in from of global variable NOTE
+  label <- NULL ## Ignore global variable, get it from labels in the data.
   gg <- global_view_legwork(cheem_ls, primary_obs, comparison_obs, color) +
     ggplot2::facet_grid(cols = ggplot2::vars(label))
-  ## adding facet_grid causes: 
-  # Error in ggplot2::geom_smooth(ggplot2::aes(V1, V2), subset(global_view_df,  : 
-  # Problem while computing stat.
-  # ℹ Error occurred in the 1st layer.
-  # Caused by error in `seq_len()`:
-  #   ! argument must be coercible to non-negative integer
   if(as_ggplot) return(gg + ggplot2::theme(aspect.ratio = 1))
   
   ## Plotly options & box selection
@@ -487,11 +476,7 @@ global_view <- function(
     plotly::layout(dragmode = "select", showlegend = FALSE) %>% ## Set drag left mouse
     plotly::event_register("plotly_selected") %>%               ## Reflect "selected", on release of the mouse button.
     plotly::highlight(on = "plotly_selected", off = "plotly_deselect") %>%
-    suppressWarnings() 
-  ## attempt to suppress:
-  #Warning: The following aesthetics were dropped during statistical transformation: x_plotlyDomain, y_plotlyDomain
-  #??? This can happen when ggplot fails to infer the correct grouping structure in the data.
-  #??? Did you forget to specify a `group` aesthetic or to convert a numerical variable into a factor?
+    suppressWarnings()
 }
 
 

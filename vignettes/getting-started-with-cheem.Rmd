@@ -5,8 +5,10 @@ date: '`r format(Sys.Date())`'
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting started with cheem}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 <!-- #Example vignette: 
 https://github.com/njtierney/naniar/blob/master/vignettes/getting-started-w-naniar.Rmd -->
@@ -54,8 +56,9 @@ The first things we need are the prediction and a local explanation (or other em
 
 ```{r}
 ## Download if not installed
-if(!require(cheem)) install.packages("cheem", dependencies = "Suggests")
-if(!require(treeshap)) devtools::install_github("ModelOriented/treeshap")
+if(!require(cheem))    install.packages("cheem", dependencies = TRUE)
+if(!require(treeshap)) install.packages("treeshap", dependencies = TRUE)
+if(!require(shapviz))  install.packages("shapviz", dependencies = TRUE)
 ## Load onto session
 library(cheem)
 library(xgboost)
@@ -234,13 +237,13 @@ peng_xgb_shap <- peng_xgb_shap$S
 
 ## treeshap (& randomForest regression)
 
-__treeshap__ is only available on github at the time of writing. It is compatible with many tree-based models including catboost, gbm, lbm, rf, ranger, and xgb models.
+__treeshap__ is only available on CRAN. It is compatible with many tree-based models including gbm, lbm, rf, ranger, and xgb models.
 
 https://github.com/ModelOriented/treeshap
 
 
 ```{r, eval=FALSE, echo=TRUE}
-if(!require(treeshap)) devtools::install_github("ModelOriented/treeshap")
+if(!require(treeshap)) install.packages("treeshap")
 if(!require(randomForest)) install.packages("randomForest")
 library(treeshap)
 library(randomForest)
@@ -255,12 +258,12 @@ wine_rf_fit  <- randomForest::randomForest(
   X, Y, ntree = 125,
   mtry = ifelse(is_discrete(Y), sqrt(ncol(X)), ncol(X) / 3),
   nodesize = max(ifelse(is_discrete(Y), 1, 5), nrow(X) / 500))
-wine_rf_pred <- predict(pid_rf_fit)
+wine_rf_pred <- predict(wine_rf_fit)
 
 ## treeshap::treeshap()
-wine_rf_tshap <- pid_rf_fit %>%
-  treeshap::randomForest.unify(x) %>%
-  treeshap::treeshap(x, interactions = FALSE, verbose = FALSE)
+wine_rf_tshap <- wine_rf_fit %>%
+  treeshap::randomForest.unify(X) %>%
+  treeshap::treeshap(X, interactions = FALSE, verbose = FALSE)
 ## Keep just the [n, p] local explanations
 wine_rf_tshap <- wine_rf_tshap$shaps
 ```
@@ -288,7 +291,7 @@ drag_lm_pred <- predict(drag_lm_fit)
 ## SHAP via DALEX, versatile but slow
 drag_lm_exp <- explain(drag_lm_fit, data = X, y = Y,
                        label = "Dragons, LM, SHAP")
-## Note that cheem expects a full [n, p] attribution space
+## DALEX::predict_parts_shap is flexible, but slow and one row at a time
 drag_lm_shap <- matrix(NA, nrow(X), ncol(X))
 sapply(1:nrow(X), function(i){
   pps <- predict_parts_shap(drag_lm_exp, new_observation = X[i, ])
@@ -299,18 +302,19 @@ sapply(1:nrow(X), function(i){
 drag_lm_shap <- as.data.frame(drag_lm_shap)
 ```
 
-<!-- # Use with non-linear embedding spaces -->
+<!-- # EXPERIMENTAL: Use with non-linear embedding spaces -->
 
-<!-- Instead of creating a non-linear model with predictions The global view could compare data space and non-linear embedded space, though the radial tour isn't well defined as there isn't nescicarily a y variable to be the y-axis for the tour. -->
+<!-- Instead of creating a non-linear model with predictions The global view could compare data space and non-linear embedded space, though the radial tour isn't well defined as there isn't necessarily a y variable to be the y-axis for the tour. -->
 
 <!-- ```{r, eval=FALSE, echo=TRUE} -->
+<!-- ## NOTE: This is not supported. embedding are [n, d<p], and y axis of the tour is gone; closer to classification tour -->
 <!-- if(!require(umap)) install.packages("umap") -->
 <!-- library(umap) -->
 <!-- library(cheem) -->
 
 <!-- X <- spinifex::penguins_na.rm[, 1:4] -->
 <!-- ## 2d umap embedding of 4d data space. No non-linear model or predictions. -->
-<!-- peng_umap2 <- umap::umap(X) -->
+<!-- peng_umap2 <- umap::umap(X, d = 4) -->
 <!-- peng_umap2 <- peng_umap2$layout -->
 
 <!-- peng_umap_chm <- cheem_ls(X, y = NULL, class = NULL, -->

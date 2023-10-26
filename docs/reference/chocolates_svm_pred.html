@@ -18,7 +18,7 @@ classifying type of chocolate (light/dark)."><!-- mathjax --><script src="https:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1.9000</span>
       </span>
     </div>
 
@@ -77,41 +77,41 @@ svm model predicting the number of the factor level of the species of penguin.
 <code>chocolate_svm_shap</code> is a (88 x 10) data frame of the DALEX SHAP attribution
 of the svm model for each observation.</p>
 <p><strong>Replicating</strong></p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cheem)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(e1071)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEX)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Classification setup</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>X    <span class="ot">&lt;-</span> chocolates[, <span class="dv">5</span><span class="sc">:</span><span class="dv">14</span>]</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Y    <span class="ot">&lt;-</span> chocolates<span class="sc">$</span>Type</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>clas <span class="ot">&lt;-</span> chocolates<span class="sc">$</span>Type</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Model and predict</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>choc_svm_fit <span class="ot">&lt;-</span> <span class="fu">svm</span>(</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> Y <span class="sc">~</span> ., <span class="at">data =</span> <span class="fu">data.frame</span>(Y, X),</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">'C-classification'</span>, <span class="at">kernel =</span> <span class="st">'linear'</span>, <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>chocolates_svm_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(choc_svm_fit, <span class="fu">data.frame</span>(Y, X))</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## SHAP via DALEX, versatile but slow</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>choc_svm_exp <span class="ot">&lt;-</span> <span class="fu">explain</span>(choc_svm_fit, <span class="at">data =</span> X, <span class="at">y =</span> Y,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">label =</span> <span class="st">"Chocolates, svm"</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="do">## Note that cheem expects a full [n, p] attribution space</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>chocolates_svm_shap <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="fu">nrow</span>(X), <span class="fu">ncol</span>(X)) <span class="do">## init a df of the same structure</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>tictoc<span class="sc">::</span><span class="fu">tic</span>(<span class="st">"choc svm DALEX shap"</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(X), <span class="cf">function</span>(i){</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  pps <span class="ot">&lt;-</span> <span class="fu">predict_parts_shap</span>(choc_svm_exp, <span class="at">new_observation =</span> X[i, ])</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep just the [n, p] local explanations</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  chocolates_svm_shap[i, ] <span class="ot">&lt;&lt;-</span> <span class="fu">tapply</span>(</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    pps<span class="sc">$</span>contribution, pps<span class="sc">$</span>variable, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">as.vector</span>()</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>chocolates_svm_shap <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(chocolates_svm_shap)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>tictoc<span class="sc">::</span><span class="fu">toc</span>() <span class="do">## ~35-40 sec for me</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(chocolates_svm_pred, <span class="at">file =</span> <span class="st">"./data/chocolates_svm_pred.rda"</span>)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(chocolates_svm_shap, <span class="at">file =</span> <span class="st">"./data/chocolates_svm_shap.rda"</span>)</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(chocolates_svm_pred)</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(chocolates_svm_shap)</span></span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cheem)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(e1071)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEX)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Classification setup</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>X    <span class="ot">&lt;-</span> chocolates[, <span class="dv">5</span><span class="sc">:</span><span class="dv">14</span>]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>Y    <span class="ot">&lt;-</span> chocolates<span class="sc">$</span>Type</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>clas <span class="ot">&lt;-</span> chocolates<span class="sc">$</span>Type</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Model and predict</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>choc_svm_fit <span class="ot">&lt;-</span> <span class="fu">svm</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> Y <span class="sc">~</span> ., <span class="at">data =</span> <span class="fu">data.frame</span>(Y, X),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">'C-classification'</span>, <span class="at">kernel =</span> <span class="st">'linear'</span>, <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>chocolates_svm_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(choc_svm_fit, <span class="fu">data.frame</span>(Y, X))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## SHAP via DALEX, versatile but slow</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>choc_svm_exp <span class="ot">&lt;-</span> <span class="fu">explain</span>(choc_svm_fit, <span class="at">data =</span> X, <span class="at">y =</span> Y,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">label =</span> <span class="st">"Chocolates, svm"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="do">## Note that cheem expects a full [n, p] attribution space</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>chocolates_svm_shap <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="fu">nrow</span>(X), <span class="fu">ncol</span>(X)) <span class="do">## init a df of the same structure</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>tictoc<span class="sc">::</span><span class="fu">tic</span>(<span class="st">"choc svm DALEX shap"</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(X), <span class="cf">function</span>(i){</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  pps <span class="ot">&lt;-</span> <span class="fu">predict_parts_shap</span>(choc_svm_exp, <span class="at">new_observation =</span> X[i, ])</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep just the [n, p] local explanations</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  chocolates_svm_shap[i, ] <span class="ot">&lt;&lt;-</span> <span class="fu">tapply</span>(</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    pps<span class="sc">$</span>contribution, pps<span class="sc">$</span>variable, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">as.vector</span>()</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>chocolates_svm_shap <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(chocolates_svm_shap)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>tictoc<span class="sc">::</span><span class="fu">toc</span>() <span class="do">## ~35-40 sec for me</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(chocolates_svm_pred, <span class="at">file =</span> <span class="st">"./data/chocolates_svm_pred.rda"</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(chocolates_svm_shap, <span class="at">file =</span> <span class="st">"./data/chocolates_svm_shap.rda"</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(chocolates_svm_pred)</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(chocolates_svm_shap)</span></span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>}</span></code></pre><p></p></div>
 <p>An object of class <code>data.frame</code> with 88 rows and 10 columns.</p>
     </div>

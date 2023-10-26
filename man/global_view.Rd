@@ -59,7 +59,6 @@ clas <- dat$SubclassMS
 ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
                         label = "North Ames, RF, SHAP")
 if(interactive()){
-  cheem:::global_view_legwork(ames_rf_chm) ## most of the way there
   global_view(ames_rf_chm, as_ggplot = TRUE) ## early return of ggplot
   global_view(ames_rf_chm) ## uses ggplot facets \%>\% plotly
 

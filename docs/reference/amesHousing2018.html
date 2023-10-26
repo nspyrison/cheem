@@ -18,7 +18,7 @@ numeric observations remain."><!-- mathjax --><script src="https://cdnjs.cloudfl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1.9000</span>
       </span>
     </div>
 
@@ -87,58 +87,58 @@ SalesPrice, the response variable, and 3 class variables</p>
 <p>Kaggle, Ames Housing Dataset
 <a href="https://www.kaggle.com/prevek18/ames-housing-dataset" class="external-link">https://www.kaggle.com/prevek18/ames-housing-dataset</a></p>
 <p><strong>Replicating this dataset:</strong></p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="cn">FALSE</span>) <span class="do">## Don't accidentally open the URL.</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">browseURL</span>(<span class="st">"https://www.kaggle.com/prevek18/ames-housing-dataset"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ames <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"./buildignore/AmesHousing.csv"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>amesHousing2018_raw <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ames)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## save(amesHousing2018_raw, file = "./data/amesHousing2018_raw.rda")</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Complete rows and numeric variables</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ames1 <span class="ot">&lt;-</span> ames[, <span class="fu">unlist</span>(<span class="fu">lapply</span>(ames, is.numeric))]</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ames1<span class="sc">$</span>Bathrooms <span class="ot">&lt;-</span> ames1<span class="sc">$</span><span class="st">`</span><span class="at">Full Bath</span><span class="st">`</span> <span class="sc">+</span> ames1<span class="sc">$</span><span class="st">`</span><span class="at">Half Bath</span><span class="st">`</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>ames1 <span class="ot">&lt;-</span> ames1[, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>, <span class="dv">38</span>, <span class="dv">19</span><span class="sc">:</span><span class="dv">37</span>)]</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>col_idx <span class="ot">&lt;-</span> <span class="sc">!</span>(<span class="fu">colnames</span>(ames1) <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Order"</span>, <span class="st">"Mas Vnr Area"</span>, <span class="st">"BsmtFin SF 1"</span>, <span class="st">"BsmtFin SF 2"</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bsmt Full Bath"</span>, <span class="st">"Bsmt Half Bath"</span>, <span class="st">"Fireplaces"</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Wood Deck SF"</span>, <span class="st">"Open Porch SF"</span>, <span class="st">"Enclosed Porch"</span>,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"3Ssn Porch"</span>, <span class="st">"Screen Porch"</span>, <span class="st">"Pool Area"</span>, <span class="st">"Misc Val"</span>, <span class="st">"2nd Flr SF"</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Low Qual Fin SF"</span>, <span class="st">"Full Bath"</span>, <span class="st">"Half Bath"</span>, <span class="st">"Kitchen AbvGr"</span>))</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>row_idx <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Garage Yr Blt"</span>) <span class="sc">&amp;</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Lot Frontage"</span>) <span class="sc">&amp;</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Bsmt Unf SF"</span>) <span class="sc">&amp;</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Total Bsmt SF"</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>ames2 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(ames1[row_idx, col_idx])</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="do">## Looking for character classes to keep:</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ames_char <span class="ot">&lt;-</span> ames[, <span class="fu">unlist</span>(<span class="fu">lapply</span>(ames, is.character))]</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ames_clas <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(ames_char, factor))[, <span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ames_clasint <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">lapply</span>(ames_clas, as.integer))</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>col_idx_char <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">names</span>(ames_clas) <span class="sc">%in%</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">c</span>(<span class="st">"MS.SubClass"</span>, <span class="st">"MS.Zoning"</span>, <span class="st">"Neighborhood"</span>))</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>classes <span class="ot">&lt;-</span> ames_clas[row_idx, col_idx_char]</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>amesHousing2018 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(ames2, classes)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(amesHousing2018) <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LotFrontage"</span>, <span class="st">"LotArea"</span>,<span class="st">"OverallQual"</span>, <span class="st">"OverallCond"</span>, <span class="st">"YearBuild"</span>,</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">"YearRemod"</span>, <span class="st">"BsmtUnfArea"</span>, <span class="st">"TotBsmtArea"</span>, <span class="st">"1stFlrArea"</span>, <span class="st">"LivingArea"</span>,</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bathrms"</span>, <span class="st">"Bedrms"</span>, <span class="st">"TotRms"</span>, <span class="st">"GarageYrBlt"</span>, <span class="st">"GarageCars"</span>, <span class="st">"GarageArea"</span>,</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">"MoSold"</span>, <span class="st">"YrSold"</span>, <span class="st">"SalePrice"</span>, <span class="st">"SubclassMS"</span>, <span class="st">"ZoneMS"</span>, <span class="st">"Neighborhd"</span>)</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="do">## save(amesHousing2018, file = "./data/amesHousing2018.rda")</span></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>.thin_col_idx <span class="ot">&lt;-</span> <span class="fu">names</span>(amesHousing2018) <span class="sc">%in%</span> <span class="fu">c</span>(</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LotArea"</span>, <span class="st">"OverallQual"</span>, <span class="st">"YearBuild"</span>,</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LivingArea"</span>, <span class="st">"Bathrms"</span>, <span class="st">"Bedrms"</span>, <span class="st">"TotRms"</span>,</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="st">"GarageYrBlt"</span>, <span class="st">"GarageArea"</span>, <span class="st">"SalePrice"</span>, <span class="st">"SubclassMS"</span>)</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>amesHousing2018_thin <span class="ot">&lt;-</span> amesHousing2018[, .thin_col_idx]</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="do">## subset to north ames, and only 5 largest subclasses</span></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>r_idx <span class="ot">&lt;-</span> amesHousing2018<span class="sc">$</span>Neighborhd <span class="sc">==</span> <span class="st">"NAmes"</span> <span class="sc">&amp;</span></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  amesHousing2018<span class="sc">$</span>SubclassMS <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"020"</span>, <span class="st">"050"</span>, <span class="st">"080"</span>, <span class="st">"090"</span>, <span class="st">"060"</span>)</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>amesHousing2018_NorthAmes <span class="ot">&lt;-</span> amesHousing2018_thin[r_idx, ]</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>amesHousing2018_NorthAmes<span class="sc">$</span>SubclassMS <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  amesHousing2018_NorthAmes<span class="sc">$</span>SubclassMS,</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>(amesHousing2018_NorthAmes<span class="sc">$</span>SubclassMS))</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="cn">FALSE</span>) <span class="do">## Don't accidentally open the URL.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">browseURL</span>(<span class="st">"https://www.kaggle.com/prevek18/ames-housing-dataset"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ames <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"./buildignore/AmesHousing.csv"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>amesHousing2018_raw <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ames)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## save(amesHousing2018_raw, file = "./data/amesHousing2018_raw.rda")</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Complete rows and numeric variables</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ames1 <span class="ot">&lt;-</span> ames[, <span class="fu">unlist</span>(<span class="fu">lapply</span>(ames, is.numeric))]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ames1<span class="sc">$</span>Bathrooms <span class="ot">&lt;-</span> ames1<span class="sc">$</span><span class="st">`</span><span class="at">Full Bath</span><span class="st">`</span> <span class="sc">+</span> ames1<span class="sc">$</span><span class="st">`</span><span class="at">Half Bath</span><span class="st">`</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>ames1 <span class="ot">&lt;-</span> ames1[, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>, <span class="dv">38</span>, <span class="dv">19</span><span class="sc">:</span><span class="dv">37</span>)]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>col_idx <span class="ot">&lt;-</span> <span class="sc">!</span>(<span class="fu">colnames</span>(ames1) <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Order"</span>, <span class="st">"Mas Vnr Area"</span>, <span class="st">"BsmtFin SF 1"</span>, <span class="st">"BsmtFin SF 2"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bsmt Full Bath"</span>, <span class="st">"Bsmt Half Bath"</span>, <span class="st">"Fireplaces"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Wood Deck SF"</span>, <span class="st">"Open Porch SF"</span>, <span class="st">"Enclosed Porch"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"3Ssn Porch"</span>, <span class="st">"Screen Porch"</span>, <span class="st">"Pool Area"</span>, <span class="st">"Misc Val"</span>, <span class="st">"2nd Flr SF"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Low Qual Fin SF"</span>, <span class="st">"Full Bath"</span>, <span class="st">"Half Bath"</span>, <span class="st">"Kitchen AbvGr"</span>))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>row_idx <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Garage Yr Blt"</span>) <span class="sc">&amp;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Lot Frontage"</span>) <span class="sc">&amp;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Bsmt Unf SF"</span>) <span class="sc">&amp;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">is.na</span>(ames1<span class="sc">$</span><span class="st">"Total Bsmt SF"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>ames2 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(ames1[row_idx, col_idx])</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="do">## Looking for character classes to keep:</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ames_char <span class="ot">&lt;-</span> ames[, <span class="fu">unlist</span>(<span class="fu">lapply</span>(ames, is.character))]</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ames_clas <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(ames_char, factor))[, <span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ames_clasint <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">lapply</span>(ames_clas, as.integer))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>col_idx_char <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">names</span>(ames_clas) <span class="sc">%in%</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">c</span>(<span class="st">"MS.SubClass"</span>, <span class="st">"MS.Zoning"</span>, <span class="st">"Neighborhood"</span>))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>classes <span class="ot">&lt;-</span> ames_clas[row_idx, col_idx_char]</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>amesHousing2018 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(ames2, classes)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(amesHousing2018) <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LotFrontage"</span>, <span class="st">"LotArea"</span>,<span class="st">"OverallQual"</span>, <span class="st">"OverallCond"</span>, <span class="st">"YearBuild"</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">"YearRemod"</span>, <span class="st">"BsmtUnfArea"</span>, <span class="st">"TotBsmtArea"</span>, <span class="st">"1stFlrArea"</span>, <span class="st">"LivingArea"</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bathrms"</span>, <span class="st">"Bedrms"</span>, <span class="st">"TotRms"</span>, <span class="st">"GarageYrBlt"</span>, <span class="st">"GarageCars"</span>, <span class="st">"GarageArea"</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">"MoSold"</span>, <span class="st">"YrSold"</span>, <span class="st">"SalePrice"</span>, <span class="st">"SubclassMS"</span>, <span class="st">"ZoneMS"</span>, <span class="st">"Neighborhd"</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="do">## save(amesHousing2018, file = "./data/amesHousing2018.rda")</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>.thin_col_idx <span class="ot">&lt;-</span> <span class="fu">names</span>(amesHousing2018) <span class="sc">%in%</span> <span class="fu">c</span>(</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LotArea"</span>, <span class="st">"OverallQual"</span>, <span class="st">"YearBuild"</span>,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="st">"LivingArea"</span>, <span class="st">"Bathrms"</span>, <span class="st">"Bedrms"</span>, <span class="st">"TotRms"</span>,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="st">"GarageYrBlt"</span>, <span class="st">"GarageArea"</span>, <span class="st">"SalePrice"</span>, <span class="st">"SubclassMS"</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>amesHousing2018_thin <span class="ot">&lt;-</span> amesHousing2018[, .thin_col_idx]</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="do">## subset to north ames, and only 5 largest subclasses</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>r_idx <span class="ot">&lt;-</span> amesHousing2018<span class="sc">$</span>Neighborhd <span class="sc">==</span> <span class="st">"NAmes"</span> <span class="sc">&amp;</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  amesHousing2018<span class="sc">$</span>SubclassMS <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"020"</span>, <span class="st">"050"</span>, <span class="st">"080"</span>, <span class="st">"090"</span>, <span class="st">"060"</span>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>amesHousing2018_NorthAmes <span class="ot">&lt;-</span> amesHousing2018_thin[r_idx, ]</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>amesHousing2018_NorthAmes<span class="sc">$</span>SubclassMS <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  amesHousing2018_NorthAmes<span class="sc">$</span>SubclassMS,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>(amesHousing2018_NorthAmes<span class="sc">$</span>SubclassMS))</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(amesHousing2018_NorthAmes, <span class="at">file =</span> <span class="st">"./data/amesHousing2018_NorthAmes.rda"</span>)</span></code></pre><p></p></div>
     </div>
     <div id="details">

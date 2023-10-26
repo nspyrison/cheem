@@ -1,6 +1,6 @@
 Package: cheem
 Title: Interactively Explore Local Explanations with the Radial Tour
-Version: 0.3.0
+Version: 0.3.1.9000
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
     email = "spyrison@gmail.com",

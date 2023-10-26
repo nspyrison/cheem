@@ -51,7 +51,9 @@ We started by looking at the model-agnostic local explanation _tree SHAP_  appli
 
 ## Sources
 
-[Explanatory Model Analysis (ebook)](https://ema.drwhy.ai/shapley.html#SHAPRcode) [DALEX CRAN page](https://CRAN.R-project.org/package=DALEX) [spinifex CRAN page](https://cran.r-project.org/package=spinifex) [treeshap GitHub page](https://github.com/ModelOriented/treeshap)
+- [Explanatory Model Analysis (ebook)](https://ema.drwhy.ai/shapley.html#SHAPRcode)
+- [DALEX CRAN page](https://CRAN.R-project.org/package=DALEX)
+- [spinifex CRAN page](https://cran.r-project.org/package=spinifex)
 
 ## Package build workflow
 

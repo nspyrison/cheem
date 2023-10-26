@@ -5,17 +5,33 @@
   require(treeshap)
   require(randomForest)
   require(xgboost)
-  #s <- function(sec = .01)Sys.sleep(sec) ## Not in use
   require(tictoc)
   require(beepr)
+  #s <- function(sec = .01)Sys.sleep(sec) ## Not in use
   
   tic("Preprocess all")
+  fp <- "./inst/preprocessing/"
   wd <- getwd()
-  fp <- "./inst/shiny_apps/cheem/preprocessing/"
   if(substr(wd, nchar(wd) - 6, nchar(wd)) != "R/cheem")
     warning("work directory is not set to cheem package root!")
   if(F) 
     dir("./inst/shiny_apps/cheem/preprocessing")
+  
+  ## Recover the classification examples
+  default_rf <- function(
+      x, y, verbose = getOption("verbose"),
+      hp_ntree = 125,
+      hp_mtry = ifelse(is_discrete(y), sqrt(ncol(x)), ncol(x) / 3),
+      hp_nodesize = max(ifelse(is_discrete(y), 1, 5), nrow(x) / 500),
+      ...
+  ){
+    if(verbose) tictoc::tic("default_rf_treeshap")
+    .fit <- randomForest::randomForest(
+      x, y, mtry = hp_mtry, nodesize = hp_nodesize, ntree = hp_ntree, ...)
+    if(verbose) tictoc::toc()
+    .fit
+  }
+  
   
   ## Classification:
   source(paste0(fp, "preprocess_toy_classification.r"))

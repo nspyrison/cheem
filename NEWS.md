@@ -1,5 +1,13 @@
+# cheem v0.3.1
 
-# v0.3.0 (CRAN)
+- Repaired packagedown site!
+- Fixed news on packagedown site.
+- Recreate the classification saved cases, they fit too well to work for illustrations.
+- Trying to include more axis context in `global_view()`. Will explore text and facet panel titles.
+- Minor documentation and code clean up and clarifications.
+
+
+# cheem v0.3.0 -- Generalized for any attribution
 
 - Rebase all functions from expecting a unified `treeshap::shap()` to generalized
 data frame or matrix format for arbitrary attribution spaces.
@@ -10,7 +18,7 @@ data frame or matrix format for arbitrary attribution spaces.
 - Minor function renames for parsimony and consistency.
 
 
-# v0.2.0 (CRAN)
+# cheem v0.2.0 (CRAN releases here on out)
 
 ## App related changes
 
@@ -35,9 +43,10 @@ data frame or matrix format for arbitrary attribution spaces.
 
 - __drat__ repository hosting __treeshap__ did not work with debian and window rhub platforms;
 - Minimally ported functions and cpp source files with @author & @source. Changed examples for consistency and smaller code base support.
+- as of v0.3.0, cheem was generalized to all local variable attributions, so this is not a concern.
 
 
-# v0.1.0 (GitHub only, commit 283da4)
+# cheem v0.1.0 (GitHub only, commit 283da4)
 
 ## Primary preprocessing functions
 

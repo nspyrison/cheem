@@ -21,7 +21,7 @@ Units of measurement are listed in the variable name."><!-- mathjax --><script s
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1.9000</span>
       </span>
     </div>
 
@@ -97,15 +97,15 @@ or 'Milk"</p></li>
     <h2>Source</h2>
     <p>Monash University, Introduction to Machine Learning course <a href="https://iml.numbat.space/" class="external-link">https://iml.numbat.space/</a></p>
 <p><strong>Replicating this dataset:</strong></p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="cn">FALSE</span>) <span class="do">## Don't accidentally open the URL.</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">browseURL</span>(<span class="st">"https://iml.numbat.space/"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Accessed Jan 2022</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>chocolates <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"https://iml.numbat.space/data/chocolates.csv"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>chocolates <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(chocolates)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>chocolates[, <span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">factor</span>(chocolates[, <span class="dv">2</span>])</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>chocolates[, <span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="fu">factor</span>(chocolates[, <span class="dv">3</span>])</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>chocolates[, <span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fu">factor</span>(chocolates[, <span class="dv">4</span>])</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="cn">FALSE</span>) <span class="do">## Don't accidentally open the URL.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">browseURL</span>(<span class="st">"https://iml.numbat.space/"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Accessed Jan 2022</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>chocolates <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="st">"https://iml.numbat.space/data/chocolates.csv"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>chocolates <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(chocolates)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>chocolates[, <span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fu">factor</span>(chocolates[, <span class="dv">2</span>])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>chocolates[, <span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="fu">factor</span>(chocolates[, <span class="dv">3</span>])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>chocolates[, <span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fu">factor</span>(chocolates[, <span class="dv">4</span>])</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(chocolates, <span class="at">file =</span> <span class="st">"./data/chocolates.rda"</span>)</span></code></pre><p></p></div>
     </div>
 

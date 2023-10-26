@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1.9000</span>
       </span>
     </div>
 
@@ -133,20 +133,20 @@
 <div class="section level2">
 <h2 id="sources">Sources<a class="anchor" aria-label="anchor" href="#sources"></a>
 </h2>
-<p><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a> <a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a> <a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a> <a href="https://github.com/ModelOriented/treeshap" class="external-link">treeshap GitHub page</a></p>
+<ul>
+<li><a href="https://ema.drwhy.ai/shapley.html#SHAPRcode" class="external-link">Explanatory Model Analysis (ebook)</a></li>
+<li><a href="https://CRAN.R-project.org/package=DALEX" class="external-link">DALEX CRAN page</a></li>
+<li><a href="https://cran.r-project.org/package=spinifex" class="external-link">spinifex CRAN page</a></li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="package-build-workflow">Package build workflow<a class="anchor" aria-label="anchor" href="#package-build-workflow"></a>
 </h2>
 <ul>
-<li>Rcpp::compileAttributes() ## Rcpp changes</li>
-<li>Kmisc::registerFunctions(prefix = ““) ## Rcpp changes</li>
 <li>devtools::document() ## documentation changes</li>
 <li>pkgdown::build_site() ## packagedown site changes (documentation, vignettes, readme)</li>
-<li>rstudioapi::restartSession() ## Install wants reset ?</li>
 <li>message(“Manually do: Build tab &gt; Install and Restart”) ## build package</li>
-<li>#devtools::check_rhub() ## check package</li>
-<li>devtools::check() ## check package</li>
+<li>rhub::check_for_cran() ## check package</li>
 <li>devtools::submit_cran() ## Submit to CRAN</li>
 </ul>
 <!-- CSS change figure width to 100% --><style>

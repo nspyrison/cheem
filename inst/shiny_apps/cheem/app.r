@@ -84,8 +84,6 @@ server <- function(input, output, session){
     unique(as.integer(.d$key))
   })
   
-  ### perf_df ----
-
   ### cheem_ggtour -----
   cheem_ggtour <- reactive({
     dev_cat("top of cheem_ggtour")
@@ -155,6 +153,7 @@ server <- function(input, output, session){
       comp_inst <- 2
     }
     
+    ## SIDE EFFECT: Update inclusion feature names
     updateNumericInput(
       session, "primary_inst",
       label = "Primary instance ('*', dashed line below):",
@@ -163,7 +162,6 @@ server <- function(input, output, session){
       session, "comparison_inst",
       label = "Comparison instance ('x', dotted line below):",
       min = 1, max = 1e6, step = 1, value = comp_inst)
-    ## SIDE EFFECT: Update inclusion feature names
   })
   
   ### update inc_feat_nms -----

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1.9000</span>
       </span>
     </div>
 
@@ -57,6 +57,74 @@
       <small>Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.3.1" id="cheem-v031">cheem v0.3.1<a class="anchor" aria-label="anchor" href="#cheem-v031"></a></h2>
+<ul><li>Repaired packagedown site!</li>
+<li>Fixed news on packagedown site.</li>
+<li>Recreate the classification saved cases, they fit too well to work for illustrations.</li>
+<li>Trying to include more axis context in <code><a href="../reference/global_view.html">global_view()</a></code>. Will explore text and facet panel titles.</li>
+<li>Minor documentation and code clean up and clarifications.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.3.0" id="cheem-v030--generalized-for-any-attribution">cheem v0.3.0 – Generalized for any attribution<small>2023-05-08</small><a class="anchor" aria-label="anchor" href="#cheem-v030--generalized-for-any-attribution"></a></h2>
+<ul><li>Rebase all functions from expecting a unified <code>treeshap::shap()</code> to generalized data frame or matrix format for arbitrary attribution spaces.</li>
+<li>Rework vignette and examples to reflect this change.</li>
+<li>Added precomputed predictions and attributions for the Ames, Chocolates, and Penguins datasets. This allows users to run attribution-agnostic functions without dependencies.</li>
+<li>Add <code><a href="../reference/subset_cheem.html">subset_cheem()</a></code>, a convenience function for subsetting cheem lists after construction.</li>
+<li>Removed plotly subplot variations of visuals: <code>global_view_subplots()</code>, <code>radial_cheem_tour_subplots()</code>. These were development variations never used in the shiny app.</li>
+<li>Minor function renames for parsimony and consistency.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.2.0" id="cheem-v020-cran-releases-here-on-out">cheem v0.2.0 (CRAN releases here on out)<small>2022-03-14</small><a class="anchor" aria-label="anchor" href="#cheem-v020-cran-releases-here-on-out"></a></h2>
+<div class="section level3">
+<h3 id="app-related-changes-0-2-0">App related changes<a class="anchor" aria-label="anchor" href="#app-related-changes-0-2-0"></a></h3>
+<ul><li>Added vignette: <em>Getting started with cheem</em>.</li>
+<li>Added <strong>pkgdown</strong> site: <a href="https://nspyrison.github.io/cheem/" class="external-link uri">https://nspyrison.github.io/cheem/</a>.</li>
+<li>Added global model performance metrics to shiny app.</li>
+<li>In <code><a href="../reference/global_view.html">global_view()</a></code>, added yhaty panel (residual plot/confusion matrix).</li>
+<li>In <code><a href="../reference/global_view.html">global_view()</a></code>, added color options: log_maha.data and cor_attr.y.</li>
+<li>In <code>cheem_radial_tour()</code>, added regression case panel with additional fixed y of residual.</li>
+<li>In app radial tour inputs, added inclusion variable, subsetting variables used in radial tour.</li>
+<li>
+<code><a href="https://rdrr.io/pkg/plotly/man/subplot.html" class="external-link">plotly::subplot()</a></code> variants of <code><a href="../reference/global_view.html">global_view()</a></code> &amp; <code>cheem_radial_tour()</code>.</li>
+<li>Added AmesHousing data, chocolates, and new toy simulated datasets (shiny app only).</li>
+<li>Reduced shiny app wording.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal--utilities-0-2-0">Internal &amp; utilities<a class="anchor" aria-label="anchor" href="#internal--utilities-0-2-0"></a></h3>
+<ul><li>Major rebase of <code><a href="../reference/cheem_ls.html">cheem_ls()</a></code>.</li>
+<li>Added <code>linear/logistic_tform()</code> to suggest an alpha as a function of the number of observations.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="sourcing-treeshap-0-2-0">Sourcing <strong>treeshap</strong>
+<a class="anchor" aria-label="anchor" href="#sourcing-treeshap-0-2-0"></a></h3>
+<ul><li>
+<strong>drat</strong> repository hosting <strong>treeshap</strong> did not work with debian and window rhub platforms;</li>
+<li>Minimally ported functions and cpp source files with <a href="https://github.com/author" class="external-link">@author</a> &amp; <a href="https://github.com/source" class="external-link">@source</a>. Changed examples for consistency and smaller code base support.</li>
+<li>as of v0.3.0, cheem was generalized to all local variable attributions, so this is not a concern.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="0.1.0" id="cheem-v010-github-only-commit-283da4">cheem v0.1.0 (GitHub only, commit 283da4)<a class="anchor" aria-label="anchor" href="#cheem-v010-github-only-commit-283da4"></a></h2>
+<div class="section level3">
+<h3 id="primary-preprocessing-functions-0-1-0">Primary preprocessing functions<a class="anchor" aria-label="anchor" href="#primary-preprocessing-functions-0-1-0"></a></h3>
+<ul><li>
+<code>default_rf()</code> create a <code><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest::randomForest()</a></code> with more conservative defaults.</li>
+<li>
+<code>attr_df_treeshap()</code> create <code><a href="https://modeloriented.github.io/treeshap/reference/treeshap.html" class="external-link">treeshap::treeshap()</a></code> local explanations of each observation.</li>
+<li>
+<code><a href="../reference/cheem_ls.html">cheem_ls()</a></code> create a cheem list of prepared tables for use in <code><a href="../reference/run_app.html">run_app()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="primary-visual-functions-0-1-0">Primary visual functions<a class="anchor" aria-label="anchor" href="#primary-visual-functions-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/run_app.html">run_app()</a></code> which is a shiny app consuming the following two:</li>
+<li>
+<code><a href="../reference/global_view.html">global_view()</a></code> linked ‘plotly’ of approximations of data- and attribution-spaces with model information.</li>
+<li>
+<code>cheem_radial_tour()</code> create <code><a href="https://rdrr.io/pkg/spinifex/man/ggtour.html" class="external-link">spinifex::ggtour</a></code> of the specified radial tour. Consumed by animate_plotly, animate_gganimate, or filmstrip.</li>
+</ul></div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

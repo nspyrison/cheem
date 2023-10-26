@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cheem</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.1.9000</span>
       </span>
     </div>
 
@@ -82,7 +82,7 @@
                         <h4 data-toc-skip class="author">Nicholas
 Spyrison</h4>
             
-            <h4 data-toc-skip class="date">2023-05-03</h4>
+            <h4 data-toc-skip class="date">2023-10-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/nspyrison/cheem/blob/HEAD/vignettes/getting-started-with-cheem.Rmd" class="external-link"><code>vignettes/getting-started-with-cheem.Rmd</code></a></small>
       <div class="hidden name"><code>getting-started-with-cheem.Rmd</code></div>
@@ -133,8 +133,9 @@ from one neighborhood in the 2018 Ames data.</p>
 predictions, and find the SHAP values of each observation.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Download if not installed</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="st">"Suggests"</span><span class="op">)</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">treeshap</span><span class="op">)</span><span class="op">)</span> <span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ModelOriented/treeshap"</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span><span class="op">)</span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cheem"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/treeshap/" class="external-link">treeshap</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"treeshap"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz" class="external-link">shapviz</a></span><span class="op">)</span><span class="op">)</span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"shapviz"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">## Load onto session</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nspyrison/cheem/" class="external-link">cheem</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span></span>
@@ -146,13 +147,13 @@ predictions, and find the SHAP values of each observation.</p>
 <span><span class="va">clas</span> <span class="op">&lt;-</span> <span class="va">amesHousing2018_NorthAmes</span><span class="op">$</span><span class="va">SubclassMS</span></span>
 <span></span>
 <span><span class="co">## Model and predict</span></span>
-<span><span class="va">ames_train</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">xgb.DMatrix</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Y</span><span class="op">)</span></span>
-<span><span class="va">ames_xgb_fit</span>  <span class="op">&lt;-</span> <span class="fu">xgboost</span><span class="op">(</span>data <span class="op">=</span> <span class="va">ames_train</span>, max.depth <span class="op">=</span> <span class="fl">3</span>, nrounds <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span><span class="va">ames_train</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/xgboost/man/xgb.DMatrix.html" class="external-link">xgb.DMatrix</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Y</span><span class="op">)</span></span>
+<span><span class="va">ames_xgb_fit</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">xgboost</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ames_train</span>, max.depth <span class="op">=</span> <span class="fl">3</span>, nrounds <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
 <span><span class="va">ames_xgb_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">ames_xgb_fit</span>, newdata <span class="op">=</span> <span class="va">ames_train</span><span class="op">)</span></span>
 <span><span class="va">ames_xgb_pred</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## SHAP values</span></span>
-<span><span class="va">shp</span> <span class="op">&lt;-</span> <span class="fu">shapviz</span><span class="op">(</span><span class="va">ames_xgb_fit</span>, X_pred <span class="op">=</span> <span class="va">ames_train</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
+<span><span class="va">shp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html" class="external-link">shapviz</a></span><span class="op">(</span><span class="va">ames_xgb_fit</span>, X_pred <span class="op">=</span> <span class="va">ames_train</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
 <span><span class="co">## Keep just the [n, p] local explanations</span></span>
 <span><span class="va">ames_xgb_shap</span> <span class="op">&lt;-</span> <span class="va">shp</span><span class="op">$</span><span class="va">S</span></span>
 <span><span class="va">ames_xgb_shap</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -301,7 +302,7 @@ attribution spaces from different models.</p>
 </h3>
 <p><strong>shapviz</strong> is being actively maintained and is hosted
 on CRAN. It is compatible with H2O, lgb, and xgb models.</p>
-<p><a href="https://github.com/mayer79/shapviz" class="external-link uri">https://github.com/mayer79/shapviz</a></p>
+<p><a href="https://github.com/ModelOriented/shapviz" class="external-link uri">https://github.com/ModelOriented/shapviz</a></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ModelOriented/shapviz" class="external-link">shapviz</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"shapviz"</span><span class="op">)</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"xgboost"</span><span class="op">)</span></span>
@@ -316,26 +317,26 @@ on CRAN. It is compatible with H2O, lgb, and xgb models.</p>
 <span></span>
 <span><span class="co">## Model and predict</span></span>
 <span><span class="va">peng_train</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.matrix.html" class="external-link">data.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">xgb.DMatrix</span><span class="op">(</span>label <span class="op">=</span> <span class="va">Y</span><span class="op">)</span></span>
-<span><span class="va">peng_xgb_fit</span>  <span class="op">&lt;-</span> <span class="fu">xgboost</span><span class="op">(</span>data <span class="op">=</span> <span class="va">peng_train</span>, max.depth <span class="op">=</span> <span class="fl">3</span>, nrounds <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/xgboost/man/xgb.DMatrix.html" class="external-link">xgb.DMatrix</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">Y</span><span class="op">)</span></span>
+<span><span class="va">peng_xgb_fit</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">xgboost</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">peng_train</span>, max.depth <span class="op">=</span> <span class="fl">3</span>, nrounds <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span>
 <span><span class="va">peng_xgb_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">peng_xgb_fit</span>, newdata <span class="op">=</span> <span class="va">peng_train</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## SHAP</span></span>
-<span><span class="va">peng_xgb_shap</span> <span class="op">&lt;-</span> <span class="fu">shapviz</span><span class="op">(</span><span class="va">peng_xgb_fit</span>, X_pred <span class="op">=</span> <span class="va">peng_train</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
+<span><span class="va">peng_xgb_shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html" class="external-link">shapviz</a></span><span class="op">(</span><span class="va">peng_xgb_fit</span>, X_pred <span class="op">=</span> <span class="va">peng_train</span>, X <span class="op">=</span> <span class="va">X</span><span class="op">)</span></span>
 <span><span class="co">## Keep just the [n, p] local explanations</span></span>
 <span><span class="va">peng_xgb_shap</span> <span class="op">&lt;-</span> <span class="va">peng_xgb_shap</span><span class="op">$</span><span class="va">S</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="treeshap-randomforest-regression">treeshap (&amp; randomForest regression)<a class="anchor" aria-label="anchor" href="#treeshap-randomforest-regression"></a>
 </h3>
-<p><strong>treeshap</strong> is only available on github at the time of
-writing. It is compatible with many tree-based models including
-catboost, gbm, lbm, rf, ranger, and xgb models.</p>
+<p><strong>treeshap</strong> is only available on CRAN. It is compatible
+with many tree-based models including gbm, lbm, rf, ranger, and xgb
+models.</p>
 <p><a href="https://github.com/ModelOriented/treeshap" class="external-link uri">https://github.com/ModelOriented/treeshap</a></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va">treeshap</span><span class="op">)</span><span class="op">)</span> <span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ModelOriented/treeshap"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/treeshap/" class="external-link">treeshap</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"treeshap"</span><span class="op">)</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/" class="external-link">randomForest</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"randomForest"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">treeshap</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeloriented.github.io/treeshap/" class="external-link">treeshap</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/" class="external-link">randomForest</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Setup</span></span>
@@ -348,12 +349,12 @@ catboost, gbm, lbm, rf, ranger, and xgb models.</p>
 <span>  <span class="va">X</span>, <span class="va">Y</span>, ntree <span class="op">=</span> <span class="fl">125</span>,</span>
 <span>  mtry <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="../reference/is_discrete.html">is_discrete</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">/</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  nodesize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="../reference/is_discrete.html">is_discrete</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">/</span> <span class="fl">500</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">wine_rf_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pid_rf_fit</span><span class="op">)</span></span>
+<span><span class="va">wine_rf_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wine_rf_fit</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## treeshap::treeshap()</span></span>
-<span><span class="va">wine_rf_tshap</span> <span class="op">&lt;-</span> <span class="va">pid_rf_fit</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">treeshap</span><span class="fu">::</span><span class="fu">randomForest.unify</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">treeshap</span><span class="fu">::</span><span class="fu">treeshap</span><span class="op">(</span><span class="va">x</span>, interactions <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">wine_rf_tshap</span> <span class="op">&lt;-</span> <span class="va">wine_rf_fit</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">treeshap</span><span class="fu">::</span><span class="fu"><a href="https://modeloriented.github.io/treeshap/reference/randomForest.unify.html" class="external-link">randomForest.unify</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">treeshap</span><span class="fu">::</span><span class="fu"><a href="https://modeloriented.github.io/treeshap/reference/treeshap.html" class="external-link">treeshap</a></span><span class="op">(</span><span class="va">X</span>, interactions <span class="op">=</span> <span class="cn">FALSE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">## Keep just the [n, p] local explanations</span></span>
 <span><span class="va">wine_rf_tshap</span> <span class="op">&lt;-</span> <span class="va">wine_rf_tshap</span><span class="op">$</span><span class="va">shaps</span></span></code></pre></div>
 </div>
@@ -379,26 +380,27 @@ times for sizable data or complex models.</p>
 <span><span class="va">drag_lm_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">drag_lm_fit</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## SHAP via DALEX, versatile but slow</span></span>
-<span><span class="va">drag_lm_exp</span> <span class="op">&lt;-</span> <span class="fu">explain</span><span class="op">(</span><span class="va">drag_lm_fit</span>, data <span class="op">=</span> <span class="va">X</span>, y <span class="op">=</span> <span class="va">Y</span>,</span>
+<span><span class="va">drag_lm_exp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://modeloriented.github.io/DALEX/reference/explain.html" class="external-link">explain</a></span><span class="op">(</span><span class="va">drag_lm_fit</span>, data <span class="op">=</span> <span class="va">X</span>, y <span class="op">=</span> <span class="va">Y</span>,</span>
 <span>                       label <span class="op">=</span> <span class="st">"Dragons, LM, SHAP"</span><span class="op">)</span></span>
-<span><span class="co">## Note that cheem expects a full [n, p] attribution space</span></span>
+<span><span class="co">## DALEX::predict_parts_shap is flexible, but slow and one row at a time</span></span>
 <span><span class="va">drag_lm_shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">pps</span> <span class="op">&lt;-</span> <span class="fu">predict_parts_shap</span><span class="op">(</span><span class="va">drag_lm_exp</span>, new_observation <span class="op">=</span> <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">pps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://modeloriented.github.io/DALEX/reference/predict_parts.html" class="external-link">predict_parts_shap</a></span><span class="op">(</span><span class="va">drag_lm_exp</span>, new_observation <span class="op">=</span> <span class="va">X</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="co">## Keep just the [n, p] local explanations</span></span>
 <span>  <span class="va">drag_lm_shap</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span></span>
 <span>    <span class="va">pps</span><span class="op">$</span><span class="va">contribution</span>, <span class="va">pps</span><span class="op">$</span><span class="va">variable</span>, <span class="va">mean</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="va">drag_lm_shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">drag_lm_shap</span><span class="op">)</span></span></code></pre></div>
-<!-- # Use with non-linear embedding spaces -->
-<!-- Instead of creating a non-linear model with predictions The global view could compare data space and non-linear embedded space, though the radial tour isn't well defined as there isn't nescicarily a y variable to be the y-axis for the tour. -->
+<!-- # EXPERIMENTAL: Use with non-linear embedding spaces -->
+<!-- Instead of creating a non-linear model with predictions The global view could compare data space and non-linear embedded space, though the radial tour isn't well defined as there isn't necessarily a y variable to be the y-axis for the tour. -->
 <!-- ```{r, eval=FALSE, echo=TRUE} -->
+<!-- ## NOTE: This is not supported. embedding are [n, d<p], and y axis of the tour is gone; closer to classification tour -->
 <!-- if(!require(umap)) install.packages("umap") -->
 <!-- library(umap) -->
 <!-- library(cheem) -->
 <!-- X <- spinifex::penguins_na.rm[, 1:4] -->
 <!-- ## 2d umap embedding of 4d data space. No non-linear model or predictions. -->
-<!-- peng_umap2 <- umap::umap(X) -->
+<!-- peng_umap2 <- umap::umap(X, d = 4) -->
 <!-- peng_umap2 <- peng_umap2$layout -->
 <!-- peng_umap_chm <- cheem_ls(X, y = NULL, class = NULL, -->
 <!--                           attr_df    = peng_umap2, -->

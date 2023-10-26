@@ -48,15 +48,14 @@ model_performance <- function(
     .r2     <- 1 - .rse
     .adj_r2 <- 1 - (.mse / stats::var(y))
     
-    ## There are a whole host of other performance measurements that  
-    ## some analysts may prefer. Hoeveer, it's Hard to unify across models 
-    ## and use cases.
-    data.frame(label     = label,
-               mse       = .mse,
-               rmse      = .rmse,
-               mad       = .mad,
-               r2        = .r2,
-               adj_r2    = .adj_r2)
+    ## There are a whole host of other performance measurements, 
+    ## but that's not the contribution/focus of cheem. 
+    data.frame(label  = label,
+               mse    = .mse,
+               rmse   = .rmse,
+               mad    = .mad,
+               r2     = .r2,
+               adj_r2 = .adj_r2)
   },
   error = function(cond){
     data.frame(label  = label,
@@ -102,7 +101,7 @@ global_view_df_1layer <- function(
   ## Projection
   x_std <- spinifex::scale_01(x)
   if(basis_type == "olda" & is.null(class))
-    stop("Basis type was olda without a class, a class must be provided for olda.")
+    stop("global_view_df_1layer: Basis type was olda without a class, a class must be provided for olda.")
   basis <- switch(basis_type,
                   pca  = stats::prcomp(x_std)$rotation[, 1:d],
                   olda = spinifex::basis_olda(x_std, class, d))
@@ -121,6 +120,8 @@ global_view_df_1layer <- function(
 #' 
 #' Performs the preprocessing steps needs to supply the plot functions
 #' `global_view()` and `radial_cheem_tour()` used in the shiny app.
+#' The user need to supply the attributions and predictions. For help getting
+#' started with this see `vignette("getting-started-with-cheem")`.
 #' 
 #' @param x The explanatory variables of the model.
 #' @param y The target variable of the model.
@@ -148,6 +149,11 @@ global_view_df_1layer <- function(
 #' X    <- spinifex::penguins_na.rm[, 1:4]
 #' Y    <- spinifex::penguins_na.rm$species
 #' clas <- spinifex::penguins_na.rm$species
+#' 
+#' ## Bring your own attributions and predictions, 
+#' ## for help review the vignette or packdown
+#' if(FALSE)
+#'   vignette("getting-started-with-cheem")
 #' 
 #' ## Cheem
 #' peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
@@ -228,8 +234,9 @@ cheem_ls <- function(
       " Please review model complexity and attr_df."))
 
   ## global_view_df -----
-  .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data")
-  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, "attribution")
+  
+  .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data, PC1 by PC2")
+  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, "attribution, PC1 by PC2")
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
   .dat_bas   <- utils::tail(attributes(.glob_dat),  1)
@@ -270,7 +277,7 @@ cheem_ls <- function(
   
   if(is_classification){
     .vec_yjitter  <- stats::runif(nrow(x), -.2, .2)
-    .y_axis_label <- "model (w/ y jitter)"
+    .y_axis_label <- "model confusion matrix"
   }
   if(all(is.na(y) | is.null(y))){
     ## No y/pred
@@ -279,7 +286,7 @@ cheem_ls <- function(
   }else{
     ## Regression
     .vec_yjitter  <- 0
-    .y_axis_label <- "model"
+    .y_axis_label <- "model residuals"
   }
   
   ## append yhaty to global_view_df ----
