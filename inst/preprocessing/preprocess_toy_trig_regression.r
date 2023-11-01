@@ -1,6 +1,5 @@
 ## Setup ------
 {
-  set.seed(20211105)
   n_obs <- 200
   X <- data.frame(x1 = runif(n_obs, 0, 4 * pi),
                   x2 = runif(n_obs, 0, 4 * pi),
@@ -30,7 +29,7 @@ chm <- cheem_ls(X, Y, rf_shap, rf_pred, clas,
 
 ## Export ----
 NM <- "preprocess_toy_trig_regression.rds"
-saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+saveRDS(chm, file = paste0("./inst/shiny_apps/cheem/data/", NM))
 cat("Saved", NM, "\n")
 
 if(F){

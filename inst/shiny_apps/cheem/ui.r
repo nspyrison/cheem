@@ -5,18 +5,18 @@
 ## Dependencies -----
 # Application only, preprocessing already done.
 #### Shiny specific
-library(shiny, quietly = TRUE, verbose = FALSE)
-library(shinythemes, quietly = TRUE, verbose = FALSE) ## Themes for shiny, think preset css styling.
+library(shiny,           quietly = TRUE, verbose = FALSE)
+library(shinythemes,     quietly = TRUE, verbose = FALSE) ## Themes for shiny, think preset css styling.
 library(shinycssloaders, quietly = TRUE, verbose = FALSE) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
-library(DT, quietly = TRUE, verbose = FALSE) ## For html table and buttons
-## Dependencies
-library(cheem, quietly = TRUE, verbose = FALSE)
+library(DT,              quietly = TRUE, verbose = FALSE) ## For html table and buttons
+library(cheem,           quietly = TRUE, verbose = FALSE)
+library(plotly,          quietly = TRUE, verbose = FALSE)
+library(magrittr,        quietly = TRUE, verbose = FALSE)
+#conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
+#library(gganimate,       quietly = TRUE, verbose = FALSE) ## Not in use atm
 ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
-library(plotly, quietly = TRUE, verbose = FALSE)
-#library(gganimate, quietly = TRUE, verbose = FALSE) ## Not in use atm
-library(magrittr, quietly = TRUE, verbose = FALSE)
 #options(show.error.locations = TRUE) #, error = browser)
-conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
+
 
 
 ## Load prepared cheem_ls() returns
@@ -32,10 +32,10 @@ chocolates_ls   <- readRDS("./data/preprocess_chocolates.rds")
 ## Create contextLine; App name, version, and sys date.
 .wd         <- getwd()
 .regex      <- regexpr("\\/[^\\/]*$", .wd)
-.local_path <- gsub("_", " ", substr(.wd, .regex + 1, nchar(.wd)))
-.title      <- paste0("cheem --- ", .local_path)
-contextLine <- paste0(.local_path, " app, ",
-                      " --- cheem (v", packageVersion("cheem"), ")",
+#.local_path <- gsub("_", " ", substr(.wd, .regex + 1, nchar(.wd)))
+.title      <- "cheem" #paste0("cheem --- ", .local_path)
+contextLine <- paste0(#.local_path, " app, ",
+                      "cheem (v", packageVersion("cheem"), ")",
                       " --- ", Sys.Date())
 
 ## UI content ----
@@ -45,7 +45,7 @@ expected_data_char <- c(
   "toy quad regression", "toy trig regression", "toy mixture model regression", 
   "fifa regression", "ames housing 2018 regression",
   "<Upload saved cheem_ls (rds only)>")
-tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
+tab1_cheem <- tabPanel(title = "Analysis", fluidPage(
   #### Top text description -----
   fluidRow(
     fluidRow(
@@ -56,7 +56,8 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
         "input.dat_char == '<Upload saved cheem_ls (rds only)>'",
         fileInput("in_cheem_ls", "Select a file (return of cheem_ls saved to rds)",
                   multiple = FALSE, accept = c("text/rds", ".rds")))),
-      column(6, tableOutput("perf_df"))
+      column(5, tableOutput("perf_df")),
+      column(1)
     ),
     htmlOutput("desc_rows"),
   ),
@@ -77,7 +78,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   ),
   ## Container display dim
   ## Also see plot dim in: ggplotly(p, height, width)
-  plotly::plotlyOutput("global_view", width = "100%", height = "544px") %>%
+  plotly::plotlyOutput("global_view", width = "100%") %>% #, width = "100%", height = "544px"
     shinycssloaders::withSpinner(type = 8),
   h5("Selected data:"),
   DT::DTOutput("selected_df")),
@@ -100,7 +101,7 @@ tab1_cheem <- tabPanel(title = "Data- and attribution-spaces", fluidPage(
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
   ## plotly tour
   #### Sometimes this behaves like iframe and others like object itself. 
-  plotly::plotlyOutput("cheem_tour_plotly", width = "1440px", height = "620px") %>%
+  plotly::plotlyOutput("cheem_tour_plotly", width = "70%", height = "800px") %>% #, width = "1440px", height = "620px") %>%
     shinycssloaders::withSpinner(type = 8),
   br(), br(), br()
 ) ## Assign tab1_cheem

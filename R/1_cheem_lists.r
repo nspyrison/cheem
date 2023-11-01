@@ -1,10 +1,3 @@
-# Model fits  -----
-
-
-
-
-
-
 # cheem workflow -----
 
 #' Extract higher level model performance statistics
@@ -48,8 +41,8 @@ model_performance <- function(
     .r2     <- 1 - .rse
     .adj_r2 <- 1 - (.mse / stats::var(y))
     
-    ## There are a whole host of other performance measurements, 
-    ## but that's not the contribution/focus of cheem. 
+    ## There are a whole host of other performance measurements,
+    ## but that's not the contribution/focus of cheem.
     data.frame(label  = label,
                mse    = .mse,
                rmse   = .rmse,
@@ -151,9 +144,11 @@ global_view_df_1layer <- function(
 #' clas <- spinifex::penguins_na.rm$species
 #' 
 #' ## Bring your own attributions and predictions, 
-#' ## for help review the vignette nspyrison.github.io/cheem/
-#' if(FALSE)
+#' ## for help review the vignette or package down site;
+#' if(FALSE){
 #'   vignette("getting-started-with-cheem")
+#'   browseURL("https://nspyrison.github.io/cheem/articles/getting-started-with-cheem.html")
+#' }
 #' 
 #' ## Cheem
 #' peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
@@ -184,6 +179,13 @@ global_view_df_1layer <- function(
 #' X    <- dat[, 1:9]
 #' Y    <- dat$SalePrice
 #' clas <- dat$SubclassMS
+#' 
+#' #' ## Bring your own attributions and predictions, 
+#' ## for help review the vignette or package down site;
+#' if(FALSE){
+#'   vignette("getting-started-with-cheem")
+#'   browseURL("https://nspyrison.github.io/cheem/articles/getting-started-with-cheem.html")
+#' }
 #' 
 #' ## Cheem list
 #' ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
@@ -226,6 +228,7 @@ cheem_ls <- function(
   attr_df <- data.frame(attr_df)
   stopifnot("data.frame" %in% class(x))
   stopifnot("data.frame" %in% class(attr_df))
+
   if(any(apply(attr_df, 2, function(i) length(unique(i)) == 1)))
     stop(paste0(
       "cheem_ls: ", label,
@@ -234,13 +237,20 @@ cheem_ls <- function(
       " Please review model complexity and attr_df."))
 
   ## global_view_df -----
-  
-  .glob_dat  <- global_view_df_1layer(x, class, basis_type, "data, PC1 by PC2")
-  .glob_attr <- global_view_df_1layer(attr_df, class, basis_type, "attribution, PC1 by PC2")
+  .pca_var <- stats::prcomp(spinifex::scale_01(x))$sdev^2
+  .var_exp <- round(100*.pca_var/sum(.pca_var), 0)
+  .glob_dat  <- global_view_df_1layer(
+    x, class, basis_type, 
+    paste0("data, PC1 (", .var_exp[1], "%) by PC2 (", .var_exp[2], "%)"))
+  .pca_var <- stats::prcomp(spinifex::scale_01(attr_df))$sdev^2
+  .var_exp <- round(100*.pca_var/sum(.pca_var), 0)
+  .glob_attr <- global_view_df_1layer(
+    attr_df, class, basis_type, 
+    paste0("Attribution, PC1 (", .var_exp[1], "%) by PC2 (", .var_exp[2], "%)"))
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
-  .dat_bas   <- utils::tail(attributes(.glob_dat),  1)
-  .attr_bas  <- utils::tail(attributes(.glob_attr), 1)
+  .dat_bas  <- utils::tail(attributes(.glob_dat),  1)
+  .attr_bas <- utils::tail(attributes(.glob_attr), 1)
   .glob_basis_ls <- c(.dat_bas, .attr_bas)
   ## log maha distance of data space
   log_maha.data <- stats::mahalanobis(x, colMeans(x), stats::cov(x))
@@ -276,23 +286,25 @@ cheem_ls <- function(
     .decode_df, function(c) if(is.numeric(c)) round(c, 2) else c))
   
   if(is_classification){
-    .vec_yjitter  <- stats::runif(nrow(x), -.2, .2)
-    .y_axis_label <- "model confusion matrix"
-  }
-  if(all(is.na(y) | is.null(y))){
-    ## No y/pred
-    .vec_yjitter  <- 0
-    .y_axis_label <- "No y/model provided"
+    .yjitter <- stats::runif(nrow(x), -.2, .2)
+    .xjitter <- stats::runif(nrow(x), -.2, .2)
+    .y_axis_label <- "model confusion matrix, pred by obs"
   }else{
-    ## Regression
-    .vec_yjitter  <- 0
-    .y_axis_label <- "model residuals"
+    if(all(is.na(y) | is.null(y))){
+      ## No y/pred
+      .yjitter <- .xjitter <- 0
+      .y_axis_label <- "No y/model provided"
+    }else{
+      ## Regression
+      .yjitter <- .xjitter <- 0
+      .y_axis_label <- "model residuals, pred by obs"
+    }
   }
   
   ## append yhaty to global_view_df ----
   .yhaty_df <-
-    data.frame(V1 = .decode_df$prediction, 
-               V2 = as.numeric(.decode_df$y) + .vec_yjitter) %>%
+    data.frame(V1 = .decode_df$prediction + .xjitter, 
+               V2 = as.numeric(.decode_df$y) + .yjitter) %>%
     spinifex::scale_01()
   .yhaty_df <- data.frame(basis_type = NA, label = .y_axis_label,
                           rownum = 1:nrow(x), class = .decode_df$class, .yhaty_df)

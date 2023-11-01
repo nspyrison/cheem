@@ -10,7 +10,7 @@
 
 ## Model and predict
 train    <- data.matrix(X) %>% xgb.DMatrix(label = Y)
-xgb_fit  <- xgboost(data = train, max.depth = 3, nrounds = 25)
+xgb_fit  <- xgboost(data = train, max.depth = 3, nrounds = 6)
 xgb_pred <- predict(xgb_fit, newdata = train)
 
 ## shapviz
@@ -23,7 +23,7 @@ chm <- cheem_ls(X, Y, xgb_shap, xgb_pred, clas,
 
 ## Export ----
 NM <- "preprocess_chocolates.rds"
-saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+saveRDS(chm, file = paste0("./inst/shiny_apps/cheem/data/", NM))
 cat("Saved", NM, "\n")
 
 if(F){

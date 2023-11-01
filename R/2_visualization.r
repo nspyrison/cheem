@@ -81,14 +81,14 @@ sug_manip_var <- function(attr_df, primary_obs, comparison_obs){
 
 #' Adds the distribution of the row local attributions to a ggtour
 #'
-#' A {spinifex} proto_*-like function, that adds the distribution of 
+#' A `spinifex` proto_*-like function, that adds the distribution of 
 #' orthonormalized row values of the specified local explanation `attr_df`. 
 #' Does not draw the basis bars; use in conjunction with `proto_basis1d()`.
 #'
 #' @param attr_df An data frame, the attributions of a local explanation.
 #' @param group_by Vector to group densities by. Originally _predicted_ class.
 #' @param position The position for the basis, one of: c("top1d", "floor1d",
-#' "bottom1d", "off"). 
+#' "bottom1d", "off").
 #' Defaults to "top1d"; basis above the density curves.
 #' @param pcp_shape The number of the shape character to add. Expects
 #' 3, 142, or 124, '+', '|' in `plotly`, and '|' in `gganimate`, respectively. 

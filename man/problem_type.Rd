@@ -23,9 +23,10 @@ for \code{DALEX::explain(type)} as it also expects "classification" or
 \examples{
 library(cheem)
 
-problem_type(mtcars$mpg)
+problem_type(mtcars$mpg) ## Numeric, many values
 problem_type(mtcars$cyl) ## Numeric column, labeled as discrete, because less than 25 unique values
-problem_type(letters)
+problem_type(letters) ## Character to classification
+problem_type(factor(letters)) ## Factor to classification
 }
 \seealso{
 Other cheem utility: 

@@ -67,7 +67,7 @@ chm <- subset_cheem(chm, 1:500)
 
 ## Export ----
 NM <- "preprocess_fifa.rds"
-saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+saveRDS(chm, file = paste0("./inst/shiny_apps/cheem/data/", NM))
 cat("Saved", NM, "\n")
 
 if(F){

@@ -37,14 +37,11 @@ cache
 
 # R Environment Variables
 .Renviron
-
-doc
-docs
-Meta
-
 *.model
 lightgbm.model
-
 inst/shiny_apps/cheem/rsconnect/*
-/doc/
-/Meta/
+
+doc/
+docs/
+Meta/
+docs/

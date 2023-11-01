@@ -18,8 +18,17 @@
 #' @name cheem
 #' @docType package
 #' @seealso [cheem_ls()] or [run_app()] for help getting started
-NULL
+#' @keywords internal
+"_PACKAGE"
 
+## usethis namespace: start
+## Exports ------
+#' @importFrom magrittr %>%
+#' @export
+magrittr::`%>%`
+NULL ## Required for roxygen2 to work, do not delete
+## usethis namespace: end
+NULL
 
 ## Print message -----
 #### prints upon first attaching the package
@@ -32,13 +41,6 @@ NULL
   conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
 }
 
-
-## Exports ------
-#' @importFrom magrittr %>%
-#' @export
-magrittr::`%>%`
-NULL ## Required for roxygen2 to work, do not delete
-
 ## globals.R -----
 globalVariables(c(
   "Feature", "split_index", "tree_index", ".", "node_parent",
@@ -47,3 +49,5 @@ globalVariables(c(
   "reorder", "variable", "importance", "Tree", "Missing",
   "Node", "Cover", "Yes", "No", "Prediction", "Decision.type"
   ))
+
+

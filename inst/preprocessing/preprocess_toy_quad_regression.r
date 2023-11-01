@@ -1,6 +1,5 @@
 ## Setup ------
 {
-  set.seed(20211105)
   X <- data.frame(x1 = runif(200, 0, 5),
                   x2 = runif(200, 0, 5),
                   x3 = runif(200, 0, 5),
@@ -23,7 +22,7 @@ chm <- cheem_ls(X, Y, rf_shap, rf_pred, clas,
 
 ## Export ----
 NM <- "preprocess_toy_quad_regression.rds"
-saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+saveRDS(chm, file = paste0("./inst/shiny_apps/cheem/data/", NM))
 cat("Saved", NM, "\n")
 
 if(F){

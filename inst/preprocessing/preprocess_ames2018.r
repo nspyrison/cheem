@@ -20,7 +20,7 @@ chm <- cheem_ls(X, Y, rf_shap, rf_pred, clas,
 
 ## Export ----
 NM <- "preprocess_ames2018.rds"
-saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+saveRDS(chm, file = paste0("./inst/shiny_apps/cheem/data/", NM))
 cat("Saved", NM, "\n")
 
 if(F){

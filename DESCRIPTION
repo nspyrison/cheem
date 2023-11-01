@@ -18,7 +18,7 @@ Description: Given a tree-based machine learning model, calculate the tree SHAP
 Depends:
     R (>= 3.5.0)
 License: MIT + file LICENSE
-URL: https://github.com/nspyrison/cheem/
+URL: https://github.com/nspyrison/cheem/, https://nspyrison.github.io/cheem/
 BugReports: https://github.com/nspyrison/cheem/issues
 Imports:
     spinifex (>= 0.3.3),

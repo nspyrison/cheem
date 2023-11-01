@@ -40,24 +40,9 @@ server <- function(input, output, session){
                error = function(e) stop(safeError(e)))
     }
     
-    ## SIDE EFFECT: Update prim/comp_inst
-    # updateNumericInput(
-    #   session, "primary_inst",
-    #   label = "Primary instance rownum, ('*' point):",
-    #   min = 1, max = 1e6, step = 1, value = prim_inst)
-    # updateNumericInput(
-    #   session, "comparison_inst",
-    #   label = "Comparison instance rownum, ('x' point):",
-    #   min = 1, max = 1e6, step = 1, value = comp_inst)
-    # ## SIDE EFFECT: Update inclusion feature names
-    # feat_nms <- colnames(ret$attr_df)
-    # updateCheckboxGroupInput(session, "inc_feat_nms", label = "features to include:",
-    #                          choices = feat_nms, selected = feat_nms, inline = TRUE)
-    
     ## Return loaded cheem_ls
     ret
   })
-
   
   
   ### bas ----
@@ -109,7 +94,7 @@ server <- function(input, output, session){
     mv <- which(rownames(bas) == mv_nm)
     radial_cheem_tour(
       cheem_ls, bas, mv, prim_inst, comp_inst, do_add_pcp_segments = add_pcp,
-      angle = .15, row_index = idx_rownum, inc_var_nms = inc_feat_nms)
+      angle = .10, row_index = idx_rownum, inc_var_nms = inc_feat_nms)
   }) %>%
     ## Leaving load_ls out; only load when all are ready
     bindCache(bas, input$primary_inst, input$comparison_inst,
@@ -125,29 +110,29 @@ server <- function(input, output, session){
     dev_cat("top of observeEvent(req(input$dat_char)")
     dat <- req(input$dat_char)
     if(dat == "toy classification"){
-      prim_inst <- 36
-      comp_inst <- 23
+      prim_inst <- 118
+      comp_inst <- 135
     }else if(dat == "penguins classification"){
-      prim_inst <- 243 ## Presubmission seminar looked at 124, 86
+      prim_inst <- 243
       comp_inst <- 169
     }else if(dat == "chocolates classification"){
-      prim_inst <- 22
-      comp_inst <- 7
+      prim_inst <- 64
+      comp_inst <- 83
     }else if(dat == "toy quad regression"){
-      prim_inst <- 11
-      comp_inst <- 121
+      prim_inst <- 100
+      comp_inst <- 188
     }else if(dat == "toy trig regression"){
-      prim_inst <- 87
-      comp_inst <- 102
+      prim_inst <- 180
+      comp_inst <- 167
     }else if(dat == "toy mixture model regression"){
-      prim_inst <- 23
-      comp_inst <- 130
+      prim_inst <- 127
+      comp_inst <- 220
     }else if(dat == "fifa regression"){
       prim_inst <- 1
       comp_inst <- 8
     }else if(dat == "ames housing 2018 regression"){
       prim_inst <- 74
-      comp_inst <- 192
+      comp_inst <- 141
     }else{ ## _ie._ user loaded data; no priors of good instance to pick.
       prim_inst <- 1
       comp_inst <- 2
@@ -268,7 +253,7 @@ server <- function(input, output, session){
     }
     
     global_view(cheem_ls, .prim_inst, .comp_inst, color = .col,
-                height_px = 540, width_px = 1440)
+                height_px = 540*.8, width_px = 1440*.8)
   }) %>%
     bindCache(load_ls(), input$primary_inst, input$comparison_inst,
               input$glob_view_col) %>%
@@ -289,15 +274,16 @@ server <- function(input, output, session){
       plotly::style(hoverinfo = "none")
     ## the following hasn't helped:
     #### %>% plotly::toWebGL() & plotly::partial_bundle(), not reliably faster and may increase visual issues.
-    #### - starting at frame 11 doesn't get around frame 1 sometimes being skipped.
-    #### - redundantly hiding gridlines in plotly doesn't remove them.
     .anim
   })
   ## Lazy eval, heavy work, let the other stuff calculate first.
   
   output$perf_df <- renderTable({
-    df <- req(load_ls()$model_performance)
-    df %>% dplyr::mutate_if(is.numeric, round, digits = 2)
+    ls <- req(load_ls())
+    if(ls$type == "regression"){
+      ls$model_performance %>%
+        dplyr::mutate_if(is.numeric, round, digits = 2)
+    }
   })
   outputOptions(output, "perf_df",
                 suspendWhenHidden = FALSE, priority = 10) ## Eager evaluation

@@ -45,6 +45,8 @@ A list of data.frames needed for the \code{shiny} application.
 \description{
 Performs the preprocessing steps needs to supply the plot functions
 \code{global_view()} and \code{radial_cheem_tour()} used in the shiny app.
+The user need to supply the attributions and predictions. For help getting
+started with this see \code{vignette("getting-started-with-cheem")}.
 }
 \examples{
 library(cheem)
@@ -53,6 +55,13 @@ library(cheem)
 X    <- spinifex::penguins_na.rm[, 1:4]
 Y    <- spinifex::penguins_na.rm$species
 clas <- spinifex::penguins_na.rm$species
+
+## Bring your own attributions and predictions, 
+## for help review the vignette or package down site;
+if(FALSE){
+  vignette("getting-started-with-cheem")
+  browseURL("https://nspyrison.github.io/cheem/articles/getting-started-with-cheem.html")
+}
 
 ## Cheem
 peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
@@ -83,6 +92,13 @@ dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
+
+#' ## Bring your own attributions and predictions, 
+## for help review the vignette or package down site;
+if(FALSE){
+  vignette("getting-started-with-cheem")
+  browseURL("https://nspyrison.github.io/cheem/articles/getting-started-with-cheem.html")
+}
 
 ## Cheem list
 ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,

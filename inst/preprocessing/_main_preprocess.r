@@ -7,6 +7,7 @@
   require(xgboost)
   require(tictoc)
   require(beepr)
+  set.seed(135) ## not sure which models will be impacted, but plausibly helps replication
   #s <- function(sec = .01)Sys.sleep(sec) ## Not in use
   
   tic("Preprocess all")
@@ -58,6 +59,7 @@
     file.edit(paste0(fp, "preprocess_toy_trig_regression.r"))
     file.edit(paste0(fp, "preprocess_chocolates.r"))
   }
+  
   toc()
   beep(4)
 }

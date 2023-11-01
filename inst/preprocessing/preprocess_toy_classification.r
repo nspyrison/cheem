@@ -1,8 +1,7 @@
 ## Data simulation ------
 {
-  set.seed(20211105)
   .n <- 50  ## obs per class
-  .m <- 3.5 ## mean difference between class
+  .m <- 3.2 ## mean difference between class
   ############## clas a:         clas b:         clas c:
   sim_EEE_p4 <- data.frame(
     x1 = c(rnorm(.n,0),    rnorm(.n,.m),   rnorm(.n,.m/2)), ## Separates A from B
@@ -24,7 +23,7 @@
 
 ## Model and predict
 train    <- data.matrix(X) %>% xgb.DMatrix(label = Y)
-xgb_fit  <- xgboost(data = train, max.depth = 3, nrounds = 25)
+xgb_fit  <- xgboost(data = train, max.depth = 3, nrounds = 5)
 xgb_pred <- predict(xgb_fit, newdata = train)
 
 ## shapviz
@@ -37,7 +36,7 @@ chm <- cheem_ls(X, Y, xgb_shap, xgb_pred, clas,
 
 ## Export ----
 NM <- "preprocess_toy_classification.rds"
-saveRDS(chm, file = paste0("~/R/cheem/inst/shiny_apps/cheem/data/", NM))
+saveRDS(chm, file = paste0("./inst/shiny_apps/cheem/data/", NM))
 cat("Saved", NM, "\n")
 
 if(F){
