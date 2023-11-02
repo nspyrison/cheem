@@ -49,7 +49,7 @@ tab1_cheem <- tabPanel(title = "Analysis", fluidPage(
   #### Top text description -----
   fluidRow(
     fluidRow(
-      column(3, selectInput("dat_char", "Data:",
+      column(3, selectInput("dat_char", "Data",
                             choices  = expected_data_char,
                             selected = "penguins classification")),
       column(3, conditionalPanel(
@@ -64,44 +64,46 @@ tab1_cheem <- tabPanel(title = "Analysis", fluidPage(
   tags$hr(style = "border-color: grey;"),
   
   #### global_view ----
-  h4("Global view:"),
+  h4("Global view"),
   #p("Approximations of data- and attribution-spaces (PC1:2) and model predictions by observed y."),
   fluidRow(
     column(3, numericInput(
-      "primary_inst", "Primary instance ('*', dashed line below):", NULL)),
+      "primary_inst", "Primary instance ('*', dashed line below)", NULL)),
     column(3, numericInput(
-      "comparison_inst", "Comparison instance ('x', dotted line below):", NULL)),
+      "comparison_inst", "Comparison instance ('x', dotted line below)", NULL)),
     column(3, selectInput(
-      "glob_view_col", "Global view point color",
+      "glob_view_col", "Point color",
       c("default", "log_maha.data", "cor_attr_proj.y", "residual"))),
-    column(3)
+    column(3, actionButton("go_global_view", label = "Update global view")),
+    #column(4)
   ),
+  
+  
   ## Container display dim
   ## Also see plot dim in: ggplotly(p, height, width)
-  plotly::plotlyOutput("global_view", width = "100%") %>% #, width = "100%", height = "544px"
+  plotly::plotlyOutput("global_view", width = "1004px", height = "342px") %>% #, width = "100%", height = "544px"
     shinycssloaders::withSpinner(type = 8),
-  h5("Selected data:"),
+  h5("Selected data"),
   DT::DTOutput("selected_df")),
   tags$hr(style = "border-color: grey;"),
   
   #### Cheem tour ----
-  h4("Cheem tour"),
+  h4("Tour"),
   fluidRow(
-    column(width = 3,
-           checkboxGroupInput("inc_feat_nms", label = "Features to include:",
-                              choices = NULL, selected = NULL, inline = TRUE)),
-    column(width = 3,
-           selectInput("manip_feat_nm", "Manipulation feature:",  NULL)),
-    column(width = 3, 
-           selectInput("do_add_pcp_segments", "Draw PCP lines on the basis distribution?",
-                       c("yes" = TRUE, "no" = FALSE))),
-    column(3)
+    column(3, checkboxGroupInput("inc_feat_nms", label = "Features to include",
+                                 choices = NULL, selected = NULL, inline = TRUE)),
+    column(3, selectInput("manip_feat_nm", "Manipulation feature", NULL)),
+    column(3, selectInput("do_add_pcp_segments", "Draw PCP lines?",
+                          c("yes" = TRUE, "no" = FALSE))),
+    column(3, actionButton("go_tour", label = "Update tour")),
+    #column(4)
   ),
+  
   # p("Longer-dashed and dotted lines: location of primary & comparison points respectively ('*'/'x' in global view)."),
   # p("Origin mark: solid grey line or cross, projection 0, all X's = 0 projected through the basis."),
   ## plotly tour
   #### Sometimes this behaves like iframe and others like object itself. 
-  plotly::plotlyOutput("cheem_tour_plotly", width = "70%", height = "800px") %>% #, width = "1440px", height = "620px") %>%
+  plotly::plotlyOutput("cheem_tour_plotly", width = "1004px", height = "502px") %>% #, width = "1440px", height = "620px") %>%
     shinycssloaders::withSpinner(type = 8),
   br(), br(), br()
 ) ## Assign tab1_cheem

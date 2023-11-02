@@ -81,9 +81,6 @@ server <- function(input, output, session){
     inc_feat_nms <- req(input$inc_feat_nms)
     idx_rownum   <- sel_rownums() ## NULL is no selection; all points
     #idx_rownum   <- NULL ## all points
-    ## sel_rownums() is leading to a hard to explore plotly method error:
-    # Error: object 'x' not found
-    ## abandoning and defaulting to full selection.
     
     if(mv_nm %in% rownames(bas) == FALSE){
       cheem:::devMessage(paste0(
@@ -94,13 +91,9 @@ server <- function(input, output, session){
     mv <- which(rownames(bas) == mv_nm)
     radial_cheem_tour(
       cheem_ls, bas, mv, prim_inst, comp_inst, do_add_pcp_segments = add_pcp,
-      angle = .10, row_index = idx_rownum, inc_var_nms = inc_feat_nms)
-  }) %>%
-    ## Leaving load_ls out; only load when all are ready
-    bindCache(bas, input$primary_inst, input$comparison_inst,
-              input$manip_feat_nm, input$do_add_pcp_segments) %>%
-    bindEvent(bas, input$primary_inst, input$comparison_inst,
-              input$manip_feat_nm, input$do_add_pcp_segments) #%>% debounce(millis = 500L)
+      angle = .10, row_index = idx_rownum, inc_var_nms = inc_feat_nms, 
+      pcp_shape = 142)
+  })
   
   
   ## Observe/event -----
@@ -253,28 +246,39 @@ server <- function(input, output, session){
     }
     
     global_view(cheem_ls, .prim_inst, .comp_inst, color = .col,
-                height_px = 540*.8, width_px = 1440*.8)
-  }) %>%
-    bindCache(load_ls(), input$primary_inst, input$comparison_inst,
-              input$glob_view_col) %>%
-    bindEvent(load_ls(), input$primary_inst, input$comparison_inst,
-              input$glob_view_col)# %>%
-    #debounce(millis = 200)
+                height_px = 338, width_px = 1000)
+  })
+
   ## Lazy eval, heavy work, let the other stuff calculate first.
-  output$global_view <- plotly::renderPlotly(suppressWarnings(glob_view()))
+  output$global_view <- plotly::renderPlotly({
+    input$load_ls
+    input$go_global_view
+    
+    if(input$go_global_view > -1)
+      return(isolate({
+      suppressWarnings(glob_view())
+    }))
+  })
   
   ### plotly tour -----
   output$cheem_tour_plotly <- plotly::renderPlotly({
-    cheem_ls <- req(load_ls())
-    ggt <- req(cheem_ggtour())
+    ## update on go button, but not other.
+    input$load_ls
+    #input$go_global_view
+    input$go_tour
     
-    .anim <- ggt %>%
-      spinifex::animate_plotly(fps = 4) %>%
-      plotly::layout(showlegend = FALSE) %>%
-      plotly::style(hoverinfo = "none")
-    ## the following hasn't helped:
-    #### %>% plotly::toWebGL() & plotly::partial_bundle(), not reliably faster and may increase visual issues.
-    .anim
+    return(isolate({
+      cheem_ls <- req(load_ls())
+      ggt <- req(cheem_ggtour())
+      
+      .anim <- ggt %>%
+        spinifex::animate_plotly(fps = 4) %>%
+        plotly::layout(showlegend = FALSE) %>%
+        plotly::style(hoverinfo = "none")
+      ## the following hasn't helped:
+      #### %>% plotly::toWebGL() & plotly::partial_bundle(), not reliably faster and may increase visual issues.
+      .anim
+    }))
   })
   ## Lazy eval, heavy work, let the other stuff calculate first.
   
