@@ -16,6 +16,7 @@ the xgb model for each observation.
 \if{html}{\out{<div class="sourceCode">}}\preformatted{library(cheem)
 library(xgboost)
 library(shapviz)
+set.seed(135)
 
 ## Classification setup
 X    <- spinifex::penguins_na.rm[, 1:4]
@@ -25,7 +26,7 @@ clas <- spinifex::penguins_na.rm$species
 ## Model and predict
 peng_train    <- data.matrix(X) \%>\%
   xgb.DMatrix(label = Y)
-peng_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 25)
+peng_xgb_fit  <- xgboost(data = peng_train, max.depth = 3, nrounds = 5)
 penguin_xgb_pred <- predict(peng_xgb_fit, newdata = peng_train)
 
 ## shapviz
@@ -79,7 +80,7 @@ if(interactive()){
   comp <- 2
   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
   bas <- sug_basis(peng_xgb_shap, prim, comp)
-  mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2)
+  mv  <- sug_manip_var(peng_xgb_shap, primary_obs = prim, comp)
   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
   animate_plotly(ggt)
 }

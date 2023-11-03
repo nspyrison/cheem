@@ -3,6 +3,7 @@
 \docType{package}
 \name{cheem}
 \alias{cheem}
+\alias{cheem-package}
 \title{cheem}
 \description{
 Consider an arbitrary black-box model. Local explanations are a class of
@@ -23,3 +24,8 @@ GitHub: \url{https://github.com/nspyrison/cheem}
 \seealso{
 \code{\link[=cheem_ls]{cheem_ls()}} or \code{\link[=run_app]{run_app()}} for help getting started
 }
+\author{
+\strong{Maintainer}: Nicholas Spyrison \email{spyrison@gmail.com} (\href{https://orcid.org/0000-0002-8417-0212}{ORCID})
+
+}
+\keyword{internal}

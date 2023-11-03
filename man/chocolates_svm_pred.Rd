@@ -16,6 +16,7 @@ of the svm model for each observation.
 \if{html}{\out{<div class="sourceCode">}}\preformatted{library(cheem)
 library(e1071)
 library(DALEX)
+set.seed(135)
 
 ## Classification setup
 X    <- chocolates[, 5:14]
@@ -32,8 +33,8 @@ chocolates_svm_pred <- predict(choc_svm_fit, data.frame(Y, X))
 choc_svm_exp <- explain(choc_svm_fit, data = X, y = Y,
                         label = "Chocolates, svm")
 ## Note that cheem expects a full [n, p] attribution space
+## Shap takes about ~30-40 sec for me
 chocolates_svm_shap <- matrix(NA, nrow(X), ncol(X)) ## init a df of the same structure
-tictoc::tic("choc svm DALEX shap")
 sapply(1:nrow(X), function(i)\{
   pps <- predict_parts_shap(choc_svm_exp, new_observation = X[i, ])
   ## Keep just the [n, p] local explanations
@@ -41,7 +42,6 @@ sapply(1:nrow(X), function(i)\{
     pps$contribution, pps$variable, mean, na.rm = TRUE) \%>\% as.vector()
 \})
 chocolates_svm_shap <- as.data.frame(chocolates_svm_shap)
-tictoc::toc() ## ~35-40 sec for me
 
 if(F)\{ ## Don't accidentally save
   save(chocolates_svm_pred, file = "./data/chocolates_svm_pred.rda")
@@ -89,10 +89,10 @@ if(FALSE){ ## Don't accidentally save.
 if(interactive()){
   prim <- 1
   comp <- 2
-  global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
-  bas <- sug_basis(peng_xgb_shap, prim, comp)
-  mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2)
-  ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
+  global_view(choc_chm, primary_obs = prim, comparison_obs = comp)
+  bas <- sug_basis(chocolates_svm_shap, prim, comp)
+  mv  <- sug_manip_var(chocolates_svm_shap, primary_obs = prim, comp)
+  ggt <- radial_cheem_tour(choc_chm, basis = bas, manip_var = mv)
   animate_plotly(ggt)
 }
 }

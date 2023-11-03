@@ -50,7 +50,7 @@ A \code{ggplot} object of the the distribution of the local explanation's
 attributions.
 }
 \description{
-A {spinifex} proto_*-like function, that adds the distribution of
+A \code{spinifex} proto_*-like function, that adds the distribution of
 orthonormalized row values of the specified local explanation \code{attr_df}.
 Does not draw the basis bars; use in conjunction with \code{proto_basis1d()}.
 }

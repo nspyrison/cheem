@@ -16,6 +16,7 @@ the random forest model for each observation.
 \if{html}{\out{<div class="sourceCode">}}\preformatted{library(cheem)
 library(randomForest)
 library(treeshap)
+set.seed(135)
 
 ## Regression setup
 dat  <- amesHousing2018_NorthAmes
@@ -81,7 +82,7 @@ if(interactive()){
   comp <- 2
   global_view(ames_chm, primary_obs = prim, comparison_obs = comp)
   bas <- sug_basis(ames_rf_shap, prim, comp)
-  mv  <- sug_manip_var(ames_rf_shap, primary_obs = 1, comparison_obs = 2)
+  mv  <- sug_manip_var(ames_rf_shap, primary_obs = prim, comp)
   ggt <- radial_cheem_tour(ames_chm, basis = bas, manip_var = mv)
   animate_plotly(ggt)
 }

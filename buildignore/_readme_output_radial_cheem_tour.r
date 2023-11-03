@@ -15,21 +15,26 @@ clas <- penguins_na.rm$species
 Y    <- as.integer(clas)
 colnames(X) <- c("bl", "bd", "fl", "bm")
 
-rf_fit  <- default_rf(X, Y)
-## Long runtime for full datasets or complex models:
-shap_df <- stop("REPLACE ME")
-this_ls <- cheem_ls(X, Y, class = clas,
-                    model = rf_fit,
-                    attr_df = shap_df)
+## Cheem
+peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
+                     label = "Penguins, xgb, shapviz")
 
-bas <- sug_basis(shap_df, rownum = 1)
-mv  <- which(colnames(penguins_ls$attr_df) == "fl")
-ggt <- radial_cheem_tour(this_ls, basis = bas, manip_var = mv,
-                         primary_obs = 243, comparison_obs = 169, angle = .25)
+bas <- sug_basis(penguin_xgb_shap, rownum = 1)
+mv  <- which(colnames(X) == "fl")
+ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv,
+                         primary_obs = 243, comparison_obs = 169, angle = .10)
+
+prim <- 243
+comp <- 256
+global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
+bas <- sug_basis(penguin_xgb_shap, prim)
+mv  <- sug_manip_var(penguin_xgb_shap, primary_obs = prim, comparison_obs = comp)
+ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv, prim, comp)
+animate_plotly(ggt)
 if(interactive()){
   ## Render gif
   gif <- animate_gganimate(
-    ggt, height = 2, width = 4.5, units = "in", res = 150) #, render = gganimate::av_renderer())
+    ggt, height = 2, width = 6, units = "in", res = 150) #, render = gganimate::av_renderer())
   ## Save gif
   gganimate::anim_save("tour_penguins.gif", animation = gif, path = "./buildignore")
   beepr::beep()

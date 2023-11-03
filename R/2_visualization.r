@@ -584,26 +584,25 @@ radial_cheem_tour <- function(
   ### Classification case -----
   if(.prob_type == "classification"){
     .pred_clas <- decode_df$predicted_class
+    .facet_fore <- rep("attribution projection", each = .n)
     ## ggtour
     ggt <- spinifex::ggtour(.mt_path, .dat, angle = angle,
                             do_center_frame = do_center_frame) +
+      spinifex::facet_wrap_tour(facet_var = .facet_fore, nrow = 1) +
       ## Density
       spinifex::proto_density(
         aes_args = list(color = .pred_clas, fill = .pred_clas),
         row_index = row_index, rug_shape = pcp_shape) +
-      
-      #Warning message:
-      #In Ops.factor(yscale, x[, 2]) : '*' not meaningful for factors
       ## PCP on Basis, 1D
       proto_basis1d_distribution(
         cheem_ls$attr_df,
         primary_obs = .prim_obs, comparison_obs = .comp_obs,
-        position = "bottom1d", group_by = .pred_clas,
+        position = "floor1d", group_by = .pred_clas,
         do_add_pcp_segments = as.logical(do_add_pcp_segments),
         pcp_shape = pcp_shape, inc_var_nms = inc_var_nms,
        row_index = row_index) +
       ## Basis 1D
-      spinifex::proto_basis1d(position = "bottom1d", manip_col = "black") +
+      spinifex::proto_basis1d(position = "floor1d", manip_col = "black") +
       spinifex::proto_origin1d() +
       ## Highlight comparison obs
       spinifex::proto_highlight1d(
@@ -641,7 +640,7 @@ radial_cheem_tour <- function(
       ## Foreground:
       .dat_fore   <- rbind(.dat, .dat)
       .idx_fore   <- c(row_index, row_index)
-      .facet_fore <- factor(rep(c("observed y", "residual"), each = 2 * .n))
+      .facet_fore <- factor(rep(c("attribution projection by observed y", "attribution projection by residual"), each = 2 * .n))
       .fixed_y    <- c(.y, .resid)
     } else {
       ## not doubled up data; just fixed_observed y
@@ -652,7 +651,7 @@ radial_cheem_tour <- function(
       ## Foreground:
       .dat_fore   <- .dat
       .idx_fore   <- row_index
-      .facet_fore <- rep("observed y", each = .n)
+      .facet_fore <- rep("attribution projection by observed y", each = .n)
       .class_fore <- .class
       .fixed_y    <- .y
     }

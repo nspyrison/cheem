@@ -44,7 +44,7 @@
   source(paste0(fp, "preprocess_toy_mixture_regression.r"))
   source(paste0(fp, "preprocess_ames2018.r"))
   tic("preprocess_fifa")
-  source(paste0(fp, "preprocess_fifa.r")) ## Longest by far, 
+  source(paste0(fp, "preprocess_fifa.r")) ## Longest by far, 4-5 min
   toc()
   
   if(F){ ## Open individual files.

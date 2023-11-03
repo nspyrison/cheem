@@ -147,7 +147,7 @@ if(interactive()){
   comp <- 2
   global_view(ames_rf_chm, primary_obs = prim, comparison_obs = comp)
   bas <- sug_basis(ames_rf_chm, prim, comp)
-  mv  <- sug_manip_var(ames_rf_chm, primary_obs = 1, comparison_obs = 2)
+  mv  <- sug_manip_var(ames_rf_chm, primary_obs = prim, comp)
   ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
   animate_plotly(ggt)
 }

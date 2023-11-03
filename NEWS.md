@@ -1,9 +1,13 @@
-# cheem v0.3.1
+# cheem v0.4.0
 
 - Repaired packagedown site!
 - Fixed news on packagedown site.
-- Recreate the classification saved cases, they fit too well to work for illustrations.
-- Trying to include more axis context in `global_view()`. Will explore text and facet panel titles.
+- Shiny app has go buttons rather than waiting after every input change.
+- Shiny app text, plot dimensions, and text cleaned up.
+- Classification tour now uses a horizontal layout.
+- Cleaned up the text on the facet panels for `global_tour()` and `radial_cheem_tour()`.
+- Recreate the saved classification model, they fit too well to work as illustrations.
+- Set seed more consistently. All model and attribution shifted a bit, but will be more replicable going forward.
 - Minor documentation and code clean up and clarifications.
 
 

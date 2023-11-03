@@ -166,7 +166,7 @@ global_view_df_1layer <- function(
 #'   comp <- 2
 #'   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
 #'   bas <- sug_basis(peng_xgb_shap, prim, comp)
-#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = 1, comparison_obs = 2)
+#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = prim, comp)
 #'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }
@@ -203,7 +203,7 @@ global_view_df_1layer <- function(
 #'   comp <- 2
 #'   global_view(ames_rf_chm, primary_obs = prim, comparison_obs = comp)
 #'   bas <- sug_basis(ames_rf_shap, prim, comp)
-#'   mv  <- sug_manip_var(ames_rf_shap, primary_obs = 1, comparison_obs = 2)
+#'   mv  <- sug_manip_var(ames_rf_shap, primary_obs = prim, comp)
 #'   ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }
