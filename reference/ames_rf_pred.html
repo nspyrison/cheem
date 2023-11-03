@@ -12,7 +12,7 @@ house sales data regressing Sales Price from house and lot variables."><!-- math
     
     <a class="navbar-brand me-2" href="../index.html">cheem</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,29 +75,30 @@ the random forest model for each observation.</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cheem)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(treeshap)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Regression setup</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>dat  <span class="ot">&lt;-</span> amesHousing2018_NorthAmes</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>X    <span class="ot">&lt;-</span> dat[, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>]</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Y    <span class="ot">&lt;-</span> dat<span class="sc">$</span>SalePrice</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>clas <span class="ot">&lt;-</span> dat<span class="sc">$</span>SubclassMS</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Model and treeSHAP</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ames_rf_fit <span class="ot">&lt;-</span> randomForest<span class="sc">::</span><span class="fu">randomForest</span>(</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  X, Y, <span class="at">ntree =</span> <span class="dv">125</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">ifelse</span>(<span class="fu">is_discrete</span>(Y), <span class="fu">sqrt</span>(<span class="fu">ncol</span>(X)), <span class="fu">ncol</span>(X) <span class="sc">/</span> <span class="dv">3</span>),</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">nodesize =</span> <span class="fu">max</span>(<span class="fu">ifelse</span>(<span class="fu">is_discrete</span>(Y), <span class="dv">1</span>, <span class="dv">5</span>), <span class="fu">nrow</span>(X) <span class="sc">/</span> <span class="dv">500</span>))</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ames_rf_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(ames_rf_fit, X)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>ames_rf_shap <span class="ot">&lt;-</span> treeshap<span class="sc">::</span><span class="fu">treeshap</span>(</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  treeshap<span class="sc">::</span><span class="fu">randomForest.unify</span>(ames_rf_fit, X), X, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>ames_rf_shap <span class="ot">&lt;-</span> ames_rf_shap<span class="sc">$</span>shaps</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(ames_rf_pred, <span class="at">file =</span> <span class="st">"./data/ames_rf_pred.rda"</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(ames_rf_shap, <span class="at">file =</span> <span class="st">"./data/ames_rf_shap.rda"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(ames_rf_pred)</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(ames_rf_shap)</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre><p></p></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">135</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Regression setup</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>dat  <span class="ot">&lt;-</span> amesHousing2018_NorthAmes</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>X    <span class="ot">&lt;-</span> dat[, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>Y    <span class="ot">&lt;-</span> dat<span class="sc">$</span>SalePrice</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>clas <span class="ot">&lt;-</span> dat<span class="sc">$</span>SubclassMS</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Model and treeSHAP</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>ames_rf_fit <span class="ot">&lt;-</span> randomForest<span class="sc">::</span><span class="fu">randomForest</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  X, Y, <span class="at">ntree =</span> <span class="dv">125</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">ifelse</span>(<span class="fu">is_discrete</span>(Y), <span class="fu">sqrt</span>(<span class="fu">ncol</span>(X)), <span class="fu">ncol</span>(X) <span class="sc">/</span> <span class="dv">3</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">nodesize =</span> <span class="fu">max</span>(<span class="fu">ifelse</span>(<span class="fu">is_discrete</span>(Y), <span class="dv">1</span>, <span class="dv">5</span>), <span class="fu">nrow</span>(X) <span class="sc">/</span> <span class="dv">500</span>))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>ames_rf_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(ames_rf_fit, X)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>ames_rf_shap <span class="ot">&lt;-</span> treeshap<span class="sc">::</span><span class="fu">treeshap</span>(</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  treeshap<span class="sc">::</span><span class="fu">randomForest.unify</span>(ames_rf_fit, X), X, <span class="cn">FALSE</span>, <span class="cn">FALSE</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>ames_rf_shap <span class="ot">&lt;-</span> ames_rf_shap<span class="sc">$</span>shaps</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(F){ <span class="do">## Don't accidentally save</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(ames_rf_pred, <span class="at">file =</span> <span class="st">"./data/ames_rf_pred.rda"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(ames_rf_shap, <span class="at">file =</span> <span class="st">"./data/ames_rf_shap.rda"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(ames_rf_pred)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">#usethis::use_data(ames_rf_shap)</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>}</span></code></pre><p></p></div>
 <p>An object of class <code>data.frame</code> with 338 rows and 9 columns.</p>
     </div>
 
@@ -113,19 +114,19 @@ the random forest model for each observation.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Precomputed predictions and shap attribution</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ames_rf_pred</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Named num [1:338] 201972 113189 166729 223308 138983 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Named num [1:338] 203193 116048 167320 223589 139029 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "names")= chr [1:338] "1" "2" "3" "4" ...</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ames_rf_shap</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 'data.frame':	338 obs. of  9 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ LotArea    : num  28654 -383 15252 2718 -1341 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ OverallQual: num  6531 -5330 6070 23783 -3134 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ YearBuild  : num  2544 -167 -617 3620 3067 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ LivingArea : num  11865 -16592 3402 29251 -3369 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Bathrms    : num  -991 -1478 1648 8202 -851 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Bedrms     : num  266 -1727 195 244 825 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ TotRms     : num  2370 -4097 698 5560 1206 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ GarageYrBlt: num  1347 -1037 -433 1090 894 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ GarageArea : num  5483.1 98.3 -3387.3 4938 -2217.1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ LotArea    : num  27231 -374 14749 1687 -1036 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ OverallQual: num  6828 -5011 6182 22641 -3156 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ YearBuild  : num  1881 294 -438 4182 2677 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ LivingArea : num  13490 -16765 4160 28335 -3640 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Bathrms    : num  -824 -1310 1621 10436 -996 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ Bedrms     : num  528 -1363 360 744 672 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ TotRms     : num  1866 -3193 124 5314 1135 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ GarageYrBlt: num  2847 -937 -559 791 1462 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ GarageArea : num  5312 672 -2915 5423 -2125 ...</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Cheem</span></span></span>
 <span class="r-in"><span><span class="va">ames_chm</span> <span class="op">&lt;-</span> <span class="fu"><a href="cheem_ls.html">cheem_ls</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">ames_rf_shap</span>, <span class="va">ames_rf_pred</span>, <span class="va">clas</span>,</span></span>
@@ -143,7 +144,7 @@ the random forest model for each observation.</p>
 <span class="r-in"><span>  <span class="va">comp</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="global_view.html">global_view</a></span><span class="op">(</span><span class="va">ames_chm</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, comparison_obs <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="sug_basis.html">sug_basis</a></span><span class="op">(</span><span class="va">ames_rf_shap</span>, <span class="va">prim</span>, <span class="va">comp</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="sug_manip_var.html">sug_manip_var</a></span><span class="op">(</span><span class="va">ames_rf_shap</span>, primary_obs <span class="op">=</span> <span class="fl">1</span>, comparison_obs <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="sug_manip_var.html">sug_manip_var</a></span><span class="op">(</span><span class="va">ames_rf_shap</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, <span class="va">comp</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">ggt</span> <span class="op">&lt;-</span> <span class="fu"><a href="radial_cheem_tour.html">radial_cheem_tour</a></span><span class="op">(</span><span class="va">ames_chm</span>, basis <span class="op">=</span> <span class="va">bas</span>, manip_var <span class="op">=</span> <span class="va">mv</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu">animate_plotly</span><span class="op">(</span><span class="va">ggt</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
