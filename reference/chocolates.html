@@ -122,7 +122,7 @@ or 'Milk"</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Save for use with shiny app (expects an rds file)</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">{</span> <span class="co">## Don't accidentally save.</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">choc_chm</span>, <span class="st">"./chocolates_svm_shap.rds"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">choc_chm</span>, <span class="st">"./chm_chocolates_svm_shap.rds"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="run_app.html">run_app</a></span><span class="op">(</span><span class="op">)</span> <span class="co">## Select the saved rds file from the data dropdown.</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
@@ -131,8 +131,8 @@ or 'Milk"</p></li>
 <span class="r-in"><span>  <span class="va">prim</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span>  <span class="va">comp</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="global_view.html">global_view</a></span><span class="op">(</span><span class="va">peng_chm</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, comparison_obs <span class="op">=</span> <span class="va">comp</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="sug_basis.html">sug_basis</a></span><span class="op">(</span><span class="va">peng_xgb_shap</span>, <span class="va">prim</span>, <span class="va">comp</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="sug_manip_var.html">sug_manip_var</a></span><span class="op">(</span><span class="va">peng_xgb_shap</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, <span class="va">comp</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">bas</span> <span class="op">&lt;-</span> <span class="fu"><a href="sug_basis.html">sug_basis</a></span><span class="op">(</span><span class="va">penguin_xgb_shap</span>, <span class="va">prim</span>, <span class="va">comp</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">mv</span>  <span class="op">&lt;-</span> <span class="fu"><a href="sug_manip_var.html">sug_manip_var</a></span><span class="op">(</span><span class="va">penguin_xgb_shap</span>, primary_obs <span class="op">=</span> <span class="va">prim</span>, <span class="va">comp</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">ggt</span> <span class="op">&lt;-</span> <span class="fu"><a href="radial_cheem_tour.html">radial_cheem_tour</a></span><span class="op">(</span><span class="va">peng_chm</span>, basis <span class="op">=</span> <span class="va">bas</span>, manip_var <span class="op">=</span> <span class="va">mv</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu">animate_plotly</span><span class="op">(</span><span class="va">ggt</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
