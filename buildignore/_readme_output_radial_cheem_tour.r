@@ -1,31 +1,23 @@
 # Create some output for Readme ----
-
 library(cheem)
 library(spinifex)
-
-if(F) ## Attempting to parallelize, small test but didn't look 11x.
-  browseURL(
-    "https://stackoverflow.com/questions/67321487/how-to-use-multiple-cores-to-make-gganimate-faster")
-n_cores <- future::availableCores() ## 12 on Acer laptop
-future::plan("multiprocess", workers = n_cores - 1)
 
 ## Classification:
 X    <- penguins_na.rm[, 1:4]
 clas <- penguins_na.rm$species
 Y    <- as.integer(clas)
-colnames(X) <- c("bl", "bd", "fl", "bm")
 
 ## Cheem
 peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
                      label = "Penguins, xgb, shapviz")
 
-bas <- sug_basis(penguin_xgb_shap, rownum = 1)
-mv  <- which(colnames(X) == "fl")
-ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv,
-                         primary_obs = 243, comparison_obs = 169, angle = .10)
-
 prim <- 243
-comp <- 256
+comp <- 169
+bas  <- sug_basis(penguin_xgb_shap, rownum = prim)
+mv   <- sug_manip_var(penguin_xgb_shap, primary_obs = prim, comp)
+ggt  <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv,
+                          primary_obs = prim, comparison_obs = comp, angle = .10)
+
 global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
 bas <- sug_basis(penguin_xgb_shap, prim)
 mv  <- sug_manip_var(penguin_xgb_shap, primary_obs = prim, comparison_obs = comp)
@@ -48,4 +40,4 @@ if(interactive()){
   # beepr::beep()
 }
 tictoc::toc()
-## , YMMV
+

@@ -72,7 +72,7 @@ ames_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
 
 ## Save for use with shiny app (expects an rds file)
 if(FALSE){ ## Don't accidentally save.
-  saveRDS(ames_chm, "./ames_rf_tshap.rds")
+  saveRDS(ames_chm, "./chm_ames_rf_tshap.rds")
   run_app() ## Select the saved rds file from the data dropdown.
 }
 

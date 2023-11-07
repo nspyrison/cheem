@@ -81,7 +81,7 @@ choc_chm <- cheem_ls(X, Y, chocolates_svm_shap,
 
 ## Save for use with shiny app (expects an rds file)
 if(FALSE){ ## Don't accidentally save.
-  saveRDS(choc_chm, "./chocolates_svm_shap.rds")
+  saveRDS(choc_chm, "./cmh_chocolates_svm_shap.rds")
   run_app() ## Select the saved rds file from the data dropdown.
 }
 

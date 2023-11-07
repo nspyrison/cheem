@@ -9,9 +9,11 @@ library(shiny,           quietly = TRUE, verbose = FALSE)
 library(shinythemes,     quietly = TRUE, verbose = FALSE) ## Themes for shiny, think preset css styling.
 library(shinycssloaders, quietly = TRUE, verbose = FALSE) ## Esp. for renderPlot() %>% withSpinner(type = 8L)
 library(DT,              quietly = TRUE, verbose = FALSE) ## For html table and buttons
-library(cheem,           quietly = TRUE, verbose = FALSE)
 library(plotly,          quietly = TRUE, verbose = FALSE)
 library(magrittr,        quietly = TRUE, verbose = FALSE)
+if(require(cheem)==FALSE)
+  devtools::install_github("nspyrison/cheem")
+library(cheem,           quietly = TRUE, verbose = FALSE)
 #conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
 #library(gganimate,       quietly = TRUE, verbose = FALSE) ## Not in use atm
 ## Previously #load("./data/0local_funcs.RData", envir = globalenv())
@@ -134,8 +136,10 @@ tab_about <- tabPanel("About", fluidPage(
     We use this to examine under which contributions the prediction is supported."),
   br(), br(),
   img(src = "cheem_workflow.png"),
-  p('(top) Wickham, H. & Grolemund, G. (2016). R for data science. ', a(href = 'https://r4ds.had.co.nz/', 'https://r4ds.had.co.nz/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
-  p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ', a(href = 'https://ema.drwhy.ai/', 'https://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
+  p('(top) Wickham, H. & Grolemund, G. (2016). R for data science. ',
+    a(href = 'https://r4ds.had.co.nz/', 'https://r4ds.had.co.nz/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
+  p('(bottom) Biecek P. & Burzykowski T. (2020). Explanatory Model Analysis. ',
+    a(href = 'https://ema.drwhy.ai/', 'https://ema.drwhy.ai/', .noWS = "outside"), .noWS = c("after-begin", "before-end")),
   p('(blue overlay) Purposed analysis in terms of workflow and model specificity.'),
   br(), br(),
   h2("Namesake:"),
@@ -148,9 +152,11 @@ tab_about <- tabPanel("About", fluidPage(
 )) ## Assign tabZ_about
 
 ## Combined ui object ----
-ui <- fluidPage(theme = shinythemes::shinytheme("flatly"),
-                navbarPage(.title,
-                           tab1_cheem,
-                           tab_about),
-                h5(contextLine, style = "color: #A9A9A9")
-)
+ui <-
+  fluidPage(theme = shinythemes::shinytheme("flatly"),
+            navbarPage(.title,
+                       tab1_cheem,
+                       tab_about),
+            h5(contextLine, style = "color: #A9A9A9")
+  )
+

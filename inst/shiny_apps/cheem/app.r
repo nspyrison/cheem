@@ -134,11 +134,11 @@ server <- function(input, output, session){
     ## SIDE EFFECT: Update inclusion feature names
     updateNumericInput(
       session, "primary_inst",
-      label = "Primary instance ('*', dashed line below):",
+      label = "Primary instance ('*', dashed line below)",
       min = 1, max = 1e6, step = 1, value = prim_inst)
     updateNumericInput(
       session, "comparison_inst",
-      label = "Comparison instance ('x', dotted line below):",
+      label = "Comparison instance ('x', dotted line below)",
       min = 1, max = 1e6, step = 1, value = comp_inst)
   })
   
@@ -146,7 +146,7 @@ server <- function(input, output, session){
   observeEvent(req(load_ls()), {
     dev_cat("top of observeEvent(req(load_ls())")
     feat_nms <- colnames(req(load_ls())$attr_df)
-    updateCheckboxGroupInput(session, "inc_feat_nms", label = "Featurtes to include:",
+    updateCheckboxGroupInput(session, "inc_feat_nms", label = "Featurtes to include",
                              choices = feat_nms, selected = feat_nms, inline = TRUE)
   })
   
@@ -171,7 +171,7 @@ server <- function(input, output, session){
       tourr::orthonormalise()
     mv          <- sug_manip_var(inc_attr_df, .prim_inst, .comp_inst)
     mv_nm       <- colnames(inc_attr_df)[mv]
-    updateSelectInput(session, "manip_feat_nm", label = "Manipulation feature:",
+    updateSelectInput(session, "manip_feat_nm", label = "Manipulation feature",
                       choices = .inc_nms, selected = mv_nm)
   }, priority = 150)
   

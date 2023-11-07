@@ -154,7 +154,7 @@ if(interactive()){
 
 ## Save for use with shiny app (expects an rds file)
 if(FALSE){ ## Don't accidentally save.
-  saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
+  saveRDS(ames_rf_chm, "./chm_NAmes_rf_tshap.rds")
   run_app() ## Select the saved rds file from the data drop down.
 }
 }

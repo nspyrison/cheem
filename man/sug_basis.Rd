@@ -22,16 +22,33 @@ the provided local explanation.
 \examples{
 library(cheem)
 
-## Regression setup
+## Attribution basis of the primary instance
+sug_basis(ames_rf_shap, rownum = 1)
+
+
+## This can be used to find a basis to start the radial tour.
+# ?radial_cheem_tour
+
+## Regression setup:
 dat  <- amesHousing2018_NorthAmes
 X    <- dat[, 1:9]
 Y    <- dat$SalePrice
 clas <- dat$SubclassMS
 
-## Attribution basis of one obs
-sug_basis(ames_rf_shap, rownum = 1)
-## This can be used to find a basis to start the radial tour.
-# ?radial_cheem_tour
+## radial_cheem_tour()
+ames_rf_chm <- cheem_ls(X, Y, ames_rf_shap, ames_rf_pred, clas,
+                        label = "North Ames, RF, SHAP")
+bas <- sug_basis(ames_rf_shap, 1)
+mv  <- sug_manip_var(ames_rf_shap, 1, 2)
+ggt <- radial_cheem_tour(ames_rf_chm, basis = bas, manip_var = mv)
+if(interactive()){
+  ## As a plotly html widget
+  spinifex::animate_plotly(ggt)
+  
+  ## As a gganimation
+  spinifex::animate_gganimate(ggt, render = gganimate::av_renderer())
+}
+## radial_cheem_tour is also used in: ?run_app()
 }
 \seealso{
 \code{\link[=radial_cheem_tour]{radial_cheem_tour()}}

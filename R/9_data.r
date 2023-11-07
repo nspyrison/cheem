@@ -132,7 +132,7 @@
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
+#'   saveRDS(ames_rf_chm, "./chm_NAmes_rf_tshap.rds")
 #'   run_app() ## Select the saved rds file from the data drop down.
 #' }
 "amesHousing2018"
@@ -201,7 +201,7 @@
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(choc_chm, "./chocolates_svm_shap.rds")
+#'   saveRDS(choc_chm, "./chm_chocolates_svm_shap.rds")
 #'   run_app() ## Select the saved rds file from the data dropdown.
 #' }
 #' 
@@ -210,8 +210,8 @@
 #'   prim <- 1
 #'   comp <- 2
 #'   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
-#'   bas <- sug_basis(peng_xgb_shap, prim, comp)
-#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = prim, comp)
+#'   bas <- sug_basis(penguin_xgb_shap, prim, comp)
+#'   mv  <- sug_manip_var(penguin_xgb_shap, primary_obs = prim, comp)
 #'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }

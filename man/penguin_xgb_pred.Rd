@@ -70,7 +70,7 @@ peng_chm <- cheem_ls(X, Y, penguin_xgb_shap, penguin_xgb_pred, clas,
 
 ## Save for use with shiny app (expects an rds file)
 if(FALSE){ ## Don't accidentally save.
-  saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
+  saveRDS(peng_chm, "./chm_peng_xgb_shapviz.rds")
   run_app() ## Select the saved rds file from the data dropdown.
 }
 
@@ -79,8 +79,8 @@ if(interactive()){
   prim <- 1
   comp <- 2
   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
-  bas <- sug_basis(peng_xgb_shap, prim, comp)
-  mv  <- sug_manip_var(peng_xgb_shap, primary_obs = prim, comp)
+  bas <- sug_basis(penguin_xgb_shap, prim, comp)
+  mv  <- sug_manip_var(penguin_xgb_shap, primary_obs = prim, comp)
   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
   animate_plotly(ggt)
 }

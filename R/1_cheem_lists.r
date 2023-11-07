@@ -156,7 +156,7 @@ global_view_df_1layer <- function(
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(peng_chm, "./peng_xgb_shapviz.rds")
+#'   saveRDS(peng_chm, "./chm_peng_xgb_shapviz.rds")
 #'   run_app() ## Select the saved rds file from the data dropdown.
 #' }
 #' 
@@ -165,8 +165,8 @@ global_view_df_1layer <- function(
 #'   prim <- 1
 #'   comp <- 2
 #'   global_view(peng_chm, primary_obs = prim, comparison_obs = comp)
-#'   bas <- sug_basis(peng_xgb_shap, prim, comp)
-#'   mv  <- sug_manip_var(peng_xgb_shap, primary_obs = prim, comp)
+#'   bas <- sug_basis(penguin_xgb_shap, prim, comp)
+#'   mv  <- sug_manip_var(penguin_xgb_shap, primary_obs = prim, comp)
 #'   ggt <- radial_cheem_tour(peng_chm, basis = bas, manip_var = mv)
 #'   animate_plotly(ggt)
 #' }
@@ -193,7 +193,7 @@ global_view_df_1layer <- function(
 #' 
 #' ## Save for use with shiny app (expects an rds file)
 #' if(FALSE){ ## Don't accidentally save.
-#'   saveRDS(ames_rf_chm, "./NAmes_rf_tshap.rds")
+#'   saveRDS(ames_rf_chm, "./chm_NAmes_rf_tshap.rds")
 #'   run_app() ## Select the saved rds file from the data drop down.
 #' }
 #' 
@@ -246,7 +246,7 @@ cheem_ls <- function(
   .var_exp <- round(100*.pca_var/sum(.pca_var), 0)
   .glob_attr <- global_view_df_1layer(
     attr_df, class, basis_type, 
-    paste0("Attribution, PC1 (", .var_exp[1], "%) by PC2 (", .var_exp[2], "%)"))
+    paste0("attribution, PC1 (", .var_exp[1], "%) by PC2 (", .var_exp[2], "%)"))
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
   .dat_bas  <- utils::tail(attributes(.glob_dat),  1)
