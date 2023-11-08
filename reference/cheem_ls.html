@@ -72,7 +72,6 @@ started with this see <code><a href="../articles/getting-started-with-cheem.html
 <span>  <span class="va">attr_df</span>,</span>
 <span>  pred <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  basis_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pca"</span>, <span class="st">"olda"</span><span class="op">)</span>,</span>
 <span>  label <span class="op">=</span> <span class="st">"label"</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"verbose"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -100,12 +99,6 @@ attributions.</p></dd>
 <dt>class</dt>
 <dd><p>Optional, (n, 1) vector, a variable to group points by.
 This can be the same as or different from <code>y</code>, the target variable.</p></dd>
-
-
-<dt>basis_type</dt>
-<dd><p>The type of basis used to approximate the data and
-attribution space from. Defaults to "pca".
-Expects "pca" or "olda" (requires <code>class</code>).</p></dd>
 
 
 <dt>label</dt>
