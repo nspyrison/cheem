@@ -90,7 +90,6 @@ ames_chm <- cheem_ls(X, Y,
                      class      = clas,
                      attr_df    = ames_xgb_shap,
                      pred       = ames_xgb_pred,
-                     basis_type = c("pca"),
                      label      = "Ames, xgb, shap")
 names(ames_chm)
 ```
@@ -320,7 +319,6 @@ drag_lm_shap <- as.data.frame(drag_lm_shap)
 <!-- peng_umap_chm <- cheem_ls(X, y = NULL, class = NULL, -->
 <!--                           attr_df    = peng_umap2, -->
 <!--                           pred       = NULL, -->
-<!--                           basis_type = c("pca"), -->
 <!--                           label      = "Penguin, umap2") -->
 
 <!-- global_view(peng_umap_chm, primary_obs = 115, comparison_obs = 296, -->

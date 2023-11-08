@@ -10,7 +10,6 @@ cheem_ls(
   attr_df,
   pred = NULL,
   class = NULL,
-  basis_type = c("pca", "olda"),
   label = "label",
   verbose = getOption("verbose")
 )
@@ -27,10 +26,6 @@ attributions.}
 
 \item{class}{Optional, (n, 1) vector, a variable to group points by.
 This can be the same as or different from \code{y}, the target variable.}
-
-\item{basis_type}{The type of basis used to approximate the data and
-attribution space from. Defaults to "pca".
-Expects "pca" or "olda" (requires \code{class}).}
 
 \item{label}{Optionally provide a character label to store reminder
 text for the type of model and local explanation used.

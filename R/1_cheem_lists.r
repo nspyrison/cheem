@@ -63,9 +63,6 @@ model_performance <- function(
 #' Produces the plot data.frame of 1 layer. consumed downstream in cheem_ls.
 #' 
 #' @param x The explanatory variables of the model.
-#' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca". 
-#' Expects "pca" or "olda" (requires `class`).
 #' @param class Optional, (n, 1) vector, a variable to group points by. 
 #' This can be the same as or different from `y`, the target variable.
 #' @param label Optionally provide a character label to store reminder 
@@ -83,27 +80,21 @@ model_performance <- function(
 # #' cheem:::global_view_df_1layer(X)
 global_view_df_1layer <- function(
   x,
-  class      = NULL, ## required for olda
-  basis_type = c("pca", "olda"),
-  label      = "label"
+  class = NULL,
+  label = "label"
 ){
   d <- 2 ## Fixed display dimensionality
-  basis_type <- match.arg(basis_type)
   if(is.null(class)) class <- as.factor(FALSE)
   
   ## Projection
   x_std <- spinifex::scale_01(x)
-  if(basis_type == "olda" & is.null(class))
-    stop("global_view_df_1layer: Basis type was olda without a class, a class must be provided for olda.")
-  basis <- switch(basis_type,
-                  pca  = stats::prcomp(x_std)$rotation[, 1:d],
-                  olda = spinifex::basis_olda(x_std, class, d))
+  basis <- stats::prcomp(x_std)$rotation[, 1:d]
   proj  <- spinifex::scale_01(x_std %*% basis)
   
   ## Column bind wider
-  ret <- data.frame(basis_type, label, 1:nrow(x), class, proj)
-  colnames(ret) <- c("basis_type", "label", "rownum", "class", paste0("V", 1:d))
-  attr(ret, paste0(basis_type, ":", label)) <- basis
+  ret <- data.frame(label, 1:nrow(x), class, proj)
+  colnames(ret) <- c("label", "rownum", "class", paste0("V", 1:d))
+  attr(ret, label) <- basis
   
   ## Return
   ret
@@ -126,9 +117,6 @@ global_view_df_1layer <- function(
 #' @param label Optionally provide a character label to store reminder 
 #' text for the type of model and local explanation used. 
 #' Defaults to "label".
-#' @param basis_type The type of basis used to approximate the data and 
-#' attribution space from. Defaults to "pca". 
-#' Expects "pca" or "olda" (requires `class`).
 #' @param verbose Logical, if start time and run duration should be printed. 
 #' Defaults to getOption("verbose").
 #' @return A list of data.frames needed for the `shiny` application.
@@ -212,7 +200,6 @@ cheem_ls <- function(
   attr_df,
   pred = NULL,
   class = NULL,
-  basis_type = c("pca", "olda"), ## class req for olda
   label = "label",
   verbose = getOption("verbose")
 ){
@@ -220,7 +207,6 @@ cheem_ls <- function(
   ## Checks
   if(verbose) tictoc::tic("cheem_ls")
   d <- 2 ## Hard coded display dimensionality
-  basis_type <- match.arg(basis_type)
   is_classification <- is_discrete(y)
   x       <- data.frame(x)
   y       <- as.numeric(y)
@@ -240,12 +226,12 @@ cheem_ls <- function(
   .pca_var <- stats::prcomp(spinifex::scale_01(x))$sdev^2
   .var_exp <- round(100*.pca_var/sum(.pca_var), 0)
   .glob_dat  <- global_view_df_1layer(
-    x, class, basis_type, 
+    x, class,
     paste0("data, PC1 (", .var_exp[1], "%) by PC2 (", .var_exp[2], "%)"))
   .pca_var <- stats::prcomp(spinifex::scale_01(attr_df))$sdev^2
   .var_exp <- round(100*.pca_var/sum(.pca_var), 0)
   .glob_attr <- global_view_df_1layer(
-    attr_df, class, basis_type, 
+    attr_df, class, 
     paste0("attribution, PC1 (", .var_exp[1], "%) by PC2 (", .var_exp[2], "%)"))
   .glob_view <- rbind(.glob_dat, .glob_attr)
   ## List of the bases
@@ -306,7 +292,7 @@ cheem_ls <- function(
     data.frame(V1 = .decode_df$prediction + .xjitter, 
                V2 = as.numeric(.decode_df$y) + .yjitter) %>%
     spinifex::scale_01()
-  .yhaty_df <- data.frame(basis_type = NA, label = .y_axis_label,
+  .yhaty_df <- data.frame(label = .y_axis_label,
                           rownum = 1:nrow(x), class = .decode_df$class, .yhaty_df)
   .glob_view <- rbind(.glob_view, .yhaty_df)
   
@@ -337,7 +323,6 @@ cheem_ls <- function(
   .glob_view$tooltip           <- rep_len(tooltip,             .N)
   .decode_df$tooltip           <- tooltip
   ## Ensure facet order is kept.
-  .glob_view$basis_type <- factor(.glob_view$basis_type, unique(.glob_view$basis_type))
   .glob_view$label      <- factor(.glob_view$label, unique(.glob_view$label))
   
   ## Cleanup and return

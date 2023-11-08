@@ -16,8 +16,8 @@
   c_pred <- penguin_xgb_pred
   r_attr <- ames_rf_shap
   c_attr <- penguin_xgb_shap
-  c_chee <- cheem_ls(c_X, c_Y, c_attr, c_pred, c_clas, "pca", "label", FALSE)
-  r_chee <- cheem_ls(r_X, r_Y, r_attr, r_pred, r_clas, "pca", "label", FALSE)
+  c_chee <- cheem_ls(c_X, c_Y, c_attr, c_pred, c_clas, "label", FALSE)
+  r_chee <- cheem_ls(r_X, r_Y, r_attr, r_pred, r_clas, "label", FALSE)
 }
 
 ## basis_attr -----
