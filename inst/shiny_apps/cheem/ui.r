@@ -11,8 +11,6 @@ library(shinycssloaders, quietly = TRUE, verbose = FALSE) ## Esp. for renderPlot
 library(DT,              quietly = TRUE, verbose = FALSE) ## For html table and buttons
 library(plotly,          quietly = TRUE, verbose = FALSE)
 library(magrittr,        quietly = TRUE, verbose = FALSE)
-if(require(cheem)==FALSE)
-  devtools::install_github("nspyrison/cheem")
 library(cheem,           quietly = TRUE, verbose = FALSE)
 #conflicted::conflict_prefer("run_app", "cheem", quiet = TRUE)
 #library(gganimate,       quietly = TRUE, verbose = FALSE) ## Not in use atm
