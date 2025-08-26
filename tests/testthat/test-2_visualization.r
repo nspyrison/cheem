@@ -38,8 +38,8 @@ r_ggt <- ggtour(r_bas_attr, scale_sd(r_X), angle = .3) +
     attr_df = r_attr, group_by = r_clas, primary_obs = 1, comparison_obs = 2)
 
 test_that("proto_basis1d_distribution", {
-  expect_equal(class(c_ggt), c("gg", "ggplot"))
-  expect_equal(class(r_ggt), c("gg", "ggplot"))
+  expect_true(inherits(c_ggt, c("ggplot", "ggplot2::ggplot")))
+  expect_true(inherits(r_ggt, c("ggplot", "ggplot2::ggplot")))
 })
 
 ## global_view -----
