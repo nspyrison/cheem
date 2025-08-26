@@ -1,7 +1,7 @@
 # cheem v0.4.1
 
 - ggplot2 is pushing breaking changes as they transition to S7 objects; changed tests from expect_equal(class(x), c("gg", "ggplot")) to expect_true(inherits(x, c("ggplot", "ggplot2::ggplot"))) according to tidyverse/ggplot2#6498.
-
+- Updated two ames housing urls as jse.amstat.org urls moved to https.
 
 # cheem v0.4.0
 
