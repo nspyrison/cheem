@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cheem</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,13 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.1" id="cheem-v041">cheem v0.4.1<a class="anchor" aria-label="anchor" href="#cheem-v041"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.2" id="cheem-v042">cheem v0.4.2<a class="anchor" aria-label="anchor" href="#cheem-v042"></a></h2>
+<ul><li>Removed the function <code>rnorm_from</code> and lqmm from suggests; lqmm (matrix math) was removed from CRAN, would need to introduce 2 new packages to keep unused utility function.</li>
+<li>ggplot2 (v4.0.0) pushed breaking changes as they transition to S7 objects; changed tests from expect_equal(class(x), c(“gg”, “ggplot”)) to expect_true(inherits(x, c(“ggplot”, “ggplot2::ggplot”))) according to tidyverse/ggplot2#6498.</li>
+<li>Fixed a 4x more visualization tests.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1" id="cheem-v041">cheem v0.4.1<a class="anchor" aria-label="anchor" href="#cheem-v041"></a></h2><p class="text-muted">CRAN release: 2025-08-26</p>
 <ul><li>ggplot2 is pushing breaking changes as they transition to S7 objects; changed tests from expect_equal(class(x), c(“gg”, “ggplot”)) to expect_true(inherits(x, c(“ggplot”, “ggplot2::ggplot”))) according to tidyverse/ggplot2#6498.</li>
 <li>Updated two ames housing urls as jse.amstat.org urls moved to https.</li>
 </ul></div>
