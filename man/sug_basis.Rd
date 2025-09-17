@@ -62,7 +62,6 @@ Other cheem utility:
 \code{\link{linear_tform}()},
 \code{\link{logistic_tform}()},
 \code{\link{problem_type}()},
-\code{\link{rnorm_from}()},
 \code{\link{sug_manip_var}()}
 }
 \concept{cheem utility}

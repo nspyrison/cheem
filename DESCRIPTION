@@ -1,6 +1,6 @@
 Package: cheem
 Title: Interactively Explore Local Explanations with the Radial Tour
-Version: 0.4.1
+Version: 0.4.2.9000
 Authors@R: c(
   person("Nicholas", "Spyrison", role = c("aut", "cre"),
     email = "spyrison@gmail.com",
@@ -32,7 +32,7 @@ Imports:
 Suggests:
     methods,
     tourr,
-    lqmm,
+    matrixcalc,
     mvtnorm,
     gganimate,
     dplyr,
@@ -46,6 +46,6 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE, roclets=c('rd', 'collate', 'namespace'))
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Language: en-US
 Config/testthat/edition: 3

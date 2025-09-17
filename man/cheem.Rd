@@ -2,8 +2,8 @@
 % Please edit documentation in R/cheem-package.r
 \docType{package}
 \name{cheem}
-\alias{cheem}
 \alias{cheem-package}
+\alias{cheem}
 \title{cheem}
 \description{
 Consider an arbitrary black-box model. Local explanations are a class of

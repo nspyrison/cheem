@@ -95,8 +95,8 @@ if(interactive()){
 \code{\link[=run_app]{run_app()}}
 
 Other cheem consumers: 
-\code{\link{global_view_legwork}()},
 \code{\link{global_view}()},
+\code{\link{global_view_legwork}()},
 \code{\link{run_app}()}
 }
 \concept{cheem consumers}

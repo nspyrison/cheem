@@ -1,3 +1,10 @@
+# cheem v0.4.2
+
+- Removed the function `rnorm_from` and lqmm from suggests; lqmm (matrix math) was removed from CRAN, would need to introduce 2 new packages to keep unused utility function.
+- ggplot2 (v4.0.0) pushed breaking changes as they transition to S7 objects; changed tests from expect_equal(class(x), c("gg", "ggplot")) to expect_true(inherits(x, c("ggplot", "ggplot2::ggplot"))) according to tidyverse/ggplot2#6498.
+- Fixed a 4x more visualization tests.
+
+
 # cheem v0.4.1
 
 - ggplot2 is pushing breaking changes as they transition to S7 objects; changed tests from expect_equal(class(x), c("gg", "ggplot")) to expect_true(inherits(x, c("ggplot", "ggplot2::ggplot"))) according to tidyverse/ggplot2#6498.

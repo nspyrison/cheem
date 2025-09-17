@@ -18,7 +18,7 @@
 }
 
 
-### model_performance_df ----
+### model_performance_df
 r_mp <- cheem:::model_performance(r_Y, r_pred)
 c_mp <- cheem:::model_performance(c_Y |> as.integer(), c_pred)
 
@@ -27,7 +27,7 @@ test_that(":::model_performance class", {
   expect_equal(class(c_mp), "data.frame")
 })
 
-### global_view_df_1layer ----
+### global_view_df_1layer
 r_gv1 <- cheem:::global_view_df_1layer(r_X)
 c_gv1 <- cheem:::global_view_df_1layer(c_X)
 
@@ -36,7 +36,7 @@ test_that(":::global_view_df_1layer class", {
   expect_equal(class(c_mp), "data.frame")
 })
 
-### cheem_ls -----
+### cheem_ls
 r_chm <- cheem_ls(r_X, r_Y, r_attr, r_pred, r_clas, verbose = FALSE)
 c_chm <- cheem_ls(c_X, c_Y, c_attr, c_pred, c_clas, verbose = FALSE)
 

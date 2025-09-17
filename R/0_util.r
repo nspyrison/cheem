@@ -159,47 +159,7 @@ contains_nonnumeric <- function(x){
   suppressWarnings(any(is.na(as.numeric(as.character(x)))))
 }
 
-#' Draw new samples from the supplied data given its mean and covariances.
-#' 
-#' Creates new observation of the data given its specific means and shapes.
-#' typically applied to a cluster subset of data. _ie_ draw from cluster 'a', 
-#' then assign to cluster 'b'.
-#' 
-#' @param data A data.frame or matrix to sample from.
-#' @param n_obs Number of new observations to draw. Defaults to 1.
-#' @param var_coeff Variance coefficient, closer to 0 make points near the 
-#' median, above 1 makes more points further away from the median. 
-#' Defaults to 1.
-#' @param method The method of the covariance matrix. Expects "person" 
-#' (continuous numeric), "kendall" or "spearman" 
-#' (latter two are ranked based ordinal).
-#' @return A data.frame, sampled observations given the means and covariance of 
-#' the data based on with column names kept.
-#' @export
-#' @family cheem utility
-#' @examples
-#' library(cheem)
-#' 
-#' sub <- mtcars[mtcars$cyl == 6, ]
-#' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
-#' rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
-rnorm_from <- function(
-  data, n_obs = 1, var_coeff = 1, method = c("pearson", "kendall", "spearman")
-){
-  .mns <- apply(data, 2, stats::median)
-  .cov <- stats::cov(data, method = match.arg(method))
-  diag(.cov) <- var_coeff * diag(.cov) ## Decrease univariate variance if needed.
-  ## person numeric, not spearman ranked/ordinal
-  
-  ## Check if this sigma is a positive definite matrix.
-  if(lqmm::is.positive.definite(.cov) == FALSE){
-    .cov <- lqmm::make.positive.definite(.cov)
-  }
-  
-  ## Sample and return
-  ret <- mvtnorm::rmvnorm(n = n_obs, mean = .mns, sigma =  var_coeff * .cov)
-  as.data.frame(ret)
-}
+
 
 #' Linear function to help set alpha opacity
 #' 
@@ -322,3 +282,47 @@ ifDev <- function(expr){
       eval(expr)
 }
 
+
+## Depreicated -----
+
+# #' Draw new samples from the supplied data given its mean and covariances.
+# #' 
+# #' Creates new observation of the data given its specific means and shapes.
+# #' typically applied to a cluster subset of data. _ie_ draw from cluster 'a', 
+# #' then assign to cluster 'b'.
+# #' 
+# #' @param data A data.frame or matrix to sample from.
+# #' @param n_obs Number of new observations to draw. Defaults to 1.
+# #' @param var_coeff Variance coefficient, closer to 0 make points near the 
+# #' median, above 1 makes more points further away from the median. 
+# #' Defaults to 1.
+# #' @param method The method of the covariance matrix. Expects "person" 
+# #' (continuous numeric), "kendall" or "spearman" 
+# #' (latter two are ranked based ordinal).
+# #' @return A data.frame, sampled observations given the means and covariance of 
+# #' the data based on with column names kept.
+# #' @export
+# #' @family cheem utility
+# #' @examples
+# #' library(cheem)
+# #' 
+# #' sub <- mtcars[mtcars$cyl == 6, ]
+# #' ## Draw 3 new observations in the shape of 6 cylinder vehicles, with reduced variance.
+# #' rnorm_from(data = sub, n_obs = 3, var_coeff = .5)
+# rnorm_from <- function(
+#     data, n_obs = 1, var_coeff = 1, method = c("pearson", "kendall", "spearman")
+# ){
+#   .mns <- apply(data, 2, stats::median)
+#   .cov <- stats::cov(data, method = match.arg(method))
+#   diag(.cov) <- var_coeff * diag(.cov) ## Decrease univariate variance if needed.
+#   ## person numeric, not spearman ranked/ordinal
+#   
+#   ## Check if this sigma is a positive definite matrix.
+#   if(lqmm::is.positive.definite(.cov) == FALSE){
+#     .cov <- lqmm::make.positive.definite(.cov)
+#   }
+#   
+#   ## Sample and return
+#   ret <- mvtnorm::rmvnorm(n = n_obs, mean = .mns, sigma =  var_coeff * .cov)
+#   as.data.frame(ret)
+# }
